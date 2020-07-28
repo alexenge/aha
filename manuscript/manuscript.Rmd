@@ -1,0 +1,400 @@
+---
+title             : "The title"
+shorttitle        : "Title"
+
+author: 
+  - name          : "First Author"
+    affiliation   : "1"
+    corresponding : yes    # Define only one corresponding author
+    address       : "Postal address"
+    email         : "my@email.com"
+    role:         # Contributorship roles (e.g., CRediT, https://casrai.org/credit/)
+      - Conceptualization
+      - Writing - Original Draft Preparation
+      - Writing - Review & Editing
+  - name          : "Ernst-August Doelle"
+    affiliation   : "1,2"
+    role:
+      - Writing - Review & Editing
+
+affiliation:
+  - id            : "1"
+    institution   : "Wilhelm-Wundt-University"
+  - id            : "2"
+    institution   : "Konstanz Business School"
+
+authornote: |
+  Add complete departmental affiliations for each author here. Each new line herein must be indented, like this line.
+
+  Enter author note here.
+
+abstract: |
+  One or two sentences providing a **basic introduction** to the field,  comprehensible to a scientist in any discipline.
+  
+  Two to three sentences of **more detailed background**, comprehensible  to scientists in related disciplines.
+  
+  One sentence clearly stating the **general problem** being addressed by  this particular study.
+  
+  One sentence summarizing the main result (with the words "**here we show**" or their equivalent).
+  
+  Two or three sentences explaining what the **main result** reveals in direct comparison to what was thought to be the case previously, or how the  main result adds to previous knowledge.
+  
+  One or two sentences to put the results into a more **general context**.
+  
+  Two or three sentences to provide a **broader perspective**, readily comprehensible to a scientist in any discipline.
+  
+  <!-- https://tinyurl.com/ybremelq -->
+  
+keywords          : "keywords"
+wordcount         : "X"
+
+bibliography      : ["r-references.bib"]
+
+floatsintext      : no
+figurelist        : no
+tablelist         : no
+footnotelist      : no
+linenumbers       : yes
+mask              : no
+draft             : no
+
+csl               : "apa.csl"
+documentclass     : "apa7"
+classoption       : "man"
+output            : papaja::apa6_pdf
+---
+
+```{r setup, include = FALSE}
+# Load packages
+library(papaja)
+library(reticulate)
+library(MASS)
+library(Matrix)
+library(lme4)
+library(buildmer)
+library(emmeans)
+library(magrittr)
+library(tidyverse)
+
+# Chunk options
+knitr::opts_chunk$set(include = FALSE, echo = FALSE)
+
+# Specify conda environment for Python
+use_condaenv("r-reticulate", required = TRUE)
+
+# Bibliography file
+r_refs("manuscript/r-references.bib")
+```
+
+```{python exp1-preprocessing}
+# Import libraries
+import mne
+import glob
+import os
+
+# Define parameters for preprocessing
+preproc_params = dict(n_components=15, method='fastica',           # ICA parameters
+                      l_freq=0.1, h_freq=30,                       # Filter edges
+                      event_id={'match': 221, 'mismatch': 222},    # EEG triggers
+                      tmin=-0.5, tmax=1.498,                       # Length of epochs
+                      baseline=(-0.2,0))                           # Baseline correction
+reject = dict(eeg=200e-6)                                          # Rejection threshold
+
+# # Debug
+# locals().update(preproc_params)
+# vhdr_fname = 'data/exp1/EEG/Vp0001.vhdr'
+
+# Define preprocessing function
+def preproc(vhdr_fname, n_components, method, l_freq, h_freq, event_id, tmin, tmax, baseline):
+  # Load EEG data
+  raw = mne.io.read_raw_brainvision(vhdr_fname, preload=True)
+  # Create new virtual EOG channels
+  raw = mne.set_bipolar_reference(raw, 'Auge_u', 'Fp1', ch_name='VEOG', drop_refs=False)
+  raw = mne.set_bipolar_reference(raw, 'F9', 'F10', ch_name='HEOG', drop_refs=False)
+  raw.set_channel_types(mapping={'VEOG': 'eog', 'HEOG': 'eog'})
+  # Add EasyCap electrode layout, removing any excessive channels
+  montage = mne.channels.make_standard_montage('easycap-M1')
+  raw.drop_channels(list(set(raw.ch_names) - set(montage.ch_names) - set(['VEOG', 'HEOG'])))
+  raw.set_montage(montage=montage)
+  # Re-reference to common average
+  raw, _ = mne.set_eeg_reference(raw, 'average')
+  # Run ICA on a copy of the data
+  filt_raw = raw.copy()
+  filt_raw.load_data().filter(l_freq=1, h_freq=None)
+  ica = mne.preprocessing.ICA(n_components=n_components, random_state=12345, method=method)
+  ica.fit(filt_raw)
+  # Remove bad components based on correlations with EOG
+  eog_indices, eog_scores = ica.find_bads_eog(raw)
+  ica.exclude = eog_indices
+  raw = ica.apply(raw)
+  # Apply band-pass filter
+  raw = raw.filter(l_freq=l_freq, h_freq=h_freq)
+  # Epoching including baseline correction
+  events, _ = mne.events_from_annotations(raw, verbose=False)
+  epochs = mne.Epochs(raw, events=events, event_id=event_id, tmin=tmin, tmax=tmax,
+                      baseline=baseline, preload=True)
+  
+  # # Autoreject                    
+  # import autoreject
+  # 
+  # ar = autoreject.AutoReject(thresh_method='random_search', verbose=False)
+  # epochs_clean = ar.fit_transform(epochs)
+  # 
+  # rejected = epochs_clean.drop_log
+  # rejected[:] = [item for item in rejected if item != ['IGNORED']]
+  # rejected = [i for i in range(len(rejected)) if rejected[i] != []]
+  # 
+  # ransac = autoreject.Ransac(verbose=False)
+  # epochs = ransac.fit_transform(epochs)
+  # 
+  # reject = autoreject.get_rejection_threshold(epochs)
+                      
+  return epochs
+  
+# List of raw EEG filenames
+fnames_exp1 = sorted(glob.glob('data/exp1/EEG/*.vhdr'))
+
+# Check if preprocessing was done already (delete the file to re-run)
+if os.path.exists('output/exp1-epo.fif'):
+  # Load preprocessed data from file
+  epochs_exp1 = mne.read_epochs('output/exp1-epo.fif', preload=True)
+else:
+  # Actually apply the preprocessing function
+  epochs_exp1 = [preproc(fname, **preproc_params) for fname in fnames_exp1]
+  # Combine into a single data set
+  epochs_exp1 = mne.concatenate_epochs(epochs_exp1)
+  # Backup epochs to the export folder
+  epochs_exp1.save('output/exp1-epo.fif')
+
+# Get indices of bad epochs despite ICA
+rej_exp1 = epochs_exp1.copy().drop_bad(reject=reject).drop_log
+rej_exp1[:] = [item for item in rej_exp1 if item != ['IGNORED']]
+rej_exp1 = [i for i in range(len(rej_exp1)) if rej_exp1[i] != []]
+```
+
+```{r exp1-analysis}
+# Define function for processing behavioral data
+preproc_behav <- function(txt_fname){
+  # Read log file
+  dat <-  suppressMessages(suppressWarnings(read_tsv(txt_fname)))
+  # Remove filler stimuli (well-known objects)
+  dat %<>% filter(bek_unbek != "bekannt")
+  # Add a column for the part of the experiment
+  dat %<>% mutate(part = as_factor(Wdh - 210))
+  
+  # Assign stimuli to conditions based on keywords and button presses
+  known <- dat %>% filter(part == "1" & Tastencode == 201) %>% pull(StimID)
+  insight <- dat %>%filter(part == "2" & Bed == "richtig" & Tastencode %in% c(201, 202)) %>% pull(StimID)
+  naive <- dat %>% filter(part == "2" & Bed == "falsch" & Tastencode %in% c(203, 204)) %>% pull(StimID)
+  dat %<>% mutate(condition = as_factor(case_when(StimID %in% known ~ "Known",
+                                                  StimID %in% insight ~ "Insight",
+                                                  StimID %in% naive ~ "Naive")))
+  # Remove unrealistically short RTs
+  dat %<>% mutate(RT = replace(RT, RT < 200, NA))
+  return(dat)}
+
+# List of filenames for behavioral data
+fnames_exp1 <- list.files("data/exp1/RT", pattern = ".txt", full.names = TRUE)
+
+# Actually apply the preprocessing function
+data_exp1 <- map_dfr(fnames_exp1, preproc_behav)
+
+# Add factorized columns for participants and items (the random variables)
+data_exp1 %<>% mutate(participant = as_factor(VPNummer), item = as_factor(StimID))
+
+# Tabulate percentage of stimuli per condition
+stims_exp1 <- table(data_exp1$participant, data_exp1$condition)
+stims_exp1 <- colMeans(stims_exp1)
+stims_exp1["Known"]/(3*120) # Three repititions and 120 objects
+stims_exp1[c("Insight", "Naive")]/(3*60) # Three repitions and 60 objects each
+
+# Import epochs from Python, converting Volts to Microvolts
+epochs_exp1 <- py$epochs_exp1$get_data()*1e6
+
+# Set rejected epochs to NA
+rej_exp1 <- py$rej_exp1 + 1
+epochs_exp1[rej_exp1,,] <- NA
+
+# Create vectors with sample time points (in ms) and electrodes
+tmin <- py$preproc_params$tmin*1000
+tmax <- py$preproc_params$tmax*1000
+sfreq <- py$epochs_exp1$info['sfreq']
+times <- seq(tmin, tmax, 1000/sfreq)
+els <- py$epochs_exp1$ch_names
+
+# Define ERP components of interest
+comps <- tibble(name = c("P1", "N1", "N400"),
+                start = c(100, 150, 400),
+                stop = c(150, 200, 700),
+                roi = list(c("PO3", "PO4", "POz", "O1", "O2", "Oz"),
+                           c("P7", "P8", "PO7", "PO8", "PO9", "PO10"),
+                           c("C1", "C2", "Cz", "CP1", "CP2", "CPz")))
+
+# Define function to compute single-trial ERPs
+compute_erps <- function(epochs, els, name, start, stop, roi){
+  erps <- epochs[, which(els %in% roi), which(times %in% start:stop)]
+  erps <- apply(erps, 1, mean, na.rm = TRUE)
+  return(erps)}
+
+# Apply the function and bind ERPs to the behavioral data
+data_exp1 <- pmap_dfc(comps, compute_erps, epochs = epochs_exp1, els = els) %>% set_names(comps$name) %>% cbind(data_exp1, .)
+
+# Remove trials with missing ERPs or RTs
+rej_exp1_erp <- data_exp1 %>% filter(is.na(P1)) %>% count(participant, .drop = FALSE) %>% pull(n)
+data_exp1 %<>% filter(!is.na(P1))
+rej_exp1_rt <- data_exp1 %>% filter(is.na(RT)) %>% count(participant, .drop = FALSE) %>% pull(n)
+data_exp1 %<>% filter(!is.na(RT))
+
+# Remove any trials that don't beling to either of the two conditions
+data_exp1 %<>% filter(condition != "Known") %>% droplevels()
+
+# Set sliding difference coding for condition (insight-naive) and part (2-1, 3-1)
+t(contrasts.condition <- t(cbind(c("Insight" = 1, "Naive" = -1))))
+t(contrasts.part <- t(cbind(c("1" = -1, "2" = 1, "3" = 0),
+                            c("1" = 0, "2" = -1, "3" = 1))))
+contrasts(data_exp1$condition) <- ginv(contrasts.condition)
+contrasts(data_exp1$part) <- ginv(contrasts.part)
+
+# Parameters for linear mixed-effects models (LMMs)
+form <- tabulate.formula(~ part*condition + (part*condition|participant) + (part*condition|item))
+form %<>% mutate(block = replace(block, is.na(grouping), "fixed"))
+ctrl_params <- lmerControl(optimizer = "bobyqa", optCtrl = list(maxfun = 2e5))
+
+# Parameters for follow-up contrasts
+specs = pairwise ~ condition|part
+
+# Define function to compute LMMs and contrasts
+compute_models <- function(dep, formula, data, control, specs){
+  build <- buildmer(dep = dep, formula = formula, data = data, ddf = "Satterthwaite", calc.anova = TRUE, control = control)
+  emm_options(lmer.df = "Satterthwaite", lmerTest.limit = Inf)
+  conts <- emmeans(build@model, specs = specs, infer = TRUE)
+  mod <- list("model" = build@model, "anova" = build@anova, "summary" = build@summary, "contrasts" = conts)
+  return(mod)}
+
+# Check if models were computed already (delete the file to re-run)
+if (file.exists("output/exp1-stats.RDS")){
+   # Load models from file
+  models_exp1 <- readRDS("output/exp1-stats.RDS")
+} else {
+  # Actually apply the modelling function
+  models_exp1 <- map(comps$name, compute_models, formula = form, data = data_exp1, control = ctrl_params, specs = specs) %>%
+    set_names(comps$name)
+  # Backup epochs to the export folder
+  saveRDS(models_exp1, "output/exp1-stats.RDS")}
+```
+
+```{python exp2-preprocessing}
+# List of raw EEG filenames
+fnames_exp2 = sorted(glob.glob('data/exp2/EEG/*.vhdr'))
+
+# Check if preprocessing was done already (delete the file to re-run)
+if os.path.exists('output/exp2-epo.fif'):
+  # Load preprocessed data from file
+  epochs_exp2 = mne.read_epochs('output/exp2-epo.fif', preload=True)
+else:
+  # Actually apply the preprocessing function
+  epochs_exp2 = [preproc(fname, **preproc_params) for fname in fnames_exp2]
+  # Combine into a single data set
+  epochs_exp2 = mne.concatenate_epochs(epochs_exp2)
+  # Backup epochs to the export folder
+  epochs_exp2.save('output/exp2-epo.fif')
+  
+# Get indices of bad epochs despite ICA
+rej_exp2 = epochs_exp2.copy().drop_bad(reject=reject).drop_log
+rej_exp2[:] = [item for item in rej_exp2 if item != ['IGNORED']]
+rej_exp2 = [i for i in range(len(rej_exp2)) if rej_exp2[i] != []]
+```
+
+```{r exp2-analysis}
+# List of filenames for behavioral data
+fnames_exp2 <- list.files("data/exp2/RT", pattern = ".txt", full.names = TRUE)
+
+# Actually apply the preprocessing function
+data_exp2 <- map_dfr(fnames_exp2, preproc_behav)
+
+# Add factorized columns for participants and items (the random variables)
+data_exp2 %<>% mutate(participant = as_factor(VPNummer), item = as_factor(StimID))
+
+# Tabulate percentage of stimuli per condition
+stims_exp2 <- table(data_exp2$participant, data_exp2$condition)
+stims_exp2 <- colMeans(stims_exp2)
+stims_exp2["Known"]/(3*120) # Three repititions and 120 objects
+stims_exp2[c("Insight", "Naive")]/(3*60) # Three repitions and 60 objects each
+
+# Import epochs from Python, converting Volts to Microvolts
+epochs_exp2 <- py$epochs_exp2$get_data()*1e6
+
+# Set rejected epochs to NA
+rej_exp2 <- py$rej_exp2 + 1
+epochs_exp2[rej_exp2,,] <- NA
+
+# Apply function to compute single-trial ERPs and to the behavioral data
+data_exp2 <- pmap_dfc(comps, compute_erps, epochs = epochs_exp2, els = els) %>% set_names(comps$name) %>% cbind(data_exp2, .)
+
+# Remove trials with missing ERPs or RTs
+rej_exp2_erp <- data_exp2 %>% filter(is.na(P1)) %>% count(participant, .drop = FALSE) %>% pull(n)
+data_exp2 %<>% filter(!is.na(P1))
+rej_exp2_rt <- data_exp2 %>% filter(is.na(RT)) %>% count(participant, .drop = FALSE) %>% pull(n)
+data_exp2 %<>% filter(!is.na(RT))
+
+# Remove any trials that don't beling to either of the two conditions
+data_exp2 %<>% filter(condition != "Known") %>% droplevels()
+
+# Set sliding difference coding for condition (insight-naive) and part (2-1, 3-1)
+contrasts(data_exp2$condition) <- ginv(contrasts.condition)
+contrasts(data_exp2$part) <- ginv(contrasts.part)
+
+# Check if models were computed already (delete the file to re-run)
+if (file.exists("output/exp2-stats.RDS")){
+   # Load models from file
+  models_exp2 <- readRDS("output/exp2-stats.RDS")
+} else {
+  # Actually apply the modelling function
+  models_exp2 <- map(comps$name, compute_models, formula = form, data = data_exp2, control = ctrl_params, specs = specs) %>%
+    set_names(comps$name)
+  # Backup epochs to the export folder
+  saveRDS(models_exp2, "output/exp2-stats.RDS")}
+```
+
+```{r joint-analysis}
+# Combine data from Experiments 1 and 2 (requires changing the participant IDs for Experiment 2)
+data_joint <- data_exp2 %>%
+  mutate(participant = fct_relabel(participant, ~ paste0(., "_2"))) %>%
+  bind_rows(data_exp1, ., .id = "experiment") %>%
+  mutate(experiment = as_factor(experiment))
+
+# Set sliding difference coding for experiment (2-1), condition (insight-naive), and part (2-1, 3-1)
+t(contrasts.experiment <- t(cbind(c("1" = -1, "2" = 1))))
+contrasts(data_joint$experiment) <- ginv(contrasts.experiment)
+contrasts(data_joint$condition) <- ginv(contrasts.condition)
+contrasts(data_joint$part) <- ginv(contrasts.part)
+
+# New formula for LMMs
+form_joint <- tabulate.formula(~ experiment*part*condition + (part*condition|participant) + (experiment*part*condition|item))
+form_joint %<>% mutate(block = replace(block, is.na(grouping), "fixed"))
+
+# Check if models were computed already (delete the file to re-run)
+if (file.exists("output/joint-stats.RDS")){
+   # Load models from file
+  models_joint <- readRDS("output/joint-stats.RDS")
+} else {
+  # Actually apply the modelling function
+  models_joint <- map(comps$name, compute_models, formula = form_joint, data = data_joint, control = ctrl_params, specs = specs) %>%
+    set_names(comps$name)
+  # Backup epochs to the export folder
+  saveRDS(models_joint, "output/joint-stats.RDS")}
+```
+
+\newpage
+
+# References
+
+```{=tex}
+\begingroup
+\setlength{\parindent}{-0.5in}
+\setlength{\leftskip}{0.5in}
+```
+::: {#refs custom-style="Bibliography"}
+:::
+
+\endgroup
