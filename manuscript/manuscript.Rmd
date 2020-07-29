@@ -86,6 +86,49 @@ use_condaenv("r-reticulate", required = TRUE)
 r_refs("manuscript/r-references.bib")
 ```
 
+```{r exp1-behavior}
+# Define function for processing behavioral data
+preproc_behav <- function(txt_fname){
+  # Read log file
+  dat <-  suppressMessages(suppressWarnings(read_tsv(txt_fname)))
+  # Remove filler stimuli (well-known objects)
+  dat %<>% filter(bek_unbek != "bekannt")
+  # Add a column for the part of the experiment
+  dat %<>% mutate(part = as_factor(Wdh - 210))
+  # Assign stimuli to conditions based on keywords and button presses
+  known <- dat %>% filter(part == "1" & Tastencode == 201) %>% pull(StimID)
+  insight <- dat %>%filter(part == "2" & Bed == "richtig" & Tastencode %in% c(201, 202)) %>% pull(StimID)
+  naive <- dat %>% filter(part == "2" & Bed == "falsch" & Tastencode %in% c(203, 204)) %>% pull(StimID)
+  dat %<>% mutate(condition = as_factor(case_when(StimID %in% known ~ "Known",
+                                                  StimID %in% insight ~ "Insight",
+                                                  StimID %in% naive ~ "Naive")))
+  # Remove unrealistically short RTs
+  dat %<>% mutate(RT = replace(RT, RT < 200, NA))
+  return(dat)}
+
+# List of filenames for behavioral data
+fnames_exp1 <- list.files("data/exp1/RT", pattern = ".txt", full.names = TRUE)
+
+# Actually apply the preprocessing function
+data_exp1 <- map_dfr(fnames_exp1, preproc_behav)
+
+# Add factorized columns for participants and items (the random variables)
+data_exp1 %<>% mutate(participant = as_factor(VPNummer), item = as_factor(StimID))
+
+# Tabulate percentage of stimuli per condition
+stims_exp1 <- table(data_exp1$participant, data_exp1$condition)
+stims_exp1 <- colMeans(stims_exp1)
+stims_exp1["Known"]/(3*120) # Three repititions and 120 objects
+stims_exp1[c("Insight", "Naive")]/(3*60) # Three repitions and 60 objects each
+
+# Select only relevant columns
+data_exp1 %<>% select(part, condition, participant, item, RT)
+
+# Tell MNE to exclude trials without a proper condition or RT
+data_exp1 %<>% mutate(condition = replace(condition, condition == "Known" | is.na(RT), NA)) %>%
+  mutate(condition = fct_explicit_na(condition, na_level = "Exclude")) %>% droplevels()
+```
+
 ```{python exp1-preprocessing}
 # Import libraries
 import mne
@@ -148,9 +191,9 @@ def preproc(vhdr_fname, n_components, method, l_freq, h_freq, event_id, tmin, tm
   # epochs = ransac.fit_transform(epochs)
   # 
   # reject = autoreject.get_rejection_threshold(epochs)
-                      
-  return epochs
   
+  return epochs
+
 # List of raw EEG filenames
 fnames_exp1 = sorted(glob.glob('data/exp1/EEG/*.vhdr'))
 
@@ -163,50 +206,30 @@ else:
   epochs_exp1 = [preproc(fname, **preproc_params) for fname in fnames_exp1]
   # Combine into a single data set
   epochs_exp1 = mne.concatenate_epochs(epochs_exp1)
+  # Add metadata from R
+  epochs_exp1.metadata = r.data_exp1
   # Backup epochs to the export folder
   epochs_exp1.save('output/exp1-epo.fif')
 
-# Get indices of bad epochs despite ICA
-rej_exp1 = epochs_exp1.copy().drop_bad(reject=reject).drop_log
-rej_exp1[:] = [item for item in rej_exp1 if item != ['IGNORED']]
-rej_exp1 = [i for i in range(len(rej_exp1)) if rej_exp1[i] != []]
+# Remove trials with invalid condition or RTs
+epochs_exp1 = epochs_exp1['condition != "Exclude"']
+
+# # Compute evoked potentials for each part x condition
+# evokeds_exp1 = dict()
+# for pt in ['1', '2', '3']:
+#   for cn in ['Insight', 'Naive']:
+#     query = 'part == "' + pt + '" and condition == "' + cn + '"'
+#     evokeds_exp1['Part' + pt + '_' + cn] = epochs_exp1[query].average()
+# mne.viz.plot_compare_evokeds(evokeds_exp1, cmap=('condition', 'viridis'), picks='P8')
+
+# # Get indices of bad epochs despite ICA
+# rej_exp1 = epochs_exp1.copy().drop_bad(reject=reject).drop_log
+# rej_exp1[:] = [item for item in rej_exp1 if item != ['IGNORED']]
+# rej_exp1 = [i for i in range(len(rej_exp1)) if rej_exp1[i] != []]
 ```
 
 ```{r exp1-analysis}
-# Define function for processing behavioral data
-preproc_behav <- function(txt_fname){
-  # Read log file
-  dat <-  suppressMessages(suppressWarnings(read_tsv(txt_fname)))
-  # Remove filler stimuli (well-known objects)
-  dat %<>% filter(bek_unbek != "bekannt")
-  # Add a column for the part of the experiment
-  dat %<>% mutate(part = as_factor(Wdh - 210))
-  
-  # Assign stimuli to conditions based on keywords and button presses
-  known <- dat %>% filter(part == "1" & Tastencode == 201) %>% pull(StimID)
-  insight <- dat %>%filter(part == "2" & Bed == "richtig" & Tastencode %in% c(201, 202)) %>% pull(StimID)
-  naive <- dat %>% filter(part == "2" & Bed == "falsch" & Tastencode %in% c(203, 204)) %>% pull(StimID)
-  dat %<>% mutate(condition = as_factor(case_when(StimID %in% known ~ "Known",
-                                                  StimID %in% insight ~ "Insight",
-                                                  StimID %in% naive ~ "Naive")))
-  # Remove unrealistically short RTs
-  dat %<>% mutate(RT = replace(RT, RT < 200, NA))
-  return(dat)}
 
-# List of filenames for behavioral data
-fnames_exp1 <- list.files("data/exp1/RT", pattern = ".txt", full.names = TRUE)
-
-# Actually apply the preprocessing function
-data_exp1 <- map_dfr(fnames_exp1, preproc_behav)
-
-# Add factorized columns for participants and items (the random variables)
-data_exp1 %<>% mutate(participant = as_factor(VPNummer), item = as_factor(StimID))
-
-# Tabulate percentage of stimuli per condition
-stims_exp1 <- table(data_exp1$participant, data_exp1$condition)
-stims_exp1 <- colMeans(stims_exp1)
-stims_exp1["Known"]/(3*120) # Three repititions and 120 objects
-stims_exp1[c("Insight", "Naive")]/(3*60) # Three repitions and 60 objects each
 
 # Import epochs from Python, converting Volts to Microvolts
 epochs_exp1 <- py$epochs_exp1$get_data()*1e6
