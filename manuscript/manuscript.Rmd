@@ -89,6 +89,13 @@ renv::use_python(python = "/Users/alexander/opt/anaconda3/bin/python", type = "c
 r_refs("manuscript/r-references.bib")
 ```
 
+# Method
+
+## Participants
+
+Participants for Experiment 1 were 24 German native speakers (13 female, 11 male) with a mean age of 24.3 years (*SD* = 3.63, range 18 to 31) and no history psychological disorder or treatment. All participants were right-handed with a mean laterality index of +80.0 on the Edinburgh inventory.
+
+
 ```{r exp1-behavior}
 # Function for processing behavioral data
 preproc_behav <- function(txt_fname){
