@@ -79,7 +79,7 @@ library(tidyverse)
 library(cowplot)
 
 # Chunk options
-knitr::opts_chunk$set(include = FALSE, echo = FALSE, fig.out = "100%", fig.width = 10)
+knitr::opts_chunk$set(include = FALSE, fig.align = "center", fig.out = "100%", fig.width = 10)
 
 # Conda environment for Python
 #use_condaenv("r-reticulate", required = TRUE)
@@ -89,7 +89,7 @@ renv::use_python(python = "/Users/alexander/opt/anaconda3/bin/python", type = "c
 r_refs("manuscript/r-references.bib")
 ```
 
-```{r exp1-behavior}
+```{r exp1-preparation}
 # Function for processing behavioral data
 preproc_behav <- function(txt_fname){
   # Read log file
@@ -342,7 +342,7 @@ stars_exp1 = list(P1 = c(Pt1 = NA, Pt2 = NA, Pt3 = "*"),
                   N400 = c(Pt1 = NA, Pt2 = "***", Pt3 = "**"))
 ```
 
-```{r exp1-table, include=TRUE, results="asis"}
+```{r exp1-output, include=TRUE, results="asis", fig.height=12}
 # Check if models were computed already (delete the file to re-run)
 if (file.exists("output/exp1-stats.RDS")){
   # Load models from file
@@ -360,7 +360,7 @@ create_table <- function(models, stub.anova, stub.contrasts, caption, note){
                "p" = format(round(model$anova$`Pr(>F)`, 3), trim = FALSE, nsmall = 3)) %>%
       mutate(p = ifelse(p == "0.000", "<.001", substr(p, 2, nchar(p))))}) %>%
     bind_cols() %>% set_rownames(c(stub.anova))
-  cnames <- c("\\textit{Type III}", rep(c("\\textit{F} (\\textit{df})", "p" = "\\textit{p}"), 3))
+  cnames <- c("\\textit{Fixed effects}", rep(c("\\textit{F} (\\textit{df})", "p" = "\\textit{p}"), 3))
   conts <- map(models, function(model){
     data.frame("stat" = paste0(format(round(model$contrasts$estimate, 2), trim = FALSE, nsmall = 2), " [",
                                format(round(model$contrasts$lower.CL, 2), trim = FALSE, nsmall = 2), ", ",
@@ -379,9 +379,7 @@ create_table(models_exp1, stub.anova = c("Part", "Insight", "Pt. × ins."),
              stub.contrasts = c("Part 1", "Part 2", "Part 3"),
              caption = "Results of linear mixed-effects regression models for Experiment 1",
              note = "Pt. = part, ins. = insight, est. = estimate, CI = confidence interval.")
-```
 
-```{r exp1-plotting, include=TRUE, fig.height=12}
 # Import grand averaged evoked potentials from Python
 evokeds_exp1 <- py$evokeds_dat_exp1
 
@@ -544,7 +542,7 @@ plot_grid(plot_trial(),
           nrow = 4, rel_heights = c(3, 2, 6, 1), labels = c("A", "B", "C", ""), label_fontfamily = "Helvetica")
 ```
 
-```{r exp2-behavior}
+```{r exp2-preparation}
 # List of filenames for behavioral data
 fnames_exp2 <- list.files("data/exp2/RT", pattern = ".txt", full.names = TRUE)
 
@@ -632,15 +630,13 @@ stars_exp2 = list(P1 = c(Pt1 = NA, Pt2 = NA, Pt3 = NA),
                   N400 = c(Pt1 = NA, Pt2 = "***", Pt3 = NA))
 ```
 
-```{r exp2-table, include=TRUE, results="asis"}
+```{r exp2-output, include=TRUE, results="asis", fig.height=9}
 # Apply the function to print the table
 create_table(models_exp2, stub.anova = c("Part", "Insight", "Pt. × ins."),
             stub.contrasts = c("Part 1", "Part 2", "Part 3"),
             caption = "Results of linear mixed-effects regression models for Experiment 2",
             note = "Pt. = part, ins. = insight, est. = estimate, CI = confidence interval.")
-```
 
-```{r exp2-plotting, include=TRUE, fig.height=9}
 # Import grand averaged evoked potentials from Python
 evokeds_exp2 <- py$evokeds_dat_exp2
 
@@ -678,7 +674,7 @@ if (file.exists("output/joint-stats.RDS")){
                       specs = specs_exp12) %>% set_names(comps$name) %T>% saveRDS("output/joint-stats.RDS")}
 ```
 
-```{r joint-table, include=TRUE, results="asis"}
+```{r joint-output, include=TRUE, results="asis"}
 # Apply the function to print the table
 create_table(models_joint, stub.anova = c("Part", "Insight", "Experiment", "Pt. × ins.", "Pt. × exp.",
                                          "Ins. × exp.", "Pt. × ins. × exp."),
@@ -687,7 +683,7 @@ create_table(models_joint, stub.anova = c("Part", "Insight", "Experiment", "Pt. 
             note = "Pt. = part, ins. = insight, exp. = experiment, est. = estimate, CI = confidence interval.")
 ```
 
-```{r exp3-behavior}
+```{r exp3-preparation, eval=FALSE}
 # List of filenames for behavioral data
 fnames_exp3 <- list.files("data/exp3/RT", pattern = ".txt", full.names = TRUE)
 
@@ -701,7 +697,7 @@ data_exp3 <- map(fnames_exp3, preproc_behav)
     mutate(mean = if_else(condition == "Excl_known", mean/2, mean))) # 224 items in total
 ```
 
-```{python exp3-preprocessing}
+```{python exp3-preprocessing, eval=FALSE}
 # List of raw EEG filenames
 fnames_exp3 = sorted(glob.glob('data/exp3/EEG/*.vhdr'))
 
@@ -729,7 +725,7 @@ else:
 # rej_exp3 = [i for i in range(len(rej_exp3)) if rej_exp3[i] != []]
 ```
 
-```{r exp3-analysis}
+```{r exp3-analysis, eval=FALSE}
 # Re-import behavioral data
 data_exp3 <- py$epochs_exp3$metadata
 
@@ -783,7 +779,7 @@ if (file.exists("output/exp3-stats.RDS")){
                      specs = specs_exp3) %>% set_names(comps$name) %T>% saveRDS("output/exp3-stats.RDS")}
 ```
 
-```{r exp3-table, include=TRUE, results= asis"}
+```{r exp3-output, include=TRUE, results="asis", eval=FALSE}
 # Apply the function to print the table
 create_table(models_exp3, stub.anova = c("Part", "Insight", "Position", "Pt. × ins.", "Pt. × pos.",
                                         "Ins. × pos.", "Pt. × ins. × pos."),
