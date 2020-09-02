@@ -4,7 +4,7 @@
 %
 \documentclass[
   english,
-  man]{apa7}
+  man,floatsintext]{apa7}
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
 \usepackage{ifxetex,ifluatex}
@@ -113,12 +113,6 @@
 \makeatother
 \shorttitle{Title}
 \keywords{keywords\newline\indent Word count: X}
-\DeclareDelayedFloatFlavor{ThreePartTable}{table}
-\DeclareDelayedFloatFlavor{lltable}{table}
-\DeclareDelayedFloatFlavor*{longtable}{table}
-\makeatletter
-\renewcommand{\efloat@iwrite}[1]{\immediate\expandafter\protected@write\csname efloat@post#1\endcsname{}}
-\makeatother
 \usepackage{lineno}
 
 \linenumbers
@@ -129,6 +123,9 @@
   \setmainlanguage[]{english}
 \else
   \usepackage[shorthands=off,main=english]{babel}
+\fi
+\ifluatex
+  \usepackage{selnolig}  % disable illegal ligatures
 \fi
 \newlength{\cslhangindent}
 \setlength{\cslhangindent}{1.5em}
@@ -175,6 +172,52 @@ Two or three sentences to provide a \textbf{broader perspective}, readily compre
 
 \begin{document}
 \maketitle
+
+\begin{table}[tbp]
+
+\begin{center}
+\begin{threeparttable}
+
+\caption{\label{tab:exp1-table}Results of linear mixed-effects regression models for Experiment 1}
+
+\footnotesize{
+
+\begin{tabular}{lcccccc}
+\toprule
+ & \multicolumn{2}{c}{\textbf{P1}} & \multicolumn{2}{c}{\textbf{N1}} & \multicolumn{2}{c}{\textbf{N400}} \\
+\cmidrule(r){2-3} \cmidrule(r){4-5} \cmidrule(r){6-7}
+\textit{Type III} & \textit{F} (\textit{df}) & \textit{p} & \textit{F} (\textit{df}) & \textit{p} & \textit{F} (\textit{df}) & \textit{p}\\
+\midrule
+Part & 10.30 (2,   23.4) & .001 & 13.56 (2,   23.9) & <.001 & 31.61 (2,   24.4) & <.001\\
+Insight & 0.87 (1, 5299.9) & .352 & 0.96 (1, 5341.1) & .327 & 21.83 (1, 5210.4) & <.001\\
+Pt. × ins. & 2.37 (2, 4616.5) & .094 & 5.34 (2, 4949.3) & .005 & 11.16 (2, 5058.3) & <.001\\
+\textit{Insight $-$  naive} & Est. [95\% CI] & \textit{p} & Est. [95\% CI] & \textit{p} & Est. [95\% CI] & \textit{p}\\ \midrule
+Part 1 & 0.00 [-0.50, 0.49] & .991 & -0.17 [-0.62,  0.29] & .480 & -0.21 [-0.61, 0.18] & .292\\
+Part 2 & -0.15 [-0.65, 0.35] & .553 & -0.66 [-1.12, -0.20] & .005 & 0.91 [ 0.51, 1.31] & <.001\\
+Part 3 & 0.57 [ 0.08, 1.07] & .024 & 0.41 [-0.05,  0.87] & .080 & 0.99 [ 0.59, 1.39] & <.001\\
+\bottomrule
+\addlinespace
+\end{tabular}
+
+}
+
+\begin{tablenotes}[para]
+\normalsize{\textit{Note.} Pt. = part, ins. = insight, est. = estimate, CI = confidence interval.}
+\end{tablenotes}
+
+\end{threeparttable}
+\end{center}
+
+\end{table}
+
+\begin{figure}
+
+{\centering \includegraphics[width=1\linewidth]{manuscript_files/figure-latex/exp1-plotting-1} 
+
+}
+
+\caption{ }\label{fig:exp1-plotting}
+\end{figure}
 
 \newpage
 

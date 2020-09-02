@@ -1,0 +1,38 @@
+name: null
+channels:
+  - defaults
+dependencies:
+  - ca-certificates=2020.7.22=0
+  - certifi=2020.6.20=py38_0
+  - libcxx=10.0.0=1
+  - libedit=3.1.20191231=h1de35cc_1
+  - libffi=3.3=hb1e8313_2
+  - ncurses=6.2=h0a44026_1
+  - openssl=1.1.1g=h1de35cc_0
+  - pip=20.2.2=py38_0
+  - python=3.8.5=h26836e1_0
+  - readline=8.0=h1de35cc_0
+  - setuptools=49.6.0=py38_0
+  - sqlite=3.33.0=hffcf06c_0
+  - tk=8.6.10=hb0a8c7a_0
+  - wheel=0.35.1=py_0
+  - xz=5.2.5=h1de35cc_0
+  - zlib=1.2.11=h1de35cc_3
+  - pip:
+    - autoreject==0.2.1
+    - cycler==0.10.0
+    - joblib==0.16.0
+    - kiwisolver==1.2.0
+    - matplotlib==3.3.1
+    - mne==0.20.7
+    - numpy==1.19.1
+    - pandas==1.1.1
+    - pillow==7.2.0
+    - pyparsing==2.4.7
+    - python-dateutil==2.8.1
+    - pytz==2020.1
+    - scikit-learn==0.23.2
+    - scipy==1.5.1
+    - six==1.15.0
+    - threadpoolctl==2.1.0
+prefix: /Users/alexander/Research/aha/renv/python/condaenvs/renv-python
