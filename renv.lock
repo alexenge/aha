@@ -9,7 +9,7 @@
     ]
   },
   "Python": {
-    "Version": "3.7.7",
+    "Version": "3.8.5",
     "Type": "virtualenv"
   },
   "Packages": {
@@ -110,6 +110,13 @@
       "Source": "Repository",
       "Repository": "CRAN",
       "Hash": "0c086d512b109c39c2c3b9fe23c625c7"
+    },
+    "XML": {
+      "Package": "XML",
+      "Version": "3.99-0.5",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "408d42d1359f2a84d377c1f7f0568624"
     },
     "abind": {
       "Package": "abind",
@@ -331,6 +338,20 @@
       "Repository": "CRAN",
       "Hash": "fd2844b3a43ae2d27e70ece2df1b4e2a"
     },
+    "emmeans": {
+      "Package": "emmeans",
+      "Version": "1.5.0",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "0dc804fb37bcdfea325b3214e635f1ff"
+    },
+    "estimability": {
+      "Package": "estimability",
+      "Version": "1.3",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "05901bd61be60fd3bfc5b7d7c3517d1d"
+    },
     "evaluate": {
       "Package": "evaluate",
       "Version": "0.14",
@@ -414,6 +435,13 @@
       "Source": "Repository",
       "Repository": "CRAN",
       "Hash": "6efd734b14c6471cfe443345f3e35e29"
+    },
+    "grImport2": {
+      "Package": "grImport2",
+      "Version": "0.2-0",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "e348e793cde95a4e94f5337f88039c7e"
     },
     "gridExtra": {
       "Package": "gridExtra",
@@ -499,6 +527,13 @@
       "Repository": "CRAN",
       "Hash": "6e58bd3d6b3dd82a944cd6f05ade228f"
     },
+    "jpeg": {
+      "Package": "jpeg",
+      "Version": "0.1-8.1",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "bc316c003aba520fc73d70ad53b5fc36"
+    },
     "jsonlite": {
       "Package": "jsonlite",
       "Version": "1.7.0",
@@ -562,12 +597,26 @@
       "Repository": "CRAN",
       "Hash": "ad24d1fd9ed431543f4633bb083e194a"
     },
+    "lmerTest": {
+      "Package": "lmerTest",
+      "Version": "3.1-2",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "88e045628eada40f6cda13f553f25869"
+    },
     "lubridate": {
       "Package": "lubridate",
       "Version": "1.7.9",
       "Source": "Repository",
       "Repository": "CRAN",
       "Hash": "fc1c91e2e8d9e1fc932e75aa1ed989b7"
+    },
+    "magick": {
+      "Package": "magick",
+      "Version": "2.4.0",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "40a9efbb0418902cf6b663a1529a975a"
     },
     "magrittr": {
       "Package": "magrittr",
@@ -632,6 +681,13 @@
       "Repository": "CRAN",
       "Hash": "6dfe8bf774944bd5595785e3229d8771"
     },
+    "mvtnorm": {
+      "Package": "mvtnorm",
+      "Version": "1.1-1",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "69fa7331e7410c2a2cb3f9868513904f"
+    },
     "nlme": {
       "Package": "nlme",
       "Version": "3.1-149",
@@ -645,6 +701,13 @@
       "Source": "Repository",
       "Repository": "CRAN",
       "Hash": "2737faeee353704efec5afa1e943dd64"
+    },
+    "numDeriv": {
+      "Package": "numDeriv",
+      "Version": "2016.8-1.1",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "df58958f293b166e4ab885ebcad90e02"
     },
     "openssl": {
       "Package": "openssl",
@@ -707,6 +770,13 @@
       "Source": "Repository",
       "Repository": "CRAN",
       "Hash": "ec0e5ab4e5f851f6ef32cd1d1984957f"
+    },
+    "png": {
+      "Package": "png",
+      "Version": "0.1-7",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "03b7076c234cb3331288919983326c55"
     },
     "pracma": {
       "Package": "pracma",
