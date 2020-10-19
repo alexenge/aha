@@ -337,16 +337,14 @@ if (file.exists("analysis/export/exp1-erps.RDS")) {
   # Read data from file
   data_exp1 <- readRDS("analysis/export/exp1-erps.RDS")
 } else {
-  # Import epoched data from Python
-  epochs_exp1 <- py$epochs_exp1$get_data()
   # Compute single-trial ERPs for Experiment 1
-  data_exp1 <- pmap_dfc(comps, compute_erps, epochs = epochs_exp1, els = els) %>%
+  data_exp1 <- pmap_dfc(comps, compute_erps, epochs = py$epochs_exp1$get_data(), els = els) %>%
     set_names(comps$name) %>%
     cbind(data_exp1, .) %T>%
     saveRDS("analysis/export/exp1-erps.RDS")
 }
 
-# Remove the Python object to free up memory
+# Remove the epochs to free up memory
 py_run_string("del epochs_exp1")
 import("gc")$collect()
 
@@ -875,16 +873,14 @@ if (file.exists("analysis/export/exp2-erps.RDS")) {
   # Read data from file
   data_exp2 <- readRDS("analysis/export/exp2-erps.RDS")
 } else {
-  # Import epochs from Python, converting Volts to Microvolts
-  epochs_exp2 <- py$epochs_exp2$get_data()
   # Compute single-trial ERPs for Experiment 2
-  data_exp2 <- pmap_dfc(comps, compute_erps, epochs = epochs_exp2, els = els) %>%
+  data_exp2 <- pmap_dfc(comps, compute_erps, epochs = py$epochs_exp2$get_data(), els = els) %>%
     set_names(comps$name) %>%
     cbind(data_exp2, .) %T>%
     saveRDS("analysis/export/exp2-erps.RDS")
 }
 
-# Remove the Python object to free up memory
+# Remove the epochs to free up memory
 py_run_string("del epochs_exp2")
 import("gc")$collect()
 
@@ -1139,7 +1135,9 @@ table_joint_control <- create_table(
 )
 ```
 
-One may raise concerns whether the modulation of the N1 component in Part II genuinely reflects the semantically informed perception of the objects in the respective condition, or---as an alternative explanation---whether it could be driven by the objects in the other, semantically naive condition. Remember that these objects were preceded by non-matching keywords which were picked so that they could not be related to the object's visual features and their configuration. Thus, the modulation of the ERP components in Part II may reflect a mismatch response to those objects---reflecting, for example, the fact that the visual features of the object shown in Figure \@ref(fig:exp1-plot)A cannot be reconciled with the function of morsing messages. To preclude this alternative explanation, we repeated the analysis above using a different baseline against which the objects in the semantically informed condition were contrasted. Instead of the naive condition (where objects were presented with non-matching descriptions), we now used those objects which were preceded by matching descriptions (as in the informed condition), but which were excluded from the main analysis because participants indicated behaviorally that they did not understand the object they were seeing. Across both experiments, this was the case for `r scales::percent(stims_joint["Excl_informed"]/60, accuracy = 0.1)` of objects presented with matching descriptions as compared to `r scales::percent(stims_joint["Informed"]/60, accuracy = 0.1)` of objects which did indeed lead to semantically informed perception.^[Note that the remaining objects to make it up to 100% were excluded as not being unfamiliar in Part I of the experiment (see Statistical Analysis)] Just as above, this control analysis revealed a robust N1 effect in Part II, *b* = `r table_joint_control$conts["Part II", "N1_est"]` µV, *p* `r table_joint_control$conts["Part II", "N1_p"]`. Thus, this enhanced negativity seems to be a genuine marker of semantically informed perception, no matter if compared to objects presented with misleading keywords or compared to objects presented with accurate keywords on which participants failed to capitalize. Note that the reduction of the N400 component in Part II also remained robust in this control analysis, *b* = `r table_joint_control$conts["Part II", "N400_est"]` µV, *p* `r table_joint_control$conts["Part II", "N400_p"]`.
+One may raise concerns whether the modulation of the N1 component in Part II genuinely reflects the semantically informed perception of the objects in the respective condition, or---as an alternative explanation---whether it could be driven by the objects in the other, semantically naive condition. Remember that these objects were preceded by non-matching keywords which were picked so that they could not be related to the object's visual features and their configuration. Thus, the modulation of the ERP components in Part II may reflect a mismatch response to those objects---reflecting, for example, the fact that the visual features of the object shown in Figure \@ref(fig:exp1-plot)A cannot be reconciled with the function of morsing messages. To preclude this alternative explanation, we repeated the analysis above using a different baseline against which the objects in the semantically informed condition were contrasted. Instead of the naive condition (where objects were presented with non-matching descriptions), we now used those objects which were preceded by matching descriptions (as in the informed condition), but which were excluded from the main analysis because participants indicated behaviorally that they did not understand the object they were seeing. Across both experiments, this was the case for `r scales::percent(stims_joint["Excl_informed"]/60, accuracy = 0.1)` of objects presented with matching descriptions as compared to `r scales::percent(stims_joint["Informed"]/60, accuracy = 0.1)` of objects which did indeed lead to semantically informed perception.[^1] Just as above, this control analysis revealed a robust N1 effect in Part II, *b* = `r table_joint_control$conts["Part II", "N1_est"]` µV, *p* `r table_joint_control$conts["Part II", "N1_p"]`. Thus, this enhanced negativity seems to be a genuine marker of semantically informed perception, no matter if compared to objects presented with misleading keywords or compared to objects presented with accurate keywords on which participants failed to capitalize. Note that the reduction of the N400 component in Part II also remained robust in this control analysis, *b* = `r table_joint_control$conts["Part II", "N400_est"]` µV, *p* `r table_joint_control$conts["Part II", "N400_p"]`.
+
+[^1]: Note that the remaining objects to make it up to 100% were excluded as not being unfamiliar in Part I of the experiment (see Statistical Analysis)
 
 ## Discussion
 
@@ -1206,16 +1204,14 @@ if (file.exists("analysis/export/exp3-erps.RDS")) {
   # Read ERPs from file
   data_exp3 <- readRDS("analysis/export/exp3-erps.RDS")
 } else {
-  # Import epochs from Python, converting Volts to Microvolts (takes a while)
-  epochs_exp3 <- py$epochs_exp3$get_data()
   # Compute single-trial ERPs for Experiment 3
-  data_exp3 <- pmap_dfc(comps, compute_erps, epochs = epochs_exp3, els = els) %>%
+  data_exp3 <- pmap_dfc(comps, compute_erps, epochs = py$epochs_exp3$get_data(), els = els) %>%
     set_names(comps$name) %>%
     cbind(data_exp3, .) %T>%
     saveRDS("analysis/export/exp3-erps.RDS")
 }
 
-# Remove the Python object to free up memory
+# Remove the epochs to free up memory
 py_run_string("del epochs_exp3")
 import("gc")$collect()
 
@@ -1284,6 +1280,8 @@ table_exp3 <- create_table(
 # General Discussion
 
 General discussion section goes here.
+
+Although most of the previous studies in the object processing domain have focused on the P1 component as an index of semantic knowledge modulating perceptual processes, at least two studies provide evidence for top-down effects of meaningfulness on the visual N1 (or N170) component in response to schematic drawings of faces [@bentin2002] and objects [@beaucousin2011]. Using a similar design as in the present study, drawings of distored faces elicited a facelike (i.e. enlarged) N170 component only after participants were primed with a vaild hint---in this case the same face with all of its visual features in place [@bentin2002]. Similarly, N1 amplitudes in a global-local detection task where shown to be enhanced in response to line drawings of meaningful objects (a boat or a butterfly) as compared to visually matched by meaningless drawings of non-objects. Interestingly, this effect was reversed in polarity when participants had to focus on the smaller, constituent parts and ignoring the object which emerged out of their global arrangement, which may be interpreted as further evidence for a functional role of the N1 component in the holistic perception of an object and its early visual categorization, integrating across its visual features.
 
 \newpage
 
