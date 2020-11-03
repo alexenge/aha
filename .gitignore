@@ -1,8 +1,6 @@
 data/
 docs/
 analysis/export/*.fif
-renv/library/
-renv/python/
 .Rproj.user
 .Rhistory
 .RData

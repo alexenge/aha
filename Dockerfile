@@ -5,7 +5,7 @@ RUN R -e "remotes::install_version('renv', version = '${RENV_VERSION}', repos = 
 
 RUN apt-get update && apt-get install -y python3-pip && apt-get install -y python3-venv
 
-WORKDIR /home/aha
+WORKDIR /home/rstudio
 
 COPY data/ data/
 
@@ -13,6 +13,4 @@ COPY renv.lock renv.lock
 COPY requirements.txt requirements.txt
 RUN R -e "renv::activate()"
 RUN R -e "renv::restore(prompt = FALSE)"
-
-ENTRYPOINT R -e "rmarkdown::render(input = 'analysis/manuscript.Rmd', knit_root_dir = getwd())"
 
