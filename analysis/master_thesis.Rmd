@@ -1,0 +1,132 @@
+---
+title: "This page and the next page should be removed"
+shorttitle:  ""
+
+author: 
+  - name        : ""
+    affiliation : ""
+
+affiliation:
+  - id          : ""
+    institution : ""
+
+bibliography      : "manuscript_files/r-references.bib"
+zotero            : "aha"
+
+floatsintext      : yes
+figurelist        : no
+tablelist         : no
+footnotelist      : no
+linenumbers       : no
+mask              : no
+draft             : no
+numbersections    : true
+
+csl               : "manuscript_files/apa.csl"
+documentclass     : "apa7"
+classoption       : "doc,12pt,twoside"
+mainfont          : "Times New Roman"
+output:
+  papaja::apa6_pdf:
+    latex_engine:   "xelatex"
+
+header-includes:
+  - \setcounter{tocdepth}{2}
+  - \raggedbottom
+  - \linespread{1.5}
+  - \geometry{a4paper,margin=25mm}
+  - \fancyhead{}
+  - \fancyheadoffset[RO,LE]{0pt}
+  - \fancyhead[RO,LE]{\thepage}
+  - \fancyhead[LO,RE]{Semantic Knowledge and Unfamiliar Objects}
+  # - \addtolength\oddsidemargin {0.5cm}
+  # - \addtolength\evensidemargin {-0.5cm}
+  - \usepackage{setspace}
+  - \AtBeginEnvironment{tabular}{\doublespacing}
+  # - \AtBeginEnvironment{lltable}{\doublespacing}
+  # - \AtBeginEnvironment{tablenotes}{\doublespacing}
+  # - \captionsetup[table]{font={stretch=1.5}}
+  - \captionsetup[figure]{font={stretch=1,scriptsize}}
+  - \usepackage[all]{nowidow}
+  - \usepackage[bottom]{footmisc}
+  - \interfootnotelinepenalty=10000
+  - \usepackage[export]{adjustbox}
+---
+
+<!-- Empty page -->
+\clearpage\mbox{}\thispagestyle{empty}\clearpage
+
+<!-- Title page -->
+\thispagestyle{empty}
+\begin{center}
+\vspace*{10mm}
+\textbf{Event-Related Potentials of the Semantically Informed}\\
+\textbf{Perception of Unfamiliar Objects}\\
+\vspace*{5mm}
+\begin{figure}[h]
+\begin{center}
+\includegraphics[width=!,totalheight=!,scale=0.25]{master_thesis_files/hu_logo}
+\end{center}
+\end{figure}
+{\setstretch{1.5}
+Masterarbeit\\
+an der\\
+Humboldt-Universität zu Berlin\\
+zur Erlangung des akademischen Grades \\
+Master of Science (M.Sc.)\\
+im Fach Psychologie\\
+\vspace*{25mm}
+}
+\end{center}
+\begin{flushleft}
+{\setstretch{1.5}
+\begin{tabular}{ll}
+Vorgelegt von:&\textbf{Alexander Enge}\\
+&geb. am 09.11.1996 in Räckelwitz\\
+&Matrikelnummer 581331\\
+Unter Betreuung von:&Prof. Dr. Rasha Abdel Rahman (Humboldt-Universität zu Berlin)\\
+&Prof. Dr. Franziska Süß (Fachhochschule des Mittelstands)\\
+&\\
+Berlin, den 21.01.2021&\\
+\end{tabular}
+}
+\end{flushleft}
+
+<!-- Empty page -->
+\clearpage\mbox{}\thispagestyle{empty}\clearpage
+
+<!-- Acknowledgement -->
+\thispagestyle{empty}
+
+\begin{center}\textbf{Acknowledgment}\end{center}
+
+Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor danke frederik invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.   
+
+<!-- Empty page -->
+\clearpage\mbox{}\thispagestyle{empty}\clearpage
+
+<!-- Table of contents -->
+\thispagestyle{empty}
+\begin{flushleft}
+{\setstretch{1.0}
+\tableofcontents
+}
+\end{flushleft}
+
+<!-- Empty page -->
+\clearpage\mbox{}\thispagestyle{empty}\clearpage
+
+<!-- Abstract -->
+\setcounter{page}{1}
+
+# Abstract {.unnumbered}
+
+Does our perception of an object change as soon as we discover what it is for? This question is relevant not only for our everyday lives, where we may encounter novel tools and gadgets as parts of our dynamic working and private environments; it pertains to the long-standing debate around the (im)penetrability of perception by "higher" cognitive capacities. In this experiment, we showed participants (*n* = 24) pictures of 120 unfamiliar objects either together with valid information about their function---leading to semantically informed perception---or together with invalid information---resulting in naive perception. We measured event-related potentials (ERPs) to investigate at which stages in the visual processing hierarchy these two types of perceiving objects differed from one another. We found that semantically informed as compared to naive perception was associated with larger amplitudes in the N170 component and reduced amplitudes in the N400 component. When the same objects were presented once more (without any information), the N400 effect persisted and we now also observed enlarged amplitudes in the P1 component in response to objects for which semantically informed perception had taken place. We replicated these novel findings in an independent sample (*n* = 24). Consistent with previous work, they suggest that obtaining semantic information about previously unfamiliar objects alters aspects of their lower-level visual perception (P1 component), higher-level visual perception (e.g., holistic perception; N170 component), and semantic processing (N400 component).
+
+<!-- Acutal paper -->
+\newpage
+
+# Introduction
+
+```{r manuscript, child="manuscript.Rmd"}
+```

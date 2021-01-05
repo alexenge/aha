@@ -1,0 +1,31 @@
+\begin{figure}
+
+{\centering \includegraphics[width=1\linewidth]{manuscript_files/figure-latex/exp1-plot-1}
+
+}
+
+\caption{Procedure and Results of Experiment 1}\label{fig:exp1-plot}
+\floatfoot{\scriptsize\emph{Note.} (A) In the pre-insight part, participants were presented with 120 unfamiliar objects and indicated whether they knew what kind of object they were viewing. In the insight part, half of these objects were presented with matching keywords (in purple color for illustration), leading to semantically informed perception, and the other half with non-matching keywords (in petrol color for illustration), leading to naive perception. In the post-insight part, the same objects were presented again without the keywords. (B) ERP waveforms and scalp topographies are shown for objects with semantically informed versus naive perception within the three different parts. Semantically informed perception was associated with significantly more negative amplitudes in the N170 component in in the insight part, significantly less negative amplitudes in the N400 component in the insight and post-insight parts, and significantly more positive amplitudes in the P1 component in the post-insight part. Ampl. = amplitude.\newline*\emph{p} \textless{} .05. **\emph{p} \textless{} .01. ***\emph{p} \textless{} .001.}
+\end{figure}
+\efloatseparator
+ 
+\begin{figure}
+
+{\centering \includegraphics[width=1\linewidth]{manuscript_files/figure-latex/exp2-plot-1}
+
+}
+
+\caption{Results of Experiment 2}\label{fig:exp2-plot}
+\floatfoot{\scriptsize\emph{Note.} ERP waveforms and scalp topographies are shown for objects for which participants experienced semantically informed versus naive perception within the pre-insight, insight, and post-insight parts of the experiment. In a direct replication of Experiment 1, the effect of semantic information on the N400 component in the insight and post-insight part and on the P1 component in post-inisght part remained statistically significant, while the effect on the N170 component in the insight part remained only marginally significant (\emph{p} = .064). Ampl. = amplitude.\newline*\emph{p} \textless{} .05. **\emph{p} \textless{} .01. ***\emph{p} \textless{} .001.}
+\end{figure}
+\efloatseparator
+ 
+\begin{figure}
+
+{\centering \includegraphics[width=1\linewidth]{manuscript_files/figure-latex/joint-plot-1}
+
+}
+
+\caption{Measured and Modelled ERP Amplitudes for Experiments 1 and 2 Combined}\label{fig:joint-plot}
+\floatfoot{\scriptsize\emph{Note.} The violins and boxplots show the distributions of the by-participant grand averaged ERPs during semantically informed perception (in purple color) and naive perception (in petrol color), separately for the pre-insight part (before insight was occurring), the insight part (while insight was occurring), and the post-insight (after insight had occurred). The yellow dots show the corresponding means of these conditions as predicted by linear mixed-effects modelling (see main text and Table \ref{tab:joint-table}), together with their respective 95\% confidence interval. Ampl. = amplitude, CI = confidence interval, LMM = linear mixed-effects model.\newline*\emph{p} \textless{} .05. **\emph{p} \textless{} .01. ***\emph{p} \textless{} .001.}
+\end{figure}

@@ -1,0 +1,121 @@
+item	img	match_noun	match_verb	nonmatch_noun	nonmatch_verb
+1	galvanometer.bmp	elektrische Spannung	 prüfen	Makkaroni	formen
+2	nudelmaschine.bmp	Makkaroni	formen	Kuh 	vom Zaun abhalten
+3	Knochensaege.bmp	Knochen	sägen	Streckenmaß 	Sonnenlicht nutzen
+4	Unkraut-Jaetzange.bmp	Unkraut 	jäten	Uhr	mit Wärme betreiben
+5	mausefalle.bmp	Mausefalle	zuschnappen	Brillenglas 	zuschneiden
+6	Goldmuenzen-Waage.bmp	Goldmünzen 	wiegen	Farbe 	vom Fenster abschleifen
+7	Knie-Schraubstock.bmp	Knie	fixieren	Buchstaben 	tippen
+8	Eierkarton-Presse.bmp	Eierkarton 	pressen	Tabak 	zermahlen
+9	Baum-Klettereisen.bmp	Baum 	erklettern	Rotation	Ladung erzeugen
+10	schreibmaschine.bmp	Buchstaben 	tippen	Pferdehuf 	Halt geben
+11	Elektro-Akkordeon.bmp	Akkordeon	spielen	Seil	schneiden
+12	trimmdichgeraet.bmp	Körper 	trainieren	Buch 	offen halten
+13	paint_scraper.bmp	Farbe 	vom Fenster abschleifen	von Hand 	zentrifugieren
+14	heizpilz.bmp	Außenbereich 	heizen	Rasierklinge 	schärfen
+15	mikroskop.bmp	Pflanzenteile  	vergrößern	Katzenklo 	sich selbst reinigen
+16	krawattenaufhaenger.bmp	Krawatten 	aufhängen	Zeichnungen 	vermessen
+17	grammophonnadel.bmp	Schallplatte 	abtasten	Ball 	katapultieren
+18	glasschneider.bmp	Glas 	schneiden	Eier 	wiegen
+19	Brikettpresse.bmp	Briketts 	pressen	Narkosemittel 	abgeben
+20	orgelpfeife.bmp	Orgelton 	erzeugen	Bandage	rollen
+21	spannungsgeraet.bmp	Spannung 	erzeugen	Fußstütze	reiten
+22	anesthesia_inhaler.bmp	Narkosemittel 	abgeben	Nüsse 	aufbrechen
+23	Bandagen-Roller.bmp	Bandage 	rollen	Schnee 	rodeln
+24	weinfassoeffner.bmp	Weinfass	Loch einschlagen	Tier 	einfangen
+25	cork_inserter.bmp	Flaschenkorken	einführen	Pferd 	im Moor laufen
+26	Huehnereier-Brutautomat.bmp	Automat	Eier ausbrüten	Windgeschwindigkeit	messen
+27	Korngarbengreifer.bmp	Korngarbe 	greifen	Treibhaus 	heizen
+28	Briefwaage.bmp	Brief 	wiegen	Korngarbe 	greifen
+29	4erbohrer.bmp	Löcher 	bohren	Sonnenlicht	Intensität messen
+30	Grossfisch-Angelkurbel.bmp	Angelschnur 	kurbeln	Glaskörper 	musizieren
+31	Kurvenmalgeraet.bmp	Kurven	malen	Nussöl 	pressen
+32	radiofrequenzeinsteller.bmp	Radiofrequenz	einstellen	Erektion	helfen
+33	Zaepfchenpresse.bmp	Zäpfchen	pressen	Unkraut	jäten
+34	dosenoeffner_fuer_faesser.bmp	Fass 	öffnen	Pflanzenteile 	vergrößern
+35	karbidlampe.bmp	Bergbaustollen	beleuchten	Knie	fixieren
+36	antizaungurt.bmp	Kuh 	vom Zaun abhalten	Radiofrequenz	einstellen
+37	Saemaschine.bmp	Saatgut	gleichmäßig aussäen	Fass 	öffnen
+38	Flaschentrockner.bmp	Flaschen 	trocknen	Bleistift 	anspitzen
+39	Thermopneumatische_Uhr.bmp	Uhr	mit Wärme betreiben	Körper 	untersuchen
+40	kimkim.bmp	Tonpott	trommeln	Piano 	stimmen
+41	Sprengstoff-Zuender.bmp	Sprengstoffexplosion	auslösen	Fisch 	wiegen
+42	pferdeueberschuh.bmp	Pferdehuf 	Halt geben	Zäpfchen 	pressen
+43	Bleistiftspitzer.bmp	Bleistift 	anspitzen	Angel	Köder markieren
+44	Nussoelpressmaschine.bmp	Nussöl 	pressen	Zeichen 	einbrennen
+45	rasierklingenschaerfer.bmp	Rasierklinge 	schärfen	Kurven 	malen
+46	plattenheber.bmp	heiße Platten 	anheben	Kleidung	im Eimer waschen
+47	filmrolle.bmp	Film	aufspulen	Mund	offen halten
+48	Flammenwerfer-Aufsatz.bmp	Waffe	entflammen	Uhrzeit 	anzeigen
+49	mikrotom.bmp	Mikroskop-Proben	schneiden	heiße Platten	anheben
+50	Glasresonanz-Cello.bmp	Glaskörper	musizieren	Kork	flach pressen
+51	dampfzerstaeuber.bmp	Dampf	zerstäuben	Buch 	binden
+52	mandelnentferner.bmp	Mandeln 	operieren	Film 	aufspulen
+53	toaster.bmp	Toastbrot 	rösten	Autobatterie 	Spannung testen
+54	steigbuegel.bmp	Fußstütze	reiten	Stromstärke	messen
+55	feuertuergelenk.bmp	Türgelenk	Feuer überstehen	Botschaft 	telegrafieren
+56	einkufiger_schlitten.bmp	Schnee	rodeln	Dampf	zerstäuben
+57	Nussknacker.bmp	Nüsse 	aufbrechen	Ziegelsteine 	formen
+58	elektrisches_radiergummi.bmp	Radiergummi 	mit Strom betreiben	Münzen 	aufbewahren
+59	Treibhausheizgeraet.bmp	Treibhaus	heizen	Messer 	schleifen
+60	Telegraphier-Geraet.bmp	Botschaft 	telegrafieren	Toastbrot	rösten
+61	schwimmer.bmp	Angel	Köder markieren	Baum 	erklettern
+62	Selbstreinigendes_Katzenklo.bmp	Katzenklo	sich selbst reinigen	Tankfüllstand	messen
+63	pleximeter.bmp	Körper	untersuchen	Schuhe 	auf Eis laufen
+64	brillenglasschneidemaschine.bmp	Brillenglas 	zuschneiden	Saatgut	gleichmäßig aussäen
+65	drahtbieger.bmp	Draht 	wickeln	Bergbaustollen 	beleuchten
+66	Buecher-Offenhalter.bmp	Buch	offen halten	Sprengstoffexplosion	auslösen
+67	haecksler.bmp	Feldanbau 	häckseln	Draht 	wickeln
+68	Roemisches_Senklot.bmp	Schnurlot 	absenken	Korken	formen
+69	filar_micrometer.bmp	Sternenbilder 	vermessen	Schnurlot 	absenken
+70	Morse-Geraet.bmp	Nachricht 	morsen	Feldanbau	häckseln
+71	Stampf-Fiedel.bmp	Musikgerät 	stampfen	Goldmünzen	wiegen
+72	schneekette.bmp	Schuhe 	auf Eis laufen	Geschwindigkeit 	ermitteln
+73	mechanisches_tachometer.bmp	Geschwindigkeit	ermitteln	Mausefalle 	zuschnappen
+74	Brenneisen.bmp	Zeichen 	einbrennen	Luftdruck 	messen
+75	Tabakschneider.bmp	Tabak 	zermahlen	Flaschen	trocknen
+76	galvanometer_2.bmp	Stromstärke 	messen	Mandeln 	operieren
+77	tierfalle.bmp	Tier 	einfangen	Maiskolben 	entkörnen
+78	Messerschleifer.bmp	Messer 	schleifen	Schritte 	vergrößern
+79	tibetischer_leierkasten.bmp	Leierkasten 	klingen	Fass 	anheben
+80	Buchbinder.bmp	Buch 	binden	Löcher	bohren
+81	korkenpresse.bmp	Kork	flach pressen	Elektroschock 	spielen
+82	tablettenteiler.bmp	Tabletten	zerteilen	Blumentopf 	sich selbst wässern
+83	hebel_fuer_fassbauer.bmp	Fass 	anheben	Mikroskop-Proben	schneiden
+84	pferdeschuh.bmp	Pferd 	im Moor laufen	Luft 	abpumpen
+85	Rituelles_Hackmesser.bmp	altes Ritual	hacken	Spannung	erzeugen
+86	Historische_Waschmaschine.bmp	Kleidung	im Eimer waschen	Türgelenk 	Feuer überstehen
+87	Maiskolben-Entkoerner.bmp	Maiskolben 	entkörnen	Brief 	wiegen
+88	Ball-Wurfmaschine.bmp	Ball 	katapultieren	Radiergummi	mit Strom betreiben
+89	planimeter.bmp	Zeichnungen	vermessen	Brenner	löten
+90	elektroschockspiel.bmp	Elektroschock 	spielen	Weinfass	Loch einschlagen
+91	zaehlgeraet_fuer_lieferungen.bmp	Lieferungen	abzählen	Außenbereich 	heizen
+92	Erzeugt_statische_Ladung.bmp	Rotation 	Ladung erzeugen	Musikgerät 	stampfen
+93	Kuenstliches Herz.bmp	Herz 	durch Maschine ersetzen	Kerzen 	löschen
+94	seilschneider.bmp	Seil 	schneiden	Akkordeon 	spielen
+95	Fischwaage.bmp	Fisch	wiegen	Herz 	durch Maschine ersetzen
+96	kerzenloescher.bmp	Kerzen	löschen	Körper 	trainieren
+97	Korkenpresse_2.bmp	Korken	formen	Sternenbilder	vermessen
+98	Mechanische_Erektionshilfe.bmp	Erektion 	helfen	Waffe 	werfen
+99	heliotrop.bmp	Streckenmaß 	Sonnenlicht nutzen	Kartoffeln 	stampfen
+100	Luftdruckmessgeraete.bmp	Luftdruck 	messen	Knochen 	sägen
+101	pianostimmgeraet.bmp	Piano	stimmen	Eierkarton	pressen
+102	Handzentrifuge.bmp	von Hand	zentrifugieren	Lieferungen 	abzählen
+103	Kartoffelstampfer.bmp	Kartoffeln 	stampfen	Nachricht 	morsen
+104	ninjasterne.bmp	Waffe	werfen	elektrische Spannung 	prüfen
+105	dieselstandmessgeraet.bmp	Tankfüllstand 	messen	Tonpott	trommeln
+106	uhrwerk.bmp	Uhrzeit 	anzeigen	altes Ritual 	hacken
+107	Windgeschwindigkeitsmesser.bmp	Windgeschwindigkeit	messen	Waffe 	entflammen
+108	schluesselloch-cutter.bmp	Schlüsselloch 	stanzen	Automat	Eier ausbrüten
+109	ziegelformer.bmp	Ziegelsteine	formen	Schallplatte 	abtasten
+110	Becher-Grammophon.bmp	Becher 	Schall auffangen	Schlüsselloch 	stanzen
+111	Vakuumpumpe.bmp	Luft 	abpumpen	Briketts	pressen
+112	mundsperrer.bmp	Mund	offen halten	Orgelton 	erzeugen
+113	Autobatterie-Spannungstester.bmp	Autobatterie 	Spannung testen	Becher 	Schall auffangen
+114	Sonnenlichtsintensitaetsmesser.bmp	Sonnenlicht	Intensität messen	Krawatten 	aufhängen
+115	wagenradschloss.bmp	Kutschrad	anschließen	Angelschnur	kurbeln
+116	Eierwaage.bmp	Eier 	wiegen	Leierkasten	klingen
+117	Selbstwaessernder_Blumentopf.bmp	Blumentopf	sich selbst wässern	Glas 	schneiden
+118	Siebenmeilenstiefel.bmp	Schritte	vergrößern	Tabletten	zerteilen
+119	Muenzspender.bmp	Münzen	aufbewahren	Kutschrad	anschließen
+120	loetlampe.bmp	Brenner 	löten	Flaschenkorken einführen	einführen

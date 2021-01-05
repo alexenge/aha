@@ -1,11 +1,15 @@
 # Set some local variables
+SHELL := bash
 PROJECT := $(notdir $(CURDIR))
 HOST_PATH := $(CURDIR)
 CONTAINER_PATH := /home/rstudio
+MEMORY := 14g
+CPUS := 7
 
 # If DOCKER=TRUE, we want to knit the document via Docker, else locally
 ifeq ($(DOCKER),TRUE)
-	run := docker run --rm --volume $(HOST_PATH)/analysis:$(CONTAINER_PATH)/analysis $(PROJECT)
+	run := docker run --rm --memory=${MEMORY} --cpus=${CPUS} \
+	--volume $(HOST_PATH)/analysis:$(CONTAINER_PATH)/analysis $(PROJECT)
 	workdir := $(CONTAINER_PATH)
 else
 	workdir := $(HOST_PATH)
@@ -25,16 +29,15 @@ $(PROJECT).tar.gz:
 
 # Another target to run an interactive RStudio session in the container
 interactive:
-	docker run --rm -it -e PASSWORD=1234 -p 8787:8787 --volume $(HOST_PATH)/analysis:$(CONTAINER_PATH)/analysis $(PROJECT)
-
+	docker run --rm -it --memory=${MEMORY} --cpus=${CPUS} -e PASSWORD=1234 -p 8787:8787 \
+	--volume $(HOST_PATH)/analysis:$(CONTAINER_PATH)/analysis $(PROJECT)
 
 # Check depencies for rendering the manuscript
 analysis/manuscript.pdf: analysis/manuscript.Rmd
 analysis/manuscript.pdf: analysis/manuscript_files/apa.csl
-analysis/manuscript.pdf: analysis/manuscript_files/potato_masher.png
 analysis/manuscript.pdf: analysis/manuscript_files/r-references.bib
+analysis/manuscript.pdf: analysis/manuscript_files/potato_masher.png
 
 # Run the Docker container to render the manuscript
 analysis/manuscript.pdf:
 	$(run) Rscript -e "rmarkdown::render(input = '$(workdir)/analysis/manuscript.Rmd', knit_root_dir = '$(workdir)')"
-
