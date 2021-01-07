@@ -26,27 +26,24 @@ csl               : "manuscript_files/apa.csl"
 documentclass     : "apa7"
 classoption       : "doc,12pt,twoside"
 mainfont          : "Times New Roman"
-output:
+output            :
   papaja::apa6_pdf:
-    latex_engine:   "xelatex"
+    latex_engine  : "xelatex"
 
 header-includes:
+  - \geometry{a4paper,margin=25mm}
   - \setcounter{tocdepth}{2}
   - \raggedbottom
+  - \usepackage{ragged2e}
   - \linespread{1.5}
-  - \geometry{a4paper,margin=25mm}
   - \fancyhead{}
   - \fancyheadoffset[RO,LE]{0pt}
   - \fancyhead[RO,LE]{\thepage}
-  - \fancyhead[LO,RE]{Semantic Knowledge and Unfamiliar Objects}
-  # - \addtolength\oddsidemargin {0.5cm}
-  # - \addtolength\evensidemargin {-0.5cm}
+  - \fancyhead[RE,LO]{Semantic Knowledge and Unfamiliar Objects}
   - \usepackage{setspace}
   - \AtBeginEnvironment{tabular}{\doublespacing}
-  # - \AtBeginEnvironment{lltable}{\doublespacing}
-  # - \AtBeginEnvironment{tablenotes}{\doublespacing}
-  # - \captionsetup[table]{font={stretch=1.5}}
-  - \captionsetup[figure]{font={stretch=1,scriptsize}}
+  - \captionsetup[table]{font={stretch=1.5}}
+  - \captionsetup[figure]{font={stretch=1.5}}
   - \usepackage[all]{nowidow}
   - \usepackage[bottom]{footmisc}
   - \interfootnotelinepenalty=10000
@@ -84,10 +81,10 @@ im Fach Psychologie\\
 Vorgelegt von:&\textbf{Alexander Enge}\\
 &geb. am 09.11.1996 in Räckelwitz\\
 &Matrikelnummer 581331\\
-Unter Betreuung von:&Prof. Dr. Rasha Abdel Rahman (Humboldt-Universität zu Berlin)\\
+Fachliche Betreuung:&Prof. Dr. Rasha Abdel Rahman (Humboldt-Universität zu Berlin)\\
 &Prof. Dr. Franziska Süß (Fachhochschule des Mittelstands)\\
 &\\
-Berlin, den 21.01.2021&\\
+Berlin, den 29.01.2021&\\
 \end{tabular}
 }
 \end{flushleft}
@@ -100,7 +97,7 @@ Berlin, den 21.01.2021&\\
 
 \begin{center}\textbf{Acknowledgment}\end{center}
 
-Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor danke frederik invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.   
+I would like to thank ... (tbc)
 
 <!-- Empty page -->
 \clearpage\mbox{}\thispagestyle{empty}\clearpage
@@ -130,3 +127,32 @@ Does our perception of an object change as soon as we discover what it is for? T
 
 ```{r manuscript, child="manuscript.Rmd"}
 ```
+
+<!-- References -->
+\raggedright
+\setlength{\cslhangindent}{0.5in}
+<div id="refs"></div>
+\justify
+
+<!-- Appendix -->
+\newpage
+
+```{r appendix, child = "appendix.Rmd"}
+```
+
+<!-- Declaration of authorship -->
+\newpage
+\setlength{\parindent}{0.5in}
+
+# Declaration of Authorship {.unnumbered}
+
+I hereby declare that the present thesis has not been submitted as a part of any other examination procedure and has been independently written. All passages, including those from the internet, which were used directly or in modified form, especially those sources using text, graphs, charts or pictures, are indicated as such. I realize that an infringement of these principles which would amount to either an attempt of deception or deceit will lead to the institution of proceedings against myself.
+
+\vspace*{20mm}
+
+\noindent
+Alexander Enge\newline
+Berlin, 29.01.2021
+
+<!-- Empty page -->
+\clearpage\mbox{}\thispagestyle{empty}\clearpage

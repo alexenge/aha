@@ -1,0 +1,57 @@
+---
+title             : "Appendix"
+shorttitle        : ""
+
+author: 
+  - name        : ""
+    affiliation : ""
+
+affiliation:
+  - id          : ""
+    institution : ""
+
+floatsintext      : yes
+figurelist        : no
+tablelist         : no
+footnotelist      : no
+linenumbers       : no
+mask              : no
+draft             : no
+numbersections    : true
+
+documentclass     : "apa7"
+classoption       : "man"
+output            :
+  papaja::apa6_pdf:
+    latex_engine  : "xelatex"
+
+header-includes:
+  - \AtBeginEnvironment{tabular}{\doublespacing}
+  - \usepackage[export]{adjustbox}
+---
+
+# Appendix {.unnumbered}
+
+\setcounter{table}{0}
+\renewcommand{\thetable}{A\arabic{table}}
+
+```{r appendix, include=TRUE, results="asis"}
+# Load packages
+library(papaja)
+library(tidyverse)
+
+# Print table of materials
+read_tsv("materials/items.txt", col_types = cols()) %>%
+  transmute(
+    img = paste0("\\includegraphics[valign=c, scale=0.19]{../materials/unfamiliar/", item, ".png}"),
+    item = as.character(item),
+    match = paste(match_noun, match_verb),
+    nonmatch = paste(nonmatch_noun, nonmatch_verb)
+  ) %>%
+  apa_table(
+    col.names = c("", "\\#", "Matching keywords", "Non-matching keywords"),
+    escape = FALSE,
+    longtable = TRUE,
+    caption = "Unfamiliar Object Stimuli\\smallskip"
+  )
+```

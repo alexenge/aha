@@ -10,7 +10,8 @@
   },
   "Python": {
     "Version": "3.8.5",
-    "Type": "virtualenv"
+    "Type": "virtualenv",
+    "Name": null
   },
   "Packages": {
     "BH": {
@@ -692,8 +693,8 @@
       "Package": "papaja",
       "Version": "0.1.0.9997",
       "Source": "GitHub",
-      "Remotes": "tidymodels/broom",
       "RemoteType": "github",
+      "Remotes": "tidymodels/broom",
       "RemoteHost": "api.github.com",
       "RemoteRepo": "papaja",
       "RemoteUsername": "crsh",
@@ -857,17 +858,17 @@
     },
     "rmarkdown": {
       "Package": "rmarkdown",
-      "Version": "2.3",
+      "Version": "2.6",
       "Source": "Repository",
       "Repository": "CRAN",
-      "Hash": "202260e1b2c410edc086d5b8f1ed946e"
+      "Hash": "bc4bac38960b446c183957bfd563e763"
     },
     "rmdfiltr": {
       "Package": "rmdfiltr",
-      "Version": "0.1.2",
+      "Version": "0.1.3",
       "Source": "Repository",
       "Repository": "CRAN",
-      "Hash": "c88bc130b2004da8d110b45fa7fe9019"
+      "Hash": "d2e1277195d221e6118d8a77dda2e877"
     },
     "rprojroot": {
       "Package": "rprojroot",
