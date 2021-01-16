@@ -121,7 +121,7 @@ In the two experiments subsequently reported, participants were presented with r
 
 # Experiment 1
 
-```{r exp1-preparation}
+```{r exp1-preparation, eval=rerun_preproc}
 # Define function for reading and formatting the behavioral data
 read_behav <- function(txt_fname) {
   # Read the log file
@@ -166,51 +166,48 @@ read_behav <- function(txt_fname) {
 # Read behavioral data for Experiment 1
 data_exp1 <- list.files("data/exp1/RT", pattern = ".txt", full.names = TRUE) %>% map(read_behav)
 
-# Check average number of stimuli per condition
-(stims_exp1 <- map(data_exp1, function(x) {table(x$condition) / 3}) %>% bind_rows() %>% colMeans())
+# Check average number of stimuli per condition and save to the export folder
+map(data_exp1, function(x) table(x$condition) / 3) %>%
+  bind_rows() %>%
+  colMeans() %>%
+  saveRDS("analysis/export/exp1-stims.RDS")
 ```
 
-```{python exp1-preprocessing}
+```{python exp1-preprocessing, eval=rerun_preproc}
 # Import libraries
 import mne
 import glob
 import os
 
-montage = mne.channels.make_standard_montage("easycap-M1")
-montage._get_ch_pos()
-
 # Set parameters for EEG preprocessing
 preproc_params = dict(
-    n_components=15, method="fastica",         # ICA parameters
+    n_components=15, method='fastica',         # ICA parameters
     l_freq=0.1, h_freq=30,                     # Filter edges
-    event_id={"match": 221, "mismatch": 222},  # EEG triggers
+    event_id={'match': 221, 'mismatch': 222},  # EEG triggers
     tmin=-0.5, tmax=1.498,                     # Length of epochs
     baseline=(-0.2, 0),                        # Baseline correction
     reject=dict(eeg=200)                       # Rejection threshold
 )
 
-# # Debug
+# # For debugging
 # locals().update(preproc_params)
 # vhdr_fname = 'data/exp1/EEG/Vp0001.vhdr'
 
-# Define function for preprocessing EEG data
-def preproc(vhdr_fname, metadata, n_components, method, l_freq, h_freq, event_id, tmin, tmax, baseline, reject):
+# Define function for preprocessing the EEG data
+def preproc(vhdr_fname, metadata, n_components, method, l_freq, h_freq,
+            event_id, tmin, tmax, baseline, reject):
     # Read EEG data in microvolts
     raw = mne.io.read_raw_brainvision(vhdr_fname, scale=1e6, preload=True)
     # Create virtual EOG channels
-    raw = mne.set_bipolar_reference(raw, "Auge_u", "Fp1", ch_name="VEOG", drop_refs=False)
-    raw = mne.set_bipolar_reference(raw, "F9", "F10", ch_name="HEOG", drop_refs=False)
-    raw.set_channel_types(mapping={"VEOG": "eog", "HEOG": "eog"})
+    raw = mne.set_bipolar_reference(raw, 'Auge_u', 'Fp1', ch_name='VEOG', drop_refs=False)
+    raw = mne.set_bipolar_reference(raw, 'F9', 'F10', ch_name='HEOG', drop_refs=False)
+    raw.set_channel_types(mapping={'VEOG': 'eog', 'HEOG': 'eog'})
     # Add EasyCap electrode layout, removing any excessive channels
-    montage = mne.channels.make_standard_montage("easycap-M1")
-    raw.drop_channels(list(set(raw.ch_names) - set(montage.ch_names) - set(["VEOG", "HEOG"])))
+    montage = mne.channels.make_standard_montage('easycap-M1')
+    raw.drop_channels(list(set(raw.ch_names) - set(montage.ch_names) - set(['VEOG', 'HEOG'])))
     raw.set_montage(montage=montage)
-    # # Interpolate bad channels
-    # if vhdr_fname=='data/exp3/EEG/VP05.vhdr':
-    #   raw.info['bads'].extend(['AF8', 'TP9'])
-    #   raw = raw.interpolate_bads()
     # Re-reference to common average
-    raw, _ = mne.set_eeg_reference(raw, "average")
+    raw, _ = mne.set_eeg_reference(raw, 'average')
     # Run ICA on a copy of the data
     filt_raw = raw.copy()
     filt_raw.load_data().filter(l_freq=1, h_freq=None)
@@ -224,7 +221,8 @@ def preproc(vhdr_fname, metadata, n_components, method, l_freq, h_freq, event_id
     raw = raw.filter(l_freq=l_freq, h_freq=h_freq)
     # Epoching including baseline correction
     events, _ = mne.events_from_annotations(raw, verbose=False)
-    epochs = mne.Epochs(raw, events=events, event_id=event_id, tmin=tmin, tmax=tmax, baseline=baseline, preload=True)
+    epochs = mne.Epochs(raw, events=events, event_id=event_id, tmin=tmin,
+                        tmax=tmax, baseline=baseline, preload=True)
     # Add behavioral data
     epochs.metadata = metadata
     # Reject bad epochs
@@ -233,37 +231,49 @@ def preproc(vhdr_fname, metadata, n_components, method, l_freq, h_freq, event_id
 
 
 # List raw EEG filenames
-fnames_exp1 = sorted(glob.glob("data/exp1/EEG/*.vhdr"))
+fnames_exp1 = sorted(glob.glob('data/exp1/EEG/*.vhdr'))
 
 # Import behavioral data from R
 metadata_exp1 = r.data_exp1
 
+# Apply the function to preprocess the EEG data for Experiment 1
+epochs_exp1 = [preproc(vhdr_fname=fname, metadata=meta, **preproc_params)
+               for fname, meta in zip(fnames_exp1, metadata_exp1)]
+
+# Combine epochs into a single data set
+epochs_exp1 = mne.concatenate_epochs(epochs_exp1)
+
+# Backup epochs to the export folder
+epochs_exp1.save('analysis/export/exp1-epo.fif')
+
+# Backup the channel names separately
+
+
 # Check if preprocessing was done already (delete the file to re-run)
-if os.path.exists("analysis/export/exp1-epo.fif"):
+if os.path.exists('analysis/export/exp1-epo.fif'):
     # Read preprocessed data from file
-    epochs_exp1 = mne.read_epochs("analysis/export/exp1-epo.fif", preload=True)
+    epochs_exp1 = mne.read_epochs('analysis/export/exp1-epo.fif', preload=True)
 else:
     # Preprocess EEG data for Experiment 1
-    epochs_exp1 = [
-        preproc(vhdr_fname=fname, metadata=meta, **preproc_params) for fname, meta in zip(fnames_exp1, metadata_exp1)
-    ]
+    epochs_exp1 = [preproc(vhdr_fname=fname, metadata=meta, **preproc_params)
+                   for fname, meta in zip(fnames_exp1, metadata_exp1)]
     # Combine epochs into a single data set
     epochs_exp1 = mne.concatenate_epochs(epochs_exp1)
     # Backup epochs to the export folder
-    epochs_exp1.save("analysis/export/exp1-epo.fif")
+    epochs_exp1.save('analysis/export/exp1-epo.fif')
 
 
 # Define function to compute grand averages per condition
 def compute_evokeds(epochs):
     evokeds = dict(); evokeds_dat = dict()
     # Each part becomes a dictionary of conditions
-    for pt in ["I", "II", "III"]:
+    for pt in ['I', 'II', 'III']:
         evokeds[pt] = dict(); evokeds_dat[pt] = dict()
         # Each condition becomes a list of participants
-        for cn in ["Informed", "Naive"]:
+        for cn in ['Informed', 'Naive']:
             evokeds[pt][cn] = list(); evokeds_dat[pt][cn] = list()
             # For every participant we average trials separately for all parts and conditions
-            for vp in epochs.metadata["participant"].unique():
+            for vp in epochs.metadata['participant'].unique():
                 query = 'participant == "' + vp + '" and part == "' + pt + '" and condition == "' + cn + '"'
                 evokeds[pt][cn].append(epochs[query].average())
             # Compute grand averages across participants for this part and condition
@@ -275,54 +285,31 @@ def compute_evokeds(epochs):
 
 # Compute grand averages for Experiment 1
 evokeds_exp1, evokeds_dat_exp1 = compute_evokeds(epochs=epochs_exp1)
+
+import pickle
+with open('analysis/export/exp1-avgs.pickle', 'wb') as handle:
+    pickle.dump(evokeds_dat_exp1, handle, protocol=pickle.HIGHEST_PROTOCOL)
 ```
 
-```{python}
-# Define function to compute grand averages per condition
-def compute_evokeds(epochs):
-    evokeds = dict(); evokeds_dat = dict()
-    # Each part becomes a dictionary of conditions
-    for pt in ["I", "II", "III"]:
-        evokeds[pt] = dict(); evokeds_dat[pt] = dict()
-        # Each part becomes a dictionary of conditions
-        for pos in ["Inverted", "Upright"]:
-            evokeds[pt][pos] = dict(); evokeds_dat[pt][pos] = dict()
-            # Each condition becomes a list of participants
-            for cn in ["Informed", "Naive"]:
-                evokeds[pt][pos][cn] = list(); evokeds_dat[pt][pos][cn] = list()
-                # For every participant we average trials separately for all parts and conditions
-                for vp in epochs.metadata["participant"].unique():
-                    query = 'participant == "' + vp + '" and part == "' + pt + '" and position == "' + pos + '" and condition == "' + cn + '"'
-                    evokeds[pt][pos][cn].append(epochs[query].average())
-                # Compute grand averages across participants for this part and condition
-                evokeds[pt][pos][cn] = mne.grand_average(evokeds[pt][pos][cn])
-                # Export only the actual data for R
-                evokeds_dat[pt][pos][cn] = evokeds[pt][pos][cn].data
-    return (evokeds, evokeds_dat)
+```{r backup}
+
+test <- py$preproc(
+  vhdr_fname = "data/exp1/EEG/Vp0001.vhdr",
+  metadata = data_exp1[[1]],
+  n_components = as.integer(15),
+  method = "fastica",
+  l_freq = 0.1,
+  h_freq = 30,
+  event_id = list(match = as.integer(221), mismatch = as.integer(222)),
+  tmin = -0.5,
+  tmax = 1.498,
+  baseline = tuple(-0.2, 0),
+  reject = list(eeg = 200))
 
 
-# Compute grand averages for Experiment 1
-evokeds_exp3, evokeds_dat_exp3 = compute_evokeds_3(epochs=epochs_exp3)
+test$ch_names
 ```
 
-```{r}
-evokeds_exp3 <- py$evokeds_exp3_anova
-
-compute_erps <- function(evokeds, els, name, start, stop, roi) {
-  map(evokeds, function(part){
-    map(part, function(position) {
-      map(position, function(condition) {
-        map_dbl(condition, function(participant) {
-          participant[which(els %in% roi), which(times %in% start:stop)] %>% mean()
-        })
-      }) %>% 
-        bind_rows(.id = "condition") %>%
-        mutate(participant = factor(1:24)) %>%
-        pivot_longer(cols = c("Informed", "Naive"), names_to = "condition", values_to = "amplitude")
-    }) %>% bind_rows(.id = "position")
-  }) %>% bind_rows(.id = "part")
-}
-```
 
 ```{python exp1-tfr, eval=FALSE}
 # TFR
