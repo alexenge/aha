@@ -1,6 +1,6 @@
 data/
 docs/
-analysis/export/*.fif
+analysis/export/*
 .Rproj.user
 .Rhistory
 .RData

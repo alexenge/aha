@@ -68,6 +68,15 @@ header-includes:
 ---
 
 ```{r setup, include=FALSE}
+# Do you want to re-run the EEG preprocessing? Note that this can only be done with the raw data,
+# which are available from the corresponding author (rasha.abdel.rahman@hu-berlin.de) upon request.
+rerun_preproc <- FALSE
+
+# Do you want to re-run the linear mixed-effect models? This can be done even if only the
+# preprocessed single-trial data are available (from GitHub and/or the OSF). Note, however, that
+# fitting all models may take 24 hours or more.
+rerun_models <- FALSE
+
 # Load packages
 library(papaja)
 library(reticulate)
@@ -84,13 +93,17 @@ r_refs("analysis/manuscript_files/r-references.bib")
 # Create an export folder for results
 dir.create("analysis/export", showWarnings = FALSE)
 
-# Do you want to re-run the EEG preprocessing? Note that this can only be used with the raw EEG data, which are
-# available from the corresponding author (rasha.abdel.rahman@hu-berlin.de) upon request.
-rerun_preproc <- FALSE
-
-# Do you want to re-run the linear mixed-effect models? This can be done even if only the preprocessed single-trial
-# data are available (from GitHub and/or the OSF). Note, however, that the model fitting may take more than 24 hours.
-rerun_models <- FALSE
+# Define ERP components of interest
+comps <- tibble(
+  name = c("P1", "N170", "N400"),
+  start = c(100, 150, 400),
+  stop = c(150, 200, 700),
+  roi = list(
+    c("PO3", "PO4", "POz", "O1", "O2", "Oz"),
+    c("P7", "P8", "PO7", "PO8", "PO9", "PO10"),
+    c("C1", "C2", "Cz", "CP1", "CP2", "CPz")
+  )
+)
 ```
 
 How does our perception of an object change as soon as we discover what it is for? In this study, we presented participants with unfamiliar objects which were preceded either by matching information about their function, leading to semantically informed perception, or by non-matching information, leading to naive perception. Semantically informed perception of objects was expected to differ from naive perception at certain stages in the processing hierarchy and we aimed to identify these stages by capitalizing on the high temporal resolution of event-related brain potentials (ERPs).
@@ -121,77 +134,9 @@ In the two experiments subsequently reported, participants were presented with r
 
 # Experiment 1
 
-```{r exp1-preparation, eval=rerun_preproc}
-# Define function for reading and formatting the behavioral data
-read_behav <- function(txt_fname) {
-  # Read the log file
-  dat <- suppressWarnings(read_tsv(txt_fname, col_types = cols()))
-  # Rename columns for participant and item IDs
-  dat %<>% rename(participant = VPNummer, item = StimID) %>%
-    # Add a column for the part of the experiment
-    mutate(part = case_when(
-      Wdh %in% c(211, 231) ~ "I",
-      Wdh %in% c(212, 232) ~ "II",
-      Wdh %in% c(213, 233) ~ "III",
-      Wdh == 234 ~ "IV"
-    ) %>% as_factor()) %>%
-    # Remove filler stimuli (i.e.,well-known objects)
-    filter(bek_unbek != "bekannt")
-  # Assign stimuli to conditions based on keywords and button presses
-  excl_known <- dat %>% filter(part == "I" & Tastencode %in% c(201, 251)) %>% pull(item)
-  excl_informed <- dat %>% filter(part == "II" & grepl("richtig", Bed) & !Tastencode %in% c(201, 202, 251, 252)) %>% pull(item)
-  excl_naive <- dat %>% filter(part == "II" & grepl("falsch", Bed) & !Tastencode %in% c(203, 204, 253, 254)) %>% pull(item)
-  informed <- dat %>% filter(part == "II" & grepl("richtig", Bed) & Tastencode %in% c(201, 202, 251, 252)) %>% pull(item)
-  naive <- dat %>% filter(part == "II" & grepl("falsch", Bed) & Tastencode %in% c(203, 204, 253, 254)) %>% pull(item)
-  # Create a new condition for the experimental condition
-  dat %<>% mutate(condition = case_when(
-    item %in% excl_known ~ "Excl_known",
-    item %in% excl_informed ~ "Excl_informed",
-    item %in% excl_naive ~ "Excl_naive",
-    item %in% informed ~ "Informed",
-    item %in% naive ~ "Naive"
-  ) %>% factor(levels = c("Informed", "Naive", "Excl_informed", "Excl_naive", "Excl_known")))
-  # In Experiment 3, we need an additional column for position (upright vs. inverted)
-  if ("richtig_inv" %in% dat$Bed) {
-    dat %<>% mutate(position = as_factor(ifelse(grepl("inv", Bed), "Inverted", "Upright"))) %>%
-      # Return only relevant columns
-      select(part, position, condition, participant, item, RT)
-  } else {
-    # Return only relevant columns
-    dat %<>% select(part, condition, participant, item, RT)
-  }
-  return(dat)
-}
-
-# Read behavioral data for Experiment 1
-data_exp1 <- list.files("data/exp1/RT", pattern = ".txt", full.names = TRUE) %>% map(read_behav)
-
-# Check average number of stimuli per condition and save to the export folder
-map(data_exp1, function(x) table(x$condition) / 3) %>%
-  bind_rows() %>%
-  colMeans() %>%
-  saveRDS("analysis/export/exp1-stims.RDS")
-```
-
-```{python exp1-preprocessing, eval=rerun_preproc}
+```{python def_functions, eval=rerun_preproc}
 # Import libraries
 import mne
-import glob
-import os
-
-# Set parameters for EEG preprocessing
-preproc_params = dict(
-    n_components=15, method='fastica',         # ICA parameters
-    l_freq=0.1, h_freq=30,                     # Filter edges
-    event_id={'match': 221, 'mismatch': 222},  # EEG triggers
-    tmin=-0.5, tmax=1.498,                     # Length of epochs
-    baseline=(-0.2, 0),                        # Baseline correction
-    reject=dict(eeg=200)                       # Rejection threshold
-)
-
-# # For debugging
-# locals().update(preproc_params)
-# vhdr_fname = 'data/exp1/EEG/Vp0001.vhdr'
 
 # Define function for preprocessing the EEG data
 def preproc(vhdr_fname, metadata, n_components, method, l_freq, h_freq,
@@ -230,86 +175,187 @@ def preproc(vhdr_fname, metadata, n_components, method, l_freq, h_freq,
     return epochs
 
 
-# List raw EEG filenames
-fnames_exp1 = sorted(glob.glob('data/exp1/EEG/*.vhdr'))
+# # Define function to compute grand averages per condition
+# def compute_evokeds(epochs):
+#     evokeds = dict(); evokeds_dat = dict()
+#     # Each part becomes a dictionary of conditions
+#     for pt in ['I', 'II', 'III']:
+#         evokeds[pt] = dict(); evokeds_dat[pt] = dict()
+#         # Each condition becomes a list of participants
+#         for cn in ['Informed', 'Naive']:
+#             evokeds[pt][cn] = list(); evokeds_dat[pt][cn] = list()
+#             # For every participant we average trials separately for all parts and conditions
+#             for vp in epochs.metadata['participant'].unique():
+#                 query = 'participant == "' + vp + '" and part == "' + pt + '" and condition == "' + cn + '"'
+#                 evokeds[pt][cn].append(epochs[query].average())
+#             # Compute grand averages across participants for this part and condition
+#             evokeds[pt][cn] = mne.grand_average(evokeds[pt][cn])
+#             # Export only the actual data for R
+#             evokeds_dat[pt][cn] = evokeds[pt][cn].data
+#     return (evokeds, evokeds_dat)
 
-# Import behavioral data from R
-metadata_exp1 = r.data_exp1
 
-# Apply the function to preprocess the EEG data for Experiment 1
-epochs_exp1 = [preproc(vhdr_fname=fname, metadata=meta, **preproc_params)
-               for fname, meta in zip(fnames_exp1, metadata_exp1)]
+# Define function to compute averaged waveforms by part and condition
+def compute_evokeds(epochs, grand=True, data_only=True):
+  # Define lists of participants, parts, and conditions
+  ps = epochs.metadata['participant'].unique()
+  pts = ['I', 'II', 'III']
+  cns = ['Informed', 'Naive']
+  # Define function to compute a single by-participant waveform
+  def compute_evoked(epochs, pt, cn, p):
+    query = 'participant == "' + p + '" and part == "' + pt + '" and condition == "' + cn + '"'
+    return(epochs[query].average())
+  # Create a dict with by-participant waveforms nested in conditions nested in parts
+  avgs = {pt:{cn:[compute_evoked(epochs, pt, cn, p) for p in ps] for cn in cns} for pt in pts}
+  # If needed, compute grand-averaged waveforms across participants
+  if grand:
+    avgs = {pt:{cn:mne.grand_average(avgs[pt][cn]) for cn in cns} for pt in pts}
+  # If needed, extract only the data from the evoked MNE objects
+  if data_only:
+    if grand:
+      avgs = {pt:{cn:avgs[pt][cn].data for cn in cns} for pt in pts}
+    else:
+      avgs = {pt:{cn:[avgs[pt][cn][p].data for p in range(0, len(ps))] for cn in cns} for pt in pts}
+  return(avgs)
 
-# Combine epochs into a single data set
-epochs_exp1 = mne.concatenate_epochs(epochs_exp1)
+
+```
+
+```{r exp1-preproc, eval=rerun_preproc}
+# Define function for reading and formatting the behavioral data
+read_behav <- function(txt_fname) {
+  # Read the log file
+  dat <- suppressWarnings(read_tsv(txt_fname, col_types = cols()))
+  # Rename columns for participant and item IDs
+  dat %<>% rename(participant = VPNummer, item = StimID) %>%
+    # Add a column for the part of the experiment
+    mutate(part = case_when(
+      Wdh %in% c(211, 231) ~ "I",
+      Wdh %in% c(212, 232) ~ "II",
+      Wdh %in% c(213, 233) ~ "III",
+      Wdh == 234 ~ "IV"
+    ) %>% as_factor()) %>%
+    # Remove filler stimuli (i.e.,well-known objects)
+    filter(bek_unbek != "bekannt")
+  # Assign stimuli to conditions based on keywords and button presses
+  excl_known <- dat %>%
+    filter(part == "I" & Tastencode %in% c(201, 251)) %>%
+    pull(item)
+  excl_informed <- dat %>%
+    filter(part == "II" & grepl("richtig", Bed) & !Tastencode %in% c(201, 202, 251, 252)) %>%
+    pull(item)
+  excl_naive <- dat %>%
+    filter(part == "II" & grepl("falsch", Bed) & !Tastencode %in% c(203, 204, 253, 254)) %>%
+    pull(item)
+  informed <- dat %>%
+    filter(part == "II" & grepl("richtig", Bed) & Tastencode %in% c(201, 202, 251, 252)) %>%
+    pull(item)
+  naive <- dat %>%
+    filter(part == "II" & grepl("falsch", Bed) & Tastencode %in% c(203, 204, 253, 254)) %>%
+    pull(item)
+  # Create a new condition for the experimental condition
+  dat %<>% mutate(condition = case_when(
+    item %in% excl_known ~ "Excl_known",
+    item %in% excl_informed ~ "Excl_informed",
+    item %in% excl_naive ~ "Excl_naive",
+    item %in% informed ~ "Informed",
+    item %in% naive ~ "Naive"
+  ) %>% factor(levels = c("Informed", "Naive", "Excl_informed", "Excl_naive", "Excl_known")))
+  # In Experiment 3, we need an additional column for position (upright vs. inverted)
+  if ("richtig_inv" %in% dat$Bed) {
+    dat %<>% mutate(position = as_factor(ifelse(grepl("inv", Bed), "Inverted", "Upright"))) %>%
+      # Return only relevant columns
+      select(part, position, condition, participant, item, RT)
+  } else {
+    # Return only relevant columns
+    dat %<>% select(part, condition, participant, item, RT)
+  }
+  return(dat)
+}
+
+# Read behavioral data for Experiment 1
+list.files("data/exp1/RT", pattern = ".txt", full.names = TRUE) %>% map(read_behav) -> behav_exp1
+
+# Backup number of stimuli assigned to each condition for all participants
+map(behav_exp1, function(x) table(x$condition) / 3) %>%
+  bind_rows() %>%
+  mutate(Participant = unique(data_exp1$participant), .before = 1) %>%
+  #summarise(across(.fns = mean)) %>%
+  #pivot_longer(cols = everything(), names_to = "condition", values_to = "objects") %T>%
+  write_tsv("analysis/export/exp1-objects.tsv")
+
+# Define global parameters for EEG preprocessing
+preproc_params <- list(
+  # Number of ICA components
+  n_components = as.integer(15),
+  # ICA methods
+  method = "fastica",
+  # Lower edge of pass-band filter
+  l_freq = 0.1,
+  # Upper edge of pass-band filter
+  h_freq = 30,
+  # Event trigger codes
+  event_id = dict(match = 221, mismatch = 222),
+  # Beginning of epochs in s
+  tmin = -0.5,
+  # End of epochs in s
+  tmax = 1.498,
+  # Baseline interval in s
+  baseline = tuple(-0.2, 0),
+  # Artifact rejection threshold in microvolts
+  reject = dict(eeg = 200)
+)
+
+# Actually apply the preprocessing function for Epxeriment 1 in Python
+map2(
+  .x = list.files("data/exp1/EEG", pattern = ".vhdr", full.names = TRUE),
+  .y = behav_exp1,
+  ~ do.call(py$preproc, c(list(vhdr_fname = .x, metadata = .y), preproc_params))
+) %>%
+  # Concatenate epochs of all participants
+  py$mne$epochs$concatenate_epochs() -> epochs_exp1
 
 # Backup epochs to the export folder
-epochs_exp1.save('analysis/export/exp1-epo.fif')
+epochs_exp1$save("analysis/export/exp1-epo.fif")
 
-# Backup the channel names separately
+# Get standard EasyCap electrode positions and project to 2D space
+py$mne$channels$`_standard_montage_utils`$MONTAGE_PATH %>%
+  list.files(pattern = "easycap-M1.txt", full.names = TRUE) %>%
+  read_tsv(col_types = cols()) %>%
+  rename(electrode = Site) %>%
+  inner_join(tibble(electrode = epochs_exp1$ch_names), ., by = "electrode") %>%
+  mutate(
+    x = eegUtils:::deg2rad(Theta) * cos(eegUtils:::deg2rad(Phi)),
+    y = eegUtils:::deg2rad(Theta) * sin(eegUtils:::deg2rad(Phi)),
+  ) %>%
+  write_tsv("analysis/export/montage.tsv")
 
+# Create a vector with sample time points (in ms)
+sfreq <- epochs_exp1$info["sfreq"]
+seq(preproc_params$tmin * 1000, preproc_params$tmax * 1000, 1 / sfreq * 1000) %T>%
+  cat(file = "analysis/export/sample_times.tsv", sep = "\n") -> times
 
-# Check if preprocessing was done already (delete the file to re-run)
-if os.path.exists('analysis/export/exp1-epo.fif'):
-    # Read preprocessed data from file
-    epochs_exp1 = mne.read_epochs('analysis/export/exp1-epo.fif', preload=True)
-else:
-    # Preprocess EEG data for Experiment 1
-    epochs_exp1 = [preproc(vhdr_fname=fname, metadata=meta, **preproc_params)
-                   for fname, meta in zip(fnames_exp1, metadata_exp1)]
-    # Combine epochs into a single data set
-    epochs_exp1 = mne.concatenate_epochs(epochs_exp1)
-    # Backup epochs to the export folder
-    epochs_exp1.save('analysis/export/exp1-epo.fif')
+# Define function to compute single-trial mean ERP amplitudes
+compute_erps <- function(epochs, name, start, stop, roi) {
+  dat <- epochs$get_data()
+  els <- epochs$ch_names
+  erps <- dat[, which(els %in% roi), which(times %in% start:stop)]
+  amps <- apply(erps, 1, mean, na.rm = TRUE)
+  return(amps)
+}
 
+# Actually apply the function to compute mean ERP amplitudes for Experiment 1
+pmap_dfc(comps, compute_erps, epochs = epochs_exp1) %>%
+  set_names(comps$name) %>%
+  # Bind to the behavioral data
+  bind_cols(as_tibble(epochs_exp1$metadata), .) %T>%
+  # Backup to the export folder
+  write_tsv("analysis/export/exp1-erps.tsv") -> data_exp1
 
-# Define function to compute grand averages per condition
-def compute_evokeds(epochs):
-    evokeds = dict(); evokeds_dat = dict()
-    # Each part becomes a dictionary of conditions
-    for pt in ['I', 'II', 'III']:
-        evokeds[pt] = dict(); evokeds_dat[pt] = dict()
-        # Each condition becomes a list of participants
-        for cn in ['Informed', 'Naive']:
-            evokeds[pt][cn] = list(); evokeds_dat[pt][cn] = list()
-            # For every participant we average trials separately for all parts and conditions
-            for vp in epochs.metadata['participant'].unique():
-                query = 'participant == "' + vp + '" and part == "' + pt + '" and condition == "' + cn + '"'
-                evokeds[pt][cn].append(epochs[query].average())
-            # Compute grand averages across participants for this part and condition
-            evokeds[pt][cn] = mne.grand_average(evokeds[pt][cn])
-            # Export only the actual data for R
-            evokeds_dat[pt][cn] = evokeds[pt][cn].data
-    return (evokeds, evokeds_dat)
-
-
-# Compute grand averages for Experiment 1
-evokeds_exp1, evokeds_dat_exp1 = compute_evokeds(epochs=epochs_exp1)
-
-import pickle
-with open('analysis/export/exp1-avgs.pickle', 'wb') as handle:
-    pickle.dump(evokeds_dat_exp1, handle, protocol=pickle.HIGHEST_PROTOCOL)
+# Compute grand averages per part and condition
+py$compute_evokeds(epochs = epochs_exp1, grand = TRUE, data_only = TRUE) %>%
+  saveRDS("analysis/export/exp1-gavgs.RDS")
 ```
-
-```{r backup}
-
-test <- py$preproc(
-  vhdr_fname = "data/exp1/EEG/Vp0001.vhdr",
-  metadata = data_exp1[[1]],
-  n_components = as.integer(15),
-  method = "fastica",
-  l_freq = 0.1,
-  h_freq = 30,
-  event_id = list(match = as.integer(221), mismatch = as.integer(222)),
-  tmin = -0.5,
-  tmax = 1.498,
-  baseline = tuple(-0.2, 0),
-  reject = list(eeg = 200))
-
-
-test$ch_names
-```
-
 
 ```{python exp1-tfr, eval=FALSE}
 # TFR
@@ -351,87 +397,42 @@ power_diff.plot_joint(baseline=(-0.5, 0), mode = "percent", vmin=-100, vmax=100,
 #power_diff.plot_topomap(fmin=15, fmax=30, baseline=(-0.5, 0), mode="mean", vmin=-200, vmax=200, title="beta"); plt.show()
 ```
 
-```{r exp1-analysis}
-# Re-import behavioral data and re-factorize some columns
-data_exp1 <- py$epochs_exp1$metadata %>% mutate(
-  part = factor(part, levels = c("I", "II", "III")),
-  condition = factor(condition, levels = c("Informed", "Naive", "Excl_informed", "Excl_naive", "Excl_known")),
-  participant = factor(participant),
-  item = factor(item)
-)
+```{r exp1-models, eval=rerun_models}
+# Load preprocessed single-trial data
+read_tsv("analysis/export/exp1-erps.tsv", col_types = cols()) %>%
+  # Factorize columns
+  mutate(
+    part = factor(part, levels = c("I", "II", "III")),
+    condition = factor(condition, levels = c(
+      "Informed", "Naive", "Excl_informed", "Excl_naive", "Excl_known")
+    ),
+    participant = factor(participant),
+    item = factor(item)
+  ) %>%
+  # Remove any trials excluded from conditions
+  filter(condition %in% c("Informed", "Naive")) %>%
+  droplevels() -> data_exp1
 
-# Check number of rejected epochs
-rejected_exp1 <- data_exp1 %>% group_by(participant) %>% tally() %>% mutate(n = 360 - n) %>% pull(n)
-mean(rejected_exp1)    # Mean
-median(rejected_exp1)  # Median
-range(rejected_exp1)   # Range
+# Define contrast coding for condition (informed-naive) and part (2-1, 3-1)
+contrasts_condition <- t(cbind(
+  c("Informed" = 1, "Naive" = -1)
+))
+contrasts_part <- t(cbind(
+  c("I" = -1, "II" = 1, "III" = 0),
+  c("I" = 0, "II" = -1, "III" = 1)
+))
 
-# Create vectors with sample time points (in ms) and electrodes
-times <- seq(py$preproc_params$tmin * 1000, py$preproc_params$tmax * 1000, 1 / py$epochs_exp1$info["sfreq"] * 1000)
-els <- py$epochs_exp1$ch_names
-
-# Define ERP components of interest
-comps <- tibble(
-  name = c("P1", "N170", "N400"),
-  start = c(100, 150, 400),
-  stop = c(150, 200, 700),
-  roi = list(
-    c("PO3", "PO4", "POz", "O1", "O2", "Oz"),
-    c("P7", "P8", "PO7", "PO8", "PO9", "PO10"),
-    c("C1", "C2", "Cz", "CP1", "CP2", "CPz")
-  )
-)
-
-# Define function to compute single-trial mean ERP amplitudes
-compute_erps <- function(epochs, els, name, start, stop, roi) {
-  erps <- epochs[, which(els %in% roi), which(times %in% start:stop)]
-  amps <- apply(erps, 1, mean, na.rm = TRUE)
-  return(amps)
-}
-
-# # Define function to compute single-trial ERP latencies
-# compute_lats <- function(epochs, els, name, start, stop, roi) {
-#   erps <- epochs[, which(els %in% roi), which(times %in% start:stop)]
-#   samples <- apply(erps, MARGIN = c(1, 3), mean) %>% abs()
-#   areas <- apply(samples, MARGIN = 1, sum)
-#   cumss <- apply(samples, MARGIN = 1, cumsum) %>% asplit(MARGIN = 2)
-#   lats <- map2_int(cumss, areas, function(cums, area){which(cums < area / 2) %>% max()})
-#   lats <- start + lats * 2
-#   return(lats)
-# }
-
-# Check if single-trial ERPs were computed already (delete the file to re-run)
-if (file.exists("analysis/export/exp1-erps.RDS")) {
-  # Read data from file
-  data_exp1 <- readRDS("analysis/export/exp1-erps.RDS")
-} else {
-  # Compute single-trial ERPs for Experiment 1
-  data_exp1 <- pmap_dfc(comps, compute_erps, epochs = py$epochs_exp1$get_data(), els = els) %>%
-    set_names(comps$name) %>%
-    cbind(data_exp1, .) %T>%
-    saveRDS("analysis/export/exp1-erps.RDS")
-}
-
-# Remove the epochs to free up memory
-py_run_string("del epochs_exp1")
-import("gc")$collect()
-
-# Remove any trials excluded from conditions
-data_exp1 %<>% filter(condition %in% c("Informed", "Naive")) %>% droplevels()
-
-# Contrast coding for condition (informed-naive) and part (2-1, 3-1)
-contrasts_condition <- t(cbind(c("Informed" = 1, "Naive" = -1)))
-contrasts_part <- t(cbind(c("I" = -1, "II" = 1, "III" = 0), c("I" = 0, "II" = -1, "III" = 1)))
+# Apply these contrasts to the factors in the data
 contrasts(data_exp1$condition) <- MASS::ginv(contrasts_condition)
 contrasts(data_exp1$part) <- MASS::ginv(contrasts_part)
 
-# Set formula and parameters for linear mixed-effects regression models (LMMs)
-form_exp12 <- buildmer::tabulate.formula(
+# Define formula and parameters for linear mixed-effects regression models (LMMs)
+formula_exp12 <- buildmer::tabulate.formula(
   ~ part * condition + (part * condition | participant) + (part * condition | item)
 ) %>% mutate(block = replace(block, is.na(grouping), "fixed"))
-ctrl_params <- lme4::lmerControl(optimizer = "bobyqa", optCtrl = list(maxfun = 2e5))
+control <- lme4::lmerControl(optimizer = "bobyqa", optCtrl = list(maxfun = 2e5))
 
-# Set formula for follow-up contrasts
+# Define formula for follow-up contrasts
 specs_exp12 <- pairwise ~ condition | part
 
 # Define function to compute LMMs and follow-up contrasts for each component
@@ -439,6 +440,7 @@ compute_models <- function(dep, formula, data, control, specs) {
   require(lmerTest)
   require(buildmer)
   require(emmeans)
+  emm_options(lmer.df = "Satterthwaite", lmerTest.limit = Inf)
   build <- buildmer(
     control = control,
     REML = FALSE,
@@ -452,29 +454,29 @@ compute_models <- function(dep, formula, data, control, specs) {
       dep = dep
     )
   )
-  emm_options(lmer.df = "Satterthwaite", lmerTest.limit = Inf)
-  means <- emmeans(build@model, specs = specs, infer = TRUE, data = data)$emmeans %>% as.data.frame()
-  conts <- emmeans(build@model, specs = specs, infer = TRUE, data = data)$contrasts %>% as.data.frame()
-  mod <- list(model = build@model, anova = build@anova, summary = build@summary, means = means, contrasts = conts)
-  return(mod)
+  means <- emmeans(build@model, specs = specs, infer = TRUE, data = data)$emmeans
+  conts <- emmeans(build@model, specs = specs, infer = TRUE, data = data)$contrasts
+  modlist <- list(
+    model = build@model,
+    anova = build@anova,
+    summary = build@summary,
+    means = means %>% as.data.frame(),
+    contrasts = conts %>% as.data.frame()
+  )
+  return(modlist)
 }
 
-# Check if models were computed already (delete the file to re-run)
-if (file.exists("analysis/export/exp1-stats.RDS")) {
-  # Read models from file
-  models_exp1 <- readRDS("analysis/export/exp1-stats.RDS")
-} else {
-  # Compute LMMs for Experiment 1
-  models_exp1 <- map(
-    comps$name,
-    compute_models,
-    formula = form_exp12,
-    data = data_exp1,
-    control = ctrl_params,
-    specs = specs_exp12
-  ) %>% set_names(comps$name) %T>%
-    saveRDS("analysis/export/exp1-stats.RDS")
-}
+# Actually apply the function to compute the models for Experiment 1
+map(
+  comps$name,
+  compute_models,
+  formula = formula_exp12,
+  data = data_exp1,
+  control = control,
+  specs = specs_exp12
+) %>%
+  set_names(comps$name) %T>%
+  saveRDS("analysis/export/exp1-mods.RDS") -> models_exp1
 ```
 
 ## Method
@@ -506,25 +508,43 @@ The papaja package does not yet deal with the placement of figure captions above
 -->
 
 ```{r exp1-plot, include=TRUE, fig.height=11, fig.cap = "(ref:figure-1-caption)"}
-# Locate standard montage file from MNE Python
-fname_montage <- list.files(
-  path = reticulate::py_discover_config()$python %>% str_remove("bin/.*"),
-  pattern = "easycap-M1.txt", full.names = TRUE, recursive = TRUE
-)[1]
+# # For debugging
+# epochs_exp1 <- py$mne$read_epochs("analysis/export/exp1-epo.fif")
 
-# Retrieve locations for the relevant electrodes from this montage
-montage <- py$evokeds_exp1$I$Informed$ch_names %>%
-  as_tibble() %>%
-  rename(electrode = value) %>%
-  left_join(
-    read_tsv(fname_montage, col_types = cols()) %>%
-      rename(electrode = Site),
-    by = "electrode"
-  ) %>%
+# Compute average number of objects per condition
+(read_tsv("analysis/export/exp1-objects.tsv", col_types = cols()) %>%
+   summarise(across(.cols = -Participant, .fns = mean)) %>%
+   slice(1) %>% unlist() -> objects_exp1)
+
+# Load preprocessed single-trial data
+read_tsv("analysis/export/exp1-erps.tsv", col_types = cols()) %>%
+  # Factorize columns
   mutate(
-    x = eegUtils:::deg2rad(Theta) * cos(eegUtils:::deg2rad(Phi)),
-    y = eegUtils:::deg2rad(Theta) * sin(eegUtils:::deg2rad(Phi))
-  )
+    part = factor(part, levels = c("I", "II", "III")),
+    condition = factor(condition, levels = c(
+      "Informed", "Naive", "Excl_informed", "Excl_naive", "Excl_known")
+    ),
+    participant = factor(participant),
+    item = factor(item)
+  ) -> data_exp1
+
+# Check number of rejected epochs
+data_exp1 %>%
+  group_by(participant) %>%
+  tally() %>%
+  mutate(n = 360 - n) %>%
+  pull(n) -> rejected_exp1
+mean(rejected_exp1)    # Mean
+median(rejected_exp1)  # Median
+range(rejected_exp1)   # Range
+
+# Load sample time points and electrode montage
+times <- scan("analysis/export/sample_times.tsv", quiet = TRUE)
+montage <- read_tsv("analysis/export/montage.tsv", col_types = cols())
+
+# Load grand-averaged ERPs and linear mixed models
+evokeds_exp1 <- readRDS("analysis/export/exp1-gavgs.RDS")
+models_exp1 <- readRDS("analysis/export/exp1-mods.RDS")
 
 # Trial structure
 plot_trials <- function(){
@@ -733,7 +753,7 @@ plot_legends_erps <- function(direction) {
 # Create plot for Experiment 1
 plot_grid(
   plot_trials(),
-  plot_erps(comps = comps, evokeds = py$evokeds_dat_exp1, models = models_exp1, montage = montage),
+  plot_erps(comps = comps, evokeds = evokeds_exp1, models = models_exp1, montage = montage),
   nrow = 2, rel_heights = c(5, 6), labels = c("A", "B"), label_fontfamily = "Helvetica"
 ) + # Add some lines (to separate the parts) and the legend
   annotate(geom = "segment", x = 0.328, xend = 0.328, y = -Inf, yend = 0.53, linetype = "dashed") +
@@ -757,7 +777,7 @@ Offline, the data were preprocessed using the MNE software [Version 0.21.0\; @gr
 
 ### Statistical Analysis
 
-First, because we were interested in the effects of knowledge on perceiving *unfamiliar* objects only, we excluded from all further analyses those objects which participants classified as being known to them in the pre-insight part (i.e., before any keywords were presented). This led to the exclusion of an average of `r format(round(stims_exp1["Excl_known"], 1), nsmall = 1)` objects per participant (= `r scales::percent(stims_exp1["Excl_known"]/120, accuracy = 0.1)` of all unfamiliar objects). Next, to clearly delineate semantically informed and naive perception, the assignment of all other objects to one of these two conditions for statistical analyses was co-determined by our experimental manipulation (matching versus non-matching keywords in the insight part) and the behavioral responses of the participants themselves (see Figure \@ref(fig:exp1-plot)A). Objects were assigned to the semantically informed condition only if they were presented with matching keywords *and* if participants indicated knowing what the object was or having an assumption. This was the case for an average of `r format(round(stims_exp1["Informed"], 1), nsmall = 1)` objects per participant (= `r scales::percent(stims_exp1["Informed"]/60, accuracy = 0.1)` of objects presented with matching keywords). Complementarily, objects were assigned to the naive condition only if they were presented with non-matching keywords *and* if participants indicated not knowing what the object was or having rather no assumption. This was the case for an average of `r format(round(stims_exp1["Naive"], 1), nsmall = 1)` objects per participant (= `r scales::percent(stims_exp1["Naive"]/60, accuracy = 0.1)` of objects presented with non-matching keywords). Although this assignment was based on the manipulation and responses in the second part---when insight was thought to occur---the same assignment was used to analyze the data from the other two parts. This allowed us to test, on the one hand, if the objects from both conditions differed in important aspects even before any keywords were presented (pre-insight part) and, on the other hand, if the semantic understanding acquired in the insight part had any lasting effects on a subsequent, third presentation of the objects (post-insight part).
+First, because we were interested in the effects of knowledge on perceiving *unfamiliar* objects only, we excluded from all further analyses those objects which participants classified as being known to them in the pre-insight part (i.e., before any keywords were presented). This led to the exclusion of an average of `r format(round(objects_exp1["Excl_known"], 1), nsmall = 1)` objects per participant (= `r scales::percent(objects_exp1["Excl_known"]/120, accuracy = 0.1)` of all unfamiliar objects). Next, to clearly delineate semantically informed and naive perception, the assignment of all other objects to one of these two conditions for statistical analyses was co-determined by our experimental manipulation (matching versus non-matching keywords in the insight part) and the behavioral responses of the participants themselves (see Figure \@ref(fig:exp1-plot)A). Objects were assigned to the semantically informed condition only if they were presented with matching keywords *and* if participants indicated knowing what the object was or having an assumption. This was the case for an average of `r format(round(objects_exp1["Informed"], 1), nsmall = 1)` objects per participant (= `r scales::percent(objects_exp1["Informed"]/60, accuracy = 0.1)` of objects presented with matching keywords). Complementarily, objects were assigned to the naive condition only if they were presented with non-matching keywords *and* if participants indicated not knowing what the object was or having rather no assumption. This was the case for an average of `r format(round(objects_exp1["Naive"], 1), nsmall = 1)` objects per participant (= `r scales::percent(objects_exp1["Naive"]/60, accuracy = 0.1)` of objects presented with non-matching keywords). Although this assignment was based on the manipulation and responses in the second part---when insight was thought to occur---the same assignment was used to analyze the data from the other two parts. This allowed us to test, on the one hand, if the objects from both conditions differed in important aspects even before any keywords were presented (pre-insight part) and, on the other hand, if the semantic understanding acquired in the insight part had any lasting effects on a subsequent, third presentation of the objects (post-insight part).
 
 The event-related potentials in response to objects from both conditions and all three parts were analyzed on the single trial level using linear mixed-effects regression models [@baayen2008; @frömer2018]. For the purpose of the present study, these models have at least two desirable properties compared to traditional approaches such as analyses of variance (ANOVAs) performed on by-participant grand averages. First, they can account not only for the non-independence of data points coming from the same participant, but also simultaneously for the non-independence of data points coming from the same item. In contrast, the neglect of the item as a random variable in ANOVAs leads to anti-conservative test statistics and strictly does not allow for inferences beyond the stimulus set under study [@bürki2018; @judd2012]. Second, mixed-effects models can flexibly deal with unbalanced designs in which the number of trials differs across (combinations of) conditions. Such a situation is inevitable in designs where the assignment of trials to conditions is co-determined by the experimental manipulation and the responses of the participants rather than by the experimental manipulation alone [e.g., @fröber2017].
 
@@ -857,7 +877,7 @@ Because of the novelty of our experimental paradigm and the findings of Experime
 data_exp2 <- list.files("data/exp2/RT", pattern = ".txt", full.names = TRUE) %>% map(read_behav)
 
 # Check average number of stimuli per condition
-(stims_exp2 <- map(data_exp2, function(x) {table(x$condition) / 3}) %>% bind_rows() %>% colMeans())
+(objects_exp2 <- map(data_exp2, function(x) {table(x$condition) / 3}) %>% bind_rows() %>% colMeans())
 ```
 
 ```{python exp2-preprocessing}
@@ -942,13 +962,15 @@ if (file.exists("analysis/export/exp2-stats.RDS")) {
 }
 ```
 
+
+
 ### Participants
 
 Participants for Experiment 2 were 24 German native speakers (15 female, 9 male) with a mean age of 26 years (range 19 to 29 years) who had not participated in Experiment 1. They had no history of psychological disorders or treatment, were right-handed, and reported normal or corrected-to-normal vision. They gave written informed consent before starting the experiment and received a compensation of €8 per hour for participating.
 
 ### Materials, Procedure, and Analysis
 
-All materials, procedures, EEG-related methods, and statistical analyses were identical to Experiment 1. An average of `r format(round(stims_exp2["Excl_known"], 1), nsmall = 1)` objects per participant (= `r scales::percent(stims_exp2["Excl_known"]/120, accuracy = 0.1)` of all unfamiliar objects) was classified as being known in the pre-insight part and excluded from all further analyses. Based on participants' responses in the insight part, an average of `r format(round(stims_exp2["Informed"], 1), nsmall = 1)` objects were assigned to the semantically informed condition (= `r scales::percent(stims_exp2["Informed"]/60, accuracy = 0.1)` of objects presented with matching keywords) and an average of `r format(round(stims_exp2["Naive"], 1), nsmall = 1)` objects were assigned to the naive condition (= `r scales::percent(stims_exp2["Naive"]/60, accuracy = 0.1)` of objects presented with non-matching keywords). Automatic rejection of EEG epochs containing artifacts led to the exclusion of `r format(round(mean(rejected_exp2), 1), nsmall = 1)` trials per participant (= `r scales::percent(mean(rejected_exp2)/360, accuracy = 0.1)`; range `r min(rejected_exp2)` to `r max(rejected_exp2)` trials).
+All materials, procedures, EEG-related methods, and statistical analyses were identical to Experiment 1. An average of `r format(round(objects_exp2["Excl_known"], 1), nsmall = 1)` objects per participant (= `r scales::percent(objects_exp2["Excl_known"]/120, accuracy = 0.1)` of all unfamiliar objects) was classified as being known in the pre-insight part and excluded from all further analyses. Based on participants' responses in the insight part, an average of `r format(round(objects_exp2["Informed"], 1), nsmall = 1)` objects were assigned to the semantically informed condition (= `r scales::percent(objects_exp2["Informed"]/60, accuracy = 0.1)` of objects presented with matching keywords) and an average of `r format(round(objects_exp2["Naive"], 1), nsmall = 1)` objects were assigned to the naive condition (= `r scales::percent(objects_exp2["Naive"]/60, accuracy = 0.1)` of objects presented with non-matching keywords). Automatic rejection of EEG epochs containing artifacts led to the exclusion of `r format(round(mean(rejected_exp2), 1), nsmall = 1)` trials per participant (= `r scales::percent(mean(rejected_exp2)/360, accuracy = 0.1)`; range `r min(rejected_exp2)` to `r max(rejected_exp2)` trials).
 
 ## Results
 
@@ -1204,7 +1226,7 @@ plot_grid(
 
 ```{r control-analysis}
 # Calculate average number of objects per condition in Experiments 1 and 2
-stims_joint <- (stims_exp1 + stims_exp2) / 2
+stims_joint <- (objects_exp1 + objects_exp2) / 2
 
 # Re-load saved ERPs from Experiments 1 and 2
 data_joint_control <- bind_rows(
@@ -1281,7 +1303,7 @@ Experiment 2, which was a direct replication of Experiment 1, confirmed the effe
 data_exp3 <- list.files("data/exp3/RT", pattern = ".txt", full.names = TRUE) %>% map(read_behav)
 
 # Check average number of stimuli per condition
-(stims_exp3 <- map(data_exp3, function(x) {
+(objects_exp3 <- map(data_exp3, function(x) {
   x %<>% filter(part != "IV")
   table(x$condition) / 3
 }) %>% bind_rows() %>% colMeans())
