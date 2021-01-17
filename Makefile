@@ -18,16 +18,16 @@ endif
 # The default target is the manuscript
 all: analysis/manuscript.pdf
 
-# Another target to build the Docker container
+# Another target is to build the Docker container
 build: Dockerfile
 	docker build --tag $(PROJECT) .
 
-# Another target to save the Docker image
+# Another target is to save the Docker image
 save: $(PROJECT).tar.gz
 $(PROJECT).tar.gz:
 	docker save $(PROJECT):latest | gzip > $@
 
-# Another target to run an interactive RStudio session in the container
+# Another target is to run an interactive RStudio session in the container
 interactive:
 	docker run --rm -it --memory=${MEMORY} --cpus=${CPUS} -e PASSWORD=1234 -p 8787:8787 \
 	--volume $(HOST_PATH)/analysis:$(CONTAINER_PATH)/analysis $(PROJECT)

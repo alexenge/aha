@@ -163,15 +163,10 @@
     },
     "broom": {
       "Package": "broom",
-      "Version": "0.7.0.9001",
-      "Source": "GitHub",
-      "RemoteType": "github",
-      "RemoteUsername": "tidymodels",
-      "RemoteRepo": "broom",
-      "RemoteRef": "HEAD",
-      "RemoteSha": "03a4c5a571c019284940c846ebd360c2b5b9b308",
-      "RemoteHost": "api.github.com",
-      "Hash": "f7d0bbf20028f579843be468e63bff69"
+      "Version": "0.7.3",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "5581a5ddc8fe2ac5e0d092ec2de4c4ae"
     },
     "buildmer": {
       "Package": "buildmer",
