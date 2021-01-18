@@ -70,12 +70,12 @@ header-includes:
 ```{r setup, include=FALSE}
 # Do you want to re-run the EEG preprocessing? Note that this can only be done with the raw data,
 # which are available from the corresponding author (rasha.abdel.rahman@hu-berlin.de) upon request.
-rerun_preproc <- FALSE
+rerun_preproc <- TRUE
 
 # Do you want to re-run the linear mixed-effect models? This can be done even if only the
 # preprocessed single-trial data are available (from GitHub and/or the OSF). Note, however, that
 # fitting all models may take 24 hours or more.
-rerun_models <- FALSE
+rerun_models <- TRUE
 
 # Do you want to run the analysis for Experiment 3?
 run_exp3 <- FALSE
@@ -99,8 +99,8 @@ dir.create("analysis/export", showWarnings = FALSE)
 # Define ERP components of interest
 comps <- tibble(
   name = c("P1", "N170", "N400"),
-  start = c(100, 150, 400),
-  stop = c(150, 200, 700),
+  tmin = c(100, 150, 400),
+  tmax = c(150, 200, 700),
   roi = list(
     c("PO3", "PO4", "POz", "O1", "O2", "Oz"),
     c("P7", "P8", "PO7", "PO8", "PO9", "PO10"),
@@ -158,20 +158,20 @@ Each experimental session consisted of three parts (see Figure \@ref(fig:exp1-pl
 import mne
 
 # Define function for preprocessing the EEG data
-def preproc(vhdr_fname, metadata, n_components, method, l_freq, h_freq,
-            event_id, tmin, tmax, baseline, reject):
+def preproc(vhdr_fname, metadata, n_components, method, l_freq, h_freq, event_id, tmin, tmax,
+    baseline, reject):
     # Read EEG data in microvolts
     raw = mne.io.read_raw_brainvision(vhdr_fname, scale=1e6, preload=True)
     # Create virtual EOG channels
-    raw = mne.set_bipolar_reference(raw, 'Auge_u', 'Fp1', ch_name='VEOG', drop_refs=False)
-    raw = mne.set_bipolar_reference(raw, 'F9', 'F10', ch_name='HEOG', drop_refs=False)
-    raw.set_channel_types(mapping={'VEOG': 'eog', 'HEOG': 'eog'})
+    raw = mne.set_bipolar_reference(raw, "Auge_u", "Fp1", ch_name="VEOG", drop_refs=False)
+    raw = mne.set_bipolar_reference(raw, "F9", "F10", ch_name="HEOG", drop_refs=False)
+    raw.set_channel_types(mapping={"VEOG": "eog", "HEOG": "eog"})
     # Add EasyCap electrode layout, removing any excessive channels
-    montage = mne.channels.make_standard_montage('easycap-M1')
-    raw.drop_channels(list(set(raw.ch_names) - set(montage.ch_names) - set(['VEOG', 'HEOG'])))
+    montage = mne.channels.make_standard_montage("easycap-M1")
+    raw.drop_channels(list(set(raw.ch_names) - set(montage.ch_names) - set(["VEOG", "HEOG"])))
     raw.set_montage(montage=montage)
     # Re-reference to common average
-    raw, _ = mne.set_eeg_reference(raw, 'average')
+    raw, _ = mne.set_eeg_reference(raw, "average")
     # Run ICA on a copy of the data
     filt_raw = raw.copy()
     filt_raw.load_data().filter(l_freq=1, h_freq=None)
@@ -185,8 +185,9 @@ def preproc(vhdr_fname, metadata, n_components, method, l_freq, h_freq,
     raw = raw.filter(l_freq=l_freq, h_freq=h_freq)
     # Epoching including baseline correction
     events, _ = mne.events_from_annotations(raw, verbose=False)
-    epochs = mne.Epochs(raw, events=events, event_id=event_id, tmin=tmin,
-                        tmax=tmax, baseline=baseline, preload=True)
+    epochs = mne.Epochs(
+        raw, events=events, event_id=event_id, tmin=tmin, tmax=tmax, baseline=baseline, preload=True
+    )
     # Add behavioral data
     epochs.metadata = metadata
     # Reject bad epochs
@@ -196,26 +197,40 @@ def preproc(vhdr_fname, metadata, n_components, method, l_freq, h_freq,
 
 # Define function to compute averaged waveforms by part and condition
 def compute_evokeds(epochs, grand=True, data_only=True):
-  # Define lists of participants, parts, and conditions
-  ps = epochs.metadata['participant'].unique()
-  pts = ['I', 'II', 'III']
-  cns = ['Informed', 'Naive']
-  # Define function to compute a single by-participant waveform
-  def compute_evoked(epochs, pt, cn, p):
-    query = 'participant == "' + p + '" and part == "' + pt + '" and condition == "' + cn + '"'
-    return(epochs[query].average())
-  # Create a dict with by-participant waveforms nested in conditions nested in parts
-  avgs = {pt:{cn:[compute_evoked(epochs, pt, cn, p) for p in ps] for cn in cns} for pt in pts}
-  # If needed, compute grand-averaged waveforms across participants
-  if grand:
-    avgs = {pt:{cn:mne.grand_average(avgs[pt][cn]) for cn in cns} for pt in pts}
-  # If needed, extract only the data from the evoked MNE objects
-  if data_only:
+    # Define lists of participants, parts, and conditions
+    ps = epochs.metadata["participant"].unique()
+    pts = ["I", "II", "III"]
+    cns = ["Informed", "Naive"]
+    # Define function to compute a single by-participant waveform
+    def compute_evoked(epochs, pt, cn, p):
+        query = 'participant == "' + p + '" and part == "' + pt + '" and condition == "' + cn + '"'
+        return epochs[query].average()
+    # Create a dict with by-participant waveforms nested in conditions nested in parts
+    avgs = {pt: {cn: [compute_evoked(epochs, pt, cn, p) for p in ps] for cn in cns} for pt in pts}
+    # If needed, compute grand-averaged waveforms across participants
     if grand:
-      avgs = {pt:{cn:avgs[pt][cn].data for cn in cns} for pt in pts}
-    else:
-      avgs = {pt:{cn:[avgs[pt][cn][p].data for p in range(0, len(ps))] for cn in cns} for pt in pts}
-  return(avgs)
+        avgs = {pt: {cn: mne.grand_average(avgs[pt][cn]) for cn in cns} for pt in pts}
+    # If needed, extract only the data from the evoked MNE objects
+    if data_only:
+        if grand:
+            avgs = {pt: {cn: avgs[pt][cn].data for cn in cns} for pt in pts}
+        else:
+            ps_num = range(0, len(ps))
+            avgs = {pt: {cn: [avgs[pt][cn][p].data for p in ps_num] for cn in cns} for pt in pts}
+    return avgs
+
+
+# Define function to compute single-trial mean ERP ampltiudes from epochs
+def compute_erps(epochs, name, tmin, tmax, roi):
+    # Average across electrodes in the ROI
+    roi_idx = mne.pick_channels(epochs.ch_names, roi)
+    epochs_roi = mne.channels.combine_channels(epochs, dict(roi=roi_idx))
+    # Average across samples in the time window
+    import numpy as np
+    tmin_s, tmax_s = tmin / 1000, tmax / 1000
+    times_idx = np.where(np.logical_and(epochs.times >= tmin_s, epochs.times <= tmax_s))
+    erps = epochs_roi.get_data()[:, 0, times_idx].mean(axis=(1, 2))
+    return erps
 
 
 ```
@@ -297,7 +312,7 @@ preproc_params <- list(
   reject = dict(eeg = 200)
 )
 
-# Actually apply the preprocessing function for Epxeriment 1 in Python
+# Preprocess the EEG for Epxeriment 1 in Python
 map2(
   .x = list.files("data/exp1/EEG", pattern = ".vhdr", full.names = TRUE),
   .y = behav_exp1,
@@ -308,6 +323,22 @@ map2(
 
 # Backup epochs to the export folder
 epochs_exp1$save("analysis/export/exp1-epo.fif")
+
+# Compute mean ERP amplitudes and bind to the behavioral data
+pmap_dfc(comps, py$compute_erps, epochs = epochs_exp1) %>%
+  set_names(comps$name) %>%
+  bind_cols(as_tibble(epochs_exp1$metadata), .) %T>%
+  write_tsv("analysis/export/exp1-data.tsv") -> data_exp1
+
+# Compute grand averages per part and condition
+py$compute_evokeds(epochs = epochs_exp1, grand = TRUE, data_only = TRUE) %>%
+  saveRDS("analysis/export/exp1-gaverages.RDS")
+
+# Backup number of stimuli assigned to each condition for all participants
+map(behav_exp1, function(x) table(x$condition) / 3) %>%
+  bind_rows() %>%
+  mutate(Participant = unique(data_exp1$participant), .before = 1) %>%
+  write_tsv("analysis/export/exp1-objects.tsv")
 
 # Get standard EasyCap electrode positions and project to 2D space
 py$mne$channels$`_standard_montage_utils`$MONTAGE_PATH %>%
@@ -321,48 +352,19 @@ py$mne$channels$`_standard_montage_utils`$MONTAGE_PATH %>%
   ) %>%
   write_tsv("analysis/export/montage.tsv")
 
-# Create a vector with sample time points (in ms)
-sfreq <- epochs_exp1$info["sfreq"]
-seq(preproc_params$tmin * 1000, preproc_params$tmax * 1000, 1 / sfreq * 1000) %T>%
-  cat(file = "analysis/export/sample_times.tsv", sep = "\n") -> times
-
-# Define function to compute single-trial mean ERP amplitudes
-compute_erps <- function(epochs, name, start, stop, roi) {
-  dat <- epochs$get_data()
-  els <- epochs$ch_names
-  erps <- dat[, which(els %in% roi), which(times %in% start:stop)]
-  amps <- apply(erps, 1, mean, na.rm = TRUE)
-  return(amps)
-}
-
-# Actually apply the function to compute mean ERP amplitudes for Experiment 1
-pmap_dfc(comps, compute_erps, epochs = epochs_exp1) %>%
-  set_names(comps$name) %>%
-  # Bind to the behavioral data
-  bind_cols(as_tibble(epochs_exp1$metadata), .) %T>%
-  # Backup to the export folder
-  write_tsv("analysis/export/exp1-erps.tsv") -> data_exp1
-
-# Compute grand averages per part and condition
-py$compute_evokeds(epochs = epochs_exp1, grand = TRUE, data_only = TRUE) %>%
-  saveRDS("analysis/export/exp1-gavgs.RDS")
-
-# Backup number of stimuli assigned to each condition for all participants
-map(behav_exp1, function(x) table(x$condition) / 3) %>%
-  bind_rows() %>%
-  mutate(Participant = unique(data_exp1$participant), .before = 1) %>%
-  write_tsv("analysis/export/exp1-objects.tsv")
+# Remove the epochs to free up memory
+rm(epochs_exp1)
 ```
 
 ```{r exp1-models, eval=rerun_models}
 # Load preprocessed single-trial data
-read_tsv("analysis/export/exp1-erps.tsv", col_types = cols()) %>%
+read_tsv("analysis/export/exp1-data.tsv", col_types = cols()) %>%
   # Factorize columns
   mutate(
     part = factor(part, levels = c("I", "II", "III")),
     condition = factor(condition, levels = c(
-      "Informed", "Naive", "Excl_informed", "Excl_naive", "Excl_known")
-    ),
+      "Informed", "Naive", "Excl_informed", "Excl_naive", "Excl_known"
+    )),
     participant = factor(participant),
     item = factor(item)
   ) %>%
@@ -404,7 +406,7 @@ compute_models <- function(dep, formula, data, control, specs) {
     buildmerControl = buildmerControl(
       formula = formula,
       data = data,
-      direction = c("order", "backward"),
+      direction = c("backward", "backward"),
       elim = function(logp) exp(logp) >= .20,
       calc.anova = TRUE,
       ddf = "Satterthwaite",
@@ -423,7 +425,7 @@ compute_models <- function(dep, formula, data, control, specs) {
   return(modlist)
 }
 
-# Actually apply the function to compute the models for Experiment 1
+# Compute the models for Experiment 1
 map(
   comps$name,
   compute_models,
@@ -433,7 +435,7 @@ map(
   specs = specs_exp12
 ) %>%
   set_names(comps$name) %T>%
-  saveRDS("analysis/export/exp1-mods.RDS") -> models_exp1
+  saveRDS("analysis/export/exp1-models.RDS") -> models_exp1
 ```
 
 ```{r exp1-import}
@@ -443,7 +445,7 @@ map(
    slice(1) %>% unlist() -> objects_exp1)
 
 # Load preprocessed single-trial data
-read_tsv("analysis/export/exp1-erps.tsv", col_types = cols()) %>%
+read_tsv("analysis/export/exp1-data.tsv", col_types = cols()) %>%
   # Factorize columns
   mutate(
     part = factor(part, levels = c("I", "II", "III")),
@@ -465,8 +467,8 @@ median(rejected_exp1)  # Median
 range(rejected_exp1)   # Range
 
 # Load grand-averaged ERPs and linear mixed models
-evokeds_exp1 <- readRDS("analysis/export/exp1-gavgs.RDS")
-models_exp1 <- readRDS("analysis/export/exp1-mods.RDS")
+evokeds_exp1 <- readRDS("analysis/export/exp1-gaverages.RDS")
+models_exp1 <- readRDS("analysis/export/exp1-models.RDS")
 ```
 
 ```{r exp1-plot, include=TRUE, fig.height=11, fig.cap = "(ref:figure-1-caption)"}
@@ -565,7 +567,7 @@ plot_trials <- function(){
 # Define function to plot ERP waveforms and topographies
 plot_erps <- function(comps, evokeds, models, montage) {
   suppressWarnings(suppressMessages(
-    pmap(comps, function(name, start, stop, roi) {
+    pmap(comps, function(name, tmin, tmax, roi) {
       # N400 gets a different scale than P1 and N170
       ymin <- ifelse(name == "N400", -3, -4)
       # Loop through parts
@@ -577,34 +579,34 @@ plot_erps <- function(comps, evokeds, models, montage) {
               t() %>%
               as_tibble(.name_repair = "unique") %>%
               set_colnames(montage$electrode) %>%
-              mutate(.time = times, roi = rowMeans(select(., all_of(roi))))
+              mutate(.time = seq(-500, 1498, 2), roi = rowMeans(select(., all_of(roi))))
           }) %>% bind_rows(.id = "condition")
         # Shade background depending on whether the effect is significant or not
         asterisks <- models[[name]]$contrasts %>%
           filter(part == !!part) %>%
           mutate(asterisks = case_when(p.value < .001 ~ "***", p.value < .01 ~ "**", p.value < .05 ~ "*")) %>%
           pull(asterisks)
-        xasterisks <- case_when(str_length(asterisks) == 1 ~ start + 11, str_length(asterisks) == 3 ~ start + 15)
+        xasterisks <- case_when(str_length(asterisks) == 1 ~ tmin + 11, str_length(asterisks) == 3 ~ tmin + 15)
         if (is.na(asterisks)) {
-          shade <- annotate("rect", xmin = start, xmax = stop, ymin = ymin + 0.1, ymax = ymin + 11.95, color = "black", fill = NA)
+          shade <- annotate("rect", xmin = tmin, xmax = tmax, ymin = ymin + 0.1, ymax = ymin + 11.95, color = "black", fill = NA)
         } else {
-          shade <- annotate("rect", xmin = start, xmax = stop, ymin = ymin + 0.1, ymax = ymin + 11.95, color = "black", fill = "gray90")
+          shade <- annotate("rect", xmin = tmin, xmax = tmax, ymin = ymin + 0.1, ymax = ymin + 11.95, color = "black", fill = "gray90")
         }
 
         # # Prepare waveform
         # wave <- ggplot(data = data_plot, aes(x = .time, y = roi, color = condition)) +
-        #   annotate("rect", xmin = start, xmax = stop, ymin = -Inf, ymax = ymin + 12, fill = "gray90")
+        #   annotate("rect", xmin = tmin, xmax = tmax, ymin = -Inf, ymax = ymin + 12, fill = "gray90")
         # # Shade significant area
         # star <- stars[[name]][[part]]
         # if (!is.na(star)) {
         #   wave <- wave + geom_ribbon(
-        #     data = data_plot %>% filter(.time >= start & .time <= stop) %>%
+        #     data = data_plot %>% filter(.time >= tmin & .time <= tmax) %>%
         #       group_by(.time) %>% summarize(ymin = min(roi), ymax = max(roi)),
-        #     aes(x = .time, xmin = start, xmax = stop, ymin = ymin, ymax = ymax),
+        #     aes(x = .time, xmin = tmin, xmax = tmax, ymin = ymin, ymax = ymax),
         #     inherit.aes = FALSE, fill = viridisLite::viridis(n = 1, begin = 1)
         #   )
         # } +
-        # annotate("text", label = star, x = start + (stop - start)/2, y = -3.2, size = 7, family = "Helvetica")}
+        # annotate("text", label = star, x = tmin + (tmax - tmin)/2, y = -3.2, size = 7, family = "Helvetica")}
         # Add waves and styling
 
         # Plot waveform
@@ -626,7 +628,7 @@ plot_erps <- function(comps, evokeds, models, montage) {
           theme(legend.position = "none")
         # Plot topography
         topo <- data_plot %>%
-          filter(.time >= start & .time <= stop) %>%
+          filter(.time >= tmin & .time <= tmax) %>%
           group_by(condition) %>%
           summarise(across(montage$electrode, mean)) %>%
           pivot_longer(-condition) %>%
@@ -835,7 +837,7 @@ Participants for Experiment 2 were 24 German native speakers (15 female, 9 male)
 # Read behavioral data for Experiment 2
 list.files("data/exp2/RT", pattern = ".txt", full.names = TRUE) %>% map(read_behav) -> behav_exp2
 
-# Apply the preprocessing function for Epxeriment 2 in Python
+# Preprocess the EEG for Epxeriment 2 in Python
 map2(
   .x = list.files("data/exp2/EEG", pattern = ".vhdr", full.names = TRUE),
   .y = behav_exp2,
@@ -847,28 +849,29 @@ map2(
 # Backup epochs to the export folder
 epochs_exp2$save("analysis/export/exp2-epo.fif")
 
-# Apply the function to compute mean ERP amplitudes for Experiment 2
-pmap_dfc(comps, compute_erps, epochs = epochs_exp2) %>%
+# Compute mean ERP amplitudes and bind to the behavioral data
+pmap_dfc(comps, py$compute_erps, epochs = epochs_exp2) %>%
   set_names(comps$name) %>%
-  # Bind to the behavioral data
   bind_cols(as_tibble(epochs_exp2$metadata), .) %T>%
-  # Backup to the export folder
-  write_tsv("analysis/export/exp2-erps.tsv") -> data_exp2
+  write_tsv("analysis/export/exp2-data.tsv") -> data_exp2
 
 # Compute grand averages per part and condition
 py$compute_evokeds(epochs = epochs_exp2, grand = TRUE, data_only = TRUE) %>%
-  saveRDS("analysis/export/exp2-gavgs.RDS")
+  saveRDS("analysis/export/exp2-gaverages.RDS")
 
 # Backup number of stimuli assigned to each condition for all participants
 map(behav_exp2, function(x) table(x$condition) / 3) %>%
   bind_rows() %>%
   mutate(Participant = unique(data_exp2$participant), .before = 1) %>%
   write_tsv("analysis/export/exp2-objects.tsv")
+
+# Remove the epochs to free up memory
+rm(epochs_exp2)
 ```
 
 ```{r exp2-models, eval=rerun_models}
 # Load preprocessed single-trial data
-read_tsv("analysis/export/exp2-erps.tsv", col_types = cols()) %>%
+read_tsv("analysis/export/exp2-data.tsv", col_types = cols()) %>%
   # Factorize columns
   mutate(
     part = factor(part, levels = c("I", "II", "III")),
@@ -882,11 +885,11 @@ read_tsv("analysis/export/exp2-erps.tsv", col_types = cols()) %>%
   filter(condition %in% c("Informed", "Naive")) %>%
   droplevels() -> data_exp2
 
-# Apply these contrasts to the factors in the data
+# Apply contrasts to the factors in the data
 contrasts(data_exp2$condition) <- MASS::ginv(contrasts_condition)
 contrasts(data_exp2$part) <- MASS::ginv(contrasts_part)
 
-# Apply the function to compute the models for Experiment 2
+# Compute the models for Experiment 2
 map(
   comps$name,
   compute_models,
@@ -896,7 +899,7 @@ map(
   specs = specs_exp12
 ) %>%
   set_names(comps$name) %T>%
-  saveRDS("analysis/export/exp2-mods.RDS") -> models_exp2
+  saveRDS("analysis/export/exp2-models.RDS") -> models_exp2
 ```
 
 ```{r exp2-import}
@@ -906,7 +909,7 @@ map(
    slice(1) %>% unlist() -> objects_exp2)
 
 # Load preprocessed single-trial data
-read_tsv("analysis/export/exp2-erps.tsv", col_types = cols()) %>%
+read_tsv("analysis/export/exp2-data.tsv", col_types = cols()) %>%
   # Factorize columns
   mutate(
     part = factor(part, levels = c("I", "II", "III")),
@@ -928,8 +931,8 @@ median(rejected_exp2)  # Median
 range(rejected_exp2)   # Range
 
 # Load grand-averaged ERPs and linear mixed models
-evokeds_exp2 <- readRDS("analysis/export/exp2-gavgs.RDS")
-models_exp2 <- readRDS("analysis/export/exp2-mods.RDS")
+evokeds_exp2 <- readRDS("analysis/export/exp2-gaverages.RDS")
+models_exp2 <- readRDS("analysis/export/exp2-models.RDS")
 ```
 
 All materials, procedures, EEG-related methods, and statistical analyses were identical to Experiment 1. An average of `r format(round(objects_exp2["Excl_known"], 1), nsmall = 1)` objects per participant (= `r scales::percent(objects_exp2["Excl_known"]/120, accuracy = 0.1)` of all unfamiliar objects) was classified as being known in the pre-insight part and excluded from all further analyses. Based on participants' responses in the insight part, an average of `r format(round(objects_exp2["Informed"], 1), nsmall = 1)` objects were assigned to the semantically informed condition (= `r scales::percent(objects_exp2["Informed"]/60, accuracy = 0.1)` of objects presented with matching keywords) and an average of `r format(round(objects_exp2["Naive"], 1), nsmall = 1)` objects were assigned to the naive condition (= `r scales::percent(objects_exp2["Naive"]/60, accuracy = 0.1)` of objects presented with non-matching keywords). Automatic rejection of EEG epochs containing artifacts led to the exclusion of `r format(round(mean(rejected_exp2), 1), nsmall = 1)` trials per participant (= `r scales::percent(mean(rejected_exp2)/360, accuracy = 0.1)`; range `r min(rejected_exp2)` to `r max(rejected_exp2)` trials).
@@ -1036,12 +1039,12 @@ map(
   specs = specs_exp12
 ) %>%
   set_names(comps$name) %T>%
-  saveRDS("analysis/export/joint-mods.RDS") -> models_joint
+  saveRDS("analysis/export/joint-models.RDS") -> models_joint
 ```
 
 ```{r joint-table, include=TRUE, results="asis"}
 # Load linear mixed models
-models_joint <- readRDS("analysis/export/joint-mods.RDS")
+models_joint <- readRDS("analysis/export/joint-models.RDS")
 
 # Create table of models for Experiments 1 and 2 combined
 table_joint <- create_table(
@@ -1233,7 +1236,7 @@ map(
   specs = specs_exp12
 ) %>%
   set_names(comps$name) %T>%
-  saveRDS("analysis/export/joint-control-mods.RDS") -> models_joint_control
+  saveRDS("analysis/export/joint-control-models.RDS") -> models_joint_control
 ```
 
 
@@ -1242,7 +1245,7 @@ map(
 (stims_joint <- (objects_exp1 + objects_exp2) / 2)
 
 # Load linear mixed models
-models_joint_control <- readRDS("analysis/export/joint-control-mods.RDS")
+models_joint_control <- readRDS("analysis/export/joint-control-models.RDS")
 
 # Create a table but don't print
 table_joint_control <- create_table(
