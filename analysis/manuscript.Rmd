@@ -78,7 +78,7 @@ rerun_preproc <- TRUE
 rerun_models <- TRUE
 
 # Do you want to run the analysis for Experiment 3?
-run_exp3 <- FALSE
+run_exp3 <- TRUE
 
 # Load packages
 library(papaja)
@@ -1265,115 +1265,94 @@ One may raise concerns whether the modulation of the N170 component in the insig
 
 Experiment 2, which was a direct replication of Experiment 1, confirmed the effects of obtaining semantic information about previously unfamiliar objects on ERPs associated with lower-level visual perception (P1), higher-level visual perception (N170), and semantic processing (N400). Objects for which participants experienced semantically informed perception via matching keywords elicited enlarged N170 amplitudes and reduced N400 amplitudes. When these objects were presented once more, they again elicited reduced N400 amplitudes as well as enlarged P1 amplitudes.
 
-```{r exp3-preparation, eval=run_exp3}
-# Read behavioral data for Experiment 3
-data_exp3 <- list.files("data/exp3/RT", pattern = ".txt", full.names = TRUE) %>% map(read_behav)
-
-# Check average number of stimuli per condition
-(objects_exp3 <- map(data_exp3, function(x) {
-  x %<>% filter(part != "IV")
-  table(x$condition) / 3
-}) %>% bind_rows() %>% colMeans())
-```
-
-```{python exp3-preprocessing, eval=run_exp3}
-# List raw EEG filenames
-fnames_exp3 = sorted(glob.glob("data/exp3/EEG/*.vhdr"))
-
-# Import behavioral data from R
-metadata_exp3 = r.data_exp3
+```{r exp3-preproc, eval=run_exp3}
+# Read behavioral data for Experiment 1
+list.files("data/exp3/RT", pattern = ".txt", full.names = TRUE) %>% map(read_behav) -> behav_exp3
 
 # Update stimulus triggers
-preproc_params["event_id"] = {
-    "match/upright": 241,
-    "match/inverted": 242,
-    "mismatch/upright": 243,
-    "mismatch/inverted": 244,
-}
-
-# Check if preprocessing was done already (delete the file to re-run)
-if os.path.exists("analysis/export/exp3-epo.fif"):
-    # Read preprocessed data from file
-    epochs_exp3 = mne.read_epochs("analysis/export/exp3-epo.fif", preload=True)
-else:
-    # Preprocess EEG data for Experiment 3
-    epochs_exp3 = [
-        preproc(vhdr_fname=fname, metadata=meta, **preproc_params)
-        for fname, meta in zip(fnames_exp3, metadata_exp3)
-    ]
-    # Combine epochs into a single data set
-    epochs_exp3 = mne.concatenate_epochs(epochs_exp3)
-    # Backup epochs and evokeds to the export folder
-    epochs_exp3.save("analysis/export/exp3-epo.fif")
-```
-
-```{r exp3-analysis, eval=run_exp3}
-# Re-import behavioral data and re-factorize some columns
-data_exp3 <- py$epochs_exp3$metadata %>% mutate(
-  part = factor(part, levels = c("I", "II", "III", "IV")),
-  position = factor(position, levels = c("Inverted", "Upright")),
-  condition = factor(condition, levels = c("Informed", "Naive", "Excl_informed", "Excl_naive", "Excl_known")),
-  participant = factor(participant), item = factor(item)
+preproc_params$event_id <- dict(
+  "match/upright" = as.integer(241),
+  "match/inverted" = as.integer(242),
+  "mismatch/upright" = as.integer(243),
+  "mismatch/inverted" = as.integer(244)
 )
 
-# Check if ERPs were computed already (delete the file to re-run)
-if (file.exists("analysis/export/exp3-erps.RDS")) {
-  # Read ERPs from file
-  data_exp3 <- readRDS("analysis/export/exp3-erps.RDS")
-} else {
-  # Compute single-trial ERPs for Experiment 3
-  data_exp3 <- pmap_dfc(comps, compute_erps, epochs = py$epochs_exp3$get_data(), els = els) %>%
-    set_names(comps$name) %>%
-    cbind(data_exp3, .) %T>%
-    saveRDS("analysis/export/exp3-erps.RDS")
-}
+# Preprocess the EEG for Epxeriment 3 in Python
+map2(
+  .x = list.files("data/exp3/EEG", pattern = ".vhdr", full.names = TRUE),
+  .y = behav_exp3,
+  ~ do.call(py$preproc, c(list(vhdr_fname = .x, metadata = .y), preproc_params))
+) %>%
+  # Concatenate epochs of all participants
+  py$mne$epochs$concatenate_epochs() -> epochs_exp3
+
+# Backup epochs to the export folder
+epochs_exp3$save("analysis/export/exp3-epo.fif")
+
+# Compute mean ERP amplitudes and bind to the behavioral data
+pmap_dfc(comps, py$compute_erps, epochs = epochs_exp3) %>%
+  set_names(comps$name) %>%
+  bind_cols(as_tibble(epochs_exp3$metadata), .) %T>%
+  write_tsv("analysis/export/exp3-data.tsv") -> data_exp3
+
+# Compute grand averages per part and condition
+py$compute_evokeds(epochs = epochs_exp3, grand = TRUE, data_only = TRUE) %>%
+  saveRDS("analysis/export/exp3-gaverages.RDS")
+
+# Backup number of stimuli assigned to each condition for all participants
+map(behav_exp3, function(x) table(x$condition) / 3) %>%
+  bind_rows() %>%
+  mutate(Participant = unique(data_exp3$participant), .before = 1) %>%
+  write_tsv("analysis/export/exp3-objects.tsv")
 
 # Remove the epochs to free up memory
-py_run_string("del epochs_exp3")
-import("gc")$collect()
+rm(epochs_exp3)
+```
 
-# Remove any trials from part IV
-data_exp3 %<>% filter(part != "IV") %>% droplevels()
+```{r exp3-models, eval=run_exp3}
+# Load preprocessed single-trial data
+read_tsv("analysis/export/exp3-data.tsv", col_types = cols()) %>%
+  # Factorize columns
+  mutate(
+    part = factor(part, levels = c("I", "II", "III")),
+    position = factor(position, levels = c("Inverted", "Upright")),
+    condition = factor(condition, levels = c(
+      "Informed", "Naive", "Excl_informed", "Excl_naive", "Excl_known"
+    )),
+    participant = factor(participant),
+    item = factor(item)
+  ) %>%
+  # Remove any trials excluded from conditions and parts
+  filter(condition %in% c("Informed", "Naive") & part != "IV") %>%
+  droplevels() -> data_exp3
 
-# Check number of rejected epochs
-rejected_exp3 <- data_exp3 %>% group_by(participant) %>% tally() %>% mutate(n = 672 - n) %>% pull(n)
-mean(rejected_exp3)    # Mean
-median(rejected_exp3)  # Median
-range(rejected_exp3)   # Range
-
-# Remove any trials excluded from conditions
-data_exp3 %<>% filter(condition %in% c("Informed", "Naive")) %>% droplevels()
-
-# Contrast coding for position (inverted-upright), condition (informed-naive), and part (2-1, 3-1)
+# Define contrasts for position (inverted-upright), condition (informed-naive), and part (2-1, 3-1)
 t(contrasts_position <- t(cbind(c("Inverted" = 1, "Upright" = -1))))
 contrasts(data_exp3$position) <- MASS::ginv(contrasts_position)
 contrasts(data_exp3$condition) <- MASS::ginv(contrasts_condition)
 contrasts(data_exp3$part) <- MASS::ginv(contrasts_part)
 
-# New formula for LMMs
+# Define new formula for LMMs
 form_exp3 <- buildmer::tabulate.formula(
-  ~ part * condition * position + (part * condition * position | participant) + (part * condition * position | item)
+  ~ part * condition * position +
+    (part * condition * position | participant) +
+    (part * condition * position | item)
 ) %>% mutate(block = replace(block, is.na(grouping), "fixed"))
 
-# New follow-up contrasts
+# Define new follow-up contrasts
 specs_exp3 <- pairwise ~ condition | position * part
 
-# Check if models were computed already (delete the file to re-run)
-if (file.exists("analysis/export/exp3-stats.RDS")) {
-  # Read models from file
-  models_exp3 <- readRDS("analysis/export/exp3-stats.RDS")
-} else {
-  # Compute LMMs for Experiment 3
-  models_exp3 <- map(
-    comps$name,
-    compute_models,
-    formula = form_exp3,
-    data = data_exp3,
-    control = ctrl_params,
-    specs = specs_exp3
-  ) %>% set_names(comps$name) %T>%
-    saveRDS("analysis/export/exp3-stats.RDS")
-}
+# Compute the models for Experiment 3
+map(
+  comps$name,
+  compute_models,
+  formula = formula_exp3,
+  data = data_exp3,
+  control = control,
+  specs = specs_exp3
+) %>%
+  set_names(comps$name) %T>%
+  saveRDS("analysis/export/exp3-models.RDS") -> models_exp3
 ```
 
 ```{r exp3-table, include=TRUE, results="asis", eval=run_exp3}
