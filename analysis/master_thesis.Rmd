@@ -40,8 +40,11 @@ header-includes:
   - \fancyheadoffset[RO,LE]{0pt}
   - \fancyhead[RO,LE]{\thepage}
   - \fancyhead[RE,LO]{Semantic Knowledge and Unfamiliar Objects}
+  - \renewcommand{\headrulewidth}{0.4pt}
   - \usepackage{setspace}
   - \AtBeginEnvironment{tabular}{\doublespacing}
+  - \usepackage{makecell}
+  - \renewcommand{\cellset}{\renewcommand{\arraystretch}{0.7}}
   - \captionsetup[table]{font={stretch=1.5}}
   - \captionsetup[figure]{font={stretch=1.5}}
   - \usepackage[all]{nowidow}
@@ -84,7 +87,7 @@ Vorgelegt von:&\textbf{Alexander Enge}\\
 Fachliche Betreuung:&Prof. Dr. Rasha Abdel Rahman (Humboldt-Universität zu Berlin)\\
 &Prof. Dr. Franziska Süß (Fachhochschule des Mittelstands)\\
 &\\
-Berlin, den 29.01.2021&\\
+Berlin, den 26.01.2021&\\
 \end{tabular}
 }
 \end{flushleft}
@@ -95,15 +98,20 @@ Berlin, den 29.01.2021&\\
 <!-- Acknowledgement -->
 \thispagestyle{empty}
 
-\begin{center}\textbf{Acknowledgment}\end{center}
+\vspace*{55mm}
 
-I would like to thank ... (tbc)
+\begin{center}\textbf{Acknowledgments}\end{center}
+
+This thesis presents a re-analysis of the data from two experiments that had already been conducted before I joined the Neurocognitive Psychology Lab at Humboldt-Universität zu Berlin. Therefore, it would not have been possible for me to write it without the time and effort that Franziska Süß, Nele Langosch, and Rasha Abdel Rahman have spent conceptualizing and running these experiments, along with the help of all participants, research assistants, and technical staff who contributed to the data collection. I would also like to thank all current members of the lab for their guidance and fruitful discussions on the topics of data analysis and reporting. Valuable feedback on an earlier draft of this thesis was given by Anna Kuhlen, Annika Just, and Garrett Widener. Finally, I am most grateful to my parents, friends, and supervisors: During the journey of writing this thesis, their support has often literally changed my view of the world around me to the better.
 
 <!-- Empty page -->
 \clearpage\mbox{}\thispagestyle{empty}\clearpage
 
 <!-- Table of contents -->
 \thispagestyle{empty}
+
+\vspace*{45mm}
+
 \begin{flushleft}
 {\setstretch{1.0}
 \tableofcontents
@@ -118,9 +126,11 @@ I would like to thank ... (tbc)
 
 # Abstract {.unnumbered}
 
-Does our perception of an object change as soon as we discover what it is for? This question is relevant not only for our everyday lives, where we may encounter novel tools and gadgets as parts of our dynamic working and private environments; it pertains to the long-standing debate around the (im)penetrability of perception by "higher" cognitive capacities. In this experiment, we showed participants (*n* = 24) pictures of 120 unfamiliar objects either together with valid information about their function---leading to semantically informed perception---or together with invalid information---resulting in naive perception. We measured event-related potentials (ERPs) to investigate at which stages in the visual processing hierarchy these two types of perceiving objects differed from one another. We found that semantically informed as compared to naive perception was associated with larger amplitudes in the N170 component and reduced amplitudes in the N400 component. When the same objects were presented once more (without any information), the N400 effect persisted and we now also observed enlarged amplitudes in the P1 component in response to objects for which semantically informed perception had taken place. We replicated these novel findings in an independent sample (*n* = 24). Consistent with previous work, they suggest that obtaining semantic information about previously unfamiliar objects alters aspects of their lower-level visual perception (P1 component), higher-level visual perception (e.g., holistic perception; N170 component), and semantic processing (N400 component).
+\noindent Does our perception of an object change as soon as we discover what function it serves? This question is relevant not only for our everyday lives, where we may encounter novel tools and gadgets as parts of our dynamic working and private environments; it also pertains to the long-standing debate around the (im)penetrability of perception by higher cognitive capacities. In this experiment, we showed participants (*n* = 24) pictures of 120 unfamiliar objects either together with matching information about their function---leading to semantically informed perception---or together with non-matching information---resulting in naive perception. We measured event-related potentials (ERPs) to investigate at which stages in the visual processing hierarchy these two types of object perception differed from one another. We found that semantically informed as compared to naive perception was associated with larger amplitudes in the N170 component and reduced amplitudes in the N400 component. When the same objects were presented once more (without any information), the N400 effect persisted and we now also observed enlarged amplitudes in the P1 component in response to objects for which semantically informed perception had taken place. We replicated these novel findings in an independent sample (*n* = 24). Consistent with previous work, these results suggest that obtaining semantic information about previously unfamiliar objects alters aspects of their lower-level visual perception (P1 component), higher-level visual perception (e.g., holistic perception; N170 component), and semantic processing (N400 component).
 
-<!-- Acutal paper -->
+*Keywords:* objects, semantic knowledge, visual perception, event-related potentials
+
+<!-- Actual paper -->
 \newpage
 
 # Introduction
@@ -134,10 +144,18 @@ Does our perception of an object change as soon as we discover what it is for? T
 <div id="refs"></div>
 \justify
 
-<!-- Appendix -->
+<!-- Appendix A -->
 \newpage
 
-```{r appendix, child = "appendix.Rmd"}
+# Appendix {.unnumbered}
+
+```{r appendix_a, child = "appendix_a.Rmd"}
+```
+
+<!-- Appendix B -->
+\newpage
+
+```{r appendix_b, child = "appendix_b.Rmd"}
 ```
 
 <!-- Declaration of authorship -->
@@ -152,7 +170,10 @@ I hereby declare that the present thesis has not been submitted as a part of any
 
 \noindent
 Alexander Enge\newline
-Berlin, 29.01.2021
+Berlin, 26.01.2021
+
+<!-- Empty page -->
+\clearpage\mbox{}\thispagestyle{empty}\clearpage
 
 <!-- Empty page -->
 \clearpage\mbox{}\thispagestyle{empty}\clearpage

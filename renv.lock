@@ -140,6 +140,13 @@
       "Repository": "CRAN",
       "Hash": "543776ae6848fde2f48ff3816d0628bc"
     },
+    "bayestestR": {
+      "Package": "bayestestR",
+      "Version": "0.8.0",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "193ab1e887e1b532442087538f79df86"
+    },
     "blob": {
       "Package": "blob",
       "Version": "1.2.1",
@@ -495,6 +502,13 @@
       "Repository": "CRAN",
       "Hash": "6154ec2223172bce8162d4153cda21f7"
     },
+    "insight": {
+      "Package": "insight",
+      "Version": "0.12.0",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "289744a551d87fb383e23c823aaf88c6"
+    },
     "isoband": {
       "Package": "isoband",
       "Version": "0.2.2",
@@ -508,6 +522,13 @@
       "Source": "Repository",
       "Repository": "CRAN",
       "Hash": "2657f20b9a74c996c602e74ebe540b06"
+    },
+    "kableExtra": {
+      "Package": "kableExtra",
+      "Version": "1.3.1",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "fa7f610e7eadfc9c47d501a333e03f1a"
     },
     "knitr": {
       "Package": "knitr",
@@ -696,6 +717,13 @@
       "RemoteRef": "devel",
       "RemoteSha": "0b4a9a79d66364ca0cb8a9e80e097b29679b0eb0",
       "Hash": "14fd106a7dc4aa50111da1f911f7ece8"
+    },
+    "performance": {
+      "Package": "performance",
+      "Version": "0.6.1",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "a487e721e67b3a2f13a9ea5fe38e6221"
     },
     "pillar": {
       "Package": "pillar",
@@ -1025,6 +1053,13 @@
       "Source": "Repository",
       "Repository": "CRAN",
       "Hash": "ce4f6271baa94776db692f1cb2055bee"
+    },
+    "webshot": {
+      "Package": "webshot",
+      "Version": "0.5.2",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "e99d80ad34457a4853674e89d5e806de"
     },
     "whisker": {
       "Package": "whisker",
