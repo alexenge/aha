@@ -1,0 +1,70 @@
+---
+title             : "Appendix"
+shorttitle        : ""
+
+author: 
+  - name        : ""
+    affiliation : ""
+
+affiliation:
+  - id          : ""
+    institution : ""
+
+floatsintext      : yes
+figurelist        : no
+tablelist         : no
+footnotelist      : no
+linenumbers       : no
+mask              : no
+draft             : no
+numbersections    : true
+
+documentclass     : "apa7"
+classoption       : "man"
+output            :
+  papaja::apa6_pdf:
+    latex_engine  : "xelatex"
+
+header-includes:
+  - \usepackage[export]{adjustbox}
+  - \usepackage{makecell}
+  - \renewcommand{\cellset}{\renewcommand{\arraystretch}{0.7}}
+---
+
+## Appendix A: Stimuli {.unnumbered}
+
+\bigskip
+
+\setcounter{table}{0}
+\renewcommand{\thetable}{A\arabic{table}}
+
+```{r appendix, include=TRUE, warning=FALSE, message=FALSE, results="asis"}
+# Load packages
+library(papaja)
+library(tidyverse)
+
+# Print table of materials
+read_tsv("materials/items.txt", col_types = cols()) %>%
+  mutate(
+    match_ger = paste0(match_noun_ger, ", ", match_verb_ger),
+    match_en = paste0("{[", match_noun_en, ", ", match_verb_en, "]}"),
+    nonmatch_ger = paste0(nonmatch_noun_ger, ", ", nonmatch_verb_ger),
+    nonmatch_en = paste0("{[", nonmatch_noun_en, ", ", nonmatch_verb_en, "]}"),
+  ) %>%
+  transmute(
+    img = paste0("\\includegraphics[valign=c, scale=0.23]{../materials/unfamiliar/", item, ".png}"),
+    item = as.character(item),
+    match = paste(match_ger, match_en, sep = "\n") %>%
+      kableExtra::linebreak(align = "l", linebreaker = "\n"),
+    nonmatch = paste(nonmatch_ger, nonmatch_en, sep = "\n") %>%
+      kableExtra::linebreak(align = "l", linebreaker = "\n")
+  ) %>%
+  apa_table(
+    booktabs = TRUE,
+    col.names = c("Picture", "ID", "Matching keywords", "Non-matching keywords"),
+    escape = FALSE,
+    longtable = TRUE,
+    caption = "Unfamiliar Object Stimuli\\smallskip",
+    font_size = "footnotesize"
+  )
+```

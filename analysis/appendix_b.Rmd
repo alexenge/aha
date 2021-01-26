@@ -1,0 +1,68 @@
+---
+title             : "Appendix"
+shorttitle        : ""
+
+author: 
+  - name        : ""
+    affiliation : ""
+
+affiliation:
+  - id          : ""
+    institution : ""
+
+floatsintext      : yes
+figurelist        : no
+tablelist         : no
+footnotelist      : no
+linenumbers       : no
+mask              : no
+draft             : no
+numbersections    : true
+
+documentclass     : "apa7"
+classoption       : "man"
+output            :
+  papaja::apa6_pdf:
+    latex_engine  : "xelatex"
+---
+
+## Appendix B: Linear Mixed-Effects Models {.unnumbered}
+
+\noindent Linear mixed-effects models after model selection for Experiment 1:
+
+\footnotesize
+
+```{r exp1_formulas, include=TRUE}
+# Load packages
+library(purrr)
+
+# Define function to print the formulas
+print_formula <- function(model) cat(deparse(formula(model), width.cutoff = 75), sep = "\n")
+
+# Formulas for models for Experiment 1
+readRDS("analysis/export/exp1-models.RDS") %>% walk(~ print_formula (.x$model))
+```
+
+\normalsize
+
+\noindent Linear mixed-effects models after model selection for Experiment 2:
+
+\footnotesize
+
+```{r exp2_formulas, include=TRUE}
+# Formulas for models for Experiment 2
+readRDS("analysis/export/exp2-models.RDS") %>% walk(~ print_formula (.x$model))
+```
+
+\normalsize
+
+\noindent Linear mixed-effects models after model selection for Experiments 1 and 2 combined:
+
+\footnotesize
+
+```{r joint_formulas, include=TRUE}
+# Formulas for joint models
+readRDS("analysis/export/joint-models.RDS") %>% walk(~ print_formula (.x$model))
+```
+
+\normalsize
