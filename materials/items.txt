@@ -3,7 +3,7 @@ item	img	match_noun_ger	match_verb_ger	match_noun_en	match_verb_en	nonmatch_noun
 2	nudelmaschine.bmp	Makkaroni	formen	macaroni	forming	Kuh 	vom Zaun abhalten	cow	keeping away from the fence
 3	Knochensaege.bmp	Knochen	sägen	bones	sawing	Streckenmaß 	Sonnenlicht nutzen	distance measure	using sunrays
 4	Unkraut-Jaetzange.bmp	Unkraut 	jäten	weed	removing	Uhr	mit Wärme betreiben	clock	operating with heat
-5	mausefalle.bmp	Mausefalle	zuschnappen	mousetrap	snap-shutting	Brillenglas 	zuschneiden	eyeglass lense	cutting
+5	mausefalle.bmp	Mausefalle	zuschnappen	mousetrap	snap-shutting	Brillenglas 	zuschneiden	eyeglass lens	cutting
 6	Goldmuenzen-Waage.bmp	Goldmünzen 	wiegen	gold coin	weighing	Farbe 	vom Fenster abschleifen	paint	scraping off the window
 7	Knie-Schraubstock.bmp	Knie	fixieren	knee	fixating	Buchstaben 	tippen	letter	typing
 8	Eierkarton-Presse.bmp	Eierkarton 	pressen	egg carton	pressing	Tabak 	zermahlen	tobacco	pulverize
@@ -53,7 +53,7 @@ item	img	match_noun_ger	match_verb_ger	match_noun_en	match_verb_en	nonmatch_noun
 52	mandelnentferner.bmp	Mandeln 	operieren	kidneys	operating	Film 	aufspulen	film roll	winding
 53	toaster.bmp	Toastbrot 	rösten	toast	roasting	Autobatterie 	Spannung testen	car battery	measuring voltage
 54	steigbuegel.bmp	Fußstütze	reiten	footrest	horseback riding	Stromstärke	messen	current	measuring
-55	feuertuergelenk.bmp	Türgelenk	Feuer überstehen	door hinge	survining fires	Botschaft 	telegrafieren	message	telegraphing
+55	feuertuergelenk.bmp	Türgelenk	Feuer überstehen	door hinge	surviving fires	Botschaft 	telegrafieren	message	telegraphing
 56	einkufiger_schlitten.bmp	Schnee	rodeln	snow	sleighing	Dampf	zerstäuben	steam	spraying
 57	Nussknacker.bmp	Nüsse 	aufbrechen	nuts	cracking	Ziegelsteine 	formen	bricks	forming
 58	elektrisches_radiergummi.bmp	Radiergummi 	mit Strom betreiben	eraser	operating with electricity	Münzen 	aufbewahren	coins	storing
@@ -62,13 +62,13 @@ item	img	match_noun_ger	match_verb_ger	match_noun_en	match_verb_en	nonmatch_noun
 61	schwimmer.bmp	Angel	Köder markieren	fishing rod	marking bait	Baum 	erklettern	tree	climbing
 62	Selbstreinigendes_Katzenklo.bmp	Katzenklo	sich selbst reinigen	litter box	self-cleaning	Tankfüllstand	messen	fuel tank level	gauging
 63	pleximeter.bmp	Körper	untersuchen	body	examining	Schuhe 	auf Eis laufen	shoes	walking on ice
-64	brillenglasschneidemaschine.bmp	Brillenglas 	zuschneiden	eyeglass lense	cutting	Saatgut	gleichmäßig aussäen	seeds	sowing evenly
+64	brillenglasschneidemaschine.bmp	Brillenglas 	zuschneiden	eyeglass lens	cutting	Saatgut	gleichmäßig aussäen	seeds	sowing evenly
 65	drahtbieger.bmp	Draht 	wickeln	wire	winding	Bergbaustollen 	beleuchten	mining tunnel	lightening
 66	Buecher-Offenhalter.bmp	Buch	offen halten	book	opening	Sprengstoffexplosion	auslösen	dynamite explosion	triggering
 67	haecksler.bmp	Feldanbau 	häckseln	harvest	chopping	Draht 	wickeln	wire	winding
 68	Roemisches_Senklot.bmp	Schnurlot 	absenken	plummet	letting down	Korken	formen	bottle cork	forming
 69	filar_micrometer.bmp	Sternenbilder 	vermessen	stellar constellation	measuring	Schnurlot 	absenken	plummet	letting down
-70	Morse-Geraet.bmp	Nachricht 	morsen	message	signalling	Feldanbau	häckseln	harvest	chopping
+70	Morse-Geraet.bmp	Nachricht 	morsen	message	signaling	Feldanbau	häckseln	harvest	chopping
 71	Stampf-Fiedel.bmp	Musikgerät 	stampfen	musical instrument	stamping	Goldmünzen	wiegen	gold coin	weighing
 72	schneekette.bmp	Schuhe 	auf Eis laufen	shoes	walking on ice	Geschwindigkeit 	ermitteln	speed	determining
 73	mechanisches_tachometer.bmp	Geschwindigkeit	ermitteln	speed	determining	Mausefalle 	zuschnappen	mousetrap	snap-shutting
@@ -80,11 +80,11 @@ item	img	match_noun_ger	match_verb_ger	match_noun_en	match_verb_en	nonmatch_noun
 79	tibetischer_leierkasten.bmp	Leierkasten 	klingen	barrel organ	making sounds	Fass 	anheben	barrel	lifting
 80	Buchbinder.bmp	Buch 	binden	book	binding	Löcher	bohren	hole	drilling
 81	korkenpresse.bmp	Kork	flach pressen	cork	pressing flat	Elektroschock 	spielen	electric shock	playing
-82	tablettenteiler.bmp	Tabletten	zerteilen	pill	splitting	Blumentopf 	sich selbst wässern	flower pot	self-watering
+82	tablettenteiler.bmp	Tabletten	zerteilen	pill	splitting	Blumentopf 	sich selbst wässern	flowerpot	self-watering
 83	hebel_fuer_fassbauer.bmp	Fass 	anheben	barrel	lifting	Mikroskop-Proben	schneiden	microscopic samples	slicing
 84	pferdeschuh.bmp	Pferd 	im Moor laufen	horse	walking in the moor	Luft 	abpumpen	air	pumping out
 85	Rituelles_Hackmesser.bmp	altes Ritual	hacken	ancient ritual	chopping	Spannung	erzeugen	electric current	making
-86	Historische_Waschmaschine.bmp	Kleidung	im Eimer waschen	clothes	washing in a bucket	Türgelenk 	Feuer überstehen	door hinge	survining fires
+86	Historische_Waschmaschine.bmp	Kleidung	im Eimer waschen	clothes	washing in a bucket	Türgelenk 	Feuer überstehen	door hinge	surviving fires
 87	Maiskolben-Entkoerner.bmp	Maiskolben 	entkörnen	corncob	removing grains	Brief 	wiegen	letter	weighing
 88	Ball-Wurfmaschine.bmp	Ball 	katapultieren	ball	catapulting	Radiergummi	mit Strom betreiben	eraser	operating with electricity
 89	planimeter.bmp	Zeichnungen	vermessen	drawings	measuring	Brenner	löten	burner	soldering
@@ -96,13 +96,13 @@ item	img	match_noun_ger	match_verb_ger	match_noun_en	match_verb_en	nonmatch_noun
 95	Fischwaage.bmp	Fisch	wiegen	fish	weighing	Herz 	durch Maschine ersetzen	heart	replacing with machine
 96	kerzenloescher.bmp	Kerzen	löschen	candles	extinguishing	Körper 	trainieren	body	examining
 97	Korkenpresse_2.bmp	Korken	formen	bottle cork	forming	Sternenbilder	vermessen	stellar constellation	measuring
-98	Mechanische_Erektionshilfe.bmp	Erektion 	helfen	erection	helping	Waffe 	werfen	weapn	throwing
+98	Mechanische_Erektionshilfe.bmp	Erektion 	helfen	erection	helping	Waffe 	werfen	weapon	throwing
 99	heliotrop.bmp	Streckenmaß 	Sonnenlicht nutzen	distance measure	using sunrays	Kartoffeln 	stampfen	potatoes	mashing
 100	Luftdruckmessgeraete.bmp	Luftdruck 	messen	air pressure	measuring	Knochen 	sägen	bones	sawing
 101	pianostimmgeraet.bmp	Piano	stimmen	piano	tuning	Eierkarton	pressen	egg carton	pressing
 102	Handzentrifuge.bmp	von Hand	zentrifugieren	by hand	centrifugating	Lieferungen 	abzählen	deliveries	counting
-103	Kartoffelstampfer.bmp	Kartoffeln 	stampfen	potatoes	mashing	Nachricht 	morsen	message	signalling
-104	ninjasterne.bmp	Waffe	werfen	weapn	throwing	elektrische Spannung 	prüfen	electric current	measuring
+103	Kartoffelstampfer.bmp	Kartoffeln 	stampfen	potatoes	mashing	Nachricht 	morsen	message	signaling
+104	ninjasterne.bmp	Waffe	werfen	weapon	throwing	elektrische Spannung 	prüfen	electric current	measuring
 105	dieselstandmessgeraet.bmp	Tankfüllstand 	messen	fuel tank level	gauging	Tonpott	trommeln	clay pot	drumming
 106	uhrwerk.bmp	Uhrzeit 	anzeigen	time	displaying	altes Ritual 	hacken	ancient ritual	chopping
 107	Windgeschwindigkeitsmesser.bmp	Windgeschwindigkeit	messen	wind speed	measuring	Waffe 	entflammen	weapon	inflaming
@@ -115,7 +115,7 @@ item	img	match_noun_ger	match_verb_ger	match_noun_en	match_verb_en	nonmatch_noun
 114	Sonnenlichtsintensitaetsmesser.bmp	Sonnenlicht	Intensität messen	sunlight	measure intensity	Krawatten 	aufhängen	necktie	hanging up
 115	wagenradschloss.bmp	Kutschrad	anschließen	carriage wheel	locking	Angelschnur	kurbeln	fishing line	winding
 116	Eierwaage.bmp	Eier 	wiegen	eggs	weighing	Leierkasten	klingen	barrel organ	making sounds
-117	Selbstwaessernder_Blumentopf.bmp	Blumentopf	sich selbst wässern	flower pot	self-watering	Glas 	schneiden	glass	cutting
+117	Selbstwaessernder_Blumentopf.bmp	Blumentopf	sich selbst wässern	flowerpot	self-watering	Glas 	schneiden	glass	cutting
 118	Siebenmeilenstiefel.bmp	Schritte	vergrößern	steps	extending	Tabletten	zerteilen	pill	splitting
 119	Muenzspender.bmp	Münzen	aufbewahren	coins	storing	Kutschrad	anschließen	carriage wheel	locking
 120	loetlampe.bmp	Brenner 	löten	burner	soldering	Flaschenkorken einführen	einführen	bottle cork	inserting

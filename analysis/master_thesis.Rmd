@@ -102,7 +102,7 @@ Berlin, den 26.01.2021&\\
 
 \begin{center}\textbf{Acknowledgments}\end{center}
 
-This thesis presents a re-analysis of the data from two experiments that had already been conducted before I joined the Neurocognitive Psychology Lab at Humboldt-Universität zu Berlin. Therefore, it would not have been possible for me to write it without the time and effort that Franziska Süß, Nele Langosch, and Rasha Abdel Rahman have spent conceptualizing and running these experiments, along with the help of all participants, research assistants, and technical staff who contributed to the data collection. I would also like to thank all current members of the lab for their guidance and fruitful discussions on the topics of data analysis and reporting. Valuable feedback on an earlier draft of this thesis was given by Anna Kuhlen, Annika Just, and Garrett Widener. Finally, I am most grateful to my parents, friends, and supervisors: During the journey of writing this thesis, their support has often literally changed my view of the world around me to the better.
+This thesis presents a re-analysis of the data from two experiments that had already been conducted before I joined the Neurocognitive Psychology Lab at Humboldt-Universität zu Berlin. Therefore, it would not have been possible for me to write it without the time and effort that Franziska Süß, Nele Langosch, and Rasha Abdel Rahman have spent conceptualizing and running these experiments, along with the help of all participants, research assistants, and technical staff who contributed to the data collection. I would also like to thank all current members of the lab for their guidance and fruitful discussions on the topics of data analysis and reporting. Valuable feedback on an earlier draft of this thesis was provided by Anna Kuhlen, Annika Just, and Garrett Widener. Finally, I am most grateful to my parents, friends, and supervisors: During the journey of writing this thesis, their support has often literally changed my view of the world around me to the better.
 
 <!-- Empty page -->
 \clearpage\mbox{}\thispagestyle{empty}\clearpage
@@ -153,7 +153,6 @@ This thesis presents a re-analysis of the data from two experiments that had alr
 ```
 
 <!-- Appendix B -->
-\newpage
 
 ```{r appendix_b, child = "appendix_b.Rmd"}
 ```
@@ -171,9 +170,6 @@ I hereby declare that the present thesis has not been submitted as a part of any
 \noindent
 Alexander Enge\newline
 Berlin, 26.01.2021
-
-<!-- Empty page -->
-\clearpage\mbox{}\thispagestyle{empty}\clearpage
 
 <!-- Empty page -->
 \clearpage\mbox{}\thispagestyle{empty}\clearpage

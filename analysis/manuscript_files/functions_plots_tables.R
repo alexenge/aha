@@ -22,7 +22,7 @@ plot_trials <- function(){
     annotate("rect", xmin = 17, xmax = 37, ymin = 61, ymax = 81, color = "black", fill = "white") +
     annotate("text", x = -27, y = 65.3, label = "+", size = 20 / .pt, family = "Helvetica") +
     annotate("text", x = -9, y = 55, label = "potatoes\nmashing", size = 10 / .pt, family = "Helvetica", color = color_informed) +
-    annotate("text", x = -9, y = 79, label = "message\nsignalling", size = 10 / .pt, family = "Helvetica", color = color_naive) +
+    annotate("text", x = -9, y = 79, label = "message\nsignaling", size = 10 / .pt, family = "Helvetica", color = color_naive) +
     annotate("text", x = 9, y = 67, label = "*", size = 30 / .pt, family = "Helvetica") +
     draw_image("analysis/manuscript_files/potato_masher.png", x = 18, y = 62, width = 18, height = 18) +
     # Timings
