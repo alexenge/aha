@@ -21,7 +21,7 @@ RUN install2.r -s --error \
         mne==0.21.2 \
         nbrsessionproxy==0.8.0 \
         notebook==6.3.0 \
-        pandas==1.1.3
+        pandas==1.1.3 \
         scikit-learn==0.23.2
 
 # Set working directory
