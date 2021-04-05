@@ -138,7 +138,7 @@ All the previously mentioned studies have in common that they investigated the e
 
 The first question is if we can detect any electrophysiological correlates of *semantic insight*, that is, the critical presentation during which an understanding of the previously unfamiliar object is happening (instead of asking if this understanding leads to differential effects in an orthogonal task later on). The second question is how much learning is actually necessary before reliable top-down effects of knowledge on ERP amplitudes can be obtained: Does it actually take dozens of repetitions per object or may a single exposure to the object together with the relevant semantic information be enough? The third and closely related question is about the nature of the effects of knowledge on perception: Are they reflecting genuine top-down effects of the semantic system altering perception online (while the object is being perceived), or do they merely reflect the (re-)activation of stored representations of the objects which have been altered over the course of the learning process? By measuring the ERPs before, during, and after participants received semantic hints about unfamiliar objects, we were able to provide tentative answers to all three of these questions.
 
-In the two experiments subsequently reported, participants were presented with real-word objects that were presumed to be unfamiliar to most of them. They first viewed each of these objects without any semantic information. This first part served as a naive baseline to rule out that ERPs would differ in response to the objects based solely on low-level visual differences. Next, participants viewed each unfamiliar object for a second time, now preceded by verbal keywords. These keywords could either be matching the typical function of the object, thus making it possible for participants to understand what kind of object they were viewing, or they could be non-matching by describing the function of a different object, thus keeping the perception of the object semantically naive. During this second part, we were able to measure the online influence of semantic insight on object-evoked ERPs as it happened. Finally, the objects were presented for a third time (without keywords, as in the first part) to investigate downstream effects of having acquired semantic knowledge about them---thereby mimicking previous studies [e.g., @abdelrahman2008; @samaha2018; @weller2019]. In all three parts, we examined the influence of semantic information on ERPs associated with lower-level visual perception (P1 component, 100--150 ms), higher-level visual perception (N170 component, 150--200 ms), and semantic processing (N400 component, 400--700 ms).
+In the two experiments subsequently reported, participants were presented with real-world objects that were presumed to be unfamiliar to most of them. They first viewed each of these objects without any semantic information. This first part served as a naive baseline to rule out that ERPs would differ in response to the objects based solely on low-level visual differences. Next, participants viewed each unfamiliar object for a second time, now preceded by verbal keywords. These keywords could either be matching the typical function of the object, thus making it possible for participants to understand what kind of object they were viewing, or they could be non-matching by describing the function of a different object, thus keeping the perception of the object semantically naive. During this second part, we were able to measure the online influence of semantic insight on object-evoked ERPs as it happened. Finally, the objects were presented for a third time (without keywords, as in the first part) to investigate downstream effects of having acquired semantic knowledge about them---thereby mimicking previous studies [e.g., @abdelrahman2008; @samaha2018; @weller2019]. In all three parts, we examined the influence of semantic information on ERPs associated with lower-level visual perception (P1 component, 100--150 ms), higher-level visual perception (N170 component, 150--200 ms), and semantic processing (N400 component, 400--700 ms).
 
 # Experiment 1
 
@@ -474,6 +474,210 @@ range(rejected_exp1)   # Range
 # Load grand-averaged ERPs and linear mixed models
 evokeds_exp1 <- readRDS("analysis/export/exp1-gaverages.RDS")
 models_exp1 <- readRDS("analysis/export/exp1-models.RDS")
+```
+
+```{r bayes, eval=FALSE}
+library(brms)
+options(mc.cores = 6)
+
+data_joint_subs %>%
+  filter(condition %in% c("Informed", "Naive")) %>%
+  droplevels() %>%
+  select(part, condition, participant, item, P1, N170, N400) %>%
+  na.omit() %>%
+  as.list() -> data_brm
+
+contrasts_condition <- t(cbind(c("Informed" = 1, "Naive" = -1)))
+contrasts_part <- t(cbind(c("I" = -1, "II" = 1, "III" = 0), c("I" = 0, "II" = -1, "III" = 1)))
+contrasts(data_brm$condition) <- MASS::ginv(contrasts_condition)
+contrasts(data_brm$part) <- MASS::ginv(contrasts_part)
+
+formula <- P1 ~ part / condition + (part / condition | participant) + (part / condition | item)
+prior <- set_prior("cauchy(0, 0.707)", class = "b")
+
+mod_brm <- brm(
+  formula = formula,
+  data = data_brm,
+  family = gaussian(),
+  prior = prior,
+  sample_prior = "yes",
+  save_pars = save_pars(all = TRUE),
+  chains = 4,
+  iter = 20000,
+  warmup = 2000,
+  cores = 4,
+  control = list(adapt_delta = 0.9)
+)
+
+# mod_prior <- brm(formula = formula, data = data_brm, prior = prior, sample_prior = "only")
+# prior_summary(mod_prior)
+# mcmc_plot(mod_prior)
+#
+# mod_post <- update(mod_prior, sample_prior = "yes")
+# summary(mod_post)
+# mcmc_plot(mod_post, pars = "b")
+# plot(mod_post)
+
+hypothesis <- paste0("part", c("I", "II", "III"), ":condition1 = 0")
+bf_brms <- hypothesis(mod_post, hypothesis = hypothesis)
+bf_brms$hypothesis$bf10 <- 1 / bf_brms$hypothesis$Evid.Ratio
+bf_brms
+
+bf_bayestest <- bayestestR::bayesfactor(mod_post)
+bf_bayestest
+
+mod_brm_s <- brm(
+  bf(P1 ~ part / condition + (part / condition | participant) + (part / condition | item),
+     sigma ~ 1 + (1 | participant)),
+  prior = c(
+    prior(cauchy(0, 0.707), class = b),
+    prior(student_t(3, 0, 5.7), class = Intercept, dpar = sigma),
+    prior(normal(0, 5), class = sd, group = participant, dpar = sigma)),
+  data = data_brm,
+  family = gaussian(),
+  sample_prior = "yes",
+  save_pars = save_pars(all = TRUE),
+  chains = 4,
+  iter = 20000,
+  warmup = 2000,
+  cores = 4,
+  control = list(adapt_delta = 0.9)
+)
+```
+
+```{python tfr, eval=FALSE}
+import mne
+import numpy as np
+#import matplotlib.pyplot as plt
+
+# epochs = preproc(
+#   vhdr_fname="data/exp1/eeg/Vp0004.vhdr",
+#   metadata=r.data_exp1.query("participant == 'VP_04'"),
+#   n_components=15,
+#   method="fastica",
+#   l_freq=None,
+#   h_freq=None,
+#   event_id=dict(match=221, mismatch=222),
+#   tmin=-0.5,
+#   tmax=1.498,
+#   baseline=(-0.2, 0),
+#   reject=dict(eeg=200)
+# )
+# epochs.save("analysis/export/vp04-epo.fif")
+
+epochs = mne.read_epochs("analysis/export/unf-exp1-epo.fif")
+
+evokeds = compute_evokeds(epochs_c, grand=True, data_only=False)
+evokeds_i = evokeds["II"]["Informed"]
+evokeds_n = evokeds["II"]["Naive"]
+
+freqs = np.logspace(*np.log10([6, 35]), num=8)
+n_cycles = freqs / 2.
+power_i = mne.time_frequency.tfr_morlet(evokeds_i, freqs=freqs, n_cycles=n_cycles, use_fft=True, return_itc=False, average=True, n_jobs=1)
+power_n = mne.time_frequency.tfr_morlet(evokeds_n, freqs=freqs, n_cycles=n_cycles, use_fft=True, return_itc=False, average=True, n_jobs=1)
+power_i = power_i.apply_baseline(mode='mean', baseline=(-.400, -.100))
+power_n = power_n.apply_baseline(mode='mean', baseline=(-.400, -.100))
+
+power_d = power_i.copy()
+power_d.data = power_i.data - power_n.data
+
+
+power_d.plot()
+
+
+# epochs.resample(250., npad='auto')
+
+roi = r.comps["roi"][0] + r.comps["roi"][1]
+idxs = np.where(np.in1d(epochs.ch_names, roi))
+
+epochs_i = epochs["part == 'II' & condition == 'Informed'"].pick_channels(roi)
+epochs_n = epochs["part == 'II' & condition == 'Naive'"].pick_channels(roi)
+
+epochs_c = mne.channels.combine_channels(epochs, groups=dict(avg=range(62)))
+
+epochs_c.metadata = epochs.metadata
+epochs_s = epochs_c["part == 'II'"]
+# epochs_i = epochs_s["condition == 'Informed'"]
+# epochs_n = epochs_s["condition == 'Naive'"]
+
+# power_i = mne.time_frequency.tfr_morlet(epochs_i, freqs=freqs, n_cycles=n_cycles, use_fft=True, return_itc=False, average=True, n_jobs=1)
+# power_n = mne.time_frequency.tfr_morlet(epochs_n, freqs=freqs, n_cycles=n_cycles, use_fft=True, return_itc=False, average=True, n_jobs=1)
+# power_d = power_i - power_n
+# 
+# power_d.plot([0], baseline=(-0.5, 0), mode='percent', vmin=-1, vmax=1)
+
+# define frequencies of interest (log-spaced)
+#freqs = np.logspace(*np.log10([6, 35]), num=8)
+freqs = np.arange(3, 50, 1.6)
+#n_cycles = freqs / 2.  # different number of cycle per frequency
+n_cycles = np.linspace(3, 10, len(freqs))
+power = mne.time_frequency.tfr_morlet(epochs_c, freqs=freqs, n_cycles=n_cycles, use_fft=True, return_itc=False, average=True, n_jobs=1)
+
+power.plot([0], baseline=(-0.5, 0), mode='percent')
+
+power.plot_topo(baseline=(-0.5, 0), mode='logratio')
+power.plot_topomap(ch_type='eeg', tmin=0.15, tmax=0.2, fmin=8, fmax=12, baseline=(-0.5, 0), mode='logratio', title='Alpha')
+power.plot_topomap(ch_type='eeg', tmin=0.15, tmax=0.2, fmin=13, fmax=25, baseline=(-0.5, 0), mode='logratio', title='Beta')
+
+
+import numpy as np
+import matplotlib.pyplot as plt
+from mne.baseline import rescale
+from mne.stats import bootstrap_confidence_interval
+iter_freqs = [
+    ('Theta', 4, 7),
+    ('Alpha', 8, 12),
+    ('Beta', 13, 25),
+    ('Gamma', 30, 45)
+]
+raw_fname = "data/exp1/EEG/Vp0004.vhdr"
+tmin, tmax = -0.5, 1.498
+baseline = None
+frequency_map = list()
+event_id = dict(match=222)
+for band, fmin, fmax in iter_freqs:
+    # (re)load the data to save memory
+    raw = mne.io.read_raw_brainvision(raw_fname, scale=1e6, preload=True)
+    raw.filter(fmin, fmax, n_jobs=1,  # use more jobs to speed up.
+               l_trans_bandwidth=1,  # make sure filter params are the same
+               h_trans_bandwidth=1)  # in each band and skip "auto" option.
+    events, _ = mne.events_from_annotations(raw, verbose=False)
+    epochs = mne.Epochs(raw, events, event_id, tmin, tmax, baseline=baseline,
+                        reject=dict(eeg=200), preload=True)
+    # remove evoked response
+    epochs.subtract_evoked()
+    # get analytic signal (envelope)
+    epochs.apply_hilbert(envelope=True)
+    frequency_map.append(((band, fmin, fmax), epochs.average()))
+    del epochs
+del raw
+# Helper function for plotting spread
+def stat_fun(x):
+    """Return sum of squares."""
+    return np.sum(x ** 2, axis=0)
+# Plot
+fig, axes = plt.subplots(4, 1, figsize=(10, 7), sharex=True, sharey=True)
+colors = plt.get_cmap('winter_r')(np.linspace(0, 1, 4))
+for ((freq_name, fmin, fmax), average), color, ax in zip(
+        frequency_map, colors, axes.ravel()[::-1]):
+    times = average.times * 1e3
+    gfp = np.sum(average.data ** 2, axis=0)
+    gfp = mne.baseline.rescale(gfp, times, baseline=(None, 0))
+    ax.plot(times, gfp, label=freq_name, color=color, linewidth=2.5)
+    ax.axhline(0, linestyle='--', color='grey', linewidth=2)
+    ci_low, ci_up = bootstrap_confidence_interval(average.data, random_state=0,
+                                                  stat_fun=stat_fun)
+    ci_low = rescale(ci_low, average.times, baseline=(None, 0))
+    ci_up = rescale(ci_up, average.times, baseline=(None, 0))
+    ax.fill_between(times, gfp + ci_up, gfp - ci_low, color=color, alpha=0.3)
+    ax.grid(True)
+    ax.set_ylabel('GFP')
+    ax.annotate('%s (%d-%dHz)' % (freq_name, fmin, fmax),
+                xy=(0.95, 0.8),
+                horizontalalignment='right',
+                xycoords='axes fraction')
+axes.ravel()[-1].set_xlabel('Time [ms]')
+plt.show()
 ```
 
 ```{r exp1-plot, include=TRUE, fig.height=11, fig.cap = "(ref:figure-1-caption)"}
