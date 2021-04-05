@@ -93,10 +93,10 @@ library(cowplot)
 knitr::opts_chunk$set(include = FALSE, fig.align = "center", out.width = "100%", fig.width = 10)
 
 # Link to the bibliography file
-r_refs("manuscript_files/r-references.bib")
+r_refs("analysis/manuscript_files/r-references.bib")
 
 # Source plotting functions
-source("manuscript_files/functions_plots_tables.R")
+source("analysis/manuscript_files/functions_plots_tables.R")
 
 # Create an export folder for results
 dir.create("export", showWarnings = FALSE)
@@ -327,18 +327,16 @@ preproc_params <- list(
 
 # Preprocess the EEG for Experiment 1 in Python
 paste0("data/eeg/exp", 1:2) %>%
-  list.files(pattern = ".vhdr", full.names = TRUE)
-
-map2(
-  .x = list.files("data/exp1/EEG", pattern = ".vhdr", full.names = TRUE),
-  .y = behav_exp1,
-  ~ do.call(py$preproc, c(list(vhdr_fname = .x, metadata = .y), preproc_params))
-) %>%
+  list.files(pattern = ".vhdr", full.names = TRUE) %>%
+  map2(
+    .y = behav,
+    ~ do.call(py$preproc, c(list(vhdr_fname = .x, metadata = .y), preproc_params))
+  ) %>%
   # Concatenate epochs of all participants
-  py$mne$epochs$concatenate_epochs() -> epochs_exp1
+  py$mne$epochs$concatenate_epochs() -> epochs
 
 # Backup epochs to the export folder
-epochs_exp1$save("export/exp1-epo.fif")
+epochs$save("export/aha-epo.fif")
 
 # Compute mean ERP amplitudes and bind to the behavioral data
 pmap_dfc(comps, py$compute_erps, epochs = epochs_exp1) %>%
@@ -1252,7 +1250,7 @@ While the limited spatial resolution of the EEG precludes a precise localization
 
 On a theoretical level, the top-down modulation of these visual ERPs by semantic information challenges a modular view of visual perception [@firestone2016; @fodor1983; @pylyshyn1999; but see @clarke2020]. However, proponents of such a modular view have pointed out important shortcomings of previous studies that claimed to demonstrate top-down effects of cognition on perception [@firestone2016; @machery2015]. We took care to address as many of these shortcomings as possible: First, we showed that no effect had been present before any semantic information was being presented (in the pre-insight part). Second, we used an objective and time-resolved measure (ERPs) to disentangle effects with a perceptual locus from those with a post-perceptual locus. Third, we reduced response and demand biases by keeping the manipulation (i.e., matching or non-matching keywords) obscure to the participants and by including well-known objects as filler stimuli. Fourth, we precluded low-level visual differences between conditions by counterbalancing the assignment of objects to conditions across participants. Fifth, we reduced priming and attentional effects by presenting all objects in a randomized order and at the same location. Sixth, we reduced memory effects by using only unfamiliar objects and by measuring online ERPs rather than delayed behavioral responses. We hope that these procedures have effectively ruled out some of the most important alternative explanations for the top-down effects that we have observed, thus making a more compelling case against the cognitive impenetrability of perception.
 
-An interactive view of object vision with an abundance of top-down feedback also challenges the predominantly feed-forward models in computer vision [e.g., @marr1982; @serre2007]. In fact, the lack of a semantic knowledge base that dynamically interacts with the processing of lower-level visual features may be one key reason why even state-of-the-art deep-learning algorithms need orders of magnitude more training examples to achieve human-level performance in object recognition. For these network models, single-trial learning of previously unfamiliar objects, as was observed on the behavioral and on the neurophysiological level in the present study, seems to be out of reach until they overcome this "barrier of meaning" [@mitchell2020]. Drawing inspiration from cognitive psychology and human neuroscientific data may help to make these models more biologically plausible and, at the same time, more data efficient.
+An interactive view of object vision with an abundance of top-down feedback also challenges the predominantly feed-forward models in computer vision [e.g., @marr1982; @lindsay2020]. In fact, the lack of a semantic knowledge base that dynamically interacts with the processing of lower-level visual features may be one key reason why even state-of-the-art deep-learning algorithms need orders of magnitude more training examples to achieve human-level performance in object recognition. For these network models, single-trial learning of previously unfamiliar objects, as was observed on the behavioral and on the neurophysiological level in the present study, seems to be out of reach until they overcome this "barrier of meaning" [@mitchell2020]. Drawing inspiration from cognitive psychology and human neuroscientific data may help to make these models more biologically plausible and, at the same time, more data efficient.
 
 A theoretical framework that would explicitly predict or explain the observed P1 and N170 effects in our study is lacking at present. The effects are consistent, however, with the reverse hierarchy theory [@ahissar2004; @hochstein2002] which posits that objects first enter our visual consciousness at an abstract, conceptual level. Once this initial "vision at a glance" has taken place, feedback connections to earlier layers of the visual system are being accessed to extract the relevant lower-level features ("vision with scrutiny"). This reverse trajectory down the visual hierarchy may explain (a) the semantically induced changes to the fMRI signal in LOC and retinotopic cortex [@hsieh2010] as well as (b) the modulations of early visual ERP components observed in the present study and others [@abdelrahman2008; @maier2014; @maier2019; @samaha2018; @weller2019]. Besides this specific theory, an important role of top-down mechanisms for vision or, more specifically, object recognition is also posited by the family of predictive coding and Bayesian inference theories [e.g., @clark2013; @lupyan2015; @panichello2013; @yuille2006]. Despite the theoretical advances, the mechanistic details of these top-down effects at the algorithmic and implementational level [@marr1982] remain to be clarified.
 

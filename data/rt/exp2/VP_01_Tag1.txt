@@ -1,0 +1,481 @@
+VPNummer	Version	l_r	Wdh	StimID	Bild	Stichwort1	Stichwort2	Bed	bek_unbek	BedTrigger	Taste	Tastencode	RT
+VP_01	1	l	211	121	schneebesen.bmp				bekannt	230	1	201	1308	
+VP_01	1	l	211	91	zaehlgeraet_fuer_lieferungen.bmp	Lieferungen	abzählen	richtig	unbekannt	221	3	203	1714	
+VP_01	1	l	211	121	kassette.bmp				bekannt	230	1	201	902	
+VP_01	1	l	211	121	pfeife.bmp				bekannt	230	1	201	1682	
+VP_01	1	l	211	121	tischtennisschlaeger.bmp				bekannt	230	1	201	724	
+VP_01	1	l	211	17	grammophonnadel.bmp	Ball	katapultieren	falsch	unbekannt	222	4	204	1384	
+VP_01	1	l	211	12	trimmdichgeraet.bmp	Körper	trainieren	richtig	unbekannt	221	4	204	1341	
+VP_01	1	l	211	76	galvanometer_2.bmp	Mandeln	operieren	falsch	unbekannt	222	3	203	1619	
+VP_01	1	l	211	114	Sonnenlichtsintensitaetsmesser.bmp	Krawatten	aufhängen	falsch	unbekannt	222	3	203	1126	
+VP_01	1	l	211	121	fueller.bmp				bekannt	230	1	201	876	
+VP_01	1	l	211	121	gewehr.bmp				bekannt	230	1	201	849	
+VP_01	1	l	211	21	spannungsgeraet.bmp	Fußstütze	reiten	falsch	unbekannt	222	2	202	1677	
+VP_01	1	l	211	121	handruehrgeraet.bmp				bekannt	230	1	201	756	
+VP_01	1	l	211	121	flaschenoeffner.bmp				bekannt	230	1	201	656	
+VP_01	1	l	211	121	buerostuhl.bmp				bekannt	230	1	201	1044	
+VP_01	1	l	211	121	kuechenmaschine.bmp				bekannt	230	1	201	946	
+VP_01	1	l	211	121	hacke.bmp				bekannt	230	1	201	788	
+VP_01	1	l	211	121	ventilator.bmp				bekannt	230	1	201	655	
+VP_01	1	l	211	118	Siebenmeilenstiefel.bmp	Tabletten	zerteilen	falsch	unbekannt	222	4	204	1517	
+VP_01	1	l	211	121	hammer.bmp				bekannt	230	1	201	732	
+VP_01	1	l	211	80	Buchbinder.bmp	Löcher	bohren	falsch	unbekannt	222	3	203	1615	
+VP_01	1	l	211	74	Brenneisen.bmp	Zeichen	einbrennen	richtig	unbekannt	221	3	203	933	
+VP_01	1	l	211	121	fernglas.bmp				bekannt	230	1	201	712	
+VP_01	1	l	211	52	mandelnentferner.bmp	Film	aufspulen	falsch	unbekannt	222	3	203	1765	
+VP_01	1	l	211	121	waschbecken.bmp				bekannt	230	1	201	830	
+VP_01	1	l	211	64	brillenglasschneidemaschine.bmp	Brillenglas	zuschneiden	richtig	unbekannt	221	2	202	1761	
+VP_01	1	l	211	121	astschere.bmp				bekannt	230	1	201	1553	
+VP_01	1	l	211	78	Messerschleifer.bmp	Schritte	vergrößern	falsch	unbekannt	222	2	202	2113	
+VP_01	1	l	211	34	dosenoeffner_fuer_faesser.bmp	Fass	öffnen	richtig	unbekannt	221	2	202	1124	
+VP_01	1	l	211	121	brille.bmp				bekannt	230	1	201	607	
+VP_01	1	l	211	110	Becher-Grammophon.bmp	Schlüsselloch	stanzen	falsch	unbekannt	222	3	203	2069	
+VP_01	1	l	211	19	Brikettpresse.bmp	Narkosemittel	abgeben	falsch	unbekannt	222	2	202	1743	
+VP_01	1	l	211	121	pfannenwender.bmp				bekannt	230	1	201	588	
+VP_01	1	l	211	121	giesskanne.bmp				bekannt	230	1	201	517	
+VP_01	1	l	211	121	spritze.bmp				bekannt	230	1	201	559	
+VP_01	1	l	211	121	trillerpfeife.bmp				bekannt	230	1	201	848	
+VP_01	1	l	211	41	Sprengstoff-Zuender.bmp	Sprengstoffexplosion	auslösen	richtig	unbekannt	221	3	203	1845	
+VP_01	1	l	211	121	stempel.bmp				bekannt	230	1	201	802	
+VP_01	1	l	211	97	Korkenpresse_2.bmp	Korken	formen	richtig	unbekannt	221	4	204	1487	
+VP_01	1	l	211	121	kaefig.bmp				bekannt	230	1	201	856	
+VP_01	1	l	211	2	nudelmaschine.bmp	Makkaroni	formen	richtig	unbekannt	221	4	204	1384	
+VP_01	1	l	211	121	eierschneider.bmp				bekannt	230	1	201	797	
+VP_01	1	l	211	44	Nussoelpressmaschine.bmp	Nussöl	pressen	richtig	unbekannt	221	2	202	1803	
+VP_01	1	l	211	99	heliotrop.bmp	Streckenmaß	Sonnenlicht nutzen	richtig	unbekannt	221	4	204	2173	
+VP_01	1	l	211	121	kopfhoerer.bmp				bekannt	230	1	201	576	
+VP_01	1	l	211	43	Bleistiftspitzer.bmp	Bleistift	anspitzen	richtig	unbekannt	221	4	204	1264	
+VP_01	1	l	211	121	regenschirm.bmp				bekannt	230	1	201	686	
+VP_01	1	l	211	42	pferdeueberschuh.bmp	Pferdehuf	Halt geben	richtig	unbekannt	221	4	204	982	
+VP_01	1	l	211	121	diabolo.bmp				bekannt	230	1	201	840	
+VP_01	1	l	211	121	naehmaschine.bmp				bekannt	230	1	201	786	
+VP_01	1	l	211	121	schaumloeffel.bmp				bekannt	230	1	201	584	
+VP_01	1	l	211	121	kehrschaufel.bmp				bekannt	230	1	201	648	
+VP_01	1	l	211	119	Muenzspender.bmp	Kutschrad	anschließen	falsch	unbekannt	222	3	203	1811	
+VP_01	1	l	211	121	rechen.bmp				bekannt	230	1	201	699	
+VP_01	1	l	211	37	Saemaschine.bmp	Saatgut	gleichmäßig aussäen	richtig	unbekannt	221	4	204	1345	
+VP_01	1	l	211	121	telefon.bmp				bekannt	230	1	201	559	
+VP_01	1	l	211	121	waage.bmp				bekannt	230	1	201	646	
+VP_01	1	l	211	121	dusche.bmp				bekannt	230	1	201	814	
+VP_01	1	l	211	121	thermometer.bmp				bekannt	230	1	201	579	
+VP_01	1	l	211	112	mundsperrer.bmp	Orgelton	erzeugen	falsch	unbekannt	222	4	204	1182	
+VP_01	1	l	211	46	plattenheber.bmp	Kleidung	im Eimer waschen	falsch	unbekannt	222	4	204	1324	
+VP_01	1	l	211	88	Ball-Wurfmaschine.bmp	Radiergummi	mit Strom betreiben	falsch	unbekannt	222	4	204	1638	
+VP_01	1	l	211	121	grill.bmp				bekannt	230	1	201	741	
+VP_01	1	l	211	24	weinfassoeffner.bmp	Tier	einfangen	falsch	unbekannt	222	4	204	1871	
+VP_01	1	l	211	116	Eierwaage.bmp	Leierkasten	klingen	falsch	unbekannt	222	4	204	1006	
+VP_01	1	l	211	121	sieb.bmp				bekannt	230	1	201	890	
+VP_01	1	l	211	49	mikrotom.bmp	heiße Platten	anheben	falsch	unbekannt	222	3	203	1993	
+VP_01	1	l	211	13	paint_scraper.bmp	Farbe	vom Fenster abschleifen	richtig	unbekannt	221	3	203	1389	
+VP_01	1	l	211	16	krawattenaufhaenger.bmp	Zeichnungen	vermessen	falsch	unbekannt	222	3	203	1608	
+VP_01	1	l	211	29	4erbohrer.bmp	Sonnenlicht	Intensität messen	falsch	unbekannt	222	0	0	0	
+VP_01	1	l	211	59	Treibhausheizgeraet.bmp	Messer	schleifen	falsch	unbekannt	222	4	204	1371	
+VP_01	1	l	211	121	leiter.bmp				bekannt	230	1	201	580	
+VP_01	1	l	211	96	kerzenloescher.bmp	Kerzen	löschen	richtig	unbekannt	221	2	202	1530	
+VP_01	1	l	211	22	anesthesia_inhaler.bmp	Nüsse	aufbrechen	falsch	unbekannt	222	3	203	1610	
+VP_01	1	l	211	121	tacker.bmp				bekannt	230	1	201	575	
+VP_01	1	l	211	121	sparschwein.bmp				bekannt	230	1	201	602	
+VP_01	1	l	211	121	kuchenform.bmp				bekannt	230	1	201	517	
+VP_01	1	l	211	107	Windgeschwindigkeitsmesser.bmp	Waffe	entflammen	falsch	unbekannt	222	3	203	2420	
+VP_01	1	l	211	121	ampel.bmp				bekannt	230	1	201	957	
+VP_01	1	l	211	85	Rituelles_Hackmesser.bmp	Spannung	erzeugen	falsch	unbekannt	222	4	204	1172	
+VP_01	1	l	211	121	foehn.bmp				bekannt	230	1	201	576	
+VP_01	1	l	211	56	einkufiger_schlitten.bmp	Dampf	zerstäuben	falsch	unbekannt	222	4	204	1497	
+VP_01	1	l	211	108	schluesselloch-cutter.bmp	Automat	Eier ausbrüten	falsch	unbekannt	222	4	204	1055	
+VP_01	1	l	211	121	uhr.bmp				bekannt	230	1	201	700	
+VP_01	1	l	211	121	mikrowelle.bmp				bekannt	230	1	201	584	
+VP_01	1	l	211	51	dampfzerstaeuber.bmp	Buch	binden	falsch	unbekannt	222	2	202	2882	
+VP_01	1	l	211	121	radiergummi.bmp				bekannt	230	1	201	1469	
+VP_01	1	l	211	121	saege.bmp				bekannt	230	1	201	679	
+VP_01	1	l	211	121	trichter.bmp				bekannt	230	1	201	819	
+VP_01	1	l	211	77	tierfalle.bmp	Maiskolben	entkörnen	falsch	unbekannt	222	4	204	1425	
+VP_01	1	l	211	121	taschenmesser.bmp				bekannt	230	1	201	741	
+VP_01	1	l	211	121	handschellen.bmp				bekannt	230	1	201	551	
+VP_01	1	l	211	121	gitarre.bmp				bekannt	230	1	201	467	
+VP_01	1	l	211	27	Korngarbengreifer.bmp	Treibhaus	heizen	falsch	unbekannt	222	3	203	1764	
+VP_01	1	l	211	95	Fischwaage.bmp	Fisch	wiegen	richtig	unbekannt	221	4	204	1744	
+VP_01	1	l	211	121	axt.bmp				bekannt	230	1	201	679	
+VP_01	1	l	211	8	Eierkarton-Presse.bmp	Eierkarton	pressen	richtig	unbekannt	221	4	204	1112	
+VP_01	1	l	211	35	karbidlampe.bmp	Bergbaustollen	beleuchten	richtig	unbekannt	221	4	204	1160	
+VP_01	1	l	211	121	pinzette.bmp				bekannt	230	1	201	708	
+VP_01	1	l	211	121	kamm.bmp				bekannt	230	1	201	468	
+VP_01	1	l	211	121	aschenbecher.bmp				bekannt	230	1	201	890	
+VP_01	1	l	211	117	Selbstwaessernder_Blumentopf.bmp	Glas	schneiden	falsch	unbekannt	222	4	204	1678	
+VP_01	1	l	211	73	mechanisches_tachometer.bmp	Geschwindigkeit	ermitteln	richtig	unbekannt	221	4	204	1251	
+VP_01	1	l	211	121	hanteln.bmp				bekannt	230	1	201	1015	
+VP_01	1	l	211	82	tablettenteiler.bmp	Blumentopf	sich selbst wässern	falsch	unbekannt	222	1	201	2132	
+VP_01	1	l	211	1	galvanometer.bmp	elektrische Spannung	prüfen	richtig	unbekannt	221	2	202	1961	
+VP_01	1	l	211	62	Selbstreinigendes_Katzenklo.bmp	Katzenklo	sich selbst reinigen	richtig	unbekannt	221	4	204	1472	
+VP_01	1	l	211	50	Glasresonanz-Cello.bmp	Kork	flach pressen	falsch	unbekannt	222	4	204	929	
+VP_01	1	l	211	72	schneekette.bmp	Schuhe	auf Eis laufen	richtig	unbekannt	221	3	203	1178	
+VP_01	1	l	211	121	zollstock.bmp				bekannt	230	1	201	727	
+VP_01	1	l	211	15	mikroskop.bmp	Pflanzenteile	vergrößern	richtig	unbekannt	221	4	204	1514	
+VP_01	1	l	211	79	tibetischer_leierkasten.bmp	Fass	anheben	falsch	unbekannt	222	1	201	1014	
+VP_01	1	l	211	121	rasenmaeher.bmp				bekannt	230	1	201	588	
+VP_01	1	l	211	94	seilschneider.bmp	Seil	schneiden	richtig	unbekannt	221	4	204	1136	
+VP_01	1	l	211	83	hebel_fuer_fassbauer.bmp	Mikroskop-Proben	schneiden	falsch	unbekannt	222	3	203	2227	
+VP_01	1	l	211	106	uhrwerk.bmp	altes Ritual	hacken	falsch	unbekannt	222	4	204	977	
+VP_01	1	l	211	68	Roemisches_Senklot.bmp	Schnurlot	absenken	richtig	unbekannt	221	4	204	1059	
+VP_01	1	l	211	47	filmrolle.bmp	Mund	offen halten	falsch	unbekannt	222	4	204	1482	
+VP_01	1	l	211	121	lampe.bmp				bekannt	230	1	201	662	
+VP_01	1	l	211	121	pfanne.bmp				bekannt	230	1	201	442	
+VP_01	1	l	211	121	milchschaeumer.bmp				bekannt	230	1	201	665	
+VP_01	1	l	211	54	steigbuegel.bmp	Stromstärke	messen	falsch	unbekannt	222	4	204	1195	
+VP_01	1	l	211	28	Briefwaage.bmp	Korngarbe	greifen	falsch	unbekannt	222	3	203	1271	
+VP_01	1	l	211	14	heizpilz.bmp	Außenbereich	heizen	richtig	unbekannt	221	4	204	1373	
+VP_01	1	l	211	100	Luftdruckmessgeraete.bmp	Luftdruck	messen	richtig	unbekannt	221	3	203	1741	
+VP_01	1	l	211	121	buerste.bmp				bekannt	230	1	201	917	
+VP_01	1	l	211	57	Nussknacker.bmp	Ziegelsteine	formen	falsch	unbekannt	222	3	203	1292	
+VP_01	1	l	211	101	pianostimmgeraet.bmp	Piano	stimmen	richtig	unbekannt	221	4	204	2219	
+VP_01	1	l	211	105	dieselstandmessgeraet.bmp	Tankfüllstand	messen	richtig	unbekannt	221	4	204	1488	
+VP_01	1	l	211	23	Bandagen-Roller.bmp	Schnee	rodeln	falsch	unbekannt	222	4	204	797	
+VP_01	1	l	211	67	haecksler.bmp	Feldanbau	häckseln	richtig	unbekannt	221	4	204	809	
+VP_01	1	l	211	121	schluessel.bmp				bekannt	230	1	201	695	
+VP_01	1	l	211	25	cork_inserter.bmp	Pferd	im Moor laufen	falsch	unbekannt	222	4	204	1609	
+VP_01	1	l	211	121	slotmachine.bmp				bekannt	230	1	201	743	
+VP_01	1	l	211	121	pfeffermuehle.bmp				bekannt	230	1	201	597	
+VP_01	1	l	211	121	angel.bmp				bekannt	230	1	201	838	
+VP_01	1	l	211	121	mikrofon.bmp				bekannt	230	1	201	714	
+VP_01	1	l	211	63	pleximeter.bmp	Körper	untersuchen	richtig	unbekannt	221	4	204	1341	
+VP_01	1	l	211	121	gluehbirne.bmp				bekannt	230	1	201	689	
+VP_01	1	l	211	32	radiofrequenzeinsteller.bmp	Radiofrequenz	einstellen	richtig	unbekannt	221	3	203	1433	
+VP_01	1	l	211	121	steckdose.bmp				bekannt	230	1	201	665	
+VP_01	1	l	211	121	raclette-grill.bmp				bekannt	230	1	201	2044	
+VP_01	1	l	211	121	buegeleisen.bmp				bekannt	230	1	201	679	
+VP_01	1	l	211	7	Knie-Schraubstock.bmp	Knie	fixieren	richtig	unbekannt	221	4	204	1393	
+VP_01	1	l	211	121	waschmaschine.bmp				bekannt	230	1	201	608	
+VP_01	1	l	211	75	Tabakschneider.bmp	Tabak	zermahlen	richtig	unbekannt	221	4	204	1429	
+VP_01	1	l	211	121	trommel.bmp				bekannt	230	1	201	681	
+VP_01	1	l	211	6	Goldmuenzen-Waage.bmp	Goldmünzen	wiegen	richtig	unbekannt	221	3	203	1680	
+VP_01	1	l	211	121	zange.bmp				bekannt	230	1	201	959	
+VP_01	1	l	211	121	rasierpinsel.bmp				bekannt	230	1	201	585	
+VP_01	1	l	211	120	loetlampe.bmp	Flaschenkorken	einführen	falsch	unbekannt	222	4	204	1037	
+VP_01	1	l	211	121	buegel.bmp				bekannt	230	1	201	609	
+VP_01	1	l	211	11	Elektro-Akkordeon.bmp	Akkordeon	spielen	richtig	unbekannt	221	3	203	1408	
+VP_01	1	l	211	102	Handzentrifuge.bmp	von Hand	zentrifugieren	richtig	unbekannt	221	4	204	912	
+VP_01	1	l	211	121	puerierstab.bmp				bekannt	230	1	201	741	
+VP_01	1	l	211	121	brecheisen.bmp				bekannt	230	1	201	1229	
+VP_01	1	l	211	60	Telegraphier-Geraet.bmp	Toastbrot	rösten	falsch	unbekannt	222	4	204	1165	
+VP_01	1	l	211	36	antizaungurt.bmp	Kuh	vom Zaun abhalten	richtig	unbekannt	221	4	204	1127	
+VP_01	1	l	211	121	schere.bmp				bekannt	230	1	201	831	
+VP_01	1	l	211	121	maulschluessel.bmp				bekannt	230	1	201	596	
+VP_01	1	l	211	121	korkenzieher.bmp				bekannt	230	1	201	683	
+VP_01	1	l	211	121	handy.bmp				bekannt	230	1	201	662	
+VP_01	1	l	211	33	Zaepfchenpresse.bmp	Zäpfchen	pressen	richtig	unbekannt	221	4	204	1310	
+VP_01	1	l	211	40	kimkim.bmp	Tonpott	trommeln	richtig	unbekannt	221	3	203	2002	
+VP_01	1	l	211	66	Buecher-Offenhalter.bmp	Buch	offen halten	richtig	unbekannt	221	4	204	944	
+VP_01	1	l	211	111	Vakuumpumpe.bmp	Briketts	pressen	falsch	unbekannt	222	4	204	2315	
+VP_01	1	l	211	38	Flaschentrockner.bmp	Flaschen	trocknen	richtig	unbekannt	221	4	204	1328	
+VP_01	1	l	211	121	bohrmaschine.bmp				bekannt	230	1	201	588	
+VP_01	1	l	211	121	schraubenzieher.bmp				bekannt	230	1	201	521	
+VP_01	1	l	211	92	Erzeugt_statische_Ladung.bmp	Rotation	Ladung erzeugen	richtig	unbekannt	221	3	203	2506	
+VP_01	1	l	211	86	Historische_Waschmaschine.bmp	Türgelenk	Feuer überstehen	falsch	unbekannt	222	4	204	1232	
+VP_01	1	l	211	104	ninjasterne.bmp	Waffe	werfen	richtig	unbekannt	221	4	204	1236	
+VP_01	1	l	211	121	tesaroller.bmp				bekannt	230	1	201	633	
+VP_01	1	l	211	30	Grossfisch-Angelkurbel.bmp	Glaskörper	musizieren	falsch	unbekannt	222	4	204	1370	
+VP_01	1	l	211	121	salzstreuer.bmp				bekannt	230	1	201	633	
+VP_01	1	l	211	58	elektrisches_radiergummi.bmp	Münzen	aufbewahren	falsch	unbekannt	222	4	204	1649	
+VP_01	1	l	211	121	anker.bmp				bekannt	230	1	201	649	
+VP_01	1	l	211	121	schalter.bmp				bekannt	230	1	201	523	
+VP_01	1	l	211	4	Unkraut-Jaetzange.bmp	Unkraut	jäten	richtig	unbekannt	221	2	202	1698	
+VP_01	1	l	211	121	kamera.bmp				bekannt	230	1	201	549	
+VP_01	1	l	211	61	schwimmer.bmp	Angel	Köder markieren	richtig	unbekannt	221	4	204	959	
+VP_01	1	l	211	121	wecker.bmp				bekannt	230	1	201	654	
+VP_01	1	l	211	121	nudelholz.bmp				bekannt	230	1	201	599	
+VP_01	1	l	211	53	toaster.bmp	Autobatterie	Spannung testen	falsch	unbekannt	222	3	203	1397	
+VP_01	1	l	211	69	filar_micrometer.bmp	Sternenbilder	vermessen	richtig	unbekannt	221	4	204	862	
+VP_01	1	l	211	121	radio.bmp				bekannt	230	1	201	611	
+VP_01	1	l	211	121	sichel.bmp				bekannt	230	1	201	728	
+VP_01	1	l	211	121	lineal.bmp				bekannt	230	1	201	516	
+VP_01	1	l	211	31	Kurvenmalgeraet.bmp	Kurven	malen	richtig	unbekannt	221	4	204	1052	
+VP_01	1	l	211	93	Kuenstliches Herz.bmp	Herz	durch Maschine ersetzen	richtig	unbekannt	221	4	204	788	
+VP_01	1	l	211	113	Autobatterie-Spannungstester.bmp	Becher	Schall auffangen	falsch	unbekannt	222	3	203	1270	
+VP_01	1	l	211	3	Knochensaege.bmp	Knochen	sägen	richtig	unbekannt	221	4	204	807	
+VP_01	1	l	211	121	zirkel.bmp				bekannt	230	1	201	694	
+VP_01	1	l	211	121	kompass.bmp				bekannt	230	1	201	744	
+VP_01	1	l	211	90	elektroschockspiel.bmp	Weinfass	Loch einschlagen	falsch	unbekannt	222	3	203	1679	
+VP_01	1	l	211	121	klobuerste.bmp				bekannt	230	1	201	649	
+VP_01	1	l	211	121	dosenoeffner.bmp				bekannt	230	3	203	1438	
+VP_01	1	l	211	121	kasse.bmp				bekannt	230	1	201	822	
+VP_01	1	l	211	121	trompete.bmp				bekannt	230	1	201	560	
+VP_01	1	l	211	121	feuerzeug.bmp				bekannt	230	1	201	549	
+VP_01	1	l	211	18	glasschneider.bmp	Eier	wiegen	falsch	unbekannt	222	3	203	1707	
+VP_01	1	l	211	121	fahrrad.bmp				bekannt	230	1	201	547	
+VP_01	1	l	211	109	ziegelformer.bmp	Schallplatte	abtasten	falsch	unbekannt	222	4	204	1197	
+VP_01	1	l	211	121	kaffeemaschine.bmp				bekannt	230	1	201	455	
+VP_01	1	l	211	20	orgelpfeife.bmp	Bandage	rollen	falsch	unbekannt	222	3	203	1805	
+VP_01	1	l	211	121	stethoskop.bmp				bekannt	230	1	201	758	
+VP_01	1	l	211	121	zahnbuerste.bmp				bekannt	230	1	201	1222	
+VP_01	1	l	211	84	pferdeschuh.bmp	Luft	abpumpen	falsch	unbekannt	222	4	204	904	
+VP_01	1	l	211	121	fernseher.bmp				bekannt	230	1	201	673	
+VP_01	1	l	211	121	herd.bmp				bekannt	230	1	201	693	
+VP_01	1	l	211	81	korkenpresse.bmp	Elektroschock	spielen	falsch	unbekannt	222	3	203	1411	
+VP_01	1	l	211	5	mausefalle.bmp	Mausefalle	zuschnappen	richtig	unbekannt	221	4	204	1362	
+VP_01	1	l	211	70	Morse-Geraet.bmp	Nachricht	morsen	richtig	unbekannt	221	4	204	831	
+VP_01	1	l	211	121	nagelfeile.bmp				bekannt	230	1	201	505	
+VP_01	1	l	211	121	schaufel.bmp				bekannt	230	1	201	644	
+VP_01	1	l	211	121	sattel.bmp				bekannt	230	1	201	631	
+VP_01	1	l	211	121	videokassette.bmp				bekannt	230	1	201	649	
+VP_01	1	l	211	87	Maiskolben-Entkoerner.bmp	Brief	wiegen	falsch	unbekannt	222	4	204	1671	
+VP_01	1	l	211	55	feuertuergelenk.bmp	Botschaft	telegrafieren	falsch	unbekannt	222	3	203	1621	
+VP_01	1	l	211	45	rasierklingenschaerfer.bmp	Rasierklinge	schärfen	richtig	unbekannt	221	1	201	1677	
+VP_01	1	l	211	71	Stampf-Fiedel.bmp	Musikgerät	stampfen	richtig	unbekannt	221	3	203	1230	
+VP_01	1	l	211	10	schreibmaschine.bmp	Buchstaben	tippen	richtig	unbekannt	221	4	204	1405	
+VP_01	1	l	211	121	locher.bmp				bekannt	230	1	201	661	
+VP_01	1	l	211	121	wasserkocher.bmp				bekannt	230	1	201	986	
+VP_01	1	l	211	121	reibe.bmp				bekannt	230	1	201	519	
+VP_01	1	l	211	48	Flammenwerfer-Aufsatz.bmp	Uhrzeit	anzeigen	falsch	unbekannt	222	4	204	1118	
+VP_01	1	l	211	121	gabel.bmp				bekannt	230	1	201	603	
+VP_01	1	l	211	121	kinderwagen.bmp				bekannt	230	1	201	703	
+VP_01	1	l	211	9	Baum-Klettereisen.bmp	Baum	erklettern	richtig	unbekannt	221	4	204	1217	
+VP_01	1	l	211	115	wagenradschloss.bmp	Angelschnur	kurbeln	falsch	unbekannt	222	4	204	777	
+VP_01	1	l	211	103	Kartoffelstampfer.bmp	Kartoffeln	stampfen	richtig	unbekannt	221	4	204	1585	
+VP_01	1	l	211	98	Mechanische_Erektionshilfe.bmp	Erektion	helfen	richtig	unbekannt	221	4	204	799	
+VP_01	1	l	211	65	drahtbieger.bmp	Draht	wickeln	richtig	unbekannt	221	4	204	621	
+VP_01	1	l	211	26	Huehnereier-Brutautomat.bmp	Windgeschwindigkeit	messen	falsch	unbekannt	222	1	201	731	
+VP_01	1	l	211	39	Thermopneumatische_Uhr.bmp	Uhr	mit Wärme betreiben	richtig	unbekannt	221	4	204	813	
+VP_01	1	l	211	121	drucker.bmp				bekannt	230	1	201	759	
+VP_01	1	l	211	121	besen.bmp				bekannt	230	1	201	584	
+VP_01	1	l	211	121	koffer.bmp				bekannt	230	1	201	734	
+VP_01	1	l	211	89	planimeter.bmp	Brenner	löten	falsch	unbekannt	222	4	204	854	
+VP_01	1	l	211	121	klavier.bmp				bekannt	230	1	201	648	
+VP_01	1	l	212	64	brillenglasschneidemaschine.bmp	Brillenglas	zuschneiden	richtig	unbekannt	221	1	201	1285	1	
+VP_01	1	l	212	3	Knochensaege.bmp	Knochen	sägen	richtig	unbekannt	221	3	203	1518	2	
+VP_01	1	l	212	94	seilschneider.bmp	Seil	schneiden	richtig	unbekannt	221	1	201	1028	3	
+VP_01	1	l	212	112	mundsperrer.bmp	Orgelton	erzeugen	falsch	unbekannt	222	4	204	1083	4	
+VP_01	1	l	212	92	Erzeugt_statische_Ladung.bmp	Rotation	Ladung erzeugen	richtig	unbekannt	221	1	201	906	5	
+VP_01	1	l	212	115	wagenradschloss.bmp	Angelschnur	kurbeln	falsch	unbekannt	222	4	204	1586	6	
+VP_01	1	l	212	57	Nussknacker.bmp	Ziegelsteine	formen	falsch	unbekannt	222	3	203	1458	7	
+VP_01	1	l	212	58	elektrisches_radiergummi.bmp	Münzen	aufbewahren	falsch	unbekannt	222	4	204	1152	8	
+VP_01	1	l	212	111	Vakuumpumpe.bmp	Briketts	pressen	falsch	unbekannt	222	3	203	1779	9	
+VP_01	1	l	212	63	pleximeter.bmp	Körper	untersuchen	richtig	unbekannt	221	2	202	1438	10	
+VP_01	1	l	212	110	Becher-Grammophon.bmp	Schlüsselloch	stanzen	falsch	unbekannt	222	2	202	1834	11	
+VP_01	1	l	212	45	rasierklingenschaerfer.bmp	Rasierklinge	schärfen	richtig	unbekannt	221	4	204	1391	12	
+VP_01	1	l	212	56	einkufiger_schlitten.bmp	Dampf	zerstäuben	falsch	unbekannt	222	4	204	1483	13	
+VP_01	1	l	212	41	Sprengstoff-Zuender.bmp	Sprengstoffexplosion	auslösen	richtig	unbekannt	221	3	203	1953	14	
+VP_01	1	l	212	105	dieselstandmessgeraet.bmp	Tankfüllstand	messen	richtig	unbekannt	221	4	204	1475	15	
+VP_01	1	l	212	11	Elektro-Akkordeon.bmp	Akkordeon	spielen	richtig	unbekannt	221	2	202	1487	16	
+VP_01	1	l	212	120	loetlampe.bmp	Flaschenkorken	einführen	falsch	unbekannt	222	2	202	1228	17	
+VP_01	1	l	212	113	Autobatterie-Spannungstester.bmp	Becher	Schall auffangen	falsch	unbekannt	222	3	203	1768	18	
+VP_01	1	l	212	109	ziegelformer.bmp	Schallplatte	abtasten	falsch	unbekannt	222	1	201	1792	19	
+VP_01	1	l	212	103	Kartoffelstampfer.bmp	Kartoffeln	stampfen	richtig	unbekannt	221	2	202	1998	20	
+VP_01	1	l	212	79	tibetischer_leierkasten.bmp	Fass	anheben	falsch	unbekannt	222	4	204	1352	21	
+VP_01	1	l	212	31	Kurvenmalgeraet.bmp	Kurven	malen	richtig	unbekannt	221	2	202	1444	22	
+VP_01	1	l	212	60	Telegraphier-Geraet.bmp	Toastbrot	rösten	falsch	unbekannt	222	2	202	1617	23	
+VP_01	1	l	212	74	Brenneisen.bmp	Zeichen	einbrennen	richtig	unbekannt	221	1	201	1311	24	
+VP_01	1	l	212	62	Selbstreinigendes_Katzenklo.bmp	Katzenklo	sich selbst reinigen	richtig	unbekannt	221	2	202	1993	25	
+VP_01	1	l	212	107	Windgeschwindigkeitsmesser.bmp	Waffe	entflammen	falsch	unbekannt	222	4	204	1558	26	
+VP_01	1	l	212	35	karbidlampe.bmp	Bergbaustollen	beleuchten	richtig	unbekannt	221	1	201	1211	27	
+VP_01	1	l	212	20	orgelpfeife.bmp	Bandage	rollen	falsch	unbekannt	222	3	203	1976	28	
+VP_01	1	l	212	68	Roemisches_Senklot.bmp	Schnurlot	absenken	richtig	unbekannt	221	2	202	1330	29	
+VP_01	1	l	212	108	schluesselloch-cutter.bmp	Automat	Eier ausbrüten	falsch	unbekannt	222	4	204	1090	30	
+VP_01	1	l	213	120	loetlampe.bmp	Flaschenkorken	einführen	falsch	unbekannt	222	4	204	1367	1	
+VP_01	1	l	213	103	Kartoffelstampfer.bmp	Kartoffeln	stampfen	richtig	unbekannt	221	1	201	1321	2	
+VP_01	1	l	213	64	brillenglasschneidemaschine.bmp	Brillenglas	zuschneiden	richtig	unbekannt	221	2	202	2068	3	
+VP_01	1	l	213	57	Nussknacker.bmp	Ziegelsteine	formen	falsch	unbekannt	222	4	204	1693	4	
+VP_01	1	l	213	79	tibetischer_leierkasten.bmp	Fass	anheben	falsch	unbekannt	222	4	204	798	5	
+VP_01	1	l	213	63	pleximeter.bmp	Körper	untersuchen	richtig	unbekannt	221	2	202	986	6	
+VP_01	1	l	213	113	Autobatterie-Spannungstester.bmp	Becher	Schall auffangen	falsch	unbekannt	222	3	203	1244	7	
+VP_01	1	l	213	58	elektrisches_radiergummi.bmp	Münzen	aufbewahren	falsch	unbekannt	222	3	203	1532	8	
+VP_01	1	l	213	111	Vakuumpumpe.bmp	Briketts	pressen	falsch	unbekannt	222	4	204	1329	9	
+VP_01	1	l	213	3	Knochensaege.bmp	Knochen	sägen	richtig	unbekannt	221	4	204	1007	10	
+VP_01	1	l	213	107	Windgeschwindigkeitsmesser.bmp	Waffe	entflammen	falsch	unbekannt	222	3	203	1642	11	
+VP_01	1	l	213	62	Selbstreinigendes_Katzenklo.bmp	Katzenklo	sich selbst reinigen	richtig	unbekannt	221	2	202	1012	12	
+VP_01	1	l	213	68	Roemisches_Senklot.bmp	Schnurlot	absenken	richtig	unbekannt	221	1	201	845	13	
+VP_01	1	l	213	11	Elektro-Akkordeon.bmp	Akkordeon	spielen	richtig	unbekannt	221	1	201	813	14	
+VP_01	1	l	213	60	Telegraphier-Geraet.bmp	Toastbrot	rösten	falsch	unbekannt	222	2	202	1374	15	
+VP_01	1	l	213	92	Erzeugt_statische_Ladung.bmp	Rotation	Ladung erzeugen	richtig	unbekannt	221	1	201	825	16	
+VP_01	1	l	213	112	mundsperrer.bmp	Orgelton	erzeugen	falsch	unbekannt	222	4	204	1374	17	
+VP_01	1	l	213	105	dieselstandmessgeraet.bmp	Tankfüllstand	messen	richtig	unbekannt	221	3	203	1425	18	
+VP_01	1	l	213	108	schluesselloch-cutter.bmp	Automat	Eier ausbrüten	falsch	unbekannt	222	3	203	936	19	
+VP_01	1	l	213	94	seilschneider.bmp	Seil	schneiden	richtig	unbekannt	221	4	204	1418	20	
+VP_01	1	l	213	109	ziegelformer.bmp	Schallplatte	abtasten	falsch	unbekannt	222	2	202	1199	21	
+VP_01	1	l	213	31	Kurvenmalgeraet.bmp	Kurven	malen	richtig	unbekannt	221	2	202	874	22	
+VP_01	1	l	213	45	rasierklingenschaerfer.bmp	Rasierklinge	schärfen	richtig	unbekannt	221	4	204	1163	23	
+VP_01	1	l	213	115	wagenradschloss.bmp	Angelschnur	kurbeln	falsch	unbekannt	222	4	204	1111	24	
+VP_01	1	l	213	74	Brenneisen.bmp	Zeichen	einbrennen	richtig	unbekannt	221	1	201	967	25	
+VP_01	1	l	213	56	einkufiger_schlitten.bmp	Dampf	zerstäuben	falsch	unbekannt	222	4	204	1046	26	
+VP_01	1	l	213	20	orgelpfeife.bmp	Bandage	rollen	falsch	unbekannt	222	3	203	1234	27	
+VP_01	1	l	213	41	Sprengstoff-Zuender.bmp	Sprengstoffexplosion	auslösen	richtig	unbekannt	221	3	203	1316	28	
+VP_01	1	l	213	35	karbidlampe.bmp	Bergbaustollen	beleuchten	richtig	unbekannt	221	1	201	915	29	
+VP_01	1	l	213	110	Becher-Grammophon.bmp	Schlüsselloch	stanzen	falsch	unbekannt	222	3	203	1510	30	
+VP_01	1	l	212	73	mechanisches_tachometer.bmp	Geschwindigkeit	ermitteln	richtig	unbekannt	221	2	202	1630	31	
+VP_01	1	l	212	10	schreibmaschine.bmp	Buchstaben	tippen	richtig	unbekannt	221	1	201	877	32	
+VP_01	1	l	212	47	filmrolle.bmp	Mund	offen halten	falsch	unbekannt	222	4	204	1141	33	
+VP_01	1	l	212	7	Knie-Schraubstock.bmp	Knie	fixieren	richtig	unbekannt	221	1	201	1776	34	
+VP_01	1	l	212	87	Maiskolben-Entkoerner.bmp	Brief	wiegen	falsch	unbekannt	222	2	202	1784	35	
+VP_01	1	l	212	54	steigbuegel.bmp	Stromstärke	messen	falsch	unbekannt	222	4	204	1740	36	
+VP_01	1	l	212	1	galvanometer.bmp	elektrische Spannung	prüfen	richtig	unbekannt	221	3	203	2468	37	
+VP_01	1	l	212	29	4erbohrer.bmp	Sonnenlicht	Intensität messen	falsch	unbekannt	222	4	204	2059	38	
+VP_01	1	l	212	25	cork_inserter.bmp	Pferd	im Moor laufen	falsch	unbekannt	222	4	204	1115	39	
+VP_01	1	l	212	5	mausefalle.bmp	Mausefalle	zuschnappen	richtig	unbekannt	221	3	203	2314	40	
+VP_01	1	l	212	99	heliotrop.bmp	Streckenmaß	Sonnenlicht nutzen	richtig	unbekannt	221	3	203	2045	41	
+VP_01	1	l	212	91	zaehlgeraet_fuer_lieferungen.bmp	Lieferungen	abzählen	richtig	unbekannt	221	1	201	1492	42	
+VP_01	1	l	212	43	Bleistiftspitzer.bmp	Bleistift	anspitzen	richtig	unbekannt	221	2	202	1914	43	
+VP_01	1	l	212	119	Muenzspender.bmp	Kutschrad	anschließen	falsch	unbekannt	222	3	203	2138	44	
+VP_01	1	l	212	90	elektroschockspiel.bmp	Weinfass	Loch einschlagen	falsch	unbekannt	222	4	204	1916	45	
+VP_01	1	l	212	118	Siebenmeilenstiefel.bmp	Tabletten	zerteilen	falsch	unbekannt	222	3	203	2145	46	
+VP_01	1	l	212	39	Thermopneumatische_Uhr.bmp	Uhr	mit Wärme betreiben	richtig	unbekannt	221	2	202	1914	47	
+VP_01	1	l	212	28	Briefwaage.bmp	Korngarbe	greifen	falsch	unbekannt	222	4	204	1374	48	
+VP_01	1	l	212	30	Grossfisch-Angelkurbel.bmp	Glaskörper	musizieren	falsch	unbekannt	222	4	204	2064	49	
+VP_01	1	l	212	98	Mechanische_Erektionshilfe.bmp	Erektion	helfen	richtig	unbekannt	221	4	204	2049	50	
+VP_01	1	l	212	116	Eierwaage.bmp	Leierkasten	klingen	falsch	unbekannt	222	2	202	1363	51	
+VP_01	1	l	212	85	Rituelles_Hackmesser.bmp	Spannung	erzeugen	falsch	unbekannt	222	4	204	1331	52	
+VP_01	1	l	212	102	Handzentrifuge.bmp	von Hand	zentrifugieren	richtig	unbekannt	221	2	202	1286	53	
+VP_01	1	l	212	55	feuertuergelenk.bmp	Botschaft	telegrafieren	falsch	unbekannt	222	4	204	1341	54	
+VP_01	1	l	212	80	Buchbinder.bmp	Löcher	bohren	falsch	unbekannt	222	3	203	2475	55	
+VP_01	1	l	212	42	pferdeueberschuh.bmp	Pferdehuf	Halt geben	richtig	unbekannt	221	4	204	1779	56	
+VP_01	1	l	212	101	pianostimmgeraet.bmp	Piano	stimmen	richtig	unbekannt	221	3	203	2293	57	
+VP_01	1	l	212	70	Morse-Geraet.bmp	Nachricht	morsen	richtig	unbekannt	221	1	201	1353	58	
+VP_01	1	l	212	8	Eierkarton-Presse.bmp	Eierkarton	pressen	richtig	unbekannt	221	1	201	1465	59	
+VP_01	1	l	212	81	korkenpresse.bmp	Elektroschock	spielen	falsch	unbekannt	222	4	204	1862	60	
+VP_01	1	l	213	118	Siebenmeilenstiefel.bmp	Tabletten	zerteilen	falsch	unbekannt	222	2	202	1716	31	
+VP_01	1	l	213	30	Grossfisch-Angelkurbel.bmp	Glaskörper	musizieren	falsch	unbekannt	222	3	203	1298	32	
+VP_01	1	l	213	70	Morse-Geraet.bmp	Nachricht	morsen	richtig	unbekannt	221	2	202	1533	33	
+VP_01	1	l	213	29	4erbohrer.bmp	Sonnenlicht	Intensität messen	falsch	unbekannt	222	4	204	896	34	
+VP_01	1	l	213	101	pianostimmgeraet.bmp	Piano	stimmen	richtig	unbekannt	221	3	203	1583	35	
+VP_01	1	l	213	91	zaehlgeraet_fuer_lieferungen.bmp	Lieferungen	abzählen	richtig	unbekannt	221	1	201	1359	36	
+VP_01	1	l	213	7	Knie-Schraubstock.bmp	Knie	fixieren	richtig	unbekannt	221	1	201	1057	37	
+VP_01	1	l	213	10	schreibmaschine.bmp	Buchstaben	tippen	richtig	unbekannt	221	1	201	645	38	
+VP_01	1	l	213	55	feuertuergelenk.bmp	Botschaft	telegrafieren	falsch	unbekannt	222	4	204	765	39	
+VP_01	1	l	213	98	Mechanische_Erektionshilfe.bmp	Erektion	helfen	richtig	unbekannt	221	4	204	1101	40	
+VP_01	1	l	213	39	Thermopneumatische_Uhr.bmp	Uhr	mit Wärme betreiben	richtig	unbekannt	221	3	203	1218	41	
+VP_01	1	l	213	85	Rituelles_Hackmesser.bmp	Spannung	erzeugen	falsch	unbekannt	222	4	204	711	42	
+VP_01	1	l	213	81	korkenpresse.bmp	Elektroschock	spielen	falsch	unbekannt	222	4	204	1389	43	
+VP_01	1	l	213	54	steigbuegel.bmp	Stromstärke	messen	falsch	unbekannt	222	4	204	825	44	
+VP_01	1	l	213	87	Maiskolben-Entkoerner.bmp	Brief	wiegen	falsch	unbekannt	222	3	203	1028	45	
+VP_01	1	l	213	102	Handzentrifuge.bmp	von Hand	zentrifugieren	richtig	unbekannt	221	2	202	1375	46	
+VP_01	1	l	213	116	Eierwaage.bmp	Leierkasten	klingen	falsch	unbekannt	222	4	204	1226	47	
+VP_01	1	l	213	42	pferdeueberschuh.bmp	Pferdehuf	Halt geben	richtig	unbekannt	221	4	204	661	48	
+VP_01	1	l	213	28	Briefwaage.bmp	Korngarbe	greifen	falsch	unbekannt	222	4	204	883	49	
+VP_01	1	l	213	43	Bleistiftspitzer.bmp	Bleistift	anspitzen	richtig	unbekannt	221	3	203	1227	50	
+VP_01	1	l	213	90	elektroschockspiel.bmp	Weinfass	Loch einschlagen	falsch	unbekannt	222	4	204	1136	51	
+VP_01	1	l	213	8	Eierkarton-Presse.bmp	Eierkarton	pressen	richtig	unbekannt	221	1	201	1276	52	
+VP_01	1	l	213	5	mausefalle.bmp	Mausefalle	zuschnappen	richtig	unbekannt	221	2	202	1597	53	
+VP_01	1	l	213	99	heliotrop.bmp	Streckenmaß	Sonnenlicht nutzen	richtig	unbekannt	221	2	202	1541	54	
+VP_01	1	l	213	119	Muenzspender.bmp	Kutschrad	anschließen	falsch	unbekannt	222	4	204	2163	55	
+VP_01	1	l	213	1	galvanometer.bmp	elektrische Spannung	prüfen	richtig	unbekannt	221	3	203	1377	56	
+VP_01	1	l	213	47	filmrolle.bmp	Mund	offen halten	falsch	unbekannt	222	4	204	1031	57	
+VP_01	1	l	213	73	mechanisches_tachometer.bmp	Geschwindigkeit	ermitteln	richtig	unbekannt	221	4	204	1045	58	
+VP_01	1	l	213	25	cork_inserter.bmp	Pferd	im Moor laufen	falsch	unbekannt	222	4	204	845	59	
+VP_01	1	l	213	80	Buchbinder.bmp	Löcher	bohren	falsch	unbekannt	222	3	203	1705	60	
+VP_01	1	l	212	6	Goldmuenzen-Waage.bmp	Goldmünzen	wiegen	richtig	unbekannt	221	4	204	1929	61	
+VP_01	1	l	212	40	kimkim.bmp	Tonpott	trommeln	richtig	unbekannt	221	1	201	996	62	
+VP_01	1	l	212	50	Glasresonanz-Cello.bmp	Kork	flach pressen	falsch	unbekannt	222	4	204	1676	63	
+VP_01	1	l	212	75	Tabakschneider.bmp	Tabak	zermahlen	richtig	unbekannt	221	2	202	1320	64	
+VP_01	1	l	212	49	mikrotom.bmp	heiße Platten	anheben	falsch	unbekannt	222	3	203	2019	65	
+VP_01	1	l	212	72	schneekette.bmp	Schuhe	auf Eis laufen	richtig	unbekannt	221	2	202	2452	66	
+VP_01	1	l	212	88	Ball-Wurfmaschine.bmp	Radiergummi	mit Strom betreiben	falsch	unbekannt	222	4	204	871	67	
+VP_01	1	l	212	16	krawattenaufhaenger.bmp	Zeichnungen	vermessen	falsch	unbekannt	222	3	203	1718	68	
+VP_01	1	l	212	2	nudelmaschine.bmp	Makkaroni	formen	richtig	unbekannt	221	2	202	1297	69	
+VP_01	1	l	212	48	Flammenwerfer-Aufsatz.bmp	Uhrzeit	anzeigen	falsch	unbekannt	222	2	202	1956	70	
+VP_01	1	l	212	36	antizaungurt.bmp	Kuh	vom Zaun abhalten	richtig	unbekannt	221	4	204	1978	71	
+VP_01	1	l	212	26	Huehnereier-Brutautomat.bmp	Windgeschwindigkeit	messen	falsch	unbekannt	222	3	203	1685	72	
+VP_01	1	l	212	100	Luftdruckmessgeraete.bmp	Luftdruck	messen	richtig	unbekannt	221	2	202	1181	73	
+VP_01	1	l	212	106	uhrwerk.bmp	altes Ritual	hacken	falsch	unbekannt	222	4	204	728	74	
+VP_01	1	l	212	51	dampfzerstaeuber.bmp	Buch	binden	falsch	unbekannt	222	4	204	2854	75	
+VP_01	1	l	212	77	tierfalle.bmp	Maiskolben	entkörnen	falsch	unbekannt	222	2	202	1833	76	
+VP_01	1	l	212	97	Korkenpresse_2.bmp	Korken	formen	richtig	unbekannt	221	3	203	1930	77	
+VP_01	1	l	212	27	Korngarbengreifer.bmp	Treibhaus	heizen	falsch	unbekannt	222	4	204	1182	78	
+VP_01	1	l	212	78	Messerschleifer.bmp	Schritte	vergrößern	falsch	unbekannt	222	4	204	1798	79	
+VP_01	1	l	212	17	grammophonnadel.bmp	Ball	katapultieren	falsch	unbekannt	222	4	204	2219	80	
+VP_01	1	l	212	67	haecksler.bmp	Feldanbau	häckseln	richtig	unbekannt	221	2	202	1945	81	
+VP_01	1	l	212	44	Nussoelpressmaschine.bmp	Nussöl	pressen	richtig	unbekannt	221	1	201	1257	82	
+VP_01	1	l	212	65	drahtbieger.bmp	Draht	wickeln	richtig	unbekannt	221	2	202	1642	83	
+VP_01	1	l	212	76	galvanometer_2.bmp	Mandeln	operieren	falsch	unbekannt	222	4	204	1859	84	
+VP_01	1	l	212	82	tablettenteiler.bmp	Blumentopf	sich selbst wässern	falsch	unbekannt	222	3	203	2430	85	
+VP_01	1	l	212	34	dosenoeffner_fuer_faesser.bmp	Fass	öffnen	richtig	unbekannt	221	2	202	1862	86	
+VP_01	1	l	212	86	Historische_Waschmaschine.bmp	Türgelenk	Feuer überstehen	falsch	unbekannt	222	4	204	1893	87	
+VP_01	1	l	212	71	Stampf-Fiedel.bmp	Musikgerät	stampfen	richtig	unbekannt	221	4	204	412	88	
+VP_01	1	l	212	4	Unkraut-Jaetzange.bmp	Unkraut	jäten	richtig	unbekannt	221	2	202	1670	89	
+VP_01	1	l	212	96	kerzenloescher.bmp	Kerzen	löschen	richtig	unbekannt	221	1	201	708	90	
+VP_01	1	l	213	44	Nussoelpressmaschine.bmp	Nussöl	pressen	richtig	unbekannt	221	2	202	1192	61	
+VP_01	1	l	213	75	Tabakschneider.bmp	Tabak	zermahlen	richtig	unbekannt	221	4	204	1062	62	
+VP_01	1	l	213	86	Historische_Waschmaschine.bmp	Türgelenk	Feuer überstehen	falsch	unbekannt	222	4	204	1133	63	
+VP_01	1	l	213	40	kimkim.bmp	Tonpott	trommeln	richtig	unbekannt	221	1	201	707	64	
+VP_01	1	l	213	49	mikrotom.bmp	heiße Platten	anheben	falsch	unbekannt	222	3	203	1075	65	
+VP_01	1	l	213	48	Flammenwerfer-Aufsatz.bmp	Uhrzeit	anzeigen	falsch	unbekannt	222	3	203	1118	66	
+VP_01	1	l	213	82	tablettenteiler.bmp	Blumentopf	sich selbst wässern	falsch	unbekannt	222	3	203	978	67	
+VP_01	1	l	213	4	Unkraut-Jaetzange.bmp	Unkraut	jäten	richtig	unbekannt	221	2	202	898	68	
+VP_01	1	l	213	78	Messerschleifer.bmp	Schritte	vergrößern	falsch	unbekannt	222	4	204	1010	69	
+VP_01	1	l	213	27	Korngarbengreifer.bmp	Treibhaus	heizen	falsch	unbekannt	222	4	204	710	70	
+VP_01	1	l	213	97	Korkenpresse_2.bmp	Korken	formen	richtig	unbekannt	221	4	204	659	71	
+VP_01	1	l	213	50	Glasresonanz-Cello.bmp	Kork	flach pressen	falsch	unbekannt	222	4	204	724	72	
+VP_01	1	l	213	100	Luftdruckmessgeraete.bmp	Luftdruck	messen	richtig	unbekannt	221	2	202	1041	73	
+VP_01	1	l	213	34	dosenoeffner_fuer_faesser.bmp	Fass	öffnen	richtig	unbekannt	221	3	203	1266	74	
+VP_01	1	l	213	76	galvanometer_2.bmp	Mandeln	operieren	falsch	unbekannt	222	4	204	862	75	
+VP_01	1	l	213	77	tierfalle.bmp	Maiskolben	entkörnen	falsch	unbekannt	222	2	202	1140	76	
+VP_01	1	l	213	71	Stampf-Fiedel.bmp	Musikgerät	stampfen	richtig	unbekannt	221	3	203	934	77	
+VP_01	1	l	213	67	haecksler.bmp	Feldanbau	häckseln	richtig	unbekannt	221	3	203	2097	78	
+VP_01	1	l	213	96	kerzenloescher.bmp	Kerzen	löschen	richtig	unbekannt	221	1	201	780	79	
+VP_01	1	l	213	26	Huehnereier-Brutautomat.bmp	Windgeschwindigkeit	messen	falsch	unbekannt	222	2	202	1063	80	
+VP_01	1	l	213	88	Ball-Wurfmaschine.bmp	Radiergummi	mit Strom betreiben	falsch	unbekannt	222	4	204	1240	81	
+VP_01	1	l	213	6	Goldmuenzen-Waage.bmp	Goldmünzen	wiegen	richtig	unbekannt	221	4	204	1411	82	
+VP_01	1	l	213	2	nudelmaschine.bmp	Makkaroni	formen	richtig	unbekannt	221	2	202	1092	83	
+VP_01	1	l	213	51	dampfzerstaeuber.bmp	Buch	binden	falsch	unbekannt	222	4	204	1147	84	
+VP_01	1	l	213	17	grammophonnadel.bmp	Ball	katapultieren	falsch	unbekannt	222	4	204	766	85	
+VP_01	1	l	213	72	schneekette.bmp	Schuhe	auf Eis laufen	richtig	unbekannt	221	4	204	660	86	
+VP_01	1	l	213	16	krawattenaufhaenger.bmp	Zeichnungen	vermessen	falsch	unbekannt	222	3	203	998	87	
+VP_01	1	l	213	106	uhrwerk.bmp	altes Ritual	hacken	falsch	unbekannt	222	4	204	620	88	
+VP_01	1	l	213	65	drahtbieger.bmp	Draht	wickeln	richtig	unbekannt	221	4	204	1375	89	
+VP_01	1	l	213	36	antizaungurt.bmp	Kuh	vom Zaun abhalten	richtig	unbekannt	221	4	204	856	90	
+VP_01	1	l	212	117	Selbstwaessernder_Blumentopf.bmp	Glas	schneiden	falsch	unbekannt	222	4	204	1416	91	
+VP_01	1	l	212	95	Fischwaage.bmp	Fisch	wiegen	richtig	unbekannt	221	4	204	1516	92	
+VP_01	1	l	212	52	mandelnentferner.bmp	Film	aufspulen	falsch	unbekannt	222	4	204	1839	93	
+VP_01	1	l	212	9	Baum-Klettereisen.bmp	Baum	erklettern	richtig	unbekannt	221	2	202	1853	94	
+VP_01	1	l	212	66	Buecher-Offenhalter.bmp	Buch	offen halten	richtig	unbekannt	221	2	202	1245	95	
+VP_01	1	l	212	83	hebel_fuer_fassbauer.bmp	Mikroskop-Proben	schneiden	falsch	unbekannt	222	2	202	1908	96	
+VP_01	1	l	212	84	pferdeschuh.bmp	Luft	abpumpen	falsch	unbekannt	222	4	204	1183	97	
+VP_01	1	l	212	33	Zaepfchenpresse.bmp	Zäpfchen	pressen	richtig	unbekannt	221	1	201	1099	98	
+VP_01	1	l	212	13	paint_scraper.bmp	Farbe	vom Fenster abschleifen	richtig	unbekannt	221	3	203	1920	99	
+VP_01	1	l	212	21	spannungsgeraet.bmp	Fußstütze	reiten	falsch	unbekannt	222	4	204	924	100	
+VP_01	1	l	212	53	toaster.bmp	Autobatterie	Spannung testen	falsch	unbekannt	222	4	204	1050	101	
+VP_01	1	l	212	93	Kuenstliches Herz.bmp	Herz	durch Maschine ersetzen	richtig	unbekannt	221	2	202	1454	102	
+VP_01	1	l	212	24	weinfassoeffner.bmp	Tier	einfangen	falsch	unbekannt	222	4	204	1215	103	
+VP_01	1	l	212	15	mikroskop.bmp	Pflanzenteile	vergrößern	richtig	unbekannt	221	1	201	1291	104	
+VP_01	1	l	212	69	filar_micrometer.bmp	Sternenbilder	vermessen	richtig	unbekannt	221	4	204	1495	105	
+VP_01	1	l	212	61	schwimmer.bmp	Angel	Köder markieren	richtig	unbekannt	221	3	203	2092	106	
+VP_01	1	l	212	14	heizpilz.bmp	Außenbereich	heizen	richtig	unbekannt	221	1	201	1180	107	
+VP_01	1	l	212	46	plattenheber.bmp	Kleidung	im Eimer waschen	falsch	unbekannt	222	4	204	1319	108	
+VP_01	1	l	212	104	ninjasterne.bmp	Waffe	werfen	richtig	unbekannt	221	2	202	1831	109	
+VP_01	1	l	212	19	Brikettpresse.bmp	Narkosemittel	abgeben	falsch	unbekannt	222	4	204	1377	110	
+VP_01	1	l	212	18	glasschneider.bmp	Eier	wiegen	falsch	unbekannt	222	2	202	1821	111	
+VP_01	1	l	212	114	Sonnenlichtsintensitaetsmesser.bmp	Krawatten	aufhängen	falsch	unbekannt	222	4	204	1487	112	
+VP_01	1	l	212	59	Treibhausheizgeraet.bmp	Messer	schleifen	falsch	unbekannt	222	3	203	1917	113	
+VP_01	1	l	212	38	Flaschentrockner.bmp	Flaschen	trocknen	richtig	unbekannt	221	2	202	2338	114	
+VP_01	1	l	212	12	trimmdichgeraet.bmp	Körper	trainieren	richtig	unbekannt	221	0	0	0	115	
+VP_01	1	l	212	89	planimeter.bmp	Brenner	löten	falsch	unbekannt	222	4	204	821	116	
+VP_01	1	l	212	22	anesthesia_inhaler.bmp	Nüsse	aufbrechen	falsch	unbekannt	222	3	203	1736	117	
+VP_01	1	l	212	37	Saemaschine.bmp	Saatgut	gleichmäßig aussäen	richtig	unbekannt	221	2	202	1424	118	
+VP_01	1	l	212	32	radiofrequenzeinsteller.bmp	Radiofrequenz	einstellen	richtig	unbekannt	221	3	203	1657	119	
+VP_01	1	l	212	23	Bandagen-Roller.bmp	Schnee	rodeln	falsch	unbekannt	222	4	204	2360	120	
+VP_01	1	l	213	83	hebel_fuer_fassbauer.bmp	Mikroskop-Proben	schneiden	falsch	unbekannt	222	3	203	1092	91	
+VP_01	1	l	213	32	radiofrequenzeinsteller.bmp	Radiofrequenz	einstellen	richtig	unbekannt	221	4	204	931	92	
+VP_01	1	l	213	95	Fischwaage.bmp	Fisch	wiegen	richtig	unbekannt	221	4	204	1302	93	
+VP_01	1	l	213	19	Brikettpresse.bmp	Narkosemittel	abgeben	falsch	unbekannt	222	4	204	889	94	
+VP_01	1	l	213	84	pferdeschuh.bmp	Luft	abpumpen	falsch	unbekannt	222	4	204	820	95	
+VP_01	1	l	213	89	planimeter.bmp	Brenner	löten	falsch	unbekannt	222	4	204	679	96	
+VP_01	1	l	213	37	Saemaschine.bmp	Saatgut	gleichmäßig aussäen	richtig	unbekannt	221	2	202	1133	97	
+VP_01	1	l	213	53	toaster.bmp	Autobatterie	Spannung testen	falsch	unbekannt	222	4	204	788	98	
+VP_01	1	l	213	117	Selbstwaessernder_Blumentopf.bmp	Glas	schneiden	falsch	unbekannt	222	4	204	968	99	
+VP_01	1	l	213	14	heizpilz.bmp	Außenbereich	heizen	richtig	unbekannt	221	1	201	824	100	
+VP_01	1	l	213	15	mikroskop.bmp	Pflanzenteile	vergrößern	richtig	unbekannt	221	1	201	966	101	
+VP_01	1	l	213	52	mandelnentferner.bmp	Film	aufspulen	falsch	unbekannt	222	3	203	1124	102	
+VP_01	1	l	213	104	ninjasterne.bmp	Waffe	werfen	richtig	unbekannt	221	2	202	929	103	
+VP_01	1	l	213	38	Flaschentrockner.bmp	Flaschen	trocknen	richtig	unbekannt	221	2	202	962	104	
+VP_01	1	l	213	13	paint_scraper.bmp	Farbe	vom Fenster abschleifen	richtig	unbekannt	221	4	204	1143	105	
+VP_01	1	l	213	59	Treibhausheizgeraet.bmp	Messer	schleifen	falsch	unbekannt	222	3	203	1131	106	
+VP_01	1	l	213	18	glasschneider.bmp	Eier	wiegen	falsch	unbekannt	222	2	202	1180	107	
+VP_01	1	l	213	33	Zaepfchenpresse.bmp	Zäpfchen	pressen	richtig	unbekannt	221	1	201	948	108	
+VP_01	1	l	213	61	schwimmer.bmp	Angel	Köder markieren	richtig	unbekannt	221	4	204	1071	109	
+VP_01	1	l	213	66	Buecher-Offenhalter.bmp	Buch	offen halten	richtig	unbekannt	221	4	204	1571	110	
+VP_01	1	l	213	24	weinfassoeffner.bmp	Tier	einfangen	falsch	unbekannt	222	4	204	2654	111	
+VP_01	1	l	213	46	plattenheber.bmp	Kleidung	im Eimer waschen	falsch	unbekannt	222	4	204	662	112	
+VP_01	1	l	213	23	Bandagen-Roller.bmp	Schnee	rodeln	falsch	unbekannt	222	3	203	1248	113	
+VP_01	1	l	213	12	trimmdichgeraet.bmp	Körper	trainieren	richtig	unbekannt	221	3	203	1029	114	
+VP_01	1	l	213	114	Sonnenlichtsintensitaetsmesser.bmp	Krawatten	aufhängen	falsch	unbekannt	222	3	203	930	115	
+VP_01	1	l	213	21	spannungsgeraet.bmp	Fußstütze	reiten	falsch	unbekannt	222	3	203	1223	116	
+VP_01	1	l	213	22	anesthesia_inhaler.bmp	Nüsse	aufbrechen	falsch	unbekannt	222	4	204	878	117	
+VP_01	1	l	213	93	Kuenstliches Herz.bmp	Herz	durch Maschine ersetzen	richtig	unbekannt	221	4	204	818	118	
+VP_01	1	l	213	69	filar_micrometer.bmp	Sternenbilder	vermessen	richtig	unbekannt	221	4	204	677	119	
+VP_01	1	l	213	9	Baum-Klettereisen.bmp	Baum	erklettern	richtig	unbekannt	221	4	204	708	120	

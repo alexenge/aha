@@ -1,4 +1,4 @@
-data/
+data/eeg/
 docs/
 analysis/export/*
 .Rproj.user
@@ -6,4 +6,3 @@ analysis/export/*
 .RData
 .Ruserdata
 .DS_Store
-
