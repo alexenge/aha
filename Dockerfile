@@ -6,7 +6,12 @@ ENV USER=rstudio \
     PAPAJA_VERSION=v0.1.0.9997 \
     EEGUTILS_VERSION=v0.5.0 \
     R_REMOTES_UPGRADE=never \
-    RETICULATE_MINICONDA_ENABLED=FALSE
+    RETICULATE_MINICONDA_ENABLED=FALSE \
+    LD_LIBRARY_PATH=/usr/local/lib/R/lib
+
+# Set R environment
+RUN echo "PATH=${PATH}" >> /usr/local/lib/R/etc/Renviron
+RUN echo "export PATH=${PATH}" >> ${HOME}/.profile
 
 # Install some R and Python packages
 RUN install2.r -s --error cowplot reticulate \
