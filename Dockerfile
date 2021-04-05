@@ -16,7 +16,7 @@ RUN install2.r -s --error cowplot reticulate \
     && R -e "remotes::install_github('craddm/eegUtils', ref = '${EEGUTILS_VERSION}')" \
     && apt-get update \
     && apt-get install -y python3-pip \
-    && pip3 install mne==0.21.2 pandas==1.1.3 scikit-learn==0.23.2
+    && pip3 install mne==0.21.2 pandas==1.1.3 scikit-learn==0.23.2 notebook==6.3.0
 
 # Set working directory
 WORKDIR /home/${NB_USER}
