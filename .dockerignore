@@ -1,4 +1,5 @@
-analysis/export/*.fif
-data/
+analysis/
+data/eeg/
+data_old/
 docs/
 renv/
