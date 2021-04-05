@@ -1,7 +1,8 @@
 FROM asachet/rocker-stan:latest
 
 # Set some environment variables
-ENV USER=rstudio \
+ENV NB_USER=rstudio \
+    NB_UID=1000 \
     R_REMOTES_UPGRADE=never \
     RETICULATE_MINICONDA_ENABLED=FALSE
 
