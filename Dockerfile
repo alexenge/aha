@@ -1,8 +1,8 @@
 FROM asachet/rocker-stan:latest
 
 # Set some environment variables
-ARG NB_USER=rstudio \
-    NB_UID=1000
+ARG NB_USER=rstudio
+ARG NB_UID=1000
 ENV USER=${NB_USER} \
     NB_UID=${NB_UID} \
     R_REMOTES_UPGRADE=never \
