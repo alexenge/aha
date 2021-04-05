@@ -1,3 +1,4 @@
+analysis/export/*.fif
+data/
 docs/
 renv/
-analysis/
