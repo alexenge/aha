@@ -1,8 +1,10 @@
 FROM asachet/rocker-stan:latest
 
 # Set some environment variables
-ENV NB_USER=rstudio \
-    NB_UID=1000 \
+ARG NB_USER=rstudio \
+    NB_UID=1000
+ENV USER=${NB_USER} \
+    NB_UID=${NB_UID} \
     R_REMOTES_UPGRADE=never \
     RETICULATE_MINICONDA_ENABLED=FALSE
 
@@ -17,7 +19,7 @@ RUN install2.r -s --error cowplot reticulate \
     && pip3 install mne==0.21.2 pandas==1.1.3 scikit-learn==0.23.2
 
 # Set working directory
-WORKDIR /home/${USER}
+WORKDIR /home/${NB_USER}
 
 # Copy scripts, data, and materials
 COPY analysis/ analysis/
