@@ -12,7 +12,7 @@ ENV NB_USER=rstudio \
     RETICULATE_MINICONDA_ENABLED=FALSE
 
 # Make sure that nbrsessionproxy on binder can find the R environment
-RUN echo "PATH=${PATH}" >> /usr/local/lib/R/etc/Renviron &&
+RUN echo "PATH=${PATH}" >> /usr/local/lib/R/etc/Renviron && \
     echo "export PATH=${PATH}" >> ${HOME}/.profile
 
 # Set working directory
