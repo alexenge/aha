@@ -38,6 +38,7 @@ RUN pip3 install --no-cache-dir \
 # Expose user for binder
 ARG NB_USER
 ARG NB_UID
+RUN chown -R ${NB_USER} .
 USER ${NB_USER}
 
 # Copy scripts, data, and materials
