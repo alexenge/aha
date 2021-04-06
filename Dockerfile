@@ -1,7 +1,7 @@
 FROM asachet/rocker-stan:latest
 
 # Set some environment variables
-ENV USER=rstudio \
+ENV NB_USER=rstudio \
     NB_UID=1000 \
     PAPAJA_VERSION=v0.1.0.9997 \
     EEGUTILS_VERSION=v0.5.0 \
