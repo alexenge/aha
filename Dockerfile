@@ -44,6 +44,3 @@ USER ${NB_USER}
 COPY analysis/ analysis/
 COPY data/ data/
 COPY materials/ materials/
-
-# Start notebook server
-CMD jupyter notebook --ip 0.0.0.0
