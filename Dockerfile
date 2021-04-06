@@ -27,7 +27,7 @@ RUN pip3 install --no-cache-dir \
         pandas==1.1.3 \
         scikit-learn==0.23.2 && \
     R --quiet -e "remotes::install_github('IRkernel/IRkernel')" && \
-    #R --quiet -e "IRkernel::installspec(prefix='${VENV_DIR}')" && \
+    R --quiet -e "IRkernel::installspec(user = FALSE)" && \
     install2.r -s --error \
         cowplot \
         reticulate \
