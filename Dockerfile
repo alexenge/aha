@@ -5,6 +5,7 @@ ENV NB_USER=rstudio \
     NB_UID=1000 \
     HOME=/home/${NB_USER} \
     LD_LIBRARY_PATH=/usr/local/lib/R/lib \
+    RSTUDIO_VERSION=1.3.959 \
     PAPAJA_VERSION=v0.1.0.9997 \
     EEGUTILS_VERSION=v0.5.0 \
     R_REMOTES_UPGRADE=never \
@@ -26,6 +27,7 @@ RUN pip3 install --no-cache-dir \
         notebook==6.3.0 \
         pandas==1.1.3 \
         scikit-learn==0.23.2 && \
+    /rocker_scripts/install_rstudio.sh && \
     R --quiet -e "remotes::install_github('IRkernel/IRkernel')" && \
     R --quiet -e "IRkernel::installspec(user = FALSE)" && \
     install2.r -s --error \
