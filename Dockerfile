@@ -1,4 +1,4 @@
-FROM rocker/binder:4.0.2
+FROM rocker/binder:3.6.3
 
 # Set some environment variables
 ENV PAPAJA_VERSION=v0.1.0.9997 \
