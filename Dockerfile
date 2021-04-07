@@ -11,8 +11,8 @@ USER root
 COPY install_stan.R .
 RUN /rocker_scripts/install_rstudio.sh &&\
     R install_stan.R && \
-    R --quiet -e 'remotes::install_github('crsh/papaja', ref = "v0.1.0.9997")' && \
-    R --quiet -e 'remotes::install_github('craddm/eegUtils', ref = "v0.5.0")' && \
+    R --quiet -e 'remotes::install_github("crsh/papaja", ref = "v0.1.0.9997")' && \
+    R --quiet -e 'remotes::install_github("craddm/eegUtils", ref = "v0.5.0")' && \
     install2.r -s --error \
         brms \
         cowplot \
