@@ -1,13 +1,18 @@
-FROM rocker/binder:4.0.2
+FROM rocker/binder:4.0.3
 
 # Set some environment variables
 ENV NB_USER=rstudio \
-    RETICULATE_MINICONDA_ENABLED=FALSE
+    R_REMOTES_UPGRADE=never \
+    RETICULATE_MINICONDA_ENABLED=FALSE \
+    RSTUDIO_VERSION=1.2.5042
 
 # Install RStudio, Stan and packages
 USER root
 COPY install_stan.R .
-RUN R install_stan.R && \
+RUN /rocker_scripts/install_rstudio.sh && \
+    apt-get install -y --no-install-recommends \
+        clang && \
+    R install_stan.R && \
     R --quiet -e 'remotes::install_github("crsh/papaja", ref = "v0.1.0.9997")' && \
     R --quiet -e 'remotes::install_github("craddm/eegUtils", ref = "v0.5.0")' && \
     install2.r -s --error \
