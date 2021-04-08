@@ -27,9 +27,9 @@ RUN /rocker_scripts/install_rstudio.sh && \
         scikit-learn==0.23.2
 
 # Specify some startup instructions for R
-RUN echo 'knitr::opts_knit$set(root.dir = getwd())
-          options(mc.cores = parallel::detectCores() - 1)
-          rstan_options(auto_write = TRUE)' >> .Rprofile
+RUN echo 'options(mc.cores = parallel::detectCores() - 1)' >> .Rprofile && \
+    echo 'rsstan::rstan_options(auto_write = TRUE)' >> .Rprofile && \
+    echo 'knitr::opts_knit$set(root.dir = getwd())' >> .Rprofile
 
 # Copy scripts, data, and materials
 COPY analysis/ analysis/
