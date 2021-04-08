@@ -6,20 +6,22 @@ ENV NB_USER=rstudio \
     RETICULATE_MINICONDA_ENABLED=FALSE \
     RSTUDIO_VERSION=1.2.5042
 
-# Install RStudio, Stan and packages
+# Install RStudio, clang, R and Python packages
 USER root
 COPY install_stan.R .
 RUN /rocker_scripts/install_rstudio.sh && \
     apt-get install -y --no-install-recommends \
         clang && \
-    R install_stan.R && \
-    R --quiet -e 'remotes::install_github("crsh/papaja", ref = "v0.1.0.9997")' && \
-    R --quiet -e 'remotes::install_github("craddm/eegUtils", ref = "v0.5.0")' && \
+    mkdir .R && \
+    echo "CXX14=clang++\nCXX14FLAGS=-O3 -march=native -mtune=native -fPIC" >> .R/Makevars && \
     install2.r -s --error \
         brms \
         cowplot \
         reticulate \
+        rstan \
         styler && \
+    R --quiet -e 'remotes::install_github("crsh/papaja", ref = "v0.1.0.9997")' && \
+    R --quiet -e 'remotes::install_github("craddm/eegUtils", ref = "v0.5.0")' && \
     pip3 install --no-cache-dir \
         mne==0.21.2 \
         pandas==1.1.3 \
