@@ -1,14 +1,12 @@
 FROM rocker/binder:4.0.3
 
-# Set some environment variables
+# Set environment variables
 ENV NB_USER=rstudio \
-    R_REMOTES_UPGRADE=never \
     RETICULATE_MINICONDA_ENABLED=FALSE \
     RSTUDIO_VERSION=1.2.5042
 
 # Install RStudio, clang, R and Python packages
 USER root
-COPY install_stan.R .
 RUN /rocker_scripts/install_rstudio.sh && \
     apt-get install -y --no-install-recommends \
         clang && \
@@ -20,15 +18,18 @@ RUN /rocker_scripts/install_rstudio.sh && \
         reticulate \
         rstan \
         styler && \
-    R --quiet -e 'remotes::install_github("crsh/papaja", ref = "v0.1.0.9997")' && \
-    R --quiet -e 'remotes::install_github("craddm/eegUtils", ref = "v0.5.0")' && \
+    installGithub.r \
+        crsh/papaja@0b4a9a79 \
+        craddm/eegUtils@01c939f2 && \
     pip3 install --no-cache-dir \
         mne==0.21.2 \
         pandas==1.1.3 \
         scikit-learn==0.23.2
 
-# Set working directory for knitr
-RUN echo 'knitr::opts_knit$set(root.dir = getwd())' >> .Rprofile
+# Specify some startup instructions for R
+RUN echo 'knitr::opts_knit$set(root.dir = getwd())
+          options(mc.cores = parallel::detectCores() - 1)
+          rstan_options(auto_write = TRUE)' >> .Rprofile
 
 # Copy scripts, data, and materials
 COPY analysis/ analysis/

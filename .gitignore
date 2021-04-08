@@ -1,8 +1,9 @@
 data/eeg/
 docs/
 analysis/export/*
-.Rproj.user
-.Rhistory
-.RData
-.Ruserdata
 .DS_Store
+.RData
+.Rhistory
+.Rproj.user
+.Ruserdata
+.vscode/

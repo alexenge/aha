@@ -99,7 +99,7 @@ r_refs("analysis/manuscript_files/r-references.bib")
 source("analysis/manuscript_files/functions_plots_tables.R")
 
 # Create an export folder for results
-dir.create("export", showWarnings = FALSE)
+dir.create("analysis/export", showWarnings = FALSE)
 
 # Define ERP components of interest
 comps <- tibble(
