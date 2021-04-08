@@ -28,7 +28,7 @@ RUN /rocker_scripts/install_rstudio.sh && \
 
 # Specify some startup instructions for R
 RUN echo 'options(mc.cores = parallel::detectCores() - 1)' >> .Rprofile && \
-    echo 'rsstan::rstan_options(auto_write = TRUE)' >> .Rprofile && \
+    echo 'rstan::rstan_options(auto_write = TRUE)' >> .Rprofile && \
     echo 'knitr::opts_knit$set(root.dir = getwd())' >> .Rprofile
 
 # Copy scripts, data, and materials
