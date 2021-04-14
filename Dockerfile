@@ -9,12 +9,10 @@ COPY requirements.txt .
 # Install as root
 USER root
 RUN \
-
     # Install R packages from GitHub
     installGithub.r \
         craddm/eegUtils@01c939f2 \
         && \
-
     # Install Python packages
     pip3 install -r requirements.txt
 
