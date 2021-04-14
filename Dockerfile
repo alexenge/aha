@@ -1,4 +1,4 @@
-FROM rocker/binder:4.0.3
+FROM rocker/binder:4.0.2
 
 # Set environment variables
 ENV NB_USER=rstudio \
