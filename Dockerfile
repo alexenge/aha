@@ -9,12 +9,13 @@ COPY requirements.txt .
 # Install as root
 USER root
 RUN \
-    # Install R packages from GitHub
+    # R packages from GitHub
     installGithub.r \
         craddm/eegUtils@01c939f2 \
         && \
-    # Install Python packages
-    pip3 install -r requirements.txt
+    # Python packages
+    pip3 install --no-cache-dir -r requirements.txt && \
+    chown -R ${NB_USER} ${HOME}
 
 # Switch back to default user
 USER ${NB_USER}
