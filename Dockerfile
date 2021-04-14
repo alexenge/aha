@@ -15,7 +15,7 @@ RUN \
         && \
     # Python packages
     pip3 install --no-cache-dir -r requirements.txt && \
-    chown -R ${NB_USER} ${HOME}
+    chown -R ${NB_USER} .
 
 # Switch back to default user
 USER ${NB_USER}
