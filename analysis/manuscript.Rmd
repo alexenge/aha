@@ -54,6 +54,9 @@ output            :
   papaja::apa6_pdf:
     latex_engine  : "xelatex"
 
+editor_options: 
+  chunk_output_type: console
+
 header-includes:
   - \geometry{a4paper}
   - \fancyheadoffset[R,L]{0pt}
@@ -72,7 +75,7 @@ header-includes:
 ```{r setup, include=FALSE}
 # Do you want to re-run the EEG preprocessing? Note that this can only be done with the raw data,
 # which are available from the corresponding author (rasha.abdel.rahman@hu-berlin.de) upon request.
-rerun_preproc <- FALSE
+rerun_preproc <- TRUE
 
 # Do you want to re-run the linear mixed-effect models? This can be done even if only the
 # preprocessed single-trial data are available (from GitHub and/or the OSF). Note, however, that
@@ -111,6 +114,15 @@ comps <- tibble(
     c("P7", "P8", "PO7", "PO8", "PO9", "PO10"),
     c("C1", "C2", "Cz", "CP1", "CP2", "CPz")
   )
+)
+
+# Define some filenames for I/O
+fnames <- list(
+  epochs = "analysis/export/aha-epo.fif",
+  trials = "analysis/export/aha-trials.csv",
+  gavgs = "analysis/export/aha-gavgs.RDS",
+  conditions = "analysis/export/aha-obj-per-cond.csv",
+  montage = "analysis/export/aha-montage.csv"
 )
 ```
 
@@ -161,10 +173,22 @@ Each experimental session consisted of three parts (see Figure \@ref(fig:exp1-pl
 ```{python def_functions, eval=rerun_preproc}
 # Import libraries
 import mne
+import numpy as np
 
-# Define function for preprocessing the EEG data
-def preproc(vhdr_fname, metadata, n_components, method, l_freq, h_freq, event_id, tmin, tmax,
-    baseline, reject):
+# Define function for preprocessing a single participant
+def preproc(
+    vhdr_fname,
+    metadata,
+    n_components,
+    method,
+    l_freq,
+    h_freq,
+    event_id,
+    tmin,
+    tmax,
+    baseline,
+    reject,
+):
     # Read EEG data in microvolts
     raw = mne.io.read_raw_brainvision(vhdr_fname, scale=1e6, preload=True)
     # Create virtual EOG channels
@@ -200,8 +224,50 @@ def preproc(vhdr_fname, metadata, n_components, method, l_freq, h_freq, event_id
     return epochs
 
 
+# Define function for preprocessing a list of participants
+def preproc_all(
+    vhdr_fnames,
+    metadatas,
+    output_fname,
+    n_components,
+    method,
+    l_freq,
+    h_freq,
+    event_id,
+    tmin,
+    tmax,
+    baseline,
+    reject,
+):
+    # Do the actual preprocessing
+    epochs = [
+        preproc(
+            vhdr_fname=vhdr_fname,
+            metadata=metadata,
+            n_components=n_components,
+            method=method,
+            l_freq=l_freq,
+            h_freq=h_freq,
+            event_id=event_id,
+            tmin=tmin,
+            tmax=tmax,
+            baseline=baseline,
+            reject=reject,
+        )
+        for vhdr_fname, metadata in zip(vhdr_fnames, metadatas)
+    ]
+    # Concatenate all participants and save
+    epochs = mne.epochs.concatenate_epochs(epochs)
+    epochs.save(output_fname, overwrite=True)
+    # Return the epochs without loading the actual data
+    epochs = mne.read_epochs(output_fname, preload=False)
+    return epochs
+
+
 # Define function to compute averaged waveforms by part and condition
-def compute_evokeds(epochs, grand=True, data_only=True):
+def compute_evokeds(epochs_fname, grand=True, data_only=True):
+    # Read preprocessed epochs
+    epochs = mne.read_epochs(epochs_fname)
     # Define lists of participants, parts, and conditions
     ps = epochs.metadata["participant"].unique()
     pts = ["I", "II", "III"]
@@ -210,6 +276,7 @@ def compute_evokeds(epochs, grand=True, data_only=True):
     def compute_evoked(epochs, pt, cn, p):
         query = 'participant == "' + p + '" and part == "' + pt + '" and condition == "' + cn + '"'
         return epochs[query].average()
+
     # Create a dict with by-participant waveforms nested in conditions nested in parts
     avgs = {pt: {cn: [compute_evoked(epochs, pt, cn, p) for p in ps] for cn in cns} for pt in pts}
     # If needed, compute grand-averaged waveforms across participants
@@ -226,12 +293,13 @@ def compute_evokeds(epochs, grand=True, data_only=True):
 
 
 # Define function to compute single-trial mean ERP amplitudes from epochs
-def compute_erps(epochs, name, tmin, tmax, roi):
+def compute_erps(epochs_fname, name, tmin, tmax, roi):
+    # Read preprocessed epochs
+    epochs = mne.read_epochs(epochs_fname)
     # Average across electrodes in the ROI
     roi_idx = mne.pick_channels(epochs.ch_names, roi)
     epochs_roi = mne.channels.combine_channels(epochs, dict(roi=roi_idx))
     # Average across samples in the time window
-    import numpy as np
     tmin_s, tmax_s = tmin / 1000, tmax / 1000
     times_idx = np.where(np.logical_and(epochs.times >= tmin_s, epochs.times <= tmax_s))
     erps = epochs_roi.get_data()[:, 0, times_idx].mean(axis=(1, 2))
@@ -328,51 +396,46 @@ preproc_params <- list(
 # Preprocess the EEG for Experiment 1 in Python
 paste0("data/eeg/exp", 1:2) %>%
   list.files(pattern = ".vhdr", full.names = TRUE) %>%
-  map2(
-    .y = behav,
-    ~ do.call(py$preproc, c(list(vhdr_fname = .x, metadata = .y), preproc_params))
-  ) %>%
-  # Concatenate epochs of all participants
-  py$mne$epochs$concatenate_epochs() -> epochs
-
-# Backup epochs to the export folder
-epochs$save("export/aha-epo.fif")
+  exec(
+    .fn = py$preproc_all,
+    vhdr_fnames = .,
+    metadatas = behav,
+    output_fname = fnames$epochs,
+    !!!preproc_params
+  ) -> epochs
 
 # Compute mean ERP amplitudes and bind to the behavioral data
-pmap_dfc(comps, py$compute_erps, epochs = epochs_exp1) %>%
+pmap_dfc(comps, py$compute_erps, epochs_fname = fnames$epochs) %>%
   set_names(comps$name) %>%
-  bind_cols(as_tibble(epochs_exp1$metadata), .) %T>%
-  write_tsv("export/exp1-data.tsv") -> data_exp1
+  bind_cols(epochs$metadata, .) %T>%
+  write_tsv(fnames$trials) -> aha
 
 # Compute grand averages per part and condition
-py$compute_evokeds(epochs = epochs_exp1, grand = TRUE, data_only = TRUE) %>%
-  saveRDS("export/exp1-gaverages.RDS")
+py$compute_evokeds(epochs_fname = fnames$epochs, grand = TRUE, data_only = TRUE) %>%
+  saveRDS(fnames$gavgs)
 
 # Backup number of stimuli assigned to each condition for all participants
-map(behav_exp1, function(x) table(x$condition) / 3) %>%
+map(behav, function(x) table(x$condition) / 3) %>%
   bind_rows() %>%
-  mutate(Participant = unique(data_exp1$participant), .before = 1) %>%
-  write_tsv("export/exp1-objects.tsv")
+  mutate(Participant = unique(aha$participant), .before = 1) %>%
+  write_csv(fnames$conditions)
 
 # Get standard EasyCap electrode positions and project to 2D space
 py$mne$channels$`_standard_montage_utils`$MONTAGE_PATH %>%
   list.files(pattern = "easycap-M1.txt", full.names = TRUE) %>%
   read_tsv(col_types = cols()) %>%
   rename(electrode = Site) %>%
-  inner_join(tibble(electrode = epochs_exp1$ch_names), ., by = "electrode") %>%
+  inner_join(tibble(electrode = epochs$ch_names), ., by = "electrode") %>%
   mutate(
     x = eegUtils:::deg2rad(Theta) * cos(eegUtils:::deg2rad(Phi)),
     y = eegUtils:::deg2rad(Theta) * sin(eegUtils:::deg2rad(Phi)),
   ) %>%
-  write_tsv("export/montage.tsv")
-
-# Remove the epochs to free up memory
-rm(epochs_exp1)
+  write_csv(fnames$montage)
 ```
 
 ```{r exp1-models, eval=rerun_models}
 # Load preprocessed single-trial data
-read_tsv("export/exp1-data.tsv", col_types = cols()) %>%
+read_tsv("analysis/export/exp1-data.tsv", col_types = cols()) %>%
   # Factorize columns
   mutate(
     part = factor(part, levels = c("I", "II", "III")),
@@ -384,7 +447,7 @@ read_tsv("export/exp1-data.tsv", col_types = cols()) %>%
   ) %>%
   # Remove any trials excluded from conditions
   filter(condition %in% c("Informed", "Naive")) %>%
-  droplevels() -> data_exp1
+  droplevels() -> aha
 
 # Define contrast coding for condition (informed-naive) and part (2-1, 3-1)
 contrasts_condition <- t(cbind(
@@ -396,8 +459,8 @@ contrasts_part <- t(cbind(
 ))
 
 # Apply these contrasts to the factors in the data
-contrasts(data_exp1$condition) <- MASS::ginv(contrasts_condition)
-contrasts(data_exp1$part) <- MASS::ginv(contrasts_part)
+contrasts(aha$condition) <- MASS::ginv(contrasts_condition)
+contrasts(aha$part) <- MASS::ginv(contrasts_part)
 
 # Define formula and parameters for linear mixed-effects regression models (LMMs)
 formula_exp12 <- buildmer::tabulate.formula(
@@ -444,22 +507,22 @@ map(
   comps$name,
   compute_models,
   formula = formula_exp12,
-  data = data_exp1,
+  data = aha,
   control = control,
   specs = specs_exp12
 ) %>%
   set_names(comps$name) %T>%
-  saveRDS("export/exp1-models.RDS") -> models_exp1
+  saveRDS("analysis/export/exp1-models.RDS") -> models_exp1
 ```
 
 ```{r exp1-import}
 # Load average number of objects per condition
-(read_tsv("export/exp1-objects.tsv", col_types = cols()) %>%
+(read_tsv("analysis/export/exp1-objects.tsv", col_types = cols()) %>%
    summarise(across(.cols = -Participant, .fns = mean)) %>%
    slice(1) %>% unlist() -> objects_exp1)
 
 # Load preprocessed single-trial data
-read_tsv("export/exp1-data.tsv", col_types = cols()) %>%
+read_tsv("analysis/export/exp1-data.tsv", col_types = cols()) %>%
   # Factorize columns
   mutate(
     part = factor(part, levels = c("I", "II", "III")),
@@ -468,10 +531,10 @@ read_tsv("export/exp1-data.tsv", col_types = cols()) %>%
     ),
     participant = factor(participant),
     item = factor(item)
-  ) -> data_exp1
+  ) -> aha
 
 # Check number of rejected epochs
-data_exp1 %>%
+aha %>%
   group_by(participant) %>%
   tally() %>%
   mutate(n = 360 - n) %>%
@@ -481,8 +544,8 @@ median(rejected_exp1)  # Median
 range(rejected_exp1)   # Range
 
 # Load grand-averaged ERPs and linear mixed models
-evokeds_exp1 <- readRDS("export/exp1-gaverages.RDS")
-models_exp1 <- readRDS("export/exp1-models.RDS")
+evokeds_exp1 <- readRDS("analysis/export/exp1-gaverages.RDS")
+models_exp1 <- readRDS("analysis/export/exp1-models.RDS")
 ```
 
 ```{r bayes, eval=FALSE}
@@ -561,7 +624,7 @@ import numpy as np
 
 # epochs = preproc(
 #   vhdr_fname="data/exp1/eeg/Vp0004.vhdr",
-#   metadata=r.data_exp1.query("participant == 'VP_04'"),
+#   metadata=r.aha.query("participant == 'VP_04'"),
 #   n_components=15,
 #   method="fastica",
 #   l_freq=None,
@@ -572,9 +635,9 @@ import numpy as np
 #   baseline=(-0.2, 0),
 #   reject=dict(eeg=200)
 # )
-# epochs.save("export/vp04-epo.fif")
+# epochs.save("analysis/export/vp04-epo.fif")
 
-epochs = mne.read_epochs("export/unf-exp1-epo.fif")
+epochs = mne.read_epochs("analysis/export/unf-exp1-epo.fif")
 
 evokeds = compute_evokeds(epochs_c, grand=True, data_only=False)
 evokeds_i = evokeds["II"]["Informed"]
@@ -691,7 +754,7 @@ plt.show()
 
 ```{r exp1-plot, include=TRUE, fig.height=11, fig.cap = "(ref:figure-1-caption)"}
 # Load sample time points and electrode montage
-montage <- read_tsv("export/montage.tsv", col_types = cols())
+montage <- read_tsv("analysis/export/montage.tsv", col_types = cols())
 
 # Create plot for Experiment 1
 plot_grid(
@@ -803,23 +866,23 @@ map2(
   py$mne$epochs$concatenate_epochs() -> epochs_exp2
 
 # Backup epochs to the export folder
-epochs_exp2$save("export/exp2-epo.fif")
+epochs_exp2$save("analysis/export/exp2-epo.fif")
 
 # Compute mean ERP amplitudes and bind to the behavioral data
 pmap_dfc(comps, py$compute_erps, epochs = epochs_exp2) %>%
   set_names(comps$name) %>%
   bind_cols(as_tibble(epochs_exp2$metadata), .) %T>%
-  write_tsv("export/exp2-data.tsv") -> data_exp2
+  write_tsv("analysis/export/exp2-data.tsv") -> data_exp2
 
 # Compute grand averages per part and condition
 py$compute_evokeds(epochs = epochs_exp2, grand = TRUE, data_only = TRUE) %>%
-  saveRDS("export/exp2-gaverages.RDS")
+  saveRDS("analysis/export/exp2-gaverages.RDS")
 
 # Backup number of stimuli assigned to each condition for all participants
 map(behav_exp2, function(x) table(x$condition) / 3) %>%
   bind_rows() %>%
   mutate(Participant = unique(data_exp2$participant), .before = 1) %>%
-  write_tsv("export/exp2-objects.tsv")
+  write_tsv("analysis/export/exp2-objects.tsv")
 
 # Remove the epochs to free up memory
 rm(epochs_exp2)
@@ -827,7 +890,7 @@ rm(epochs_exp2)
 
 ```{r exp2-models, eval=rerun_models}
 # Load preprocessed single-trial data
-read_tsv("export/exp2-data.tsv", col_types = cols()) %>%
+read_tsv("analysis/export/exp2-data.tsv", col_types = cols()) %>%
   # Factorize columns
   mutate(
     part = factor(part, levels = c("I", "II", "III")),
@@ -855,17 +918,17 @@ map(
   specs = specs_exp12
 ) %>%
   set_names(comps$name) %T>%
-  saveRDS("export/exp2-models.RDS") -> models_exp2
+  saveRDS("analysis/export/exp2-models.RDS") -> models_exp2
 ```
 
 ```{r exp2-import}
 # Load average number of objects per condition
-(read_tsv("export/exp2-objects.tsv", col_types = cols()) %>%
+(read_tsv("analysis/export/exp2-objects.tsv", col_types = cols()) %>%
    summarise(across(.cols = -Participant, .fns = mean)) %>%
    slice(1) %>% unlist() -> objects_exp2)
 
 # Load preprocessed single-trial data
-read_tsv("export/exp2-data.tsv", col_types = cols()) %>%
+read_tsv("analysis/export/exp2-data.tsv", col_types = cols()) %>%
   # Factorize columns
   mutate(
     part = factor(part, levels = c("I", "II", "III")),
@@ -887,8 +950,8 @@ median(rejected_exp2)  # Median
 range(rejected_exp2)   # Range
 
 # Load grand-averaged ERPs and linear mixed models
-evokeds_exp2 <- readRDS("export/exp2-gaverages.RDS")
-models_exp2 <- readRDS("export/exp2-models.RDS")
+evokeds_exp2 <- readRDS("analysis/export/exp2-gaverages.RDS")
+models_exp2 <- readRDS("analysis/export/exp2-models.RDS")
 ```
 
 All materials, procedures, EEG-related methods, and statistical analyses were identical to Experiment 1. An average of `r format(round(objects_exp2["Excl_known"], 1), nsmall = 1)` objects per participant (= `r scales::percent(objects_exp2["Excl_known"]/120, accuracy = 0.1)` of all unfamiliar objects) was classified as being known in the pre-insight part and excluded from all further analyses. Based on participants' responses in the insight part, an average of `r format(round(objects_exp2["Informed"], 1), nsmall = 1)` objects was assigned to the semantically informed condition (= `r scales::percent(objects_exp2["Informed"]/60, accuracy = 0.1)` of objects presented with matching keywords) and an average of `r format(round(objects_exp2["Naive"], 1), nsmall = 1)` objects was assigned to the naive condition (= `r scales::percent(objects_exp2["Naive"]/60, accuracy = 0.1)` of objects presented with non-matching keywords). Automatic rejection of EEG epochs containing artifacts led to the exclusion of `r format(round(mean(rejected_exp2), 1), nsmall = 1)` trials per participant (= `r scales::percent(mean(rejected_exp2)/360, accuracy = 0.1)`; range `r min(rejected_exp2)` to `r max(rejected_exp2)` trials).
@@ -952,7 +1015,7 @@ In an attempt to maximize statistical power, we combined the ERP data sets from 
 # Combine data from Experiments 1 and 2 (requires changing the participant IDs for Experiment 2)
 data_exp2 %>%
   mutate(participant = fct_relabel(participant, ~ paste0(., "_2"))) %>%
-  bind_rows(data_exp1, ., .id = "experiment") %>%
+  bind_rows(aha, ., .id = "experiment") %>%
   mutate(experiment = as_factor(experiment)) -> data_joint
 
 # Subset only the relevant conditions
@@ -985,12 +1048,12 @@ map(
   specs = specs_exp12
 ) %>%
   set_names(comps$name) %T>%
-  saveRDS("export/joint-models.RDS") -> models_joint
+  saveRDS("analysis/export/joint-models.RDS") -> models_joint
 ```
 
 ```{r joint-table, include=TRUE, results="asis"}
 # Load linear mixed models
-models_joint <- readRDS("export/joint-models.RDS")
+models_joint <- readRDS("analysis/export/joint-models.RDS")
 
 # Create table of models for Experiments 1 and 2 combined
 table_joint <- create_table(
@@ -1082,7 +1145,7 @@ map(
   specs = specs_exp12
 ) %>%
   set_names(comps$name) %T>%
-  saveRDS("export/joint-control-models.RDS") -> models_joint_control
+  saveRDS("analysis/export/joint-control-models.RDS") -> models_joint_control
 ```
 
 ```{r control-table}
@@ -1090,7 +1153,7 @@ map(
 (stims_joint <- (objects_exp1 + objects_exp2) / 2)
 
 # Load linear mixed models
-models_joint_control <- readRDS("export/joint-control-models.RDS")
+models_joint_control <- readRDS("analysis/export/joint-control-models.RDS")
 
 # Create a table but don't print
 table_joint_control <- create_table(
@@ -1149,23 +1212,23 @@ map2(
   py$mne$epochs$concatenate_epochs() -> epochs_exp3
 
 # Backup epochs to the export folder
-epochs_exp3$save("export/exp3-epo.fif")
+epochs_exp3$save("analysis/export/exp3-epo.fif")
 
 # Compute mean ERP amplitudes and bind to the behavioral data
 pmap_dfc(comps, py$compute_erps, epochs = epochs_exp3) %>%
   set_names(comps$name) %>%
   bind_cols(as_tibble(epochs_exp3$metadata), .) %T>%
-  write_tsv("export/exp3-data.tsv") -> data_exp3
+  write_tsv("analysis/export/exp3-data.tsv") -> data_exp3
 
 # Compute grand averages per part and condition
 py$compute_evokeds(epochs = epochs_exp3, grand = TRUE, data_only = TRUE) %>%
-  saveRDS("export/exp3-gaverages.RDS")
+  saveRDS("analysis/export/exp3-gaverages.RDS")
 
 # Backup number of stimuli assigned to each condition for all participants
 map(behav_exp3, function(x) table(x$condition) / 3) %>%
   bind_rows() %>%
   mutate(Participant = unique(data_exp3$participant), .before = 1) %>%
-  write_tsv("export/exp3-objects.tsv")
+  write_tsv("analysis/export/exp3-objects.tsv")
 
 # Remove the epochs to free up memory
 rm(epochs_exp3)
@@ -1173,7 +1236,7 @@ rm(epochs_exp3)
 
 ```{r exp3-models, eval=run_exp3}
 # Load preprocessed single-trial data
-read_tsv("export/exp3-data.tsv", col_types = cols()) %>%
+read_tsv("analysis/export/exp3-data.tsv", col_types = cols()) %>%
   # Factorize columns
   mutate(
     part = factor(part, levels = c("I", "II", "III")),
@@ -1214,7 +1277,7 @@ map(
   specs = specs_exp3
 ) %>%
   set_names(comps$name) %T>%
-  saveRDS("export/exp3-models.RDS") -> models_exp3
+  saveRDS("analysis/export/exp3-models.RDS") -> models_exp3
 ```
 
 ```{r exp3-table, include=TRUE, results="asis", eval=run_exp3}
