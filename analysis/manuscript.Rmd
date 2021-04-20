@@ -435,7 +435,7 @@ py$mne$channels$`_standard_montage_utils`$MONTAGE_PATH %>%
 
 ```{r exp1-models, eval=rerun_models}
 # Load preprocessed single-trial data
-read_tsv("analysis/export/exp1-data.tsv", col_types = cols()) %>%
+read_tsv("analysis/export/aha-trials.csv", col_types = cols()) %>%
   # Factorize columns
   mutate(
     part = factor(part, levels = c("I", "II", "III")),
@@ -462,57 +462,35 @@ contrasts_part <- t(cbind(
 contrasts(aha$condition) <- MASS::ginv(contrasts_condition)
 contrasts(aha$part) <- MASS::ginv(contrasts_part)
 
-# Define formula and parameters for linear mixed-effects regression models (LMMs)
-formula_exp12 <- buildmer::tabulate.formula(
-  ~ part * condition + (part * condition | participant) + (part * condition | item)
-) %>% mutate(block = replace(block, is.na(grouping), "fixed"))
-control <- lme4::lmerControl(optimizer = "bobyqa", optCtrl = list(maxfun = 2e5))
+# Specify model formula and follow-up contrasts
+form <- erp ~ part * condition +
+  (part * condition | participant) +
+  (part * condition | item)
+specs <- pairwise ~ condition | part
 
-# Define formula for follow-up contrasts
-specs_exp12 <- pairwise ~ condition | part
-
-# Define function to compute LMMs and follow-up contrasts for each component
-compute_models <- function(dep, formula, data, control, specs) {
-  require(lmerTest)
-  require(buildmer)
+# Calculate linear mixed-effects models and contrasts
+map(comps$name, function(comp, formula = form, data = aha, specs = specs) {
+  require(afex)
   require(emmeans)
-  emm_options(lmer.df = "Satterthwaite", lmerTest.limit = Inf)
-  build <- buildmer(
-    control = control,
-    REML = FALSE,
-    buildmerControl = buildmerControl(
-      formula = formula,
-      data = data,
-      direction = c("backward", "backward"),
-      elim = function(logp) exp(logp) >= .20,
-      calc.anova = TRUE,
-      ddf = "Satterthwaite",
-      dep = dep
-    )
+  data %<>% rename(erp = all_of(comp))
+  mod <- mixed(
+    formula,
+    data,
+    method = "S",
+    check_contrasts = FALSE,
+    all_fit = TRUE
   )
-  means <- emmeans(build@model, specs = specs, infer = TRUE, data = data)$emmeans
-  conts <- emmeans(build@model, specs = specs, infer = TRUE, data = data)$contrasts
+  em <- emmeans(mod, specs = specs, infer = TRUE, data = data)
   modlist <- list(
-    model = build@model,
-    anova = build@anova,
-    summary = build@summary,
-    means = means %>% as.data.frame(),
-    contrasts = conts %>% as.data.frame()
+    model = mod,
+    anova = anova(mod),
+    summary = summary(mod),
+    means = as.data.frame(em$means),
+    contrasts = as.data.frame(em$contrasts)
   )
-  return(modlist)
-}
-
-# Compute the models for Experiment 1
-map(
-  comps$name,
-  compute_models,
-  formula = formula_exp12,
-  data = aha,
-  control = control,
-  specs = specs_exp12
-) %>%
+}) %>%
   set_names(comps$name) %T>%
-  saveRDS("analysis/export/exp1-models.RDS") -> models_exp1
+  saveRDS("analysis/export/aha_models_freq.RDS") -> mods_freq
 ```
 
 ```{r exp1-import}
