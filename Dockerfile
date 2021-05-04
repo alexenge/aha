@@ -1,5 +1,10 @@
 FROM alexenge/base_rstan:4.0.3
 
+# Create project folder
+ENV PROJ=aha
+RUN mkdir ${HOME}/${PROJ}
+WORKDIR ${HOME}/${PROJ}
+
 # Copy files into the container
 COPY analysis/ analysis/
 COPY data/ data/

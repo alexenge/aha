@@ -1,3 +1,5 @@
-analysis/export/*.fif
+data/processed/*.fif
+data/raw/
 docs/
 renv/
+.Rprofile

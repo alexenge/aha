@@ -1,9 +1,11 @@
-data/eeg/
+analysis/export/
+data/raw/
+data/processed/*
 docs/
-analysis/export/*
 .DS_Store
 .RData
 .Rhistory
 .Rproj.user
 .Ruserdata
+.devcontainer/
 .vscode/

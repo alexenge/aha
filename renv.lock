@@ -142,10 +142,10 @@
     },
     "bayestestR": {
       "Package": "bayestestR",
-      "Version": "0.8.0",
+      "Version": "0.8.2",
       "Source": "Repository",
       "Repository": "CRAN",
-      "Hash": "193ab1e887e1b532442087538f79df86"
+      "Hash": "c5ea7613d9b5a5a0a5272ee6363aebbd"
     },
     "blob": {
       "Package": "blob",
@@ -316,9 +316,9 @@
       "RemoteHost": "api.github.com",
       "RemoteRepo": "eegUtils",
       "RemoteUsername": "craddm",
-      "RemoteRef": "HEAD",
+      "RemoteRef": "01c939f2",
       "RemoteSha": "01c939f2327a20131a92a61cfdd8da111c36d595",
-      "Hash": "dd0dbb2b061749e49cfd44b6e90d6f9b"
+      "Hash": "661ccddfa30502fe07774b049c1dc709"
     },
     "ellipsis": {
       "Package": "ellipsis",
@@ -385,10 +385,10 @@
     },
     "future": {
       "Package": "future",
-      "Version": "1.18.0",
+      "Version": "1.21.0",
       "Source": "Repository",
       "Repository": "CRAN",
-      "Hash": "7f6e18b431939ccf2b4667d406a1f33e"
+      "Hash": "f25fad6bee82b7ab01f055e2d813b96f"
     },
     "future.apply": {
       "Package": "future.apply",
@@ -413,10 +413,10 @@
     },
     "globals": {
       "Package": "globals",
-      "Version": "0.12.5",
+      "Version": "0.14.0",
       "Source": "Repository",
       "Repository": "CRAN",
-      "Hash": "e9e529fb7a579ad4b4ff65e052e76ed8"
+      "Hash": "eca8023ed5ca6372479ebb9b3207f5ae"
     },
     "glue": {
       "Package": "glue",
@@ -469,10 +469,10 @@
     },
     "htmltools": {
       "Package": "htmltools",
-      "Version": "0.5.0",
+      "Version": "0.5.1.1",
       "Source": "Repository",
       "Repository": "CRAN",
-      "Hash": "7d651b7131794fe007b1ad6f21aaa401"
+      "Hash": "af2c2531e55df5cf230c4b5444fc973c"
     },
     "htmlwidgets": {
       "Package": "htmlwidgets",
@@ -709,14 +709,21 @@
       "Package": "papaja",
       "Version": "0.1.0.9997",
       "Source": "GitHub",
-      "RemoteType": "github",
       "Remotes": "tidymodels/broom",
+      "RemoteType": "github",
       "RemoteHost": "api.github.com",
       "RemoteRepo": "papaja",
       "RemoteUsername": "crsh",
-      "RemoteRef": "devel",
+      "RemoteRef": "0b4a9a79",
       "RemoteSha": "0b4a9a79d66364ca0cb8a9e80e097b29679b0eb0",
-      "Hash": "14fd106a7dc4aa50111da1f911f7ece8"
+      "Hash": "618c6ebad75abb1a070df4541d4e83ce"
+    },
+    "parallelly": {
+      "Package": "parallelly",
+      "Version": "1.24.0",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "3d77980bde8c8fe48dc0c24dcb014b39"
     },
     "performance": {
       "Package": "performance",
