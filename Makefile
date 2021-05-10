@@ -4,18 +4,15 @@ DOCKER_USER := alexenge
 PROJECT := $(notdir $(CURDIR))
 HOST_PATH := $(CURDIR)
 CONTAINER_PATH := /home/rstudio
-MEMORY := 14g
-CPUS := 7
+CONTAINER_TAG := $(DOCKER_USER)/$(PROJECT)
 
 # If DOCKER=TRUE, do stuff inside in the container
 ifeq ($(DOCKER),TRUE)
 	run := docker run \
 		--rm \
-		--memory=${MEMORY} \
-		--cpus=${CPUS} \
 		--volume $(HOST_PATH)/analysis:$(CONTAINER_PATH)/analysis \
 		--volume $(HOST_PATH)/data:$(CONTAINER_PATH)/data \
-		$(PROJECT)
+		$(CONTAINER_TAG)
 	workdir := $(CONTAINER_PATH)
 else
 	workdir := $(HOST_PATH)
@@ -32,7 +29,7 @@ analysis/manuscript.pdf:
 
 # Build the docker container
 build: Dockerfile
-	docker build --tag $(DOCKER_USER)/$(PROJECT) .
+	docker build --tag $(CONTAINER_TAG) .
 
 # Save the docker image
 save: $(PROJECT).tar.gz
@@ -43,11 +40,8 @@ $(PROJECT).tar.gz:
 interactive:
 	docker run \
 		--rm \
-		--memory=${MEMORY} \
-		--cpus=${CPUS} \
 		--volume $(HOST_PATH)/analysis:$(CONTAINER_PATH)/analysis \
 		--volume $(HOST_PATH)/data:$(CONTAINER_PATH)/data \
-		-it \
 		-e PASSWORD=1234 \
 		-p 8888:8888 \
-		$(PROJECT)
+		$(CONTAINER_TAG)
