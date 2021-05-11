@@ -1,11 +1,13 @@
 certifi==2020.12.5
+h5py==3.2.1
 joblib==1.0.1
-mne==0.22.1
+mne==0.23.0
 numpy==1.20.2
 pandas==1.2.3
 pip==21.0.1
 python-dateutil==2.8.1
 pytz==2021.1
+radian==0.5.10
 scikit-learn==0.24.1
 scipy==1.6.2
 setuptools==49.6.0

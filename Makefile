@@ -9,8 +9,9 @@ CONTAINER_TAG := $(DOCKER_USER)/$(PROJECT)
 # If DOCKER=TRUE, do stuff inside in the container
 ifeq ($(DOCKER),TRUE)
 	run := docker run \
+		-it \
 		--rm \
-		--volume $(HOST_PATH)/analysis:$(CONTAINER_PATH)/analysis \
+		--volume $(HOST_PATH)/code:$(CONTAINER_PATH)/code \
 		--volume $(HOST_PATH)/data:$(CONTAINER_PATH)/data \
 		$(CONTAINER_TAG)
 	workdir := $(CONTAINER_PATH)
@@ -19,13 +20,13 @@ else
 endif
 
 # Knit the manuscript
-all: analysis/manuscript.pdf
-analysis/manuscript.pdf: analysis/manuscript.Rmd
-analysis/manuscript.pdf: analysis/manuscript_files/apa.csl
-analysis/manuscript.pdf: analysis/manuscript_files/r-references.bib
-analysis/manuscript.pdf: analysis/manuscript_files/potato_masher.png
-analysis/manuscript.pdf:
-	$(run) Rscript -e "rmarkdown::render(input = '$(workdir)/analysis/manuscript.Rmd')"
+all: code/manuscript.pdf
+code/manuscript.pdf: code/manuscript.Rmd
+code/manuscript.pdf: misc/apa.csl
+code/manuscript.pdf: misc/bibliography.bib
+code/manuscript.pdf: misc/potato_masher.png
+code/manuscript.pdf:
+	$(run) Rscript -e "rmarkdown::render(input = '$(workdir)/code/manuscript.Rmd')"
 
 # Build the docker container
 build: Dockerfile
@@ -39,8 +40,9 @@ $(PROJECT).tar.gz:
 # Run an interactive RStudio session in the container
 interactive:
 	docker run \
+		-it \
 		--rm \
-		--volume $(HOST_PATH)/analysis:$(CONTAINER_PATH)/analysis \
+		--volume $(HOST_PATH)/code:$(CONTAINER_PATH)/code \
 		--volume $(HOST_PATH)/data:$(CONTAINER_PATH)/data \
 		-e PASSWORD=1234 \
 		-p 8888:8888 \

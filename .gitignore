@@ -1,6 +1,6 @@
 analysis/export/
-data/raw/
-data/processed/*
+code/__pycache__/
+data/
 docs/
 .DS_Store
 .RData

@@ -1,5 +1,4 @@
-data/processed/*.fif
-data/raw/
+data/*
 docs/
 renv/
 .Rprofile

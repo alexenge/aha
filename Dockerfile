@@ -1,14 +1,10 @@
 FROM alexenge/base_rstan:4.0.3
 
-# Create project folder
-ENV PROJ=aha
-RUN mkdir ${HOME}/${PROJ}
-WORKDIR ${HOME}/${PROJ}
-
 # Copy files into the container
-COPY analysis/ analysis/
+COPY code/ code/
 COPY data/ data/
 COPY materials/ materials/
+COPY misc/ misc/
 COPY requirements.txt .
 
 # Switch to root user
@@ -21,4 +17,5 @@ RUN installGithub.r \
     && pip3 install --no-cache-dir -r requirements.txt
 
 # Switch back to default user
+RUN chown -R ${NB_USER} ${HOME}
 USER ${NB_USER}
