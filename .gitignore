@@ -1,7 +1,3 @@
-analysis/export/
-code/__pycache__/
-data/
-docs/
 .DS_Store
 .RData
 .Rhistory
@@ -9,3 +5,10 @@ docs/
 .Ruserdata
 .devcontainer/
 .vscode/
+*.fif
+*.h5
+analysis/export/
+code/__pycache__/
+code/tmp.py
+data/
+docs/
