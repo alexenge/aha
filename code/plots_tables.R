@@ -24,7 +24,7 @@ plot_trials <- function() {
     annotate("text", x = -9, y = 55, label = "potatoes\nmashing", size = 10 / .pt, family = "Helvetica", color = color_informed) +
     annotate("text", x = -9, y = 79, label = "message\nsignaling", size = 10 / .pt, family = "Helvetica", color = color_naive) +
     annotate("text", x = 9, y = 67, label = "*", size = 30 / .pt, family = "Helvetica") +
-    draw_image("analysis/manuscript_files/potato_masher.png", x = 18, y = 62, width = 18, height = 18) +
+    draw_image("misc/potato_masher.png", x = 18, y = 62, width = 18, height = 18) +
     # Timings
     annotate("text", x = -9, y = 67.3, label = "or", size = 10 / .pt, family = "Helvetica") +
     annotate("text", x = -27, y = 52, label = "0.5 s", size = 10 / .pt, family = "Helvetica") +
@@ -66,7 +66,7 @@ plot_trials <- function() {
     annotate("rect", xmin = -91, xmax = -71, ymin = 22, ymax = 42, color = "black", fill = "white") +
     annotate("rect", xmin = -53, xmax = -73, ymin = 24, ymax = 44, color = "black", fill = "white") +
     annotate("text", x = -81, y = 32.3, label = "+", size = 20 / .pt, family = "Helvetica") +
-    draw_image("analysis/manuscript_files/potato_masher.png", x = -72, y = 25, width = 18, height = 18) +
+    draw_image("misc/potato_masher.png", x = -72, y = 25, width = 18, height = 18) +
     # Timings
     annotate("text", x = -81, y = 19, label = "0.5 s", size = 10 / .pt, family = "Helvetica") +
     annotate("text", x = -63, y = 19.3, label = "3 s or\nresponse", size = 10 / .pt, family = "Helvetica", lineheight = 1) +
@@ -81,7 +81,7 @@ plot_trials <- function() {
     annotate("rect", xmin = 53, xmax = 73, ymin = 22, ymax = 42, color = "black", fill = "white") +
     annotate("rect", xmin = 71, xmax = 91, ymin = 24, ymax = 44, color = "black", fill = "white") +
     annotate("text", x = 63, y = 32.3, label = "+", size = 20 / .pt, family = "Helvetica") +
-    draw_image("analysis/manuscript_files/potato_masher.png", x = 72, y = 25, width = 18, height = 18) +
+    draw_image("misc/potato_masher.png", x = 72, y = 25, width = 18, height = 18) +
     # Timings
     annotate("text", x = 63, y = 19, label = "0.5 s", size = 10 / .pt, family = "Helvetica") +
     annotate("text", x = 81, y = 19.3, label = "3 s or\nresponse", size = 10 / .pt, family = "Helvetica", lineheight = 1) +
@@ -91,23 +91,30 @@ plot_trials <- function() {
 }
 
 # Function to plot ERP waveforms and topographies
-plot_erps <- function(comps, evokeds, models, montage) {
+plot_erps <- function(erp_components, evokeds, models, montage) {
   suppressWarnings(suppressMessages(
-    pmap(comps, function(name, tmin, tmax, roi) {
+    pmap(erp_components, function(name, tmin, tmax, roi) {
+      # Convert time window from s to ms
+      tmin <- tmin * 1000
+      tmax <- tmax * 1000
       # N400 gets a different scale than P1 and N170
       ymin <- ifelse(name == "N400", -3, -4)
       # Loop through parts
       parts <- map(c("I", "II", "III"), function(part) {
-        # Create (conditions x time points) x electrodes tibble
-        data_plot <- evokeds[[part]] %>%
-          map(function(data) {
-            data %>%
-              t() %>%
-              as_tibble(.name_repair = "unique") %>%
-              set_colnames(montage$electrode) %>%
-              mutate(.time = seq(-500, 1498, 2), roi = rowMeans(select(., all_of(roi))))
-          }) %>%
-          bind_rows(.id = "condition")
+        data_plot <- filter(evokeds, part == !!part & condition %in% c("Informed", "Naive"))
+
+        # # Create (conditions x time points) x electrodes tibble
+        # data_plot <- evokeds[[part]] %>%
+        #   map(function(data) {
+        #     data %>%
+        #       t() %>%
+        #       as_tibble(.name_repair = "unique") %>%
+        #       set_colnames(montage$electrode) %>%
+        #       mutate(time = seq(-500, 1498, 2), roi = rowMeans(select(., all_of(roi))))
+        #   }) %>%
+        #   bind_rows(.id = "condition")
+        
+        
         # Shade background depending on whether the effect is significant or not
         asterisks <- models[[name]]$contrasts %>%
           filter(part == !!part) %>%
@@ -120,7 +127,7 @@ plot_erps <- function(comps, evokeds, models, montage) {
           shade <- annotate("rect", xmin = tmin, xmax = tmax, ymin = ymin + 0.1, ymax = ymin + 11.95, color = "black", fill = "gray90")
         }
         # Plot waveform
-        wave <- ggplot(data = data_plot, aes(x = .time, y = roi, color = condition)) +
+        wave <- ggplot(data = data_plot, aes(x = time, y = !!sym(name), color = condition)) +
           shade +
           annotate("text", label = asterisks, x = xasterisks, y = ymin + 11, size = 6, hjust = 0, family = "Helvetica") +
           annotate("segment", x = -200, xend = 800, y = 0, yend = 0) +
@@ -138,9 +145,9 @@ plot_erps <- function(comps, evokeds, models, montage) {
           theme(legend.position = "none")
         # Plot topography
         topo <- data_plot %>%
-          filter(.time >= tmin & .time <= tmax) %>%
+          filter(time >= tmin & time <= tmax) %>%
           group_by(condition) %>%
-          summarise(across(montage$electrode, mean)) %>%
+          summarise(across(montage$electrode, mean), .groups = "drop") %>%
           pivot_longer(-condition) %>%
           pivot_wider(names_from = condition) %>%
           transmute(amplitude = Informed - Naive) %>%
@@ -262,7 +269,7 @@ plot_violins <- function(data, models) {
           filter(part == !!part) %>%
           rename(amplitude = !!comp) %>%
           group_by(participant, part, condition) %>%
-          summarise(across(amplitude, mean)) %>%
+          summarise(across(amplitude, mean), .groups = "drop") %>%
           ggplot(aes(x = 0, y = amplitude, fill = condition)) +
           annotate("text", x = 0, y = yastersisks, label = asterisks, size = 6, family = "Helvetica") +
           geom_split_violin(trim = TRUE, color = "gray70") +

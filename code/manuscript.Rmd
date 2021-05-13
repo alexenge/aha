@@ -86,6 +86,16 @@ knitr::opts_chunk$set(
 # Re-run preprocessing and/or model fitting?
 rerun_preprocessing <- TRUE
 rerun_model_fitting <- TRUE
+
+# File names for easier I/O
+fnames <- list(
+  montage = "data/processed/montage.csv",
+  evo_gavg = "data/processed/evo_gavg.csv",
+  evo_tfr_gavg = "data/processed/evo-tfr_gavg.csv",
+  evo_tfr_diff = "data/processed/evo-tfr_diff.csv",
+  evo_tfr_gavg_nochans = "data/processed/evo-tfr_gavg-nochans.csv",
+  evo_tfr_diff_nochans = "data/processed/evo-tfr_diff-nochans.csv"
+)
 ```
 
 Does our perception of an object change as soon as we discover what function it serves? In this study, we presented participants with unfamiliar objects that were preceded either by matching information about their function, leading to semantically informed perception, or by non-matching information, leading to naive perception. We expected semantically informed perception to differ from naive perception within the object processing hierarchy and we capitalized on the high temporal resolution of event-related potentials (ERPs) to find out at which stage (or stages) this was indeed the case. This allowed us to show for the first time that knowledge about the function of a previously unfamiliar object alters its early cortical processing in the same trial as it is being discovered and within less than 200 ms after the presentation of the object.
@@ -133,6 +143,21 @@ For each unfamiliar object, a pair of keywords---a noun and a verb---was selecte
 Each experimental session consisted of three parts (see Figure \@ref(fig:exp1-plot)A). In the *pre-insight* part, after written informed consent had been obtained and the EEG had been prepared, all 240 familiar and unfamiliar objects were presented once in random order and without any keywords. Each trial consisted of a fixation cross presented in the middle of the screen for 0.5 s, followed by the presentation of the object until participants made a response or until a time out after 3 s. The inter-trial interval until the presentation of the next fixation cross was 0.5 s and participants took a self-timed break after each block of 60 objects. The task, which was kept the same across all three parts, was to classify each object using one of four response alternatives: (a) "I know what this is or have a strong assumption," (b) "I have an assumption what this is," (c) "I have rather no assumption what this is," or (d) "I don't know what this is and have no assumption." Participants were asked to respond as quickly and as accurately as possible by pressing one out of four buttons with the index or middle finger of their left or right hand, respectively. The mapping of the rating scale to the four buttons (left to right or right to left) was counterbalanced across participants.
 
 ```{r, preprocessing}
+# List EEG files and behavioral log files
+fname_vhdr <- c(
+  list.files("data/raw/eeg/exp1", pattern = ".vhdr", full.names = TRUE),
+  list.files("data/raw/eeg/exp2", pattern = ".vhdr", full.names = TRUE)
+)
+fname_log <- c(
+  list.files("data/raw/rt/exp1", pattern = ".txt", full.names = TRUE),
+  list.files("data/raw/rt/exp2", pattern = ".txt", full.names = TRUE)
+)
+
+# Generate new BIDS-style subject IDs
+seq(length(fname_vhdr)) %>%
+  str_pad(width = 2, pad = 0) %>%
+  paste0("sub-", .) -> subject_id
+
 # Define ERP components of interest
 erp_components <- tibble(
   name = c("P1", "N170", "N400"),
@@ -145,29 +170,15 @@ erp_components <- tibble(
   )
 )
 
-# Define frequencies and # of cycles for TFR analysis
+# Define frequencies and number of cycles for TFR analysis
 tfr_freqs <- seq(4, 50, by = 2)
 tfr_cycles <- seq(3, 10, length.out = length(tfr_freqs))
 
-# Run the preprocessing if requested (only works if the raw data are available)
+# Perform preprocessing for all subjects using MNE-Python (see code/preprocessing.py)
+# This will run only if `rerun_preprocessing = TRUE` and if the raw data are available
 if (rerun_preprocessing) {
-  
-  # List EEG files and behavioral log files
-  fname_vhdr <- c(
-    list.files("data/raw/eeg/exp1", pattern = ".vhdr", full.names = TRUE),
-    list.files("data/raw/eeg/exp2", pattern = ".vhdr", full.names = TRUE)
-  )
-  fname_log <- c(
-    list.files("data/raw/rt/exp1", pattern = ".txt", full.names = TRUE),
-    list.files("data/raw/rt/exp2", pattern = ".txt", full.names = TRUE)
-  )
-  
-  # Generate new BIDS-style subject IDs
-  1:length(fname_vhdr) %>%
-    str_pad(width = 2, pad = 0) %>%
-    paste0("sub-", .) -> subject_id
-  
-  # Perform preprocessing for all subjects using MNE-Python (see code/preprocessing.py)
+
+  # Do the actual preprocessing
   tibble(fname_vhdr, fname_log, subject_id) %>%
     pwalk(
       pp$preprocess,
@@ -187,209 +198,167 @@ if (rerun_preprocessing) {
       baseline = tuple(-0.2, 0),
       reject = dict(eeg = 200e-6),
       erp_components = erp_components,
-      condition_cols = c("part", "condition"),
+      average_by = c("part", "condition", "subject_id"),
+      tfr_equalize = "condition == ['Informed', 'Naive']",
+      tfr_resample = py_none(),
       tfr_freqs = tfr_freqs,
       tfr_cycles = tfr_cycles,
-      tfr_sfreq_downsampled = 250,
       tfr_crop = tuple(-0.2, 0.8)
     )
-}
 
-please_stop_here()
+  # Get standard EasyCap electrode positions and project them into 2D space
+  read_csv("data/preprocessed/sub-01_tfr-evo.csv", col_types = cols()) %>%
+    select(-c(part, condition, subject_id, time, freq)) %>%
+    colnames() -> ch_names
+  import("mne.channels._standard_montage_utils")$MONTAGE_PATH %>%
+    paste0("/easycap-M1.txt") %>%
+    read_tsv(col_types = cols()) %>%
+    rename(electrode = Site) %>%
+    inner_join(tibble(electrode = ch_names), ., by = "electrode") %>%
+    mutate(
+      x = eegUtils:::deg2rad(Theta) * cos(eegUtils:::deg2rad(Phi)),
+      y = eegUtils:::deg2rad(Theta) * sin(eegUtils:::deg2rad(Phi)),
+    ) %>%
+    mutate(across(c(x, y), round, 3)) %>%
+    write_csv(fnames$montage)
+}
 ```
 
+```{python, grand_averaging, eval=rerun_preproc}
+from os import makedirs
 
-```{r, preprocessing_old}
-# Define ERP components of interest
-comps <- tibble(
-  name = c("P1", "N170", "N400"),
-  tmin = c(100, 150, 400),
-  tmax = c(150, 200, 700),
-  roi = list(
-    c("PO3", "PO4", "POz", "O1", "O2", "Oz"),
-    c("P7", "P8", "PO7", "PO8", "PO9", "PO10"),
-    c("C1", "C2", "Cz", "CP1", "CP2", "CPz")
-  )
+import numpy as np
+import pandas as pd
+
+# Create output folder
+makedirs("data/processed", exist_ok=True)
+
+# Read evoked *potentials* for all subjects
+fname_evo_tfr = ["data/preprocessed/" + sub + "_evo.csv" for sub in r.subject_id]
+evo = [pd.read_csv(fname) for fname in fname_evo_tfr]
+evo = pd.concat(evo)
+
+# Average across subjects
+id_vars = ["part", "condition", "time"]
+evo = evo.groupby(id_vars, as_index=False).mean()
+evo.to_csv(r.fnames["evo_gavg"], float_format="%.3f", index=False)
+
+# Read evoked *power* for all subjects
+fname_evo_tfr = ["data/preprocessed/" + sub + "_tfr-evo.csv" for sub in r.subject_id]
+evo_tfr = [pd.read_csv(fname) for fname in fname_evo_tfr]
+evo_tfr = pd.concat(evo_tfr)
+
+# Compute difference in power between conditions
+id_vars = ["part", "condition", "subject_id", "time", "freq"]
+electrodes = [col for col in evo_tfr.columns if (col not in id_vars)]
+evo_tfr_diff = (
+    evo_tfr.query("condition == 'Informed'")[electrodes]
+    - evo_tfr.query("condition == 'Naive'")[electrodes].values
 )
+evo_tfr_diff[id_vars] = evo_tfr.query("condition == 'Informed'")[id_vars]
 
-# Define some filenames for I/O
-fnames <- list(
-  epochs = "data/processed/aha-epo.fif",
-  epochs_unf = "data/processed/aha-unf-epo.fif",
-  trials = "data/processed/aha-trials.csv",
-  gavgs = "data/processed/aha-gavgs.RDS",
-  conditions = "data/processed/aha-obj-per-cond.csv",
-  montage = "data/processed/aha-montage.csv",
-  models_freq = "data/processed/aha-models-freq.RDS"
-)
+# Average first across subjects, then across electrodes
+id_vars.remove("subject_id")
+fnames = [r.fnames["evo_tfr_gavg"], r.fnames["evo_tfr_diff"]]
+fnames_nochans = [r.fnames["evo_tfr_gavg_nochans"], r.fnames["evo_tfr_diff_nochans"]]
+for df, fname, fname_nochans in zip([evo_tfr, evo_tfr_diff], fnames, fnames_nochans):
+    df = df.groupby(id_vars, as_index=False).mean()
+    df.to_csv(fname, float_format="%.3f", index=False)
+    df["power"] = df[electrodes].mean(axis=1)
+    df.drop(electrodes, axis=1, inplace=True)
+    df.to_csv(fname_nochans, float_format="%.3f", index=False)
+del df, evo_tfr, evo_tfr_diff
+```
 
-# Define parameters for EEG preprocessing
-preproc_params <- list(
-  # Number of ICA components
-  n_components = as.integer(15),
-  # ICA methods
-  method = "fastica",
-  # Lower edge of pass-band filter
-  l_freq = 0.1,
-  # Upper edge of pass-band filter
-  h_freq = 30,
-  # Event trigger codes
-  event_id = dict(match = as.integer(221), mismatch = as.integer(222)),
-  # Beginning of epochs in s
-  tmin = -0.5,
-  # End of epochs in s
-  tmax = 1.498,
-  # Baseline interval in s
-  baseline = tuple(-0.2, 0),
-  # Artifact rejection threshold in microvolts
-  reject = dict(eeg = 200)
-)
+```{r, tfr_wip}
+please_stop_here()
 
-# Check if single-trial data are available
-if (file.exists(fnames$trials)) {
-  
-  # If so, load preprocessed single-trial data
-  read_tsv(fnames$trials, col_types = cols()) %>%
-    
-    # Factorize columns
-    mutate(
-      part = factor(part, levels = c("I", "II", "III")),
-      condition = factor(condition, levels = c(
-        "Informed", "Naive", "Excl_informed", "Excl_naive", "Excl_known"
-      )),
-      participant = factor(participant),
-      item = factor(item)
-    ) -> aha
-  
-} else {
-  
-  # If not, we preprocess the behvarioral and EEG data
-  paste0("data/raw/rt/exp", 1:2) %>%
-    map(list.files, pattern = ".txt", full.names = TRUE) %>%
-    map(map, function(txt_fname) {
-      
-      # Read the behavioral log file
-      suppressWarnings(read_tsv(txt_fname, col_types = cols())) %>%
-        
-        # Rename columns for participant and item IDs
-        rename(participant = VPNummer, item = StimID) %>%
-        
-        # Add a column for the part of the experiment
-        mutate(part = case_when(
-          Wdh %in% c(211, 231) ~ "I",
-          Wdh %in% c(212, 232) ~ "II",
-          Wdh %in% c(213, 233) ~ "III",
-          Wdh == 234 ~ "IV"
-        ) %>% as_factor()) %>%
-        
-        # Remove filler stimuli (i.e.,well-known objects)
-        filter(bek_unbek != "bekannt") -> dat
-      
-      # Assign stimuli to conditions based on keywords and button presses in Part II
-      excl_known <- dat %>%
-        filter(part == "I" & Tastencode == 201) %>%
-        pull(item)
-      excl_informed <- dat %>%
-        filter(part == "II" & Bed == "richtig" & !Tastencode %in% c(201, 202)) %>%
-        pull(item)
-      excl_naive <- dat %>%
-        filter(part == "II" & Bed == "falsch" & !Tastencode %in% c(203, 204)) %>%
-        pull(item)
-      informed <- dat %>%
-        filter(part == "II" & Bed == "richtig" & Tastencode %in% c(201, 202)) %>%
-        pull(item)
-      naive <- dat %>%
-        filter(part == "II" & Bed == "falsch" & Tastencode %in% c(203, 204)) %>%
-        pull(item)
-      
-      # Create a new condition for these experimental condition
-      dat %<>% mutate(condition = case_when(
-        item %in% excl_known ~ "Excl_known",
-        item %in% excl_informed ~ "Excl_informed",
-        item %in% excl_naive ~ "Excl_naive",
-        item %in% informed ~ "Informed",
-        item %in% naive ~ "Naive"
-      ) %>% factor(levels = c(
-        "Informed", "Naive", "Excl_informed", "Excl_naive", "Excl_known"
-      ))) %>%
-        
-        # Return only relevant columns
-        select(part, condition, participant, item, RT) %>%
-        return()
-    }) -> behav
-  
-  # Avoid duplicate participant labels across the two experiments
-  behav[[2]] %<>% map(mutate, participant = paste0(participant, "_2"))
-  
-  # Merge behavioral data for all participants into a single list
-  behav %<>% flatten()
-  
-  # List BrainVision header file names for preprocessing
-  paste0("data/raw/eeg/exp", 1:2) %>%
-    list.files(pattern = ".vhdr", full.names = TRUE) -> fnames$vhdr
-  
-  # # Do the actual preprocessing in MNE-Python
-  # exec(
-  #   .fn = py$preproc_all,
-  #   vhdr_fnames = fnames$vhdr,
-  #   metadatas = behav,
-  #   output_fname = fnames$epochs,
-  #   !!!preproc_params
-  # ) -> epochs
-  # 
-  # # Compute mean ERP amplitudes and bind to the behavioral data
-  # pmap_dfc(comps, py$compute_erps, epochs_fname = fnames$epochs) %>%
-  #   set_names(comps$name) %>%
-  #   bind_cols(epochs$metadata, .) %T>%
-  #   write_tsv(fnames$trials) -> aha
-  # 
-  # # Compute grand averages per part and condition
-  # py$compute_evokeds(epochs_fname = fnames$epochs, grand = TRUE, data_only = TRUE) %>%
-  #   saveRDS(fnames$gavgs)
-  # 
-  # # Backup number of stimuli assigned to each condition for all participants
-  # map(behav, function(x) table(x$condition) / 3) %>%
-  #   bind_rows() %>%
-  #   mutate(Participant = unique(aha$participant), .before = 1) %>%
-  #   write_csv(fnames$conditions)
-  # 
-  # # Get standard EasyCap electrode positions and project to 2D space
-  # py$mne$channels$`_standard_montage_utils`$MONTAGE_PATH %>%
-  #   list.files(pattern = "easycap-M1.txt", full.names = TRUE) %>%
-  #   read_tsv(col_types = cols()) %>%
-  #   rename(electrode = Site) %>%
-  #   inner_join(tibble(electrode = epochs$ch_names), ., by = "electrode") %>%
-  #   mutate(
-  #     x = eegUtils:::deg2rad(Theta) * cos(eegUtils:::deg2rad(Phi)),
-  #     y = eegUtils:::deg2rad(Theta) * sin(eegUtils:::deg2rad(Phi)),
-  #   ) %>%
-  #   write_csv(fnames$montage)
-  
-  # Do the preprocessing again, this time without filtering (for TFR)
-  preproc_params$l_freq <- py_none()
-  preproc_params$h_freq <- py_none()
-  preproc_params$reject <- py_none()
-  exec(
-    .fn = py$preproc_all,
-    vhdr_fnames = fnames$vhdr,
-    metadatas = behav,
-    output_fname = fnames$epochs_unf,
-    !!!preproc_params
-  ) -> epochs_unf
-}
 
-# Check number of rejected epochs
-aha %>%
-  group_by(participant) %>%
-  tally() %>%
-  mutate(n = 360 - n) %>%
-  pull(n) -> rejected
-mean(rejected)    # Mean
-median(rejected)  # Median
-range(rejected)   # Range
+# Read evoked power
+paste0("data/preprocessed/", subject_id, "_tfr-evo.csv") %>%
+  map(read_csv, col_types = cols())
+
+  map2(subject_id, function(fname, id) {
+    read_csv(fname, col_types = cols(), progress = FALSE) %>%
+      mutate(participant = id)
+  }) %>%
+  bind_rows() -> evo
+
+# Average across participants
+grouping <- c("part", "condition", "time", "freq")
+evo %<>%
+  group_by(across(all_of(grouping))) %>%
+  summarise(across(-participant, .fns = mean), .groups = "drop")
+
+# Average across channels
+evo %>%
+  pivot_longer(!all_of(grouping), names_to = "channel", values_to = "power") %>%
+  group_by(across(all_of(grouping))) %>%
+  summarise(power = mean(power), .groups = "drop") -> evo_all_channels
+
+# Average across conditions within parts
+evo_all_channels %>%
+  group_by(part, time, freq) %>%
+  summarise(power = mean(power), .groups = "drop") -> evo_all_channels_conds
+
+# Plot
+evo_all_channels_conds %>%
+  ggplot(aes(x = time, y = freq, fill = power)) +
+  facet_wrap(~part) +
+  geom_raster() +
+  scale_fill_viridis_c(limits = c(0, 2), oob = scales::squish) +
+  annotate("rect", xmin = 150, xmax = 400, ymin = 30, ymax = 50, color = "white", fill = NA) +
+  theme(aspect.ratio = 0.5) +
+  theme_minimal() +
+  coord_cartesian(expand = FALSE) +
+  ggsave("evo_all_channels_conds.pdf", width = 7, height = 2)
+
+# Compute differences between conditions
+evo_all_channels %>%
+  group_by(part, time, freq) %>%
+  mutate(power = power - power[condition == "Naive"]) %>%
+  filter(condition == "Informed") %>%
+  ggplot(aes(x = time, y = freq, fill = power)) +
+  facet_wrap(~part) +
+  geom_raster() +
+  scale_fill_viridis_c(limits = c(0, 1), oob = scales::squish) +
+  annotate("rect", xmin = 150, xmax = 400, ymin = 30, ymax = 50, color = "white", fill = NA) +
+  theme(aspect.ratio = 0.5) +
+  theme_minimal() +
+  coord_cartesian(expand = FALSE) +
+  ggsave("evo_all_channels_diff.pdf", width = 7, height = 2)
 ```
 
 ```{r, models_freq}
+# Read single trial data for all subjects
+paste0("data/preprocessed/", subject_id, "_trials.csv") %>%
+  map(read_csv, col_types = cols()) %>%
+  bind_rows() %>%
+  mutate(
+    part = factor(part, levels = c("I", "II", "III")),
+    condition = factor(condition, levels = c("Informed", "Naive")),
+    subject_id = factor(subject_id),
+    item_id = factor(item_id)
+  ) %>%
+  na.omit() -> trials
+
+contrasts_condition <- t(cbind(c("Informed" = 1, "Naive" = -1)))
+contrasts_part <- t(cbind(
+  c("I" = -1, "II" = 1, "III" = 0),
+  c("I" = 0, "II" = -1, "III" = 1)
+))
+
+# Apply these contrasts to the factors in the data
+contrasts(trials$condition) <- MASS::ginv(contrasts_condition)
+contrasts(trials$part) <- MASS::ginv(contrasts_part)
+
+formula <- N400 ~ part / condition + (1|subject_id) + (1|item_id)
+mod <- lmer(formula, data = trials)
+summary(mod)
+
+
+
+
 # Remove any trials excluded from conditions
 aha %>%
   filter(condition %in% c("Informed", "Naive")) %>%
@@ -503,281 +472,65 @@ mod_brm_s <- brm(
 )
 ```
 
-```{python, tfr}
-from mne.time_frequency import tfr_morlet
-from mne.channels import find_ch_adjacency
-from mne.stats import spatio_temporal_cluster_test
+```{r exp1-plot, include=TRUE, fig.height=11, fig.cap = "(ref:figure-1-caption)"}
+# Load montage and data
+montage <- read_csv(fnames$montage, col_types = cols())
+evokeds <- read_csv(fnames$evo_gavg, col_types = cols())
 
-epochs_unf = mne.read_epochs(r.fnames["epochs_unf"])
-epochs_ptII_informed = epochs_unf["part == 'II' & condition == 'Informed'"]
-epochs_ptII_naive = epochs_unf["part == 'II' & condition == 'Naive'"]
+# Create plot for Experiment 1
+plot_grid(
+  plot_trials(),
+  plot_erps(comps = comps, evokeds = evokeds_exp1, models = models_exp1, montage = montage),
+  nrow = 2, rel_heights = c(5, 6), labels = c("A", "B"), label_fontfamily = "Helvetica"
+) + # Add some lines (to separate the parts) and the legend
+  annotate(geom = "segment", x = 0.328, xend = 0.328, y = -Inf, yend = 0.53, linetype = "dashed") +
+  annotate(geom = "segment", x = 0.672, xend = 0.672, y = -Inf, yend = 0.53, linetype = "dashed") +
+  annotate(geom = "segment", x = 0.328, xend = 0.28, y = 0.53, yend = 0.58, linetype = "dashed") +
+  annotate(geom = "segment", x = 0.672, xend = 0.72, y = 0.53, yend = 0.58, linetype = "dashed") +  
+  annotate(geom = "segment", x = 0.28, xend = 0.28, y = 0.58, yend = Inf, linetype = "dashed") +
+  annotate(geom = "segment", x = 0.72, xend = 0.72, y = 0.58, yend = Inf, linetype = "dashed") +
+  draw_plot(plot_legends_erps(direction = "vertical"), x = 0.405, y = 0.422, width = 1, height = 1)
+```
 
-evokeds = compute_evokeds(
-  epochs_fname=r.fnames["epochs_unf"], grand=False, data_only=False
-  )
-  
-  evokeds_informed = evokeds["II"]["Informed"]
-  evokeds_naive = evokeds["II"]["Naive"]
-  
-  X1 = np.array([evokeds.data for evokeds in evokeds_informed])
-  X2 = np.array([evokeds.data for evokeds in evokeds_naive])
-  X1 = np.transpose(X1, [0, 2, 1])
-  X2 = np.transpose(X2, [0, 2, 1])
-  X = [X1, X2]
-  
-  adjacency, ch_names = find_ch_adjacency(evokeds["II"]["Informed"][0].info, ch_type="eeg")
-  
-  cluster_stats = spatio_temporal_cluster_test(
-    X=X,
-    n_permutations=1000,
-    tail=0,
-    n_jobs=1,
-    buffer_size=None,
-    adjacency=adjacency,
-    )
-    
-    p_accept = 0.05
-    T_obs, clusters, p_values, _ = cluster_stats
-    good_cluster_inds = np.where(p_values < p_accept)[0]
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    freqs = np.logspace(*np.log10([6, 35]), num=8)
-    n_cycles = freqs / 2.
-    
-    tfr_ptII_informed = tfr_morlet(
-      epochs_ptII_informed,
-      freqs=freqs,
-      n_cycles=n_cycles,
-      decim=2,
-      return_itc=False,
-      average=False,
-      )
-      tfr_ptII_naive = tfr_morlet(
-        epochs_ptII_naive,
-        freqs=freqs,
-        n_cycles=n_cycles,
-        decim=2,
-        return_itc=False,
-        average=False,
-        )
-        
-        tfr_ptII_informed.apply_baseline(mode='ratio', baseline=(None, 0))
-        tfr_ptII_naive.apply_baseline(mode='ratio', baseline=(None, 0))
-        
-        adjacency, ch_names = find_ch_adjacency(epochs_ptII_informed.info, ch_type="eeg")
-        
-        spatio_temporal_cluster_test(X, n_permutations=1000,
-        threshold=threshold, tail=1,
-        n_jobs=1, buffer_size=None,
-        adjacency=adjacency)
-        
-        
-        
-        
-        ```
-        
-        
-        ```{python tfr_old, eval=FALSE}
-        import mne
-        import numpy as np
-        #import matplotlib.pyplot as plt
-        
-        # epochs = preproc(
-        #   vhdr_fname="data/exp1/eeg/Vp0004.vhdr",
-        #   metadata=r.aha.query("participant == 'VP_04'"),
-        #   n_components=15,
-        #   method="fastica",
-        #   l_freq=None,
-        #   h_freq=None,
-        #   event_id=dict(match=221, mismatch=222),
-        #   tmin=-0.5,
-        #   tmax=1.498,
-        #   baseline=(-0.2, 0),
-        #   reject=dict(eeg=200)
-        # )
-        # epochs.save("data/processed/vp04-epo.fif")
-        
-        epochs = mne.read_epochs("data/processed/unf-exp1-epo.fif")
-        
-        evokeds = compute_evokeds(epochs_c, grand=True, data_only=False)
-        evokeds_i = evokeds["II"]["Informed"]
-        evokeds_n = evokeds["II"]["Naive"]
-        
-        freqs = np.logspace(*np.log10([6, 35]), num=8)
-        n_cycles = freqs / 2.
-        power_i = mne.time_frequency.tfr_morlet(evokeds_i, freqs=freqs, n_cycles=n_cycles, use_fft=True, return_itc=False, average=True, n_jobs=1)
-        power_n = mne.time_frequency.tfr_morlet(evokeds_n, freqs=freqs, n_cycles=n_cycles, use_fft=True, return_itc=False, average=True, n_jobs=1)
-        power_i = power_i.apply_baseline(mode='mean', baseline=(-.400, -.100))
-        power_n = power_n.apply_baseline(mode='mean', baseline=(-.400, -.100))
-        
-        power_d = power_i.copy()
-        power_d.data = power_i.data - power_n.data
-        
-        
-        power_d.plot()
-        
-        
-        # epochs.resample(250., npad='auto')
-        
-        roi = r.comps["roi"][0] + r.comps["roi"][1]
-        idxs = np.where(np.in1d(epochs.ch_names, roi))
-        
-        epochs_i = epochs["part == 'II' & condition == 'Informed'"].pick_channels(roi)
-        epochs_n = epochs["part == 'II' & condition == 'Naive'"].pick_channels(roi)
-        
-        epochs_c = mne.channels.combine_channels(epochs, groups=dict(avg=range(62)))
-        
-        epochs_c.metadata = epochs.metadata
-        epochs_s = epochs_c["part == 'II'"]
-        # epochs_i = epochs_s["condition == 'Informed'"]
-        # epochs_n = epochs_s["condition == 'Naive'"]
-        
-        # power_i = mne.time_frequency.tfr_morlet(epochs_i, freqs=freqs, n_cycles=n_cycles, use_fft=True, return_itc=False, average=True, n_jobs=1)
-        # power_n = mne.time_frequency.tfr_morlet(epochs_n, freqs=freqs, n_cycles=n_cycles, use_fft=True, return_itc=False, average=True, n_jobs=1)
-        # power_d = power_i - power_n
-        # 
-        # power_d.plot([0], baseline=(-0.5, 0), mode='percent', vmin=-1, vmax=1)
-        
-        # define frequencies of interest (log-spaced)
-        #freqs = np.logspace(*np.log10([6, 35]), num=8)
-        freqs = np.arange(3, 50, 1.6)
-        #n_cycles = freqs / 2.  # different number of cycle per frequency
-        n_cycles = np.linspace(3, 10, len(freqs))
-        power = mne.time_frequency.tfr_morlet(epochs_c, freqs=freqs, n_cycles=n_cycles, use_fft=True, return_itc=False, average=True, n_jobs=1)
-        
-        power.plot([0], baseline=(-0.5, 0), mode='percent')
-        
-        power.plot_topo(baseline=(-0.5, 0), mode='logratio')
-        power.plot_topomap(ch_type='eeg', tmin=0.15, tmax=0.2, fmin=8, fmax=12, baseline=(-0.5, 0), mode='logratio', title='Alpha')
-        power.plot_topomap(ch_type='eeg', tmin=0.15, tmax=0.2, fmin=13, fmax=25, baseline=(-0.5, 0), mode='logratio', title='Beta')
-        
-        
-        import numpy as np
-        import matplotlib.pyplot as plt
-        from mne.baseline import rescale
-        from mne.stats import bootstrap_confidence_interval
-        iter_freqs = [
-          ('Theta', 4, 7),
-          ('Alpha', 8, 12),
-          ('Beta', 13, 25),
-          ('Gamma', 30, 45)
-          ]
-          raw_fname = "data/exp1/EEG/Vp0004.vhdr"
-          tmin, tmax = -0.5, 1.498
-          baseline = None
-          frequency_map = list()
-          event_id = dict(match=222)
-          for band, fmin, fmax in iter_freqs:
-            # (re)load the data to save memory
-            raw = mne.io.read_raw_brainvision(raw_fname, scale=1e6, preload=True)
-            raw.filter(fmin, fmax, n_jobs=1,  # use more jobs to speed up.
-            l_trans_bandwidth=1,  # make sure filter params are the same
-            h_trans_bandwidth=1)  # in each band and skip "auto" option.
-            events, _ = mne.events_from_annotations(raw, verbose=False)
-            epochs = mne.Epochs(raw, events, event_id, tmin, tmax, baseline=baseline,
-            reject=dict(eeg=200), preload=True)
-            # remove evoked response
-            epochs.subtract_evoked()
-            # get analytic signal (envelope)
-            epochs.apply_hilbert(envelope=True)
-            frequency_map.append(((band, fmin, fmax), epochs.average()))
-            del epochs
-            del raw
-            # Helper function for plotting spread
-            def stat_fun(x):
-              """Return sum of squares."""
-              return np.sum(x ** 2, axis=0)
-            # Plot
-            fig, axes = plt.subplots(4, 1, figsize=(10, 7), sharex=True, sharey=True)
-            colors = plt.get_cmap('winter_r')(np.linspace(0, 1, 4))
-            for ((freq_name, fmin, fmax), average), color, ax in zip(
-              frequency_map, colors, axes.ravel()[::-1]):
-                times = average.times * 1e3
-                gfp = np.sum(average.data ** 2, axis=0)
-                gfp = mne.baseline.rescale(gfp, times, baseline=(None, 0))
-                ax.plot(times, gfp, label=freq_name, color=color, linewidth=2.5)
-                ax.axhline(0, linestyle='--', color='grey', linewidth=2)
-                ci_low, ci_up = bootstrap_confidence_interval(average.data, random_state=0,
-                stat_fun=stat_fun)
-                ci_low = rescale(ci_low, average.times, baseline=(None, 0))
-                ci_up = rescale(ci_up, average.times, baseline=(None, 0))
-                ax.fill_between(times, gfp + ci_up, gfp - ci_low, color=color, alpha=0.3)
-                ax.grid(True)
-                ax.set_ylabel('GFP')
-                ax.annotate('%s (%d-%dHz)' % (freq_name, fmin, fmax),
-                xy=(0.95, 0.8),
-                horizontalalignment='right',
-                xycoords='axes fraction')
-                axes.ravel()[-1].set_xlabel('Time [ms]')
-                plt.show()
-                ```
-                
-                ```{r exp1-plot, include=TRUE, fig.height=11, fig.cap = "(ref:figure-1-caption)"}
-                # Load sample time points and electrode montage
-                montage <- read_csv("data/processed/aha-montage.csv", col_types = cols())
-                
-                # Create plot for Experiment 1
-                plot_grid(
-                  plot_trials(),
-                  plot_erps(comps = comps, evokeds = evokeds_exp1, models = models_exp1, montage = montage),
-                  nrow = 2, rel_heights = c(5, 6), labels = c("A", "B"), label_fontfamily = "Helvetica"
-                  ) + # Add some lines (to separate the parts) and the legend
-                  annotate(geom = "segment", x = 0.328, xend = 0.328, y = -Inf, yend = 0.53, linetype = "dashed") +
-                  annotate(geom = "segment", x = 0.672, xend = 0.672, y = -Inf, yend = 0.53, linetype = "dashed") +
-                  annotate(geom = "segment", x = 0.328, xend = 0.28, y = 0.53, yend = 0.58, linetype = "dashed") +
-                  annotate(geom = "segment", x = 0.672, xend = 0.72, y = 0.53, yend = 0.58, linetype = "dashed") +  
-                  annotate(geom = "segment", x = 0.28, xend = 0.28, y = 0.58, yend = Inf, linetype = "dashed") +
-                  annotate(geom = "segment", x = 0.72, xend = 0.72, y = 0.58, yend = Inf, linetype = "dashed") +
-                  draw_plot(plot_legends_erps(direction = "vertical"), x = 0.405, y = 0.422, width = 1, height = 1)
-                  ```
-                  
-                  (ref:figure-1-caption) Procedure and Results of Experiment 1\smallskip
-                  
-                  <!--
-                  
-                  The papaja package does not yet deal with the placement of figure captions above rather than below the figures. Therefore, we manually need to post-process the .tex file, moving the caption{} above includegraphics{} and copying the figure note manually below includegraphics{}:
-                  
-                  \bigskip\small\textit{Note.} 
-                  (A) In the pre-insight part, participants were presented with 120 unfamiliar objects and indicated whether they knew what kind of object they were viewing. In the insight part, half of these objects were presented with matching keywords (in purple color for illustration), leading to semantically informed perception, and the other half with non-matching keywords (in petrol color for illustration), leading to naive perception. In the post-insight part, the same objects were presented again without the keywords. (B) ERP waveforms and scalp topographies are shown for objects with semantically informed versus naive perception within the three different parts. Semantically informed perception was associated with significantly more negative amplitudes in the N170 component in the insight part, significantly less negative amplitudes in the N400 component in the insight and post-insight parts, and significantly more positive amplitudes in the P1 component in the post-insight part. Ampl. = amplitude.\newline
-                  *\textit{p} \textless{} .05. **\textit{p} \textless{} .01. ***\textit{p} \textless{} .001.
-                  
-                  -->
-                  
-                  In the *insight* part, the 120 unfamiliar objects were presented for a second time, now preceded either by matching keywords (leading to semantically informed perception) or by non-matching keywords (leading to naive perception). Each trial consisted of a fixation cross presented for 0.5 s, followed by the presentation of the keywords for 2.5 s. Then, an asterisk was presented in the middle of the screen for another 0.5 s, followed by the presentation of the object until a response was made or until a time out after 3 s. The objects were presented in blocks of 30 trials so that within each block (a) there were 15 objects from each of the two experimental conditions and (b) objects were heterogeneous in terms of their shape, visual complexity, and functional category (e.g., medical devices, musical instruments).
-                  
-                  Finally, in the *post-insight* part, the unfamiliar objects were presented for a third time with an identical trial structure as in the pre-insight part, that is, without any keywords. Note that the insight and post-insight parts were presented in an interleaved fashion so that after the presentation of one block of 30 objects in the insight part (with keywords), participants took a self-timed break and continued with the same block of 30 objects in the post-insight part (without keywords) before moving on to the next block consisting of 30 different objects. They continued like this until all four blocks were completed in both parts. In total, the experiment consisted of 480 trials (120 familiar objects in the pre-insight part and 120 unfamiliar objects in the pre-insight, insight, and post-insight parts). It took participants approximately 35 minutes to complete.
-                  
-                  ### EEG Recording and Preprocessing
-                  
-                  The continuous EEG was recorded from 62 Ag/AgCl scalp electrodes placed according to the extended 10--20 system [@americanelectroencephalographicsociety1991] and referenced online to an external electrode placed on the left mastoid (M1). Two additional external electrodes were placed on the right mastoid (M2) and below the left eye (IO1), respectively. During the recording, electrode impedance was kept below 5 kΩ. An online band-pass filter with a high-pass time-constant of 10 s (0.016 Hz) and a low-pass cutoff frequency of 1000 Hz was applied before digitizing the signal at a sampling rate of 500 Hz.
-                  
-                  Offline, the data were preprocessed using the MNE software [Version 0.21.0\; @gramfort2013] in Python [Version 3.8.5\; @vanrossum2009]. First, all scalp electrodes were re-referenced to the common average. Next, artifacts resulting from blinks and eye movements were removed using independent component analysis (ICA). The first 15 components were extracted by the FastICA algorithm [@hyvärinen1999] after temporarily low-pass filtering the data at 1 Hz. Any components showing substantive correlations with either of two virtual EOG channels (VEOG: IO1 - Fp1, HEOG: F9 - F10) were removed automatically using the *find\_bads\_eog* function. After artifact correction, a zero-phase, non-causal FIR filter with a lower pass-band edge at 0.1 Hz (transition bandwidth: 0.1 Hz) and an upper pass-band edge at 30 Hz (transition bandwidth: 7.5 Hz) was applied. Next, the continuous EEG was epoched into segments of 2 s, starting 500 ms before the onset of the visual presentation of each unfamiliar object. The epochs were baseline-corrected by subtracting the average voltage during the 200 ms before stimulus onset. Epochs containing artifacts despite ICA, defined as peak-to-peak amplitudes exceeding 200 µV, were removed from further analysis. This led to the exclusion of an average of `r format(round(mean(rejected_exp1), 1), nsmall = 1)` trials per participant (= `r scales::percent(mean(rejected_exp1)/360, accuracy = 0.1)`; range `r min(rejected_exp1)` to `r max(rejected_exp1)` trials). Single-trial event-related potentials were computed as the mean amplitude across time windows and regions of interests (ROIs) defined a priori, namely 100--150 ms after object onset at electrodes PO3, PO4, POz, O1, O2, and Oz for the P1 component, 150--200 ms after object onset at electrodes P7, P8, PO7, PO8, PO9, and PO10 for the N170 component, and 400--700 ms after object onset at electrodes C1, C2, Cz, CP1, CP2, and CPz for the N400 component (for the positions of these electrodes on the scalp, see the topographies in Figure \@ref(fig:exp1-plot)B).
-                  
-                  ### Statistical Analysis
-                  
-                  First, because we were interested in the effects of knowledge on perceiving *unfamiliar* objects only, we excluded objects from all further analyses when participants classified them as being known in the pre-insight part (i.e., before any keywords were presented). This led to the exclusion of an average of `r format(round(objects_exp1["Excl_known"], 1), nsmall = 1)` objects per participant (= `r scales::percent(objects_exp1["Excl_known"]/120, accuracy = 0.1)` of all unfamiliar objects). Next, to clearly delineate semantically informed and naive perception, the assignment of all other objects to one of these two conditions for statistical analysis was co-determined by our experimental manipulation (matching versus non-matching keywords in the insight part) and the behavioral responses of the participants themselves (see Figure \@ref(fig:exp1-plot)A). Objects were assigned to the semantically informed condition only if they were presented with matching keywords *and* if participants indicated knowing what the object was or having an assumption. This was the case for an average of `r format(round(objects_exp1["Informed"], 1), nsmall = 1)` objects per participant (= `r scales::percent(objects_exp1["Informed"]/60, accuracy = 0.1)` of objects presented with matching keywords). Complementarily, objects were assigned to the naive condition only if they were presented with non-matching keywords *and* if participants indicated not knowing what the object was or having rather no assumption. This was the case for an average of `r format(round(objects_exp1["Naive"], 1), nsmall = 1)` objects per participant (= `r scales::percent(objects_exp1["Naive"]/60, accuracy = 0.1)` of objects presented with non-matching keywords). Although this assignment was based on the manipulation and responses in the second part---when insight was thought to occur---the same assignment was used to analyze the data from the other two parts. This allowed us to test, on the one hand, if the objects from both conditions differed in important aspects even before any keywords were presented (pre-insight part) and, on the other hand, if the semantic understanding acquired in the insight part had any down-stream effects on the subsequent perception of the objects (post-insight part).
-                  
-                  The event-related potentials in response to objects from both conditions and all three parts were analyzed on the single trial level using linear mixed-effects regression models [@baayen2008; @frömer2018]. For the purpose of the present study, these models have at least three desirable properties compared to traditional approaches such as analyses of variance (ANOVAs) performed on by-participant averages. First, they can leverage all of the information that is present in the data set on the single trial level, some of which would be lost when computing averages. Second, they can account simultaneously for the non-independence of data points coming from the same participant and/or from the same item. In contrast, the neglect of the item as a random variable in by-participant ANOVAs can lead to anti-conservative test statistics and strictly does not allow for inferences beyond the stimulus set under study [@bürki2018; @judd2012]. Finally, mixed-effects models can flexibly deal with unbalanced designs in which the number of trials differs across (combinations of) conditions. Such a situation is inevitable when the assignment of trials to conditions is co-determined by the experimental manipulation and the behavior of participants in response to this manipulation [e.g., @fröber2017].
-                  
-                  Three separate models were computed predicting P1, N170, and N400 mean amplitudes, respectively. All models included three fixed effects: (a) the part of the experiment, coded as a repeated contrast (i.e., subtracting the first from the second part and the second from the third part, the intercept being the grand mean across all three parts), (b) the condition of the object, coded as a scaled sum contrast (i.e., subtracting the naive condition from the semantically informed condition, the intercept being the grand mean across both conditions), and (c) the two-way interaction of part and condition. For details on these and other contrast coding schemes in linear (mixed-effects) models, please refer to @schad2020. To determine the random effects structure, we always started with a maximal model containing by-participant and by-item random intercepts and random slopes for all fixed effects [@barr2013]. We then performed a model selection algorithm as proposed by @matuschek2017 in order to increase statistical power and avoid overparameterization: Iteratively, each random effect was removed and the resulting, more parsimonious model was compared to the previous, more complex model by means of a likelihood ratio test. Only if the parsimonious model explained the data equally well as the complex model [determined by *p* ≥ .20\; @matuschek2017] did we leave the random effect out, otherwise it was kept in the final model (see Appendix B for the formulas after model selection). All models were computed in R [Version `r as.character(packageVersion("base"))`\; @R-base] using the lme4 package [Version `r as.character(packageVersion("lme4"))`\; @R-lme4]. The optimizer function *bobyqa* with 20,000 iterations was used for maximum likelihood estimation. The model selection algorithm via likelihood ratio tests was performed using the buildmer package [Version `r as.character(packageVersion("buildmer"))`\; @R-buildmer].
-                  
-                  Finally, to answer our research question of whether or not semantically informed perception had an influence on the ERP components within each part, planned follow-up comparisons were calculated, contrasting the semantically informed against the naive condition within the pre-insight, \mbox{insight}, and post-insight parts. This was achieved using the emmeans package [Version `r as.character(packageVersion("emmeans"))`\; @R-emmeans]. All *p*-values were computed by approximating the relevant denominator degrees of freedom using Satterthwaite's method as implemented in the lmerTest package [Version `r as.character(packageVersion("lmerTest"))`\; @R-lmerTest].
-                  
-                  The materials, single trial behavioral and ERP data, and all code for data analysis can be accessed via the Open Science Framework (<https://osf.io/uksbc/>). We are not able to share the raw EEG data openly because we did not obtain participants' informed consent to do so.
-                  
-                  ## Results
-                  
-                  Single-trial ERPs were analyzed in response to unfamiliar objects before (pre-insight part), while (insight part), and after (post-insight part) participants obtained relevant semantic information about their function. In the insight part, half of the objects were preceded by matching keywords, fostering semantically informed perception. The other half were preceded by non-matching keywords, keeping the perception of the object semantically naive. The objects were analyzed according to this manipulation in combination with participants' self-report in the insight part (see Figure \@ref(fig:exp1-plot)A), thereby making sure that semantically informed and naive perception did indeed occur. The analysis focused on differences between these two conditions in the P1 component (100--150 ms) as an index of lower-level visual perception, the N170 component (150--200 ms) as index of higher-level visual perception, and the N400 component (400--700 ms) as an index of semantic processing.
-                  
-                  ```{r exp1-table, include=TRUE, results="asis"}
+(ref:figure-1-caption) Procedure and Results of Experiment 1\smallskip
+
+<!--
+
+The papaja package does not yet deal with the placement of figure captions above rather than below the figures. Therefore, we manually need to post-process the .tex file, moving the caption{} above includegraphics{} and copying the figure note manually below includegraphics{}:
+
+\bigskip\small\textit{Note.} 
+(A) In the pre-insight part, participants were presented with 120 unfamiliar objects and indicated whether they knew what kind of object they were viewing. In the insight part, half of these objects were presented with matching keywords (in purple color for illustration), leading to semantically informed perception, and the other half with non-matching keywords (in petrol color for illustration), leading to naive perception. In the post-insight part, the same objects were presented again without the keywords. (B) ERP waveforms and scalp topographies are shown for objects with semantically informed versus naive perception within the three different parts. Semantically informed perception was associated with significantly more negative amplitudes in the N170 component in the insight part, significantly less negative amplitudes in the N400 component in the insight and post-insight parts, and significantly more positive amplitudes in the P1 component in the post-insight part. Ampl. = amplitude.\newline
+*\textit{p} \textless{} .05. **\textit{p} \textless{} .01. ***\textit{p} \textless{} .001.
+
+-->
+
+In the *insight* part, the 120 unfamiliar objects were presented for a second time, now preceded either by matching keywords (leading to semantically informed perception) or by non-matching keywords (leading to naive perception). Each trial consisted of a fixation cross presented for 0.5 s, followed by the presentation of the keywords for 2.5 s. Then, an asterisk was presented in the middle of the screen for another 0.5 s, followed by the presentation of the object until a response was made or until a time out after 3 s. The objects were presented in blocks of 30 trials so that within each block (a) there were 15 objects from each of the two experimental conditions and (b) objects were heterogeneous in terms of their shape, visual complexity, and functional category (e.g., medical devices, musical instruments).
+
+Finally, in the *post-insight* part, the unfamiliar objects were presented for a third time with an identical trial structure as in the pre-insight part, that is, without any keywords. Note that the insight and post-insight parts were presented in an interleaved fashion so that after the presentation of one block of 30 objects in the insight part (with keywords), participants took a self-timed break and continued with the same block of 30 objects in the post-insight part (without keywords) before moving on to the next block consisting of 30 different objects. They continued like this until all four blocks were completed in both parts. In total, the experiment consisted of 480 trials (120 familiar objects in the pre-insight part and 120 unfamiliar objects in the pre-insight, insight, and post-insight parts). It took participants approximately 35 minutes to complete.
+
+### EEG Recording and Preprocessing
+
+The continuous EEG was recorded from 62 Ag/AgCl scalp electrodes placed according to the extended 10--20 system [@americanelectroencephalographicsociety1991] and referenced online to an external electrode placed on the left mastoid (M1). Two additional external electrodes were placed on the right mastoid (M2) and below the left eye (IO1), respectively. During the recording, electrode impedance was kept below 5 kΩ. An online band-pass filter with a high-pass time-constant of 10 s (0.016 Hz) and a low-pass cutoff frequency of 1000 Hz was applied before digitizing the signal at a sampling rate of 500 Hz.
+
+Offline, the data were preprocessed using the MNE software [Version 0.21.0\; @gramfort2013] in Python [Version 3.8.5\; @vanrossum2009]. First, all scalp electrodes were re-referenced to the common average. Next, artifacts resulting from blinks and eye movements were removed using independent component analysis (ICA). The first 15 components were extracted by the FastICA algorithm [@hyvärinen1999] after temporarily low-pass filtering the data at 1 Hz. Any components showing substantive correlations with either of two virtual EOG channels (VEOG: IO1 - Fp1, HEOG: F9 - F10) were removed automatically using the *find\_bads\_eog* function. After artifact correction, a zero-phase, non-causal FIR filter with a lower pass-band edge at 0.1 Hz (transition bandwidth: 0.1 Hz) and an upper pass-band edge at 30 Hz (transition bandwidth: 7.5 Hz) was applied. Next, the continuous EEG was epoched into segments of 2 s, starting 500 ms before the onset of the visual presentation of each unfamiliar object. The epochs were baseline-corrected by subtracting the average voltage during the 200 ms before stimulus onset. Epochs containing artifacts despite ICA, defined as peak-to-peak amplitudes exceeding 200 µV, were removed from further analysis. This led to the exclusion of an average of `r format(round(mean(rejected_exp1), 1), nsmall = 1)` trials per participant (= `r scales::percent(mean(rejected_exp1)/360, accuracy = 0.1)`; range `r min(rejected_exp1)` to `r max(rejected_exp1)` trials). Single-trial event-related potentials were computed as the mean amplitude across time windows and regions of interests (ROIs) defined a priori, namely 100--150 ms after object onset at electrodes PO3, PO4, POz, O1, O2, and Oz for the P1 component, 150--200 ms after object onset at electrodes P7, P8, PO7, PO8, PO9, and PO10 for the N170 component, and 400--700 ms after object onset at electrodes C1, C2, Cz, CP1, CP2, and CPz for the N400 component (for the positions of these electrodes on the scalp, see the topographies in Figure \@ref(fig:exp1-plot)B).
+
+### Statistical Analysis
+
+First, because we were interested in the effects of knowledge on perceiving *unfamiliar* objects only, we excluded objects from all further analyses when participants classified them as being known in the pre-insight part (i.e., before any keywords were presented). This led to the exclusion of an average of `r format(round(objects_exp1["Excl_known"], 1), nsmall = 1)` objects per participant (= `r scales::percent(objects_exp1["Excl_known"]/120, accuracy = 0.1)` of all unfamiliar objects). Next, to clearly delineate semantically informed and naive perception, the assignment of all other objects to one of these two conditions for statistical analysis was co-determined by our experimental manipulation (matching versus non-matching keywords in the insight part) and the behavioral responses of the participants themselves (see Figure \@ref(fig:exp1-plot)A). Objects were assigned to the semantically informed condition only if they were presented with matching keywords *and* if participants indicated knowing what the object was or having an assumption. This was the case for an average of `r format(round(objects_exp1["Informed"], 1), nsmall = 1)` objects per participant (= `r scales::percent(objects_exp1["Informed"]/60, accuracy = 0.1)` of objects presented with matching keywords). Complementarily, objects were assigned to the naive condition only if they were presented with non-matching keywords *and* if participants indicated not knowing what the object was or having rather no assumption. This was the case for an average of `r format(round(objects_exp1["Naive"], 1), nsmall = 1)` objects per participant (= `r scales::percent(objects_exp1["Naive"]/60, accuracy = 0.1)` of objects presented with non-matching keywords). Although this assignment was based on the manipulation and responses in the second part---when insight was thought to occur---the same assignment was used to analyze the data from the other two parts. This allowed us to test, on the one hand, if the objects from both conditions differed in important aspects even before any keywords were presented (pre-insight part) and, on the other hand, if the semantic understanding acquired in the insight part had any down-stream effects on the subsequent perception of the objects (post-insight part).
+
+The event-related potentials in response to objects from both conditions and all three parts were analyzed on the single trial level using linear mixed-effects regression models [@baayen2008; @frömer2018]. For the purpose of the present study, these models have at least three desirable properties compared to traditional approaches such as analyses of variance (ANOVAs) performed on by-participant averages. First, they can leverage all of the information that is present in the data set on the single trial level, some of which would be lost when computing averages. Second, they can account simultaneously for the non-independence of data points coming from the same participant and/or from the same item. In contrast, the neglect of the item as a random variable in by-participant ANOVAs can lead to anti-conservative test statistics and strictly does not allow for inferences beyond the stimulus set under study [@bürki2018; @judd2012]. Finally, mixed-effects models can flexibly deal with unbalanced designs in which the number of trials differs across (combinations of) conditions. Such a situation is inevitable when the assignment of trials to conditions is co-determined by the experimental manipulation and the behavior of participants in response to this manipulation [e.g., @fröber2017].
+
+Three separate models were computed predicting P1, N170, and N400 mean amplitudes, respectively. All models included three fixed effects: (a) the part of the experiment, coded as a repeated contrast (i.e., subtracting the first from the second part and the second from the third part, the intercept being the grand mean across all three parts), (b) the condition of the object, coded as a scaled sum contrast (i.e., subtracting the naive condition from the semantically informed condition, the intercept being the grand mean across both conditions), and (c) the two-way interaction of part and condition. For details on these and other contrast coding schemes in linear (mixed-effects) models, please refer to @schad2020. To determine the random effects structure, we always started with a maximal model containing by-participant and by-item random intercepts and random slopes for all fixed effects [@barr2013]. We then performed a model selection algorithm as proposed by @matuschek2017 in order to increase statistical power and avoid overparameterization: Iteratively, each random effect was removed and the resulting, more parsimonious model was compared to the previous, more complex model by means of a likelihood ratio test. Only if the parsimonious model explained the data equally well as the complex model [determined by *p* ≥ .20\; @matuschek2017] did we leave the random effect out, otherwise it was kept in the final model (see Appendix B for the formulas after model selection). All models were computed in R [Version `r as.character(packageVersion("base"))`\; @R-base] using the lme4 package [Version `r as.character(packageVersion("lme4"))`\; @R-lme4]. The optimizer function *bobyqa* with 20,000 iterations was used for maximum likelihood estimation. The model selection algorithm via likelihood ratio tests was performed using the buildmer package [Version `r as.character(packageVersion("buildmer"))`\; @R-buildmer].
+
+Finally, to answer our research question of whether or not semantically informed perception had an influence on the ERP components within each part, planned follow-up comparisons were calculated, contrasting the semantically informed against the naive condition within the pre-insight, \mbox{insight}, and post-insight parts. This was achieved using the emmeans package [Version `r as.character(packageVersion("emmeans"))`\; @R-emmeans]. All *p*-values were computed by approximating the relevant denominator degrees of freedom using Satterthwaite's method as implemented in the lmerTest package [Version `r as.character(packageVersion("lmerTest"))`\; @R-lmerTest].
+
+The materials, single trial behavioral and ERP data, and all code for data analysis can be accessed via the Open Science Framework (<https://osf.io/uksbc/>). We are not able to share the raw EEG data openly because we did not obtain participants' informed consent to do so.
+
+## Results
+
+Single-trial ERPs were analyzed in response to unfamiliar objects before (pre-insight part), while (insight part), and after (post-insight part) participants obtained relevant semantic information about their function. In the insight part, half of the objects were preceded by matching keywords, fostering semantically informed perception. The other half were preceded by non-matching keywords, keeping the perception of the object semantically naive. The objects were analyzed according to this manipulation in combination with participants' self-report in the insight part (see Figure \@ref(fig:exp1-plot)A), thereby making sure that semantically informed and naive perception did indeed occur. The analysis focused on differences between these two conditions in the P1 component (100--150 ms) as an index of lower-level visual perception, the N170 component (150--200 ms) as index of higher-level visual perception, and the N400 component (400--700 ms) as an index of semantic processing.  
+
+```{r exp1-table, include=TRUE, results="asis"}
 # Create table of models for Experiment 1
 table_exp1 <- create_table(
 models = models_exp1,

@@ -15,9 +15,9 @@ EEG power at a pre-specified range of frequencies.
 from glob import glob
 from os import makedirs, removedirs
 
+import mne
 import numpy as np
 import pandas as pd
-from mne import Epochs, events_from_annotations, pick_channels, set_bipolar_reference
 from mne.channels import combine_channels, make_standard_montage
 from mne.io import read_raw_brainvision
 from mne.preprocessing import ICA
@@ -44,10 +44,11 @@ def preprocess(
     baseline=(-0.2, 0),
     erp_components=None,
     reject={"eeg": 200e-6},
-    condition_cols=["part", "condition"],
+    average_by=None,
+    tfr_equalize=None,
+    tfr_resample=None,
     tfr_freqs=None,
     tfr_cycles=None,
-    tfr_sfreq_downsampled=250,
     tfr_crop=(-0.2, 0.8),
 ):
     """
@@ -57,11 +58,11 @@ def preprocess(
     # Create output directory if it doesn't exist
     makedirs(output_dir, exist_ok=True)
 
-    # Read raw data in microvolts
+    # Read raw EEG data
     raw = read_raw_brainvision(fname_vhdr, preload=True)
 
     # Create virtual EOG channels
-    raw = set_bipolar_reference(
+    raw = mne.set_bipolar_reference(
         raw,
         anode=eog_anodes,
         cathode=eog_cathodes,
@@ -77,10 +78,13 @@ def preprocess(
     raw.drop_channels(drops)
     raw.set_montage(montage=montage)
 
+    # Re-reference to common average
+    raw, _ = mne.set_eeg_reference(raw, "average")
+
     # Run ICA on a copy of the data
     raw_filt_ica = raw.copy()
     raw_filt_ica.load_data().filter(l_freq=1, h_freq=None)
-    ica = ICA(n_components=ica_components, random_state=ica_seed, method=ica_method)
+    ica = ICA(ica_components, random_state=ica_seed, method=ica_method, max_iter="auto")
     ica.fit(raw_filt_ica)
 
     # Remove bad components from the raw data
@@ -92,8 +96,8 @@ def preprocess(
     raw_filt = raw.filter(l_freq=hipass, h_freq=lowpass)
 
     # Epoching and baseline correction
-    events, _ = events_from_annotations(raw, verbose=False)
-    epochs = Epochs(raw_filt, events, event_id, tmin, tmax, baseline, preload=True)
+    events, _ = mne.events_from_annotations(raw, verbose=False)
+    epochs = mne.Epochs(raw_filt, events, event_id, tmin, tmax, baseline, preload=True)
 
     # Read behavioral metadata
     epochs.metadata = _read_log(fname_log, subject_id)
@@ -118,28 +122,40 @@ def preprocess(
     epochs.metadata.to_csv(prefix + "trials.csv", float_format="%.3f", index=False)
 
     # Compute evoked potentials
-    evokeds = _evokeds_df_from_epochs(epochs, condition_cols)
+    evokeds = _evokeds_df_from_epochs(epochs, average_by)
     evokeds.to_csv(prefix + "evo.csv", float_format="%.3f", index=False)
 
-    # Compute single trial power from unfiltered epochs
-    epochs_unf = Epochs(raw, events, event_id, tmin, tmax, baseline, preload=True)
-    del epochs, evokeds, raw, raw_filt, raw_filt_ica
+    # Create unfiltered epochs for time-frequency analysis
+    epochs_unf = mne.Epochs(raw, events, event_id, tmin, tmax, baseline, preload=True)
     epochs_unf.metadata = metadata_backup
-    tfr_decim = int(epochs_unf.info["sfreq"] / tfr_sfreq_downsampled)
+    if tfr_equalize is not None:
+        epochs_unf = epochs_unf[tfr_equalize]
+        epochs_unf.equalize_event_counts()
+    if tfr_resample is not None:
+        epochs_unf.resample(tfr_resample)
+    del epochs, evokeds, raw, raw_filt, raw_filt_ica
+
+    # Compute single trial power
     tfr = tfr_morlet(
         epochs_unf,
         tfr_freqs,
         tfr_cycles,
         use_fft=True,
         return_itc=False,
-        decim=tfr_decim,
         average=False,
     )
     tfr.apply_baseline(baseline, mode="percent")
-    tfr.crop(*tfr_crop)
-    tfr.data = np.float32(tfr.data)
+
+    # Reduce size and save
+    if tfr_crop is not None:
+        tfr.crop(*tfr_crop)
+        tfr.data = np.float32(tfr.data)
     tfr.save(prefix + "tfr.h5")
-    del tfr
+
+    # Compute evoked power
+    evokeds_tfr = _evokeds_df_from_epochs(tfr, average_by)
+    evokeds_tfr.to_csv(prefix + "tfr-evo.csv", float_format="%.3f", index=False)
+    del epochs_unf, evokeds_tfr, tfr
 
 
 def _read_log(fname_log=None, subject_id=None):
@@ -149,11 +165,11 @@ def _read_log(fname_log=None, subject_id=None):
 
     # Read the file
     log = pd.read_csv(fname_log, delimiter="\t", usecols=range(14), index_col=False)
-    columns = {"StimID": "item", "VPNummer": "participant"}
+    columns = {"StimID": "item_id", "VPNummer": "subject_id"}
     log.rename(columns=columns, inplace=True)
 
     # Use BIDS style subject ID
-    log["participant"] = subject_id
+    log["subject_id"] = subject_id
 
     # Remove filler items
     log.query("bek_unbek == 'unbekannt'", inplace=True)
@@ -171,11 +187,11 @@ def _read_log(fname_log=None, subject_id=None):
         "part == 'II' & Bed == 'richtig' & Tastencode == [201, 202]",
         "part == 'II' & Bed == 'falsch' & Tastencode == [203, 204]",
     ]
-    items_per_cond = [log.query(query)["item"].to_list() for query in queries]
-    choicelist = [log["item"].isin(items) for items in items_per_cond]
+    items_per_cond = [log.query(query)["item_id"].to_list() for query in queries]
+    choicelist = [log["item_id"].isin(items) for items in items_per_cond]
     log["condition"] = np.select(choicelist, conditions)
 
-    return log[["part", "condition", "participant", "item", "RT"]]
+    return log[["part", "condition", "subject_id", "item_id", "RT"]]
 
 
 def _single_trial_erps_from_epochs(epochs, name, tmin, tmax, roi):
@@ -184,7 +200,7 @@ def _single_trial_erps_from_epochs(epochs, name, tmin, tmax, roi):
     """
 
     # Create average channel for region of interest
-    roi_dict = {name: pick_channels(epochs.ch_names, roi)}
+    roi_dict = {name: mne.pick_channels(epochs.ch_names, roi)}
     epochs_roi = combine_channels(epochs, roi_dict)
     epochs.add_channels([epochs_roi], force_update_info=True)
 
@@ -200,13 +216,13 @@ def _single_trial_erps_from_epochs(epochs, name, tmin, tmax, roi):
     return epochs
 
 
-def _evokeds_df_from_epochs(epochs, condition_cols):
+def _evokeds_df_from_epochs(epochs, average_by):
     """
     Computes per-condition evoked potentials by averaging the relevant epochs.
     """
 
     # Get unique combinations of conditions
-    conditions = epochs.metadata[condition_cols].drop_duplicates()
+    conditions = epochs.metadata[average_by].drop_duplicates()
 
     # Create a list of evoked DataFrames for each condition
     evokeds_dfs = list()
