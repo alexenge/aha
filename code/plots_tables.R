@@ -102,19 +102,6 @@ plot_erps <- function(erp_components, evokeds, models, montage) {
       # Loop through parts
       parts <- map(c("I", "II", "III"), function(part) {
         data_plot <- filter(evokeds, part == !!part & condition %in% c("Informed", "Naive"))
-
-        # # Create (conditions x time points) x electrodes tibble
-        # data_plot <- evokeds[[part]] %>%
-        #   map(function(data) {
-        #     data %>%
-        #       t() %>%
-        #       as_tibble(.name_repair = "unique") %>%
-        #       set_colnames(montage$electrode) %>%
-        #       mutate(time = seq(-500, 1498, 2), roi = rowMeans(select(., all_of(roi))))
-        #   }) %>%
-        #   bind_rows(.id = "condition")
-        
-        
         # Shade background depending on whether the effect is significant or not
         asterisks <- models[[name]]$contrasts %>%
           filter(part == !!part) %>%
@@ -148,10 +135,10 @@ plot_erps <- function(erp_components, evokeds, models, montage) {
           filter(time >= tmin & time <= tmax) %>%
           group_by(condition) %>%
           summarise(across(montage$electrode, mean), .groups = "drop") %>%
-          pivot_longer(-condition) %>%
+          pivot_longer(-condition, names_to = "electrode") %>%
           pivot_wider(names_from = condition) %>%
-          transmute(amplitude = Informed - Naive) %>%
-          bind_cols(montage) %>%
+          mutate(amplitude = Informed - Naive) %>%
+          inner_join(montage, by = "electrode") %>%
           eegUtils::topoplot(limits = c(-1, 1), palette = "viridis", contour = FALSE, highlights = roi, scaling = 0.1) +
           theme(legend.position = "none")
         topo$layers[[3]]$aes_params$size <- topo$layers[[4]]$aes_params$size <- topo$layers[[5]]$aes_params$size <- 0.6
@@ -202,12 +189,15 @@ plot_legends_erps <- function(direction) {
 # Function to plot headings for Parts I, II, and III
 plot_headings <- function(spacing) {
   plot_grid(
+    NULL,
     ggplot() +
       annotate("text", label = "Pre-insight part", x = 0, y = 0, size = 14 / .pt, family = "Helvetica", fontface = "bold") +
-      theme_void(), NULL,
+      theme_void(),
+    NULL,
     ggplot() +
       annotate("text", label = "Insight part", x = 0, y = 0, size = 14 / .pt, family = "Helvetica", fontface = "bold") +
-      theme_void(), NULL,
+      theme_void(),
+    NULL,
     ggplot() +
       annotate("text", label = "Post-insight part", x = 0, y = 0, size = 14 / .pt, family = "Helvetica", fontface = "bold") +
       theme_void(),
@@ -410,6 +400,9 @@ create_table <- function(models, stub_anova, stub_contrasts, caption, note) {
     cat()
   return(list("anov" = anov, "conts" = conts))
 }
+
+# Small helper function to draw a dashed line
+annotate_line <- function(x, xend, y, yend) annotate("segment", x = x, xend = xend, y = y, yend = yend, linetype = "dashed")
 
 # # Old function without t-values and performance measures
 # create_table <- function(models, stub_anova, stub_contrasts, caption, note) {

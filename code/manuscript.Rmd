@@ -29,7 +29,6 @@ authornote: |
   The preprocessed data and code for this study are openly available at https://osf.io/uksbc/.
 abstract: |
   Does our perception of an object change as soon as we discover what function it serves? This question is relevant not only for our everyday lives, where we may encounter novel tools and gadgets as parts of our dynamic working and private environments; it also pertains to the long-standing debate around the (im)penetrability of perception by higher cognitive capacities. In this experiment, we showed participants (*n* = 24) pictures of 120 unfamiliar objects either together with matching information about their function---leading to semantically informed perception---or together with non-matching information---resulting in naive perception. We measured event-related potentials (ERPs) to investigate at which stages in the visual processing hierarchy these two types of object perception differed from one another. We found that semantically informed as compared to naive perception was associated with larger amplitudes in the N170 component and reduced amplitudes in the N400 component. When the same objects were presented once more (without any information), the N400 effect persisted and we now also observed enlarged amplitudes in the P1 component in response to objects for which semantically informed perception had taken place. We replicated these novel findings in an independent sample (*n* = 24). Consistent with previous work, these results suggest that obtaining semantic information about previously unfamiliar objects alters aspects of their lower-level visual perception (P1 component), higher-level visual perception (e.g., holistic perception; N170 component), and semantic processing (N400 component).
-  
 keywords          : "objects, semantic knowledge, visual perception, event-related potentials"
 floatsintext      : yes
 figurelist        : no
@@ -65,13 +64,16 @@ header-includes:
 
 ```{r setup, include=FALSE}
 # Load packages
-library(lmerTest)
 library(emmeans)
-library(papaja)
+library(MASS)
+library(afex)
 library(reticulate)
+library(papaja)
+library(cowplot)
+library(scales)
 library(tidyverse)
 library(magrittr)
-library(cowplot)
+library(furrr)
 
 # Load custom helper functions and bibliography
 pp <- import_from_path("preprocessing", path = "code")
@@ -84,17 +86,19 @@ knitr::opts_chunk$set(
 )
 
 # Re-run preprocessing and/or model fitting?
-rerun_preprocessing <- TRUE
+rerun_preprocessing <- FALSE
 rerun_model_fitting <- TRUE
 
 # File names for easier I/O
 fnames <- list(
   montage = "data/processed/montage.csv",
+  objects_per_condition = "data/processed/obj-per-cond.csv",
   evo_gavg = "data/processed/evo_gavg.csv",
-  evo_tfr_gavg = "data/processed/evo-tfr_gavg.csv",
+  evo_tfr_flat = "data/processed/evo-tfr_flat.csv",
   evo_tfr_diff = "data/processed/evo-tfr_diff.csv",
-  evo_tfr_gavg_nochans = "data/processed/evo-tfr_gavg-nochans.csv",
-  evo_tfr_diff_nochans = "data/processed/evo-tfr_diff-nochans.csv"
+  evo_tfr_flat_nochans = "data/processed/evo-tfr_flat-nochans.csv",
+  evo_tfr_diff_nochans = "data/processed/evo-tfr_diff-nochans.csv",
+  models_freq = "data/processed/models_freq.RDS"
 )
 ```
 
@@ -207,6 +211,7 @@ if (rerun_preprocessing) {
     )
 
   # Get standard EasyCap electrode positions and project them into 2D space
+  dir.create("data/processed")
   read_csv("data/preprocessed/sub-01_tfr-evo.csv", col_types = cols()) %>%
     select(-c(part, condition, subject_id, time, freq)) %>%
     colnames() -> ch_names
@@ -221,10 +226,19 @@ if (rerun_preprocessing) {
     ) %>%
     mutate(across(c(x, y), round, 3)) %>%
     write_csv(fnames$montage)
+
+  # Determine number of objects per condition for each participant
+  fname_log %>%
+    map2(subject_id, pp$read_log) %>%
+    bind_rows() %>%
+    with(table(subject_id, condition) / 3) %>%
+    as.data.frame.matrix() %>%
+    rownames_to_column("subject_id") %>%
+    write_csv(fnames$objects_per_condition)
 }
 ```
 
-```{python, grand_averaging, eval=rerun_preproc}
+```{python, grand_averaging, eval=TRUE}
 from os import makedirs
 
 import numpy as np
@@ -257,76 +271,18 @@ evo_tfr_diff = (
 )
 evo_tfr_diff[id_vars] = evo_tfr.query("condition == 'Informed'")[id_vars]
 
-# Average first across subjects, then across electrodes
+# Compute flat average across conditions
+id_vars.remove("condition")
+evo_tfr_flat = evo_tfr.groupby(id_vars, as_index=False).mean()
+
+# Average across subjects and save
 id_vars.remove("subject_id")
-fnames = [r.fnames["evo_tfr_gavg"], r.fnames["evo_tfr_diff"]]
-fnames_nochans = [r.fnames["evo_tfr_gavg_nochans"], r.fnames["evo_tfr_diff_nochans"]]
-for df, fname, fname_nochans in zip([evo_tfr, evo_tfr_diff], fnames, fnames_nochans):
+dfs = [evo_tfr_flat, evo_tfr_diff]
+fnames_tfr = [r.fnames["evo_tfr_flat"], r.fnames["evo_tfr_diff"]]
+for df, fname in zip(dfs, fnames_tfr):
     df = df.groupby(id_vars, as_index=False).mean()
     df.to_csv(fname, float_format="%.3f", index=False)
-    df["power"] = df[electrodes].mean(axis=1)
-    df.drop(electrodes, axis=1, inplace=True)
-    df.to_csv(fname_nochans, float_format="%.3f", index=False)
-del df, evo_tfr, evo_tfr_diff
-```
-
-```{r, tfr_wip}
-please_stop_here()
-
-
-# Read evoked power
-paste0("data/preprocessed/", subject_id, "_tfr-evo.csv") %>%
-  map(read_csv, col_types = cols())
-
-  map2(subject_id, function(fname, id) {
-    read_csv(fname, col_types = cols(), progress = FALSE) %>%
-      mutate(participant = id)
-  }) %>%
-  bind_rows() -> evo
-
-# Average across participants
-grouping <- c("part", "condition", "time", "freq")
-evo %<>%
-  group_by(across(all_of(grouping))) %>%
-  summarise(across(-participant, .fns = mean), .groups = "drop")
-
-# Average across channels
-evo %>%
-  pivot_longer(!all_of(grouping), names_to = "channel", values_to = "power") %>%
-  group_by(across(all_of(grouping))) %>%
-  summarise(power = mean(power), .groups = "drop") -> evo_all_channels
-
-# Average across conditions within parts
-evo_all_channels %>%
-  group_by(part, time, freq) %>%
-  summarise(power = mean(power), .groups = "drop") -> evo_all_channels_conds
-
-# Plot
-evo_all_channels_conds %>%
-  ggplot(aes(x = time, y = freq, fill = power)) +
-  facet_wrap(~part) +
-  geom_raster() +
-  scale_fill_viridis_c(limits = c(0, 2), oob = scales::squish) +
-  annotate("rect", xmin = 150, xmax = 400, ymin = 30, ymax = 50, color = "white", fill = NA) +
-  theme(aspect.ratio = 0.5) +
-  theme_minimal() +
-  coord_cartesian(expand = FALSE) +
-  ggsave("evo_all_channels_conds.pdf", width = 7, height = 2)
-
-# Compute differences between conditions
-evo_all_channels %>%
-  group_by(part, time, freq) %>%
-  mutate(power = power - power[condition == "Naive"]) %>%
-  filter(condition == "Informed") %>%
-  ggplot(aes(x = time, y = freq, fill = power)) +
-  facet_wrap(~part) +
-  geom_raster() +
-  scale_fill_viridis_c(limits = c(0, 1), oob = scales::squish) +
-  annotate("rect", xmin = 150, xmax = 400, ymin = 30, ymax = 50, color = "white", fill = NA) +
-  theme(aspect.ratio = 0.5) +
-  theme_minimal() +
-  coord_cartesian(expand = FALSE) +
-  ggsave("evo_all_channels_diff.pdf", width = 7, height = 2)
+del df, dfs, evo, evo_tfr, evo_tfr_diff, evo_tfr_flat
 ```
 
 ```{r, models_freq}
@@ -338,69 +294,92 @@ paste0("data/preprocessed/", subject_id, "_trials.csv") %>%
     part = factor(part, levels = c("I", "II", "III")),
     condition = factor(condition, levels = c("Informed", "Naive")),
     subject_id = factor(subject_id),
-    item_id = factor(item_id)
-  ) %>%
-  na.omit() -> trials
+    item_id = factor(item_id),
+    RT = ifelse(RT < 200, NA, RT),
+    logRT = log(RT)
+  ) -> trials
 
-contrasts_condition <- t(cbind(c("Informed" = 1, "Naive" = -1)))
-contrasts_part <- t(cbind(
-  c("I" = -1, "II" = 1, "III" = 0),
-  c("I" = 0, "II" = -1, "III" = 1)
-))
+# Remove trials with unrealistically short RTs or invalid conditions
+sum(is.na(trials$RT))
+sum(is.na(trials$RT)) / nrow(trials)
+trials %<>% na.omit()
 
-# Apply these contrasts to the factors in the data
-contrasts(trials$condition) <- MASS::ginv(contrasts_condition)
-contrasts(trials$part) <- MASS::ginv(contrasts_part)
+# Contrast coding for parts
+cbind(c("I" = -1, "II" = 1, "III" = 0), c("I" = 0, "II" = -1, "III" = 1)) %>%
+  t() %>%
+  ginv() -> contrasts(trials$part)
 
-formula <- N400 ~ part / condition + (1|subject_id) + (1|item_id)
-mod <- lmer(formula, data = trials)
-summary(mod)
+# Contrast coding for conditions
+c("Informed" = 1, "Naive" = -1) %>%
+  t() %>%
+  ginv() -> contrasts(trials$condition)
 
+# Load fitted models or rerun them
+if (!rerun_model_fitting) {
 
+  # Load models
+  models_freq <- readRDS(fnames$models_freq)
+} else {
 
+  # Compute models for dependent variables in parallel
+  dvs <- c("logRT", "P1", "N170", "N400")
+  n_cores <- min(length(dvs), availableCores())
+  plan("multisession", workers = n_cores)
+  future_map(dvs, function(dv, dat = trials) {
 
-# Remove any trials excluded from conditions
-aha %>%
-  filter(condition %in% c("Informed", "Naive")) %>%
-  droplevels() -> aha
+    # Define model formula
+    form <- paste0(
+      dv, " ~ part * condition +
+        (part * condition | subject_id) +
+        (part * condition | item_id)"
+    ) %>% formula()
 
-# Define contrast coding for condition (informed-naive) and part (2-1, 3-1)
-contrasts_condition <- t(cbind(
-  c("Informed" = 1, "Naive" = -1)
-))
-contrasts_part <- t(cbind(
-  c("I" = -1, "II" = 1, "III" = 0),
-  c("I" = 0, "II" = -1, "III" = 1)
-))
+    # Define follow-up comparisons
+    specs <- pairwise ~ condition | part
 
-# Apply these contrasts to the factors in the data
-contrasts(aha$condition) <- MASS::ginv(contrasts_condition)
-contrasts(aha$part) <- MASS::ginv(contrasts_part)
+    # Fit initial model
+    fit <- lmer(form, dat, REML = FALSE)
 
-# Specify model formula
-form <- erp ~ part * condition +
-  (part * condition | participant) +
-  (part * condition | item)
+    # Refit using all available optimizers
+    fits <- all_fit(fit, formula = form, data = dat)
 
-# Specify follow-up comparisons
-specs <- pairwise ~ condition | part
+    # See which of the optimizers converged
+    fits_converged <- keep(
+      fits,
+      ~ .x@optinfo$conv$opt == 0 &
+        length(.x@optinfo$conv$lme4) == 0 &
+        length(.x@optinfo$warnings) == 0
+    )
 
-# Calculate linear mixed-effects models and follow-up comparisons
-map(comps$name, function(comp, formula = form, data = aha, specs = specs) {
-  data %<>% rename(erp = all_of(comp))
-  mod <- lmer(formula, data, all_fit = TRUE)
-  emm_options(lmer.df = "Satterthwaite", lmerTest.limit = Inf)
-  em <- emmeans(mod, specs = specs, infer = TRUE, data = data)
-  modlist <- list(
-    model = mod,
-    anova = anova(mod),
-    summary = summary(mod),
-    means = as.data.frame(em$means),
-    contrasts = as.data.frame(em$contrasts)
-  )
-}) %>%
-  set_names(comps$name) %T>%
-  saveRDS(fnames$models_freq) -> mods_freq
+    # Find best model via logLik
+    logliks <- map(fits_converged, logLik)
+    fit_best <- fits[[which.max(logliks)]]
+
+    # Compute follow-up comparisons
+    emm_options(lmer.df = "Satterthwaite", lmerTest.limit = Inf)
+    em <- emmeans(fit_best, specs, infer = TRUE)
+
+    # Return a list of relevant model outputs
+    return(
+      list(
+        fit = fit_best,
+        anova = anova(fit_best),
+        means = em$emmeans,
+        contrasts = em$contrasts,
+        all_fits = fits
+      )
+    )
+  }) %>%
+
+    # Save
+    set_names(dvs) %T>%
+    saveRDS(fnames$models_freq) -> models_freq
+
+  # Stop the workers
+  future:::ClusterRegistry("stop")
+}
+
+please_stop_here()
 ```
 
 ```{r bayes, eval=FALSE}
@@ -416,8 +395,8 @@ data_joint_subs %>%
 
 contrasts_condition <- t(cbind(c("Informed" = 1, "Naive" = -1)))
 contrasts_part <- t(cbind(c("I" = -1, "II" = 1, "III" = 0), c("I" = 0, "II" = -1, "III" = 1)))
-contrasts(data_brm$condition) <- MASS::ginv(contrasts_condition)
-contrasts(data_brm$part) <- MASS::ginv(contrasts_part)
+contrasts(data_brm$condition) <- ginv(contrasts_condition)
+contrasts(data_brm$part) <- ginv(contrasts_part)
 
 formula <- P1 ~ part / condition + (part / condition | participant) + (part / condition | item)
 prior <- set_prior("cauchy(0, 0.707)", class = "b")
@@ -472,7 +451,7 @@ mod_brm_s <- brm(
 )
 ```
 
-```{r exp1-plot, include=TRUE, fig.height=11, fig.cap = "(ref:figure-1-caption)"}
+```{r fig1, include=TRUE, fig.height=11, fig.cap = "(ref:fig1_caption)"}
 # Load montage and data
 montage <- read_csv(fnames$montage, col_types = cols())
 evokeds <- read_csv(fnames$evo_gavg, col_types = cols())
@@ -480,19 +459,22 @@ evokeds <- read_csv(fnames$evo_gavg, col_types = cols())
 # Create plot for Experiment 1
 plot_grid(
   plot_trials(),
-  plot_erps(comps = comps, evokeds = evokeds_exp1, models = models_exp1, montage = montage),
+  plot_erps(erp_components, evokeds, models_freq, montage),
   nrow = 2, rel_heights = c(5, 6), labels = c("A", "B"), label_fontfamily = "Helvetica"
 ) + # Add some lines (to separate the parts) and the legend
-  annotate(geom = "segment", x = 0.328, xend = 0.328, y = -Inf, yend = 0.53, linetype = "dashed") +
-  annotate(geom = "segment", x = 0.672, xend = 0.672, y = -Inf, yend = 0.53, linetype = "dashed") +
-  annotate(geom = "segment", x = 0.328, xend = 0.28, y = 0.53, yend = 0.58, linetype = "dashed") +
-  annotate(geom = "segment", x = 0.672, xend = 0.72, y = 0.53, yend = 0.58, linetype = "dashed") +  
-  annotate(geom = "segment", x = 0.28, xend = 0.28, y = 0.58, yend = Inf, linetype = "dashed") +
-  annotate(geom = "segment", x = 0.72, xend = 0.72, y = 0.58, yend = Inf, linetype = "dashed") +
-  draw_plot(plot_legends_erps(direction = "vertical"), x = 0.405, y = 0.422, width = 1, height = 1)
+  annotate_line(x = 0.328, xend = 0.328, y = -Inf, yend = 0.53) +
+  annotate_line(x = 0.672, xend = 0.672, y = -Inf, yend = 0.53) +
+  annotate_line(x = 0.328, xend = 0.28, y = 0.53, yend = 0.58) +
+  annotate_line(x = 0.672, xend = 0.72, y = 0.53, yend = 0.58) +
+  annotate_line(x = 0.28, xend = 0.28, y = 0.58, yend = Inf) +
+  annotate_line(x = 0.72, xend = 0.72, y = 0.58, yend = Inf) +
+  draw_plot(
+    plot_legends_erps(direction = "vertical"),
+    x = 0.405, y = 0.422, width = 1, height = 1
+  )
 ```
 
-(ref:figure-1-caption) Procedure and Results of Experiment 1\smallskip
+(ref:fig1_caption) Procedure and Results of Experiment 1\smallskip
 
 <!--
 
@@ -512,11 +494,11 @@ Finally, in the *post-insight* part, the unfamiliar objects were presented for a
 
 The continuous EEG was recorded from 62 Ag/AgCl scalp electrodes placed according to the extended 10--20 system [@americanelectroencephalographicsociety1991] and referenced online to an external electrode placed on the left mastoid (M1). Two additional external electrodes were placed on the right mastoid (M2) and below the left eye (IO1), respectively. During the recording, electrode impedance was kept below 5 kΩ. An online band-pass filter with a high-pass time-constant of 10 s (0.016 Hz) and a low-pass cutoff frequency of 1000 Hz was applied before digitizing the signal at a sampling rate of 500 Hz.
 
-Offline, the data were preprocessed using the MNE software [Version 0.21.0\; @gramfort2013] in Python [Version 3.8.5\; @vanrossum2009]. First, all scalp electrodes were re-referenced to the common average. Next, artifacts resulting from blinks and eye movements were removed using independent component analysis (ICA). The first 15 components were extracted by the FastICA algorithm [@hyvärinen1999] after temporarily low-pass filtering the data at 1 Hz. Any components showing substantive correlations with either of two virtual EOG channels (VEOG: IO1 - Fp1, HEOG: F9 - F10) were removed automatically using the *find\_bads\_eog* function. After artifact correction, a zero-phase, non-causal FIR filter with a lower pass-band edge at 0.1 Hz (transition bandwidth: 0.1 Hz) and an upper pass-band edge at 30 Hz (transition bandwidth: 7.5 Hz) was applied. Next, the continuous EEG was epoched into segments of 2 s, starting 500 ms before the onset of the visual presentation of each unfamiliar object. The epochs were baseline-corrected by subtracting the average voltage during the 200 ms before stimulus onset. Epochs containing artifacts despite ICA, defined as peak-to-peak amplitudes exceeding 200 µV, were removed from further analysis. This led to the exclusion of an average of `r format(round(mean(rejected_exp1), 1), nsmall = 1)` trials per participant (= `r scales::percent(mean(rejected_exp1)/360, accuracy = 0.1)`; range `r min(rejected_exp1)` to `r max(rejected_exp1)` trials). Single-trial event-related potentials were computed as the mean amplitude across time windows and regions of interests (ROIs) defined a priori, namely 100--150 ms after object onset at electrodes PO3, PO4, POz, O1, O2, and Oz for the P1 component, 150--200 ms after object onset at electrodes P7, P8, PO7, PO8, PO9, and PO10 for the N170 component, and 400--700 ms after object onset at electrodes C1, C2, Cz, CP1, CP2, and CPz for the N400 component (for the positions of these electrodes on the scalp, see the topographies in Figure \@ref(fig:exp1-plot)B).
+Offline, the data were preprocessed using the MNE software [Version 0.21.0\; @gramfort2013] in Python [Version 3.8.5\; @vanrossum2009]. First, all scalp electrodes were re-referenced to the common average. Next, artifacts resulting from blinks and eye movements were removed using independent component analysis (ICA). The first 15 components were extracted by the FastICA algorithm [@hyvärinen1999] after temporarily low-pass filtering the data at 1 Hz. Any components showing substantive correlations with either of two virtual EOG channels (VEOG: IO1 - Fp1, HEOG: F9 - F10) were removed automatically using the *find\_bads\_eog* function. After artifact correction, a zero-phase, non-causal FIR filter with a lower pass-band edge at 0.1 Hz (transition bandwidth: 0.1 Hz) and an upper pass-band edge at 30 Hz (transition bandwidth: 7.5 Hz) was applied. Next, the continuous EEG was epoched into segments of 2 s, starting 500 ms before the onset of the visual presentation of each unfamiliar object. The epochs were baseline-corrected by subtracting the average voltage during the 200 ms before stimulus onset. Epochs containing artifacts despite ICA, defined as peak-to-peak amplitudes exceeding 200 µV, were removed from further analysis. This led to the exclusion of an average of `r format(round(mean(rejected_exp1), 1), nsmall = 1)` trials per participant (= `r percent(mean(rejected_exp1)/360, accuracy = 0.1)`; range `r min(rejected_exp1)` to `r max(rejected_exp1)` trials). Single-trial event-related potentials were computed as the mean amplitude across time windows and regions of interests (ROIs) defined a priori, namely 100--150 ms after object onset at electrodes PO3, PO4, POz, O1, O2, and Oz for the P1 component, 150--200 ms after object onset at electrodes P7, P8, PO7, PO8, PO9, and PO10 for the N170 component, and 400--700 ms after object onset at electrodes C1, C2, Cz, CP1, CP2, and CPz for the N400 component (for the positions of these electrodes on the scalp, see the topographies in Figure \@ref(fig:exp1-plot)B).
 
 ### Statistical Analysis
 
-First, because we were interested in the effects of knowledge on perceiving *unfamiliar* objects only, we excluded objects from all further analyses when participants classified them as being known in the pre-insight part (i.e., before any keywords were presented). This led to the exclusion of an average of `r format(round(objects_exp1["Excl_known"], 1), nsmall = 1)` objects per participant (= `r scales::percent(objects_exp1["Excl_known"]/120, accuracy = 0.1)` of all unfamiliar objects). Next, to clearly delineate semantically informed and naive perception, the assignment of all other objects to one of these two conditions for statistical analysis was co-determined by our experimental manipulation (matching versus non-matching keywords in the insight part) and the behavioral responses of the participants themselves (see Figure \@ref(fig:exp1-plot)A). Objects were assigned to the semantically informed condition only if they were presented with matching keywords *and* if participants indicated knowing what the object was or having an assumption. This was the case for an average of `r format(round(objects_exp1["Informed"], 1), nsmall = 1)` objects per participant (= `r scales::percent(objects_exp1["Informed"]/60, accuracy = 0.1)` of objects presented with matching keywords). Complementarily, objects were assigned to the naive condition only if they were presented with non-matching keywords *and* if participants indicated not knowing what the object was or having rather no assumption. This was the case for an average of `r format(round(objects_exp1["Naive"], 1), nsmall = 1)` objects per participant (= `r scales::percent(objects_exp1["Naive"]/60, accuracy = 0.1)` of objects presented with non-matching keywords). Although this assignment was based on the manipulation and responses in the second part---when insight was thought to occur---the same assignment was used to analyze the data from the other two parts. This allowed us to test, on the one hand, if the objects from both conditions differed in important aspects even before any keywords were presented (pre-insight part) and, on the other hand, if the semantic understanding acquired in the insight part had any down-stream effects on the subsequent perception of the objects (post-insight part).
+First, because we were interested in the effects of knowledge on perceiving *unfamiliar* objects only, we excluded objects from all further analyses when participants classified them as being known in the pre-insight part (i.e., before any keywords were presented). This led to the exclusion of an average of `r format(round(objects_exp1["Excl_known"], 1), nsmall = 1)` objects per participant (= `r percent(objects_exp1["Excl_known"]/120, accuracy = 0.1)` of all unfamiliar objects). Next, to clearly delineate semantically informed and naive perception, the assignment of all other objects to one of these two conditions for statistical analysis was co-determined by our experimental manipulation (matching versus non-matching keywords in the insight part) and the behavioral responses of the participants themselves (see Figure \@ref(fig:exp1-plot)A). Objects were assigned to the semantically informed condition only if they were presented with matching keywords *and* if participants indicated knowing what the object was or having an assumption. This was the case for an average of `r format(round(objects_exp1["Informed"], 1), nsmall = 1)` objects per participant (= `r percent(objects_exp1["Informed"]/60, accuracy = 0.1)` of objects presented with matching keywords). Complementarily, objects were assigned to the naive condition only if they were presented with non-matching keywords *and* if participants indicated not knowing what the object was or having rather no assumption. This was the case for an average of `r format(round(objects_exp1["Naive"], 1), nsmall = 1)` objects per participant (= `r percent(objects_exp1["Naive"]/60, accuracy = 0.1)` of objects presented with non-matching keywords). Although this assignment was based on the manipulation and responses in the second part---when insight was thought to occur---the same assignment was used to analyze the data from the other two parts. This allowed us to test, on the one hand, if the objects from both conditions differed in important aspects even before any keywords were presented (pre-insight part) and, on the other hand, if the semantic understanding acquired in the insight part had any down-stream effects on the subsequent perception of the objects (post-insight part).
 
 The event-related potentials in response to objects from both conditions and all three parts were analyzed on the single trial level using linear mixed-effects regression models [@baayen2008; @frömer2018]. For the purpose of the present study, these models have at least three desirable properties compared to traditional approaches such as analyses of variance (ANOVAs) performed on by-participant averages. First, they can leverage all of the information that is present in the data set on the single trial level, some of which would be lost when computing averages. Second, they can account simultaneously for the non-independence of data points coming from the same participant and/or from the same item. In contrast, the neglect of the item as a random variable in by-participant ANOVAs can lead to anti-conservative test statistics and strictly does not allow for inferences beyond the stimulus set under study [@bürki2018; @judd2012]. Finally, mixed-effects models can flexibly deal with unbalanced designs in which the number of trials differs across (combinations of) conditions. Such a situation is inevitable when the assignment of trials to conditions is co-determined by the experimental manipulation and the behavior of participants in response to this manipulation [e.g., @fröber2017].
 
@@ -554,6 +536,145 @@ In the insight part, half of the unfamiliar objects were presented with matching
 ### ERPs After Insight Had Occurred
 
 In the post-insight part, the unfamiliar objects were presented for a third time, again without the keywords (as in the pre-insight part). This allowed us to test if the semantic information had any lasting effects on the processing of the objects. As in the insight part, the N400 component remained significantly reduced during semantically informed as compared to naive perception, *b* = `r table_exp1$conts["Post-insight part", "N400_est"]` µV, *p* `r table_exp1$conts["Post-insight part", "N400_p"]`, whereas the effect in the N170 component did not reoccur, *b* = `r table_exp1$conts["Post-insight part", "N170_est"]` µV, *p* = `r table_exp1$conts["Post-insight part", "N170_p"]`. Instead, we now observed an even earlier modulation in the P1 component which was significantly enlarged (i.e., more positive) in response to objects for which semantically informed perception had taken place, *b* = `r table_exp1$conts["Post-insight part", "P1_est"]` µV, *p* = `r table_exp1$conts["Post-insight part", "P1_p"]`.
+
+```{r, fig3, include=TRUE}
+evo_tfr_flat <- read_csv(fnames$evo_tfr_flat, col_types = cols(), progress = FALSE)
+evo_tfr_diff <- read_csv(fnames$evo_tfr_diff, col_types = cols(), progress = FALSE)
+
+# Scaling of power in all plots
+limits_power <- c(0, 2)
+
+# Time-frequency of interest based on visual inspect
+tfoi <- list(tmin = 200, tmax = 400, fmin = 34, fmax = 48)  # Gamma
+# tfoi <- list(tmin = 150, tmax = 350, fmin = 14, fmax = 24)  # Beta
+
+standard_text <- element_text(size = 10, color = "black", family = "Helvetica")
+
+plot_tfr_raster <- function(evo_tfr, limits, tmin, tmax, fmin, fmax, label) {
+  # Average across electrodes
+  evo_tfr %>%
+    pivot_longer(-c(part, time, freq), names_to = "electrode", values_to = "power") %>%
+    group_by(part, time, freq) %>%
+    summarise(power = mean(power), .groups = "drop") %>%
+    # Create one raster plot per part
+    group_by(part) %>%
+    group_map(function(data_part, part) {
+      ggplot(data_part, aes(x = time, y = freq, fill = power)) +
+        geom_raster() +
+        scale_fill_viridis_c(
+          limits = limits,
+          labels = function(x) x * 100,
+          guide = guide_colorbar(
+            title = "Power (% change\nfrom baseline)",
+            title.position = "left",
+            title.theme = element_text(size = 10, color = "black", angle = 90, lineheight = 1),
+            title.hjust = 0.5,
+            label.theme = element_text(size = 10, color = "black"),
+            barheight = unit(4, "cm"),
+            ticks = FALSE,
+            direction = "vertical"
+          ),
+          oob = squish
+        ) +
+        scale_x_continuous(breaks = seq(-100, 700, 200)) +
+        coord_cartesian(expand = FALSE) +
+        annotate("rect", xmin = tmin, xmax = tmax, ymin = fmin + 1, ymax = fmax + 1, color = "white", fill = NA, linetype = "dotted") +
+        annotate("segment", x = 0, xend = 0, y = -Inf, yend = Inf, color = "white", linetype = "dotted") +
+        labs(x = "Time (ms)", y = "") +
+        theme_minimal() +
+        theme(
+          legend.position = "none",
+          axis.title = standard_text,
+          axis.text = standard_text
+        )
+    }) -> plotlist
+  # Add label and axis title to the first plot
+  plotlist[[1]] <- plotlist[[1]] + annotate(
+    "text",
+    x = -100,
+    y = 27,
+    label = label,
+    size = 10 / .pt,
+    angle = 90,
+    family = "Helvetica",
+    color = "white",
+    lineheight = 0.9
+  ) +
+    ylab("Frequency (ms)")
+  # Extract legend for another subplot
+  current_legend <<- get_legend(plotlist[[1]] + theme(legend.position = "right"))
+  plot_grid(plotlist = plotlist, nrow = 1)
+}
+
+plot_tfr_topo <- function(evo_tfr, limits, tmin, tmax, fmin, fmax, legend) {
+  # Average across times and frequencies of interest
+  evo_tfr_diff %>%
+    # Select time window and frequencies of interest
+    filter(time >= tmin & time <= tmax & freq >= fmin & freq <= fmax) %>%
+    # Convert to long format
+    pivot_longer(-c(part, time, freq), names_to = "electrode", values_to = "power") %>%
+    # Create one topoplot per part
+    group_by(part) %>%
+    group_map(function(data_part, part) {
+      data_part %>%
+        group_by(electrode) %>%
+        summarise(power = mean(power), .groups = "drop") %>%
+        inner_join(montage, by = "electrode") %>%
+        eegUtils::topoplot(
+          limits = limits,
+          palette = "viridis",
+          contour = FALSE,
+          quantity = "power",
+          scaling = 0.5
+        ) +
+        theme(legend.position = "none",)
+    }) -> plotlist
+  #plotlist <- c(plotlist, list(legend))
+  plot_grid(
+    NULL,
+    plotlist[[1]],
+    NULL,
+    plotlist[[2]],
+    NULL,
+    plotlist[[3]],
+    nrow = 1,
+    rel_widths = c(2, 7, 0, 7, 1, 7))
+}
+
+# Bring it all together
+plot_grid(
+  plot_headings(spacing = c(1, 7, 1, 7, 1, 7)),
+  do.call(
+    plot_tfr_raster, c(tfoi, list(
+      evo_tfr = evo_tfr_flat,
+      limits = limits_power,
+      label = "All channels,\nall conditions"
+    ))
+  ),
+  do.call(
+    plot_tfr_raster, c(tfoi, list(
+      evo_tfr = evo_tfr_diff,
+      limits = limits_power,
+      label = "All channels,\n\u0394 (informed - naive)"
+    ))
+  ),
+  do.call(
+    plot_tfr_topo, c(tfoi, list(
+      evo_tfr = evo_tfr_diff,
+      limits = limits_power,
+      legend = current_legend))
+  ),
+  nrow = 4,
+  rel_heights = c(1, 5, 5, 5),
+  labels = c("", "A", "B", "C"),
+  label_y = c(1, 1.16, 1.1, 1),
+  label_fontfamily = "Helvetica"
+) +
+  draw_plot(current_legend, x = -0.42, y = -0.34) +
+  annotate_line(0.344, 0.344, -Inf, Inf) +
+  annotate_line(0.676, 0.676, -Inf, Inf) +
+  ggsave("data/processed/tfr.pdf", width = unit(10, "cm"), height = unit(7, "cm"), device = cairo_pdf)
+```
 
 ## Discussion
 
@@ -626,8 +747,8 @@ read_tsv("data/processed/exp2-data.tsv", col_types = cols()) %>%
   droplevels() -> data_exp2
 
 # Apply contrasts to the factors in the data
-contrasts(data_exp2$condition) <- MASS::ginv(contrasts_condition)
-contrasts(data_exp2$part) <- MASS::ginv(contrasts_part)
+contrasts(data_exp2$condition) <- ginv(contrasts_condition)
+contrasts(data_exp2$part) <- ginv(contrasts_part)
 
 # Compute the models for Experiment 2
 map(
@@ -675,7 +796,7 @@ evokeds_exp2 <- readRDS("data/processed/exp2-gaverages.RDS")
 models_exp2 <- readRDS("data/processed/exp2-models.RDS")
 ```
 
-All materials, procedures, EEG-related methods, and statistical analyses were identical to Experiment 1. An average of `r format(round(objects_exp2["Excl_known"], 1), nsmall = 1)` objects per participant (= `r scales::percent(objects_exp2["Excl_known"]/120, accuracy = 0.1)` of all unfamiliar objects) was classified as being known in the pre-insight part and excluded from all further analyses. Based on participants' responses in the insight part, an average of `r format(round(objects_exp2["Informed"], 1), nsmall = 1)` objects was assigned to the semantically informed condition (= `r scales::percent(objects_exp2["Informed"]/60, accuracy = 0.1)` of objects presented with matching keywords) and an average of `r format(round(objects_exp2["Naive"], 1), nsmall = 1)` objects was assigned to the naive condition (= `r scales::percent(objects_exp2["Naive"]/60, accuracy = 0.1)` of objects presented with non-matching keywords). Automatic rejection of EEG epochs containing artifacts led to the exclusion of `r format(round(mean(rejected_exp2), 1), nsmall = 1)` trials per participant (= `r scales::percent(mean(rejected_exp2)/360, accuracy = 0.1)`; range `r min(rejected_exp2)` to `r max(rejected_exp2)` trials).
+All materials, procedures, EEG-related methods, and statistical analyses were identical to Experiment 1. An average of `r format(round(objects_exp2["Excl_known"], 1), nsmall = 1)` objects per participant (= `r percent(objects_exp2["Excl_known"]/120, accuracy = 0.1)` of all unfamiliar objects) was classified as being known in the pre-insight part and excluded from all further analyses. Based on participants' responses in the insight part, an average of `r format(round(objects_exp2["Informed"], 1), nsmall = 1)` objects was assigned to the semantically informed condition (= `r percent(objects_exp2["Informed"]/60, accuracy = 0.1)` of objects presented with matching keywords) and an average of `r format(round(objects_exp2["Naive"], 1), nsmall = 1)` objects was assigned to the naive condition (= `r percent(objects_exp2["Naive"]/60, accuracy = 0.1)` of objects presented with non-matching keywords). Automatic rejection of EEG epochs containing artifacts led to the exclusion of `r format(round(mean(rejected_exp2), 1), nsmall = 1)` trials per participant (= `r percent(mean(rejected_exp2)/360, accuracy = 0.1)`; range `r min(rejected_exp2)` to `r max(rejected_exp2)` trials).
 
 ## Results
 
@@ -692,7 +813,7 @@ table_exp2 <- create_table(
 
 As in Experiment 1, P1, N170, and N400 amplitudes differed between the three different parts of the experiments, all *F*s ≥ `r table_exp2$anov["Part", "N170_f"]`, all *p*s `r table_exp2$anov["Part", "N170_p"]` (see Table \@ref(tab:exp2-table)). Also as in Experiment 1, N400 amplitudes differed between the informed and the naive condition averaged across parts, *F*`r table_exp2$anov["Condition", "N400_df"]` = `r table_exp2$anov["Condition", "N400_f"]`, *p* `r table_exp2$anov["Condition", "N400_p"]`. The part × condition interaction was significant in the P1 component, *F*`r table_exp2$anov["Pt. × con.", "P1_df"]` = `r table_exp2$anov["Pt. × con.", "P1_f"]`, *p* = `r table_exp2$anov["Pt. × con.", "P1_p"]`, and in the N400 component, *F*`r table_exp2$anov["Pt. × con.", "N400_df"]` = `r table_exp2$anov["Pt. × con.", "N400_f"]`, *p* `r table_exp2$anov["Pt. × con.", "N400_p"]`, but not in the N170 component, *F*`r table_exp2$anov["Pt. × con.", "N170_df"]` = `r table_exp2$anov["Pt. × con.", "N170_f"]`, *p* = `r table_exp2$anov["Pt. × con.", "N170_p"]`.
 
-```{r exp2-plot, include=TRUE, fig.height=7.5, fig.cap = "(ref:figure-2-caption)"}
+```{r exp2-plot, include=TRUE, fig.height=7.5, fig.cap = "(ref:fig2_caption)"}
 # Create plot for Experiment 2
 plot_grid(
   #plot_bars(data = data_exp2, stars = stars_exp2, ymin = -2.5),
@@ -701,11 +822,11 @@ plot_grid(
   plot_legends_erps(direction = "horizontal"),
   nrow = 3, rel_heights = c(0.3, 6, 1.2), labels = NULL
 ) + # Add some lines (to separate the parts)
-  annotate(geom = "segment", x = 0.328, xend = 0.328, y = 0.15, yend = Inf, linetype = "dashed") +
-  annotate(geom = "segment", x = 0.672, xend = 0.672, y = 0.15, yend = Inf, linetype = "dashed")
+  annotate_line(x = 0.328, xend = 0.328, y = 0.15, yend = Inf) +
+  annotate_line(x = 0.672, xend = 0.672, y = 0.15, yend = Inf)
 ```
 
-(ref:figure-2-caption) Results of Experiment 2\smallskip
+(ref:fig2_caption) Results of Experiment 2\smallskip
 
 <!--
 
@@ -748,9 +869,9 @@ data_joint %>%
 ```{r joint-models, eval=rerun_models}
 # Contrast coding for experiment (2-1), condition (informed-naive), and part (2-1, 3-1)
 t(contrasts_experiment <- t(cbind(c("1" = -1, "2" = 1))))
-contrasts(data_joint_subs$experiment) <- MASS::ginv(contrasts_experiment)
-contrasts(data_joint_subs$condition) <- MASS::ginv(contrasts_condition)
-contrasts(data_joint_subs$part) <- MASS::ginv(contrasts_part)
+contrasts(data_joint_subs$experiment) <- ginv(contrasts_experiment)
+contrasts(data_joint_subs$condition) <- ginv(contrasts_condition)
+contrasts(data_joint_subs$part) <- ginv(contrasts_part)
 
 # New formula for LMMs
 form_joint <- buildmer::tabulate.formula(
@@ -813,7 +934,7 @@ As shown in Table \@ref(tab:joint-table), the main effect of part was significan
 
 Based on the part × condition interaction, we again computed follow-up comparisons between the semantically informed and the naive condition within each part, now collapsed across the data from both experiments (see Table \@ref(tab:joint-table) and Figure \@ref(fig:joint-plot)). This confirmed the absence of any reliable differences between the two conditions in the pre-insight part, all *p*s ≥ `r table_joint$conts["Pre-insight part", "N400_p"]`, the significant enhancement of the N170 component in the insight part, while the semantic information was obtained, *b* = `r table_joint$conts["Insight part", "N170_est"]` µV, *p* = `r table_joint$conts["Insight part", "N170_p"]`, the significant reduction of the N400 component in the insight part, while the semantic information was obtained, *b* = `r table_joint$conts["Insight part", "N400_est"]` µV, *p* `r table_joint$conts["Insight part", "N400_p"]`, and in the post-insight part, after the information had been obtained, *b* = `r table_joint$conts["Post-insight part", "N400_est"]` µV, *p* `r table_joint$conts["Post-insight part", "N400_p"]`, as well as the significant enhancement of the P1 component in the post-insight part, after the information had been obtained, *b* = `r table_joint$conts["Post-insight part", "P1_est"]` µV, *p* = `r table_joint$conts["Post-insight part", "P1_p"]`.
 
-(ref:figure-3-caption) Measured and Modeled ERP Amplitudes for Experiments 1 and 2 Combined\smallskip
+(ref:fig3_caption) Measured and Modeled ERP Amplitudes for Experiments 1 and 2 Combined\smallskip
 
 <!--
 
@@ -824,7 +945,7 @@ The violins and box plots show the distributions of the by-participant averaged 
 
 -->
 
-```{r joint-plot, include=TRUE, fig.height=8, fig.cap = "(ref:figure-3-caption)"}
+```{r joint-plot, include=TRUE, fig.height=8, fig.cap = "(ref:fig3_caption)"}
 # Create violin plot for Experiments 1 and 2 combined
 plot_grid(
   plot_headings(spacing = c(10, 2, 10, 2, 10)),
@@ -835,12 +956,12 @@ plot_grid(
   nrow = 1, rel_widths = c(8.5, 1.5)
 ) + # Add some lines (to separate the parts)
   annotate(
-    geom = "segment", x = 11 / 34 * 0.85, xend = 11 / 34 * 0.85,
-    y = -Inf, yend = Inf, linetype = "dashed"
+    "segment", x = 11 / 34 * 0.85, xend = 11 / 34 * 0.85,
+    y = -Inf, yend = Inf
   ) +
   annotate(
-    geom = "segment", x = 23 / 34 * 0.85, xend = 23 / 34 * 0.85,
-    y = -Inf, yend = Inf, linetype = "dashed"
+    "segment", x = 23 / 34 * 0.85, xend = 23 / 34 * 0.85,
+    y = -Inf, yend = Inf
   )
 ```
 
@@ -853,8 +974,8 @@ data_joint %>%
   droplevels() -> data_joint_control
 
 # Contrast coding for condition (informed-no_informed) and part (2-1, 3-1)
-contrasts(data_joint_control$condition) <- MASS::ginv(contrasts_condition)
-contrasts(data_joint_control$part) <- MASS::ginv(contrasts_part)
+contrasts(data_joint_control$condition) <- ginv(contrasts_condition)
+contrasts(data_joint_control$part) <- ginv(contrasts_part)
 
 # Apply the function to re-compute the joint models
 map(
@@ -891,7 +1012,7 @@ table_joint_control <- create_table(
 )
 ```
 
-One may raise concerns whether the modulation of the N170 component in the insight part genuinely reflects the semantically informed perception of the objects in the respective condition, or---as an alternative explanation---whether it may be driven by the objects in the other, semantically naive condition. Remember that these objects were preceded by non-matching keywords which were picked so that they could not be related to the visual features of the object and their configuration. Thus, the modulation of the ERP components in the insight part could be a mismatch response to those objects---reflecting, for example, the fact that the visual features of the object shown in Figure \@ref(fig:exp1-plot)A cannot be reconciled with the function of signaling messages. To preclude this alternative explanation, we repeated our analysis using a different baseline against which the objects in the semantically informed condition were contrasted. Instead of the naive condition (where objects were presented with non-matching keywords), we now used those objects which were presented with matching keywords (as in the informed condition), but which were excluded from the main analysis because participants indicated behaviorally that they did not understand the object they were seeing. Across both experiments, this was the case for `r scales::percent(stims_joint["Excl_informed"]/60, accuracy = 0.1)` of objects presented with matching keywords, as compared to `r scales::percent(stims_joint["Informed"]/60, accuracy = 0.1)` of objects which did indeed lead to semantically informed perception.[^1] Just as above, this control analysis revealed a robust N170 effect in the insight part, *b* = `r table_joint_control$conts["Insight part", "N170_est"]` µV, *p* `r table_joint_control$conts["Insight part", "N170_p"]`. Thus, this enhanced negativity seems to be a genuine marker of semantically informed perception, no matter if compared to objects presented with non-matching keywords or compared to objects presented with matching keywords on which participants failed to capitalize. Note that the reduction of the N400 component in the insight part also remained robust in this control analysis, *b* = `r table_joint_control$conts["Insight part", "N400_est"]` µV, *p* `r table_joint_control$conts["Insight part", "N400_p"]`.
+One may raise concerns whether the modulation of the N170 component in the insight part genuinely reflects the semantically informed perception of the objects in the respective condition, or---as an alternative explanation---whether it may be driven by the objects in the other, semantically naive condition. Remember that these objects were preceded by non-matching keywords which were picked so that they could not be related to the visual features of the object and their configuration. Thus, the modulation of the ERP components in the insight part could be a mismatch response to those objects---reflecting, for example, the fact that the visual features of the object shown in Figure \@ref(fig:exp1-plot)A cannot be reconciled with the function of signaling messages. To preclude this alternative explanation, we repeated our analysis using a different baseline against which the objects in the semantically informed condition were contrasted. Instead of the naive condition (where objects were presented with non-matching keywords), we now used those objects which were presented with matching keywords (as in the informed condition), but which were excluded from the main analysis because participants indicated behaviorally that they did not understand the object they were seeing. Across both experiments, this was the case for `r percent(stims_joint["Excl_informed"]/60, accuracy = 0.1)` of objects presented with matching keywords, as compared to `r percent(stims_joint["Informed"]/60, accuracy = 0.1)` of objects which did indeed lead to semantically informed perception.[^1] Just as above, this control analysis revealed a robust N170 effect in the insight part, *b* = `r table_joint_control$conts["Insight part", "N170_est"]` µV, *p* `r table_joint_control$conts["Insight part", "N170_p"]`. Thus, this enhanced negativity seems to be a genuine marker of semantically informed perception, no matter if compared to objects presented with non-matching keywords or compared to objects presented with matching keywords on which participants failed to capitalize. Note that the reduction of the N400 component in the insight part also remained robust in this control analysis, *b* = `r table_joint_control$conts["Insight part", "N400_est"]` µV, *p* `r table_joint_control$conts["Insight part", "N400_p"]`.
 
 [^1]: Note that these percentages do not add up to 100% because some objects were excluded from all analyses if participants indicated knowing these objects in the pre-insight part, before any keywords had been presented (see Method).
 
@@ -974,9 +1095,9 @@ read_tsv("data/processed/exp3-data.tsv", col_types = cols()) %>%
 
 # Define contrasts for position (inverted-upright), condition (informed-naive), and part (2-1, 3-1)
 t(contrasts_position <- t(cbind(c("Inverted" = 1, "Upright" = -1))))
-contrasts(data_exp3$position) <- MASS::ginv(contrasts_position)
-contrasts(data_exp3$condition) <- MASS::ginv(contrasts_condition)
-contrasts(data_exp3$part) <- MASS::ginv(contrasts_part)
+contrasts(data_exp3$position) <- ginv(contrasts_position)
+contrasts(data_exp3$condition) <- ginv(contrasts_condition)
+contrasts(data_exp3$part) <- ginv(contrasts_part)
 
 # Define new formula for LMMs
 formula_exp3 <- buildmer::tabulate.formula(

@@ -100,7 +100,7 @@ def preprocess(
     epochs = mne.Epochs(raw_filt, events, event_id, tmin, tmax, baseline, preload=True)
 
     # Read behavioral metadata
-    epochs.metadata = _read_log(fname_log, subject_id)
+    epochs.metadata = read_log(fname_log, subject_id)
 
     # Compute single trial mean amplitude for ERP components of interest
     for _, component in erp_components.iterrows():
@@ -158,7 +158,7 @@ def preprocess(
     del epochs_unf, evokeds_tfr, tfr
 
 
-def _read_log(fname_log=None, subject_id=None):
+def read_log(fname_log=None, subject_id=None):
     """
     Extracts the relevant information from a behavioral log file into a DataFrame.
     """

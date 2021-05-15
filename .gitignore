@@ -7,8 +7,12 @@
 .vscode/
 *.fif
 *.h5
+*evo.csv
+renv*
 analysis/export/
 code/__pycache__/
 code/tmp.py
-data/
+data/raw/
+data/processed_old/
+data/processed/
 docs/
