@@ -238,7 +238,7 @@ if (rerun_preprocessing) {
 }
 ```
 
-```{python, grand_averaging, eval=TRUE}
+```{python, grand_averaging, eval=rerun_preprocessing}
 from os import makedirs
 
 import numpy as np
@@ -324,7 +324,7 @@ if (!rerun_model_fitting) {
   # Compute models for dependent variables in parallel
   dvs <- c("logRT", "P1", "N170", "N400")
   n_cores <- min(length(dvs), availableCores())
-  plan("multisession", workers = n_cores)
+  plan("multicore", workers = n_cores)
   future_map(dvs, function(dv, dat = trials) {
 
     # Define model formula
@@ -338,7 +338,7 @@ if (!rerun_model_fitting) {
     specs <- pairwise ~ condition | part
 
     # Fit initial model
-    fit <- lmer(form, dat, REML = FALSE)
+    fit <- lmer(form, dat, REML = TRUE)
 
     # Refit using all available optimizers
     fits <- all_fit(fit, formula = form, data = dat)
@@ -346,9 +346,7 @@ if (!rerun_model_fitting) {
     # See which of the optimizers converged
     fits_converged <- keep(
       fits,
-      ~ .x@optinfo$conv$opt == 0 &
-        length(.x@optinfo$conv$lme4) == 0 &
-        length(.x@optinfo$warnings) == 0
+      ~ .x@optinfo$conv$opt == 0 & length(.x@optinfo$conv$lme4) == 0
     )
 
     # Find best model via logLik
@@ -538,6 +536,7 @@ In the insight part, half of the unfamiliar objects were presented with matching
 In the post-insight part, the unfamiliar objects were presented for a third time, again without the keywords (as in the pre-insight part). This allowed us to test if the semantic information had any lasting effects on the processing of the objects. As in the insight part, the N400 component remained significantly reduced during semantically informed as compared to naive perception, *b* = `r table_exp1$conts["Post-insight part", "N400_est"]` µV, *p* `r table_exp1$conts["Post-insight part", "N400_p"]`, whereas the effect in the N170 component did not reoccur, *b* = `r table_exp1$conts["Post-insight part", "N170_est"]` µV, *p* = `r table_exp1$conts["Post-insight part", "N170_p"]`. Instead, we now observed an even earlier modulation in the P1 component which was significantly enlarged (i.e., more positive) in response to objects for which semantically informed perception had taken place, *b* = `r table_exp1$conts["Post-insight part", "P1_est"]` µV, *p* = `r table_exp1$conts["Post-insight part", "P1_p"]`.
 
 ```{r, fig3, include=TRUE}
+# Read grand averages of evoked power
 evo_tfr_flat <- read_csv(fnames$evo_tfr_flat, col_types = cols(), progress = FALSE)
 evo_tfr_diff <- read_csv(fnames$evo_tfr_diff, col_types = cols(), progress = FALSE)
 
@@ -545,9 +544,10 @@ evo_tfr_diff <- read_csv(fnames$evo_tfr_diff, col_types = cols(), progress = FAL
 limits_power <- c(0, 2)
 
 # Time-frequency of interest based on visual inspect
+tfoi <- list(tmin = 150, tmax = 350, fmin = 14, fmax = 24)  # Beta or
 tfoi <- list(tmin = 200, tmax = 400, fmin = 34, fmax = 48)  # Gamma
-# tfoi <- list(tmin = 150, tmax = 350, fmin = 14, fmax = 24)  # Beta
 
+# Standard text format
 standard_text <- element_text(size = 10, color = "black", family = "Helvetica")
 
 plot_tfr_raster <- function(evo_tfr, limits, tmin, tmax, fmin, fmax, label) {

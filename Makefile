@@ -9,7 +9,6 @@ CONTAINER_TAG := $(DOCKER_USER)/$(PROJECT)
 # If DOCKER=TRUE, do stuff inside in the container
 ifeq ($(DOCKER),TRUE)
 	run := docker run \
-		-it \
 		--rm \
 		--volume $(HOST_PATH)/code:$(CONTAINER_PATH)/code \
 		--volume $(HOST_PATH)/data:$(CONTAINER_PATH)/data \
@@ -40,7 +39,6 @@ $(PROJECT).tar.gz:
 # Run an interactive RStudio session in the container
 interactive:
 	docker run \
-		-it \
 		--rm \
 		--volume $(HOST_PATH)/code:$(CONTAINER_PATH)/code \
 		--volume $(HOST_PATH)/data:$(CONTAINER_PATH)/data \
