@@ -1,5 +1,9 @@
 FROM alexenge/base_rstan:4.0.3
 
+# Create new project directory
+RUN mkdir ${HOME}/aha
+WORKDIR ${HOME}/aha
+
 # Copy files into the container
 COPY code/ code/
 COPY data/ data/
