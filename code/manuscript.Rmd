@@ -351,7 +351,6 @@ if (!rerun_model_fitting) {
         cl = cl,
         crit = "LRT",
         elim = function(logp) exp(logp) >= .20,
-        quiet = TRUE,
         calc.anova = TRUE,
         ddf = "Satterthwaite",
         REML = FALSE,
@@ -370,8 +369,8 @@ if (!rerun_model_fitting) {
         model = build@model,
         anova = build@anova,
         summary = build@summary,
-        means = em$emmeans,
-        contrasts = em$contrasts
+        means = as.data.frame(em$emmeans),
+        contrasts = as.data.frame(em$contrasts)
       )
     )
   }) %>%
@@ -404,7 +403,7 @@ mod_brm <- brm(
   chains = 4,
   # iter = 20000,
   # warmup = 2000,
-  cores = 4,
+  # cores = 4,
   backend = "cmdstanr"
 )
 
