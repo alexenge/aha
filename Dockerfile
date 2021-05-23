@@ -1,8 +1,9 @@
 FROM alexenge/base_rstan:4.0.3
 
 # Create new project directory
-RUN mkdir ${HOME}/aha
-WORKDIR ${HOME}/aha
+ENV PROJDIR="${HOME}/aha"
+RUN mkdir "${PROJDIR}"
+WORKDIR "${PROJDIR}"
 
 # Copy files into the container
 COPY code/ code/
@@ -21,5 +22,5 @@ RUN installGithub.r \
     && pip3 install --no-cache-dir -r requirements.txt
 
 # Switch back to default user
-RUN chown -R ${NB_USER} ${HOME}
-USER ${NB_USER}
+RUN chown -R "${NB_USER}" "${HOME}"
+USER "${NB_USER}"
