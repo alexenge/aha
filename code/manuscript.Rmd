@@ -64,16 +64,18 @@ header-includes:
 
 ```{r setup, include=FALSE}
 # Load packages
-library(emmeans)
 library(MASS)
-library(afex)
+library(lme4)
+library(buildmer)
+library(emmeans)
+library(brms)
+library(parallel)
 library(reticulate)
 library(papaja)
 library(cowplot)
 library(scales)
 library(tidyverse)
 library(magrittr)
-library(furrr)
 
 # Load custom helper functions and bibliography
 pp <- import_from_path("preprocessing", path = "code")
@@ -88,6 +90,9 @@ knitr::opts_chunk$set(
 # Re-run preprocessing and/or model fitting?
 rerun_preprocessing <- FALSE
 rerun_model_fitting <- TRUE
+
+# Number of CPU cores for parallel model fitting
+n_cores <- detectCores()
 
 # File names for easier I/O
 fnames <- list(
@@ -323,12 +328,10 @@ if (!rerun_model_fitting) {
 
   # Compute models for dependent variables in parallel
   dvs <- c("logRT", "P1", "N170", "N400")
-  n_cores <- min(length(dvs), availableCores())
-  plan("multicore", workers = n_cores)
-  future_map(dvs, function(dv, dat = trials) {
+  map(dvs, function(dv) {
 
     # Define model formula
-    form <- paste0(
+    formula_lme <- paste0(
       dv, " ~ part * condition +
         (part * condition | subject_id) +
         (part * condition | item_id)"
@@ -337,34 +340,38 @@ if (!rerun_model_fitting) {
     # Define follow-up comparisons
     specs <- pairwise ~ condition | part
 
-    # Fit initial model
-    fit <- lmer(form, dat, REML = TRUE)
-
-    # Refit using all available optimizers
-    fits <- all_fit(fit, formula = form, data = dat)
-
-    # See which of the optimizers converged
-    fits_converged <- keep(
-      fits,
-      ~ .x@optinfo$conv$opt == 0 & length(.x@optinfo$conv$lme4) == 0
+    # Automic model selection via likelihood ratio tests
+    # using an alpha level of .20 (see Matuschek et al., 2017, J Mem Lang)
+    cl <- makeCluster(n_cores)
+    build <- buildmer(
+      formula = formula_lme,
+      data = trials,
+      buildmerControl = buildmerControl(
+        direction = c("backward", "backward"),
+        cl = cl,
+        crit = "LRT",
+        elim = function(logp) exp(logp) >= .20,
+        quiet = TRUE,
+        calc.anova = TRUE,
+        ddf = "Satterthwaite",
+        REML = FALSE,
+      ),
+      control = lmerControl(optimizer = "bobyqa", optCtrl = list(maxfun = 1e6))
     )
-
-    # Find best model via logLik
-    logliks <- map(fits_converged, logLik)
-    fit_best <- fits[[which.max(logliks)]]
+    stopCluster(cl)
 
     # Compute follow-up comparisons
     emm_options(lmer.df = "Satterthwaite", lmerTest.limit = Inf)
-    em <- emmeans(fit_best, specs, infer = TRUE)
+    em <- emmeans(build@model, specs, infer = TRUE)
 
     # Return a list of relevant model outputs
     return(
       list(
-        fit = fit_best,
-        anova = anova(fit_best),
+        model = build@model,
+        anova = build@anova,
+        summary = build@summary,
         means = em$emmeans,
-        contrasts = em$contrasts,
-        all_fits = fits
+        contrasts = em$contrasts
       )
     )
   }) %>%
@@ -372,45 +379,33 @@ if (!rerun_model_fitting) {
     # Save
     set_names(dvs) %T>%
     saveRDS(fnames$models_freq) -> models_freq
-
-  # Stop the workers
-  future:::ClusterRegistry("stop")
 }
 
 please_stop_here()
 ```
 
-```{r bayes, eval=FALSE}
-library(brms)
-options(mc.cores = 6)
+```{r models_bayes, eval=FALSE}
+# Define model formula
+form <- P1 ~ part * condition +
+  (part * condition | subject_id) +
+  (part * condition | item_id)
 
-data_joint_subs %>%
-  filter(condition %in% c("Informed", "Naive")) %>%
-  droplevels() %>%
-  select(part, condition, participant, item, P1, N170, N400) %>%
-  na.omit() %>%
-  as.list() -> data_brm
-
-contrasts_condition <- t(cbind(c("Informed" = 1, "Naive" = -1)))
-contrasts_part <- t(cbind(c("I" = -1, "II" = 1, "III" = 0), c("I" = 0, "II" = -1, "III" = 1)))
-contrasts(data_brm$condition) <- ginv(contrasts_condition)
-contrasts(data_brm$part) <- ginv(contrasts_part)
-
-formula <- P1 ~ part / condition + (part / condition | participant) + (part / condition | item)
+# Default prior for slopes
 prior <- set_prior("cauchy(0, 0.707)", class = "b")
 
+# Fit Bayesian mixed model
 mod_brm <- brm(
-  formula = formula,
-  data = data_brm,
+  formula = form,
+  data = trials,
   family = gaussian(),
   prior = prior,
   sample_prior = "yes",
   save_pars = save_pars(all = TRUE),
   chains = 4,
-  iter = 20000,
-  warmup = 2000,
+  # iter = 20000,
+  # warmup = 2000,
   cores = 4,
-  control = list(adapt_delta = 0.9)
+  backend = "cmdstanr"
 )
 
 # mod_prior <- brm(formula = formula, data = data_brm, prior = prior, sample_prior = "only")
@@ -453,6 +448,7 @@ mod_brm_s <- brm(
 # Load montage and data
 montage <- read_csv(fnames$montage, col_types = cols())
 evokeds <- read_csv(fnames$evo_gavg, col_types = cols())
+models_freq <- readRDS(fnames$models_freq)
 
 # Create plot for Experiment 1
 plot_grid(
