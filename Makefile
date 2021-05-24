@@ -3,7 +3,7 @@ SHELL := bash
 DOCKER_USER := alexenge
 PROJECT := $(notdir $(CURDIR))
 HOST_PATH := $(CURDIR)
-CONTAINER_PATH := /home/rstudio
+CONTAINER_PATH := /home/rstudio/aha
 CONTAINER_TAG := $(DOCKER_USER)/$(PROJECT)
 
 # If DOCKER=TRUE, do stuff inside in the container
