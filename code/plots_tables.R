@@ -1,14 +1,56 @@
-####################################################################################################
+########################################################################################
 ## FUNCTIONS TO CREATE PLOTS AND TABLES ##
-####################################################################################################
+########################################################################################
 
-# Function to plot the trial structure
-plot_trials <- function() {
-  suppressMessages(require(magick))
-  color_informed <- viridisLite::viridis(1, begin = 0.1)
-  color_naive <- viridisLite::viridis(1, begin = 0.5)
-  ggplot() +
+# Function to create Figure 1
+plot_fig1 <- function(erp_components, evokeds, trials, models) {
+
+  # Define colors for conditions
+  colors <- list(
+    Informed = viridisLite::viridis(1, begin = 0.1),
+    Naive = viridisLite::viridis(1, begin = 0.5)
+  )
+
+  # Base object for split violin plots (kudos to https://stackoverflow.com/a/45614547)
+  GeomSplitViolin <- ggproto(
+    "GeomSplitViolin", GeomViolin,
+    draw_group = function(self, data, ..., draw_quantiles = NULL) {
+      data <- transform(data, xminv = x - violinwidth * (x - xmin), xmaxv = x + violinwidth * (xmax - x))
+      grp <- data[1, "group"]
+      newdata <- plyr::arrange(transform(data, x = if (grp %% 2 == 1) xminv else xmaxv), if (grp %% 2 == 1) y else -y)
+      newdata <- rbind(newdata[1, ], newdata, newdata[nrow(newdata), ], newdata[1, ])
+      newdata[c(1, nrow(newdata) - 1, nrow(newdata)), "x"] <- round(newdata[1, "x"])
+      if (length(draw_quantiles) > 0 & !scales::zero_range(range(data$y))) {
+        stopifnot(all(draw_quantiles >= 0), all(draw_quantiles <= 1))
+        quantiles <- ggplot2:::create_quantile_segment_frame(data, draw_quantiles)
+        aesthetics <- data[rep(1, nrow(quantiles)), setdiff(names(data), c("x", "y")), drop = FALSE]
+        aesthetics$alpha <- rep(1, nrow(quantiles))
+        both <- cbind(quantiles, aesthetics)
+        quantile_grob <- GeomPath$draw_panel(both, ...)
+        ggplot2:::ggname("geom_split_violin", grid::grobTree(GeomPolygon$draw_panel(newdata, ...), quantile_grob))
+      }
+      else {
+        ggplot2:::ggname("geom_split_violin", GeomPolygon$draw_panel(newdata, ...))
+      }
+    }
+  )
+
+  # Base function for split violin plots (kudos to https://stackoverflow.com/a/45614547)
+  geom_split_violin <- function(mapping = NULL, data = NULL, stat = "ydensity", position = "identity", ...,
+                                draw_quantiles = NULL, trim = TRUE, scale = "area", na.rm = FALSE,
+                                show.legend = NA, inherit.aes = TRUE) {
+    layer(
+      data = data, mapping = mapping, stat = stat, geom = GeomSplitViolin,
+      position = position, show.legend = show.legend, inherit.aes = inherit.aes,
+      params = list(trim = trim, scale = scale, draw_quantiles = draw_quantiles, na.rm = na.rm, ...)
+    )
+  }
+
+  # Trial structure
+  fig1a <- ggplot() +
     coord_cartesian(xlim = c(-100, 100), ylim = c(0, 100), expand = FALSE) +
+    theme_void() +
+    theme(aspect.ratio = 0.5) +
     ## PART II ##
     # Title
     annotate("text", x = 0, y = 97.2, label = "Insight part", size = 14 / .pt, family = "Helvetica", fontface = "bold") +
@@ -16,13 +58,13 @@ plot_trials <- function() {
     annotate("segment", x = -30, xend = 24, y = 79, yend = 85, arrow = arrow(length = unit(0.1, "inches"))) +
     # Squares
     annotate("rect", xmin = -37, xmax = -17, ymin = 55, ymax = 75, color = "black", fill = "white") +
-    annotate("rect", xmin = -19, xmax = 1, ymin = 45, ymax = 65, color = color_informed, fill = "white") +
-    annotate("rect", xmin = -19, xmax = 1, ymin = 69, ymax = 89, color = color_naive, fill = "white") +
+    annotate("rect", xmin = -19, xmax = 1, ymin = 45, ymax = 65, color = colors$Informed, fill = "white") +
+    annotate("rect", xmin = -19, xmax = 1, ymin = 69, ymax = 89, color = colors$Naive, fill = "white") +
     annotate("rect", xmin = -1, xmax = 19, ymin = 59, ymax = 79, color = "black", fill = "white") +
     annotate("rect", xmin = 17, xmax = 37, ymin = 61, ymax = 81, color = "black", fill = "white") +
     annotate("text", x = -27, y = 65.3, label = "+", size = 20 / .pt, family = "Helvetica") +
-    annotate("text", x = -9, y = 55, label = "potatoes\nmashing", size = 10 / .pt, family = "Helvetica", color = color_informed) +
-    annotate("text", x = -9, y = 79, label = "message\nsignaling", size = 10 / .pt, family = "Helvetica", color = color_naive) +
+    annotate("text", x = -9, y = 55, label = "potatoes\nmashing", size = 10 / .pt, family = "Helvetica", color = colors$Informed) +
+    annotate("text", x = -9, y = 79, label = "message\nsignaling", size = 10 / .pt, family = "Helvetica", color = colors$Naive) +
     annotate("text", x = 9, y = 67, label = "*", size = 30 / .pt, family = "Helvetica") +
     draw_image("misc/potato_masher.png", x = 18, y = 62, width = 18, height = 18) +
     # Timings
@@ -45,18 +87,18 @@ plot_trials <- function() {
     annotate("text", x = 12, y = 26, label = "C. \"I have rather\nno assumption\nwhat this is\"", size = 10 / .pt, family = "Helvetica", lineheight = 1) +
     annotate("text", x = 32, y = 26, label = "D. \"I don\'t\n know what\nthis is\"", size = 10 / .pt, family = "Helvetica", lineheight = 1) +
     # Conditions
-    annotate("segment", x = -32, y = 17, xend = -32, yend = 22, color = color_informed) +
-    annotate("segment", x = -12, y = 17, xend = -12, yend = 20, color = color_informed) +
-    annotate("segment", x = 12, y = 17, xend = 12, yend = 20, color = color_naive) +
-    annotate("segment", x = 32, y = 17, xend = 32, yend = 20, color = color_naive) +
-    annotate("segment", x = -32, y = 17, xend = -12, yend = 17, color = color_informed) +
-    annotate("segment", x = 12, y = 17, xend = 32, yend = 17, color = color_naive) +
-    annotate("segment", x = -22, y = 15, xend = -22, yend = 17, color = color_informed) +
-    annotate("segment", x = 22, y = 15, xend = 22, yend = 17, color = color_naive) +
-    annotate("text", x = -22, y = 13, label = "Informed condition", size = 10 / .pt, family = "Helvetica", fontface = "bold", color = color_informed) +
-    annotate("text", x = 22, y = 13, label = "Naive condition", size = 10 / .pt, family = "Helvetica", fontface = "bold", color = color_naive) +
-    annotate("text", x = -22, y = 7.9, label = "Matching keywords\nand response A or B", size = 10 / .pt, family = "Helvetica", color = color_informed, lineheight = 1) +
-    annotate("text", x = 22, y = 7.9, label = "Non-matching keywords\nand response C or D", size = 10 / .pt, family = "Helvetica", color = color_naive, lineheight = 1) +
+    annotate("segment", x = -32, y = 17, xend = -32, yend = 22, color = colors$Informed) +
+    annotate("segment", x = -12, y = 17, xend = -12, yend = 20, color = colors$Informed) +
+    annotate("segment", x = 12, y = 17, xend = 12, yend = 20, color = colors$Naive) +
+    annotate("segment", x = 32, y = 17, xend = 32, yend = 20, color = colors$Naive) +
+    annotate("segment", x = -32, y = 17, xend = -12, yend = 17, color = colors$Informed) +
+    annotate("segment", x = 12, y = 17, xend = 32, yend = 17, color = colors$Naive) +
+    annotate("segment", x = -22, y = 15, xend = -22, yend = 17, color = colors$Informed) +
+    annotate("segment", x = 22, y = 15, xend = 22, yend = 17, color = colors$Naive) +
+    annotate("text", x = -22, y = 13, label = "Informed condition", size = 10 / .pt, family = "Helvetica", fontface = "bold", color = colors$Informed) +
+    annotate("text", x = 22, y = 13, label = "Naive condition", size = 10 / .pt, family = "Helvetica", fontface = "bold", color = colors$Naive) +
+    annotate("text", x = -22, y = 7.9, label = "Matching keywords\nand response A or B", size = 10 / .pt, family = "Helvetica", color = colors$Informed, lineheight = 1) +
+    annotate("text", x = 22, y = 7.9, label = "Non-matching keywords\nand response C or D", size = 10 / .pt, family = "Helvetica", color = colors$Naive, lineheight = 1) +
     ## PART I ##
     # Title
     annotate("text", x = -72, y = 56, label = "Pre-insight part", size = 14 / .pt, family = "Helvetica", fontface = "bold") +
@@ -86,51 +128,48 @@ plot_trials <- function() {
     annotate("text", x = 63, y = 19, label = "0.5 s", size = 10 / .pt, family = "Helvetica") +
     annotate("text", x = 81, y = 19.3, label = "3 s or\nresponse", size = 10 / .pt, family = "Helvetica", lineheight = 1) +
     # Conditions
-    annotate("text", x = 72, y = 7.9, label = "Objects classified according\nto conditions in the insight part", size = 10 / .pt, family = "Helvetica", lineheight = 1) +
-    theme_void()
-}
+    annotate("text", x = 72, y = 7.9, label = "Objects classified according\nto conditions in the insight part", size = 10 / .pt, family = "Helvetica", lineheight = 1)
 
-# Function to plot ERP waveforms and topographies
-plot_erps <- function(erp_components, evokeds, models, montage) {
-  suppressWarnings(suppressMessages(
-    pmap(erp_components, function(name, tmin, tmax, roi) {
-      # Convert time window from s to ms
-      tmin <- tmin * 1000
-      tmax <- tmax * 1000
-      # N400 gets a different scale than P1 and N170
-      ymin <- ifelse(name == "N400", -3, -4)
-      # Loop through parts
-      parts <- map(c("I", "II", "III"), function(part) {
-        data_plot <- filter(evokeds, part == !!part & condition %in% c("Informed", "Naive"))
-        # Shade background depending on whether the effect is significant or not
-        asterisks <- models[[name]]$contrasts %>%
-          filter(part == !!part) %>%
-          mutate(asterisks = case_when(p.value < .001 ~ "***", p.value < .01 ~ "**", p.value < .05 ~ "*")) %>%
-          pull(asterisks)
-        xasterisks <- case_when(str_length(asterisks) == 1 ~ tmin + 11, str_length(asterisks) == 3 ~ tmin + 15)
-        if (is.na(asterisks)) {
-          shade <- annotate("rect", xmin = tmin, xmax = tmax, ymin = ymin + 0.1, ymax = ymin + 11.95, color = "black", fill = NA)
-        } else {
-          shade <- annotate("rect", xmin = tmin, xmax = tmax, ymin = ymin + 0.1, ymax = ymin + 11.95, color = "black", fill = "gray90")
-        }
-        # Plot waveform
-        wave <- ggplot(data = data_plot, aes(x = time, y = !!sym(name), color = condition)) +
-          shade +
-          annotate("text", label = asterisks, x = xasterisks, y = ymin + 11, size = 6, hjust = 0, family = "Helvetica") +
-          annotate("segment", x = -200, xend = 800, y = 0, yend = 0) +
-          annotate("segment", x = 0, xend = 0, y = ymin, yend = ymin + 12) +
-          annotate("segment", x = seq(-100, 700, 200), xend = seq(-100, 700, 200), y = -0.3, yend = 0) +
-          annotate("segment", x = -12, xend = 0, y = seq(-2, 8, 4), yend = seq(-2, 8, 4)) +
-          annotate("text", x = seq(-100, 700, 200), y = -0.9, label = seq(-100, 700, 200), size = 10 / .pt, family = "Helvetica") +
-          annotate("text", x = -20, y = seq(-2, 8, 4), label = seq(-2, 8, 4), size = 10 / .pt, family = "Helvetica", hjust = 1) +
-          annotate("text", x = 400, y = ymin + 0.8, label = "Time (ms)", size = 10 / .pt, family = "Helvetica", lineheight = 0.9) +
-          annotate("text", x = -100, y = 4, label = paste(name, "ampl.\n(µV)"), size = 10 / .pt, family = "Helvetica", angle = 90, lineheight = 0.9) +
-          geom_line() +
-          scale_color_viridis_d(begin = 0.1, end = 0.5) +
-          coord_cartesian(xlim = c(-200, 800), ylim = c(ymin, ymin + 14), expand = FALSE) +
-          theme_void() +
-          theme(legend.position = "none")
-        # Plot topography
+  # ERP results (waveforms, topographies, violin plots)
+  leg <- cbar <- NULL
+  fig1b <- pmap(erp_components, function(name, tmin, tmax, roi) {
+    # Convert time window from s to ms
+    tmin <- tmin * 1000
+    tmax <- tmax * 1000
+    # N400 gets a different scale than P1 and N170
+    ymin <- ifelse(name == "N400", -3, -4)
+    # Iterate over parts
+    parts <- map(c("I", "II", "III"), function(part) {
+      data_plot <- filter(evokeds, part == !!part & condition %in% c("Informed", "Naive") & time < 800)
+      # Shade background depending on whether the effect is significant or not
+      asterisks <- models[[name]]$contrasts %>%
+        filter(part == !!part) %>%
+        mutate(asterisks = case_when(p.value < .001 ~ "*\n*\n*", p.value < .01 ~ "*\n*", p.value < .05 ~ "*", TRUE ~ "")) %>%
+        pull(asterisks)
+      if (asterisks == "") {
+        shade <- annotate("rect", xmin = tmin, xmax = tmax, ymin = ymin + 0.1, ymax = ymin + 11.95, color = "black", fill = NA)
+      } else {
+        shade <- annotate("rect", xmin = tmin, xmax = tmax, ymin = ymin + 0.1, ymax = ymin + 11.95, color = "black", fill = "gray90")
+      }
+      # Create waveform
+      wave <- ggplot(data = data_plot, aes(x = time, y = !!sym(name), color = condition)) +
+        shade +
+        annotate("text", label = asterisks, x = tmin + 27.3, y = ymin + 11.69, size = 5, hjust = 0.5, vjust = 1, family = "Helvetica", lineheight = 0.32) +
+        annotate("segment", x = -200, xend = 800, y = 0, yend = 0) +
+        annotate("segment", x = 0, xend = 0, y = ymin, yend = ymin + 12) +
+        annotate("segment", x = seq(-100, 700, 200), xend = seq(-100, 700, 200), y = -0.3, yend = 0) +
+        annotate("segment", x = -12, xend = 0, y = seq(-2, 8, 4), yend = seq(-2, 8, 4)) +
+        annotate("text", x = seq(-100, 700, 200), y = -0.9, label = seq(-100, 700, 200), size = 10 / .pt, family = "Helvetica") +
+        annotate("text", x = -20, y = seq(-2, 8, 4), label = seq(-2, 8, 4), size = 10 / .pt, family = "Helvetica", hjust = 1) +
+        annotate("text", x = 400, y = ymin + 0.8, label = "Time (ms)", size = 10 / .pt, family = "Helvetica", lineheight = 0.9) +
+        annotate("text", x = -120, y = 5, label = paste(name, "ROI (µV)"), size = 10 / .pt, family = "Helvetica", angle = 90, lineheight = 0.9) +
+        geom_line() +
+        scale_color_viridis_d(begin = 0.1, end = 0.5) +
+        coord_cartesian(xlim = c(-200, 1400), ylim = c(ymin, ymin + 14), expand = FALSE) +
+        theme_void() +
+        theme(legend.position = "none")
+      # Create topography
+      suppressMessages(
         topo <- data_plot %>%
           filter(time >= tmin & time <= tmax) %>%
           group_by(condition) %>%
@@ -141,177 +180,99 @@ plot_erps <- function(erp_components, evokeds, models, montage) {
           inner_join(montage, by = "electrode") %>%
           eegUtils::topoplot(limits = c(-1, 1), palette = "viridis", contour = FALSE, highlights = roi, scaling = 0.1) +
           theme(legend.position = "none")
-        topo$layers[[3]]$aes_params$size <- topo$layers[[4]]$aes_params$size <- topo$layers[[5]]$aes_params$size <- 0.6
-        # Combine waveform and topography
-        wave + draw_plot(topo, width = 320, height = 9, x = 500, y = ymin + 6.4)
-      })
-      # Combine plots for the different parts
-      plot_grid(parts[[1]], NULL, parts[[2]], NULL, parts[[3]], nrow = 1, rel_widths = c(10, 1, 10, 1, 10))
-      # Combine plots for the different components
-    }) %>% plot_grid(plotlist = ., nrow = 3)
-  ))
-}
-
-# Function to create a combined legend and colorbar
-plot_legends_erps <- function(direction) {
-  if (direction == "vertical") {
-    mar <- margin(l = 12, r = 10, b = 6, t = 7)
-    vjust <- 3.5
-  }
-  else {
-    mar <- margin(l = 8, r = 12, b = 4, t = 6)
-    vjust <- 0.7
-  }
-  get_legend(
-    tibble(amplitude = c(-1, 0, 1), condition = c("Informed", "Naive", "Informed")) %>%
-      ggplot(aes(x = 0, y = 0, color = condition, fill = amplitude)) +
-      geom_line() +
-      geom_raster() +
-      labs(color = "Conditions", fill = "Informed - naive (µV)") +
-      scale_color_viridis_d(begin = 0.1, end = 0.5, guide = guide_legend(direction = "vertical", title.position = "top")) +
-      scale_fill_viridis_c(guide = guide_colorbar(direction = "horizontal", ticks = FALSE, title.position = "top", title.vjust = vjust)) +
-      theme(
-        legend.direction = direction,
-        legend.box = direction,
-        legend.box.background = element_rect(colour = "black", size = 0.5),
-        legend.box.margin = mar,
-        legend.background = element_blank(),
-        legend.title = element_text(family = "Helvetica", size = 10, face = "bold"),
-        legend.text = element_text(family = "Helvetica", size = 10),
-        legend.key = element_rect(fill = NA),
-        legend.key.width = unit(0.7, "cm"),
-        legend.key.height = unit(0.4, "cm"),
-        legend.spacing.x = unit(0.3, "cm")
       )
-  )
-}
-
-# Function to plot headings for Parts I, II, and III
-plot_headings <- function(spacing) {
-  plot_grid(
-    NULL,
-    ggplot() +
-      annotate("text", label = "Pre-insight part", x = 0, y = 0, size = 14 / .pt, family = "Helvetica", fontface = "bold") +
-      theme_void(),
-    NULL,
-    ggplot() +
-      annotate("text", label = "Insight part", x = 0, y = 0, size = 14 / .pt, family = "Helvetica", fontface = "bold") +
-      theme_void(),
-    NULL,
-    ggplot() +
-      annotate("text", label = "Post-insight part", x = 0, y = 0, size = 14 / .pt, family = "Helvetica", fontface = "bold") +
-      theme_void(),
-    nrow = 1, rel_widths = spacing
-  )
-}
-
-# Function for our custom violin plot (reusing code from to https://stackoverflow.com/a/45614547)
-plot_violins <- function(data, models) {
-  GeomSplitViolin <- ggproto(
-    "GeomSplitViolin", GeomViolin,
-    draw_group = function(self, data, ..., draw_quantiles = NULL) {
-      data <- transform(data, xminv = x - violinwidth * (x - xmin), xmaxv = x + violinwidth * (xmax - x))
-      grp <- data[1, "group"]
-      newdata <- plyr::arrange(transform(data, x = if (grp %% 2 == 1) xminv else xmaxv), if (grp %% 2 == 1) y else -y)
-      newdata <- rbind(newdata[1, ], newdata, newdata[nrow(newdata), ], newdata[1, ])
-      newdata[c(1, nrow(newdata) - 1, nrow(newdata)), "x"] <- round(newdata[1, "x"])
-      if (length(draw_quantiles) > 0 & !scales::zero_range(range(data$y))) {
-        stopifnot(all(draw_quantiles >= 0), all(draw_quantiles <= 1))
-        quantiles <- ggplot2:::create_quantile_segment_frame(data, draw_quantiles)
-        aesthetics <- data[rep(1, nrow(quantiles)), setdiff(names(data), c("x", "y")), drop = FALSE]
-        aesthetics$alpha <- rep(1, nrow(quantiles))
-        both <- cbind(quantiles, aesthetics)
-        quantile_grob <- GeomPath$draw_panel(both, ...)
-        ggplot2:::ggname("geom_split_violin", grid::grobTree(GeomPolygon$draw_panel(newdata, ...), quantile_grob))
-      }
-      else {
-        ggplot2:::ggname("geom_split_violin", GeomPolygon$draw_panel(newdata, ...))
-      }
-    }
-  )
-  geom_split_violin <- function(mapping = NULL, data = NULL, stat = "ydensity", position = "identity", ...,
-                                draw_quantiles = NULL, trim = TRUE, scale = "area", na.rm = FALSE,
-                                show.legend = NA, inherit.aes = TRUE) {
-    layer(
-      data = data, mapping = mapping, stat = stat, geom = GeomSplitViolin,
-      position = position, show.legend = show.legend, inherit.aes = inherit.aes,
-      params = list(trim = trim, scale = scale, draw_quantiles = draw_quantiles, na.rm = na.rm, ...)
-    )
-  }
-  suppressWarnings(suppressMessages(
-    parts <- map(c("I", "II", "III"), function(part) {
-      map(c("P1", "N170", "N400"), function(comp) {
-        modmeans <- models[[comp]]$means %>%
-          filter(part == !!part) %>%
-          rename(amplitude = emmean)
-        ymin <- case_when(comp == "P1" ~ -5, comp == "N170" ~ -11, comp == "N400" ~ -11)
-        asterisks <- models[[comp]]$contrasts %>%
-          filter(part == !!part) %>%
-          mutate(asterisks = case_when(p.value < .001 ~ "***", p.value < .01 ~ "**", p.value < .05 ~ "*")) %>%
-          pull(asterisks)
-        yastersisks <- case_when(
-          comp == "P1" ~ 17.6,
-          comp == "N170" ~ 10,
-          comp == "N400" & part == "II" ~ 9.7,
-          comp == "N400" & part == "III" ~ 8.9
+      topo$layers[[4]]$aes_params$size <- 0.5
+      topo$layers[[3]]$aes_params$size <- topo$layers[[5]]$aes_params$size <- 0.6
+      # Create violins
+      modmeans <- models[[name]]$means %>% filter(part == !!part)
+      ymin_violins <- case_when(name == "P1" ~ -5, name == "N170" ~ -11, name == "N400" ~ -9)
+      violins <- trials %>%
+        na.omit() %>%
+        filter(part == !!part) %>%
+        rename(dv = !!name) %>%
+        group_by(condition, subject_id) %>%
+        summarise(dv = mean(dv), .groups = "drop") %>%
+        ggplot(aes(x = 0, y = dv, color = "LMM mean\n± 95% CI", fill = condition)) +
+        geom_split_violin(trim = TRUE, color = NA) +
+        geom_boxplot(position = position_dodge(width = 1.1), width = 0.3, outlier.size = 0.6, color = "gray70") +
+        geom_pointrange(
+          data = modmeans,
+          aes(y = emmean, ymin = lower.CL, ymax = upper.CL),
+          position = position_dodge(width = 0.4),
+          size = 0.8,
+          fatten = 0.8
+        ) +
+        coord_cartesian(xlim = c(-0.6, 0.6), ylim = c(ymin_violins, ymin_violins + 24)) +
+        scale_x_continuous(breaks = NULL) +
+        scale_y_continuous(breaks = seq(ymin_violins, ymin_violins + 24, 6)) +
+        scale_fill_viridis_d(begin = 0.1, end = 0.5) +
+        scale_color_viridis_d(begin = 1) +
+        theme_classic() +
+        theme(
+          legend.position = "none",
+          axis.title = element_blank(),
+          axis.text.y = element_text(size = 10, color = "black", family = "Helvetica")
         )
-        data %>%
-          filter(part == !!part) %>%
-          rename(amplitude = !!comp) %>%
-          group_by(participant, part, condition) %>%
-          summarise(across(amplitude, mean), .groups = "drop") %>%
-          ggplot(aes(x = 0, y = amplitude, fill = condition)) +
-          annotate("text", x = 0, y = yastersisks, label = asterisks, size = 6, family = "Helvetica") +
-          geom_split_violin(trim = TRUE, color = "gray70") +
-          geom_boxplot(position = position_dodge(width = 0.8), width = 0.3, color = "gray70") +
-          geom_pointrange(
-            data = modmeans,
-            aes(ymin = lower.CL, ymax = upper.CL),
-            position = position_dodge(width = 0.25),
-            size = 0.4,
-            color = viridisLite::viridis(n = 1, begin = 1)
+      # Extract legend
+      get_legend(
+        violins +
+          guides(
+            fill = guide_legend(title = "Conditions", order = 1, override.aes = list(color = NA)),
+            color = guide_legend(title = NULL, order = 2)
           ) +
-          coord_cartesian(ylim = c(ymin, ymin + 25), xlim = c(-0.6, 0.6)) +
-          scale_x_continuous(breaks = c(-0.2, 0.2), labels = c("Informed", "Naive")) +
-          scale_y_continuous(breaks = seq(ymin, ymin + 25, 5)) +
-          ylab(paste(comp, "ampl. (µV)")) +
-          scale_fill_viridis_d(begin = 0.1, end = 0.5) +
-          theme_classic() +
           theme(
-            legend.position = "none",
-            axis.title.x = element_blank(),
-            axis.title.y = element_text(size = 10, color = "black", family = "Helvetica"),
-            axis.text = element_text(size = 10, color = "black", family = "Helvetica")
+            legend.position = "right",
+            legend.spacing = unit(0.01, "inches"),
+            legend.title = element_text(family = "Helvetica", size = 10, face = "bold"),
+            legend.text = element_text(family = "Helvetica", size = 10),
+            legend.key = element_rect(fill = "gray70", color = "white")
           )
-      }) %>% plot_grid(plotlist = ., align = "v", nrow = 3)
-    })
-  ))
-  plot_grid(parts[[1]], NULL, parts[[2]], NULL, parts[[3]], ncol = 5, rel_widths = c(10, 2, 10, 2, 10))
-}
-
-# Function for the legend for the violin plot
-plot_legends_violins <- function() {
-  get_legend(
-    tibble(Conditions = c("Informed", "Naive")) %>%
-      ggplot(aes(x = 0, y = 0, color = "LMM mean\n± 95% CI", fill = Conditions)) +
-      geom_raster() +
-      geom_pointrange(aes(ymin = -1, ymax = 1)) +
-      scale_fill_viridis_d(begin = 0.1, end = 0.5) +
-      scale_color_viridis_d(begin = 1) +
-      guides(
-        fill = guide_legend(override.aes = list(color = NA)),
-        color = guide_legend(title = NULL)
-      ) +
-      theme(
-        legend.box.background = element_rect(colour = "black", size = 0.5),
-        legend.box.margin = margin(l = 9, r = 9, b = 9, t = 7),
-        legend.background = element_blank(),
-        legend.spacing = unit(0.01, "inches"),
-        legend.title = element_text(family = "Helvetica", size = 10, face = "bold"),
-        legend.text = element_text(family = "Helvetica", size = 10),
-        legend.key = element_rect(fill = "gray70")
+      ) ->> leg
+      # Extract colorbar
+      suppressWarnings(
+        get_legend(
+          topo +
+            # scale_fill_continuous(breaks = c(-1, 0, 1)) +
+            guides(
+              fill = guide_colorbar(
+                title.hjust = 0.5,
+                title = "\u0394 (informed - naive)\nampl. (µV)",
+                title.position = "left",
+                barheight = 6.5,
+                ticks = FALSE
+              )
+            ) +
+            theme(
+              legend.position = "right",
+              legend.title = element_text(size = 10, angle = 90, family = "Helvetica", face = "bold"),
+              legend.text = element_text(size = 10, family = "Helvetica"),
+            )
+        ) ->> cbar
       )
-  )
+      # Combine waveform, topography, and violins
+      wave +
+        draw_plot(violins, width = 590, height = 13.1, x = 810, y = ymin - 0.5) +
+        draw_plot(topo, width = 400, height = 14, x = 500, y = ymin + 3)
+    })
+    # Combine plots for the different parts (= formint a single row)
+    plot_grid(parts[[1]], NULL, parts[[2]], NULL, parts[[3]], nrow = 1, rel_widths = c(10, 0.5, 10, 0.5, 10))
+    # Combine plots for the different components (= forming a components x parts matrix)
+  }) %>% plot_grid(plotlist = ., nrow = 3)
+
+  # Combine evrything
+  plot_grid(fig1a, fig1b, nrow = 2, labels = "AUTO", label_fontfamily = "Helvetica", label_y = c(1, 1.03)) +
+    
+    # Add some lines to separate the three parts
+    annotate("segment", x = 0.327, xend = 0.327, y = -Inf, yend = 0.48) +
+    annotate("segment", x = 0.667, xend = 0.667, y = -Inf, yend = 0.48) +
+    annotate("segment", x = 0.327, xend = 0.272, y = 0.48, yend = 0.55) +
+    annotate("segment", x = 0.667, xend = 0.728, y = 0.48, yend = 0.55) +
+    annotate("segment", x = 0.272, xend = 0.272, y = 0.55, yend = Inf) +
+    annotate("segment", x = 0.728, xend = 0.728, y = 0.55, yend = Inf) +
+    
+    # Add legend and colorbar
+    draw_plot(leg, x = 0.73, y = 0.82, width = 0.2, height = 0.2) +
+    draw_plot(cbar, x = 0.85, y = 0.82, width = 0.2, height = 0.2)
 }
 
 # Function to print an ANOVA-style table
@@ -400,9 +361,6 @@ create_table <- function(models, stub_anova, stub_contrasts, caption, note) {
     cat()
   return(list("anov" = anov, "conts" = conts))
 }
-
-# Small helper function to draw a dashed line
-annotate_line <- function(x, xend, y, yend) annotate("segment", x = x, xend = xend, y = y, yend = yend, linetype = "dashed")
 
 # # Old function without t-values and performance measures
 # create_table <- function(models, stub_anova, stub_contrasts, caption, note) {

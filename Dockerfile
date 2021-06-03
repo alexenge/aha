@@ -19,7 +19,14 @@ USER root
 RUN installGithub.r \
         craddm/eegUtils@01c939f2 \
     # Install Python packages
-    && pip3 install --no-cache-dir -r requirements.txt
+    && pip3 install --no-cache-dir -r requirements.txt \
+    # Install groupmne
+    && pip3 install --no-cache-dir mutar==0.0.1 \
+    && cd "${HOME}" \
+    && git clone https://github.com/hichamjanati/groupmne \
+    && cd groupmne \
+    && python setup.py develop \
+    && cd "${PROJDIR}"
 
 # Switch back to default user
 RUN chown -R "${NB_USER}" "${HOME}"

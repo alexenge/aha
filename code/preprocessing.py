@@ -18,6 +18,7 @@ from os import makedirs, removedirs
 import mne
 import numpy as np
 import pandas as pd
+from mne import write_evokeds
 from mne.channels import combine_channels, make_standard_montage
 from mne.io import read_raw_brainvision
 from mne.preprocessing import ICA
@@ -122,18 +123,22 @@ def preprocess(
     epochs.metadata.to_csv(prefix + "trials.csv", float_format="%.3f", index=False)
 
     # Compute evoked potentials
-    evokeds = _evokeds_df_from_epochs(epochs, average_by)
-    evokeds.to_csv(prefix + "evo.csv", float_format="%.3f", index=False)
+    evokeds_list, evokeds_df = _evokeds_df_from_epochs(epochs, average_by)
+    write_evokeds(prefix + "ave.fif", evokeds_list)
+    evokeds_df.to_csv(prefix + "ave.csv", float_format="%.3f", index=False)
 
     # Create unfiltered epochs for time-frequency analysis
-    epochs_unf = mne.Epochs(raw, events, event_id, tmin, tmax, baseline, preload=True)
+    tmin, tmax = -1.0, 1.0
+    epochs_unf = mne.Epochs(
+        raw, events, event_id, tmin, tmax, baseline=None, preload=True
+    )
     epochs_unf.metadata = metadata_backup
     if tfr_equalize is not None:
         epochs_unf = epochs_unf[tfr_equalize]
         epochs_unf.equalize_event_counts()
     if tfr_resample is not None:
         epochs_unf.resample(tfr_resample)
-    del epochs, evokeds, raw, raw_filt, raw_filt_ica
+    del epochs, evokeds_list, evokeds_df, raw, raw_filt, raw_filt_ica
 
     # Compute single trial power
     tfr = tfr_morlet(
@@ -144,6 +149,7 @@ def preprocess(
         return_itc=False,
         average=False,
     )
+    baseline = (-0.9, -0.6)
     tfr.apply_baseline(baseline, mode="percent")
 
     # Reduce size and save
@@ -153,9 +159,9 @@ def preprocess(
     tfr.save(prefix + "tfr.h5")
 
     # Compute evoked power
-    evokeds_tfr = _evokeds_df_from_epochs(tfr, average_by)
-    evokeds_tfr.to_csv(prefix + "tfr-evo.csv", float_format="%.3f", index=False)
-    del epochs_unf, evokeds_tfr, tfr
+    _, evokeds_tfr_df = _evokeds_df_from_epochs(tfr, average_by)
+    evokeds_tfr_df.to_csv(prefix + "tfr-ave.csv", float_format="%.3f", index=False)
+    del epochs_unf, evokeds_tfr_df, tfr
 
 
 def read_log(fname_log=None, subject_id=None):
@@ -203,6 +209,7 @@ def _single_trial_erps_from_epochs(epochs, name, tmin, tmax, roi):
     roi_dict = {name: mne.pick_channels(epochs.ch_names, roi)}
     epochs_roi = combine_channels(epochs, roi_dict)
     epochs.add_channels([epochs_roi], force_update_info=True)
+    epochs.set_channel_types({name: "misc"})
 
     # Extract mean amplitudes by averaging across the relevant time window
     epochs_roi.crop(tmin, tmax)
@@ -224,28 +231,35 @@ def _evokeds_df_from_epochs(epochs, average_by):
     # Get unique combinations of conditions
     conditions = epochs.metadata[average_by].drop_duplicates()
 
-    # Create a list of evoked DataFrames for each condition
+    # Prepare emtpy lists
+    evokeds_list = list()
     evokeds_dfs = list()
+
+    # Compute evoked averages for each condition
     for _, condition in conditions.iterrows():
 
-        # Convert current condition to query for extracting epochs
+        # Convert current condition to query for extracting the relevant epochs
         condition = pd.DataFrame({"value": condition})
         condition["key"] = condition.index
         condition["query"] = condition["key"] + " == '" + condition["value"] + "'"
         query = condition["query"].to_list()
         query = " & ".join(query)
 
-        # Average epochs belonging to the current condition
-        evokeds = epochs[query].average()
+        # Average epochs belonging to this condition
+        evokeds = epochs[query].average(picks=["eeg", "misc"])
+        evokeds.comment = query
 
-        # Convert to DataFrame and append condition columns
+        # Convert to DataFrame, adding condition info
         evokeds_df = evokeds.to_data_frame()
         condition_df = pd.concat([condition[["value"]].transpose()] * len(evokeds_df))
         condition_df.reset_index(inplace=True, drop=True)
         evokeds_df = pd.concat([condition_df, evokeds_df], axis=1)
 
-        # Add to the list
+        # Add current condition to the lists
+        evokeds_list.append(evokeds)
         evokeds_dfs.append(evokeds_df)
 
-    # Concatenate into one big DataFrame
-    return pd.concat(evokeds_dfs)
+    # Concatenate the list of DataFrames into one big one
+    evoked_df = pd.concat(evokeds_dfs)
+
+    return evokeds_list, evoked_df
