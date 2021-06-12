@@ -90,7 +90,7 @@ knitr::opts_chunk$set(
 
 # Re-run preprocessing and/or model fitting?
 rerun_preprocessing <- TRUE
-rerun_model_fitting <- FALSE
+rerun_model_fitting <- TRUE
 
 # Number of CPU cores for parallel model fitting
 n_cores <- detectCores()
@@ -207,6 +207,7 @@ if (rerun_preprocessing) {
       reject = dict(eeg = 200e-6),
       erp_components = erp_components,
       average_by = c("part", "condition", "subject_id"),
+      tfr_baseline = tuple(-0.3, -0.1),
       tfr_equalize = "condition == ['Informed', 'Naive']",
       tfr_resample = py_none(),
       tfr_freqs = tfr_freqs,
@@ -565,7 +566,7 @@ evo_tfr_flat <- read_csv(fnames$evo_tfr_flat, col_types = cols(), progress = FAL
 evo_tfr_diff <- read_csv(fnames$evo_tfr_diff, col_types = cols(), progress = FALSE)
 
 # Scaling of power in all plots
-limits_power <- c(0, 2)
+limits_power <- c(0, 0.5)
 
 # Time-frequency of interest based on visual inspect
 tfoi <- list(tmin = 150, tmax = 350, fmin = 14, fmax = 24)  # Beta or

@@ -12,17 +12,17 @@ EEG power at a pre-specified range of frequencies.
 
 """
 
-from glob import glob
-from os import makedirs, removedirs
+from os import makedirs
 
 import mne
 import numpy as np
 import pandas as pd
-from mne import write_evokeds
 from mne.channels import combine_channels, make_standard_montage
+from mne.epochs import Epochs
 from mne.io import read_raw_brainvision
 from mne.preprocessing import ICA
 from mne.time_frequency import tfr_morlet
+from mne.time_frequency.tfr import EpochsTFR
 
 
 def preprocess(
@@ -46,6 +46,7 @@ def preprocess(
     erp_components=None,
     reject={"eeg": 200e-6},
     average_by=None,
+    tfr_baseline=None,
     tfr_equalize=None,
     tfr_resample=None,
     tfr_freqs=None,
@@ -98,7 +99,7 @@ def preprocess(
 
     # Epoching and baseline correction
     events, _ = mne.events_from_annotations(raw, verbose=False)
-    epochs = mne.Epochs(raw_filt, events, event_id, tmin, tmax, baseline, preload=True)
+    epochs = Epochs(raw_filt, events, event_id, tmin, tmax, baseline, preload=True)
 
     # Read behavioral metadata
     epochs.metadata = read_log(fname_log, subject_id)
@@ -117,6 +118,10 @@ def preprocess(
     metadata_backup = epochs.metadata
     epochs.drop_bad(reject=reject)
 
+    # Retrieve indices of good epochs
+    good_epochs = [x for x in epochs.drop_log if not x == ("IGNORED",)]
+    good_epochs = [i for i, x in enumerate(good_epochs) if x == ()]
+
     # Save epochs and trials to output folder
     prefix = output_dir + "/" + subject_id + "_"
     epochs.save(prefix + "epo.fif")
@@ -124,15 +129,17 @@ def preprocess(
 
     # Compute evoked potentials
     evokeds_list, evokeds_df = _evokeds_df_from_epochs(epochs, average_by)
-    write_evokeds(prefix + "ave.fif", evokeds_list)
+    mne.write_evokeds(prefix + "ave.fif", evokeds_list)
     evokeds_df.to_csv(prefix + "ave.csv", float_format="%.3f", index=False)
 
     # Create unfiltered epochs for time-frequency analysis
-    tmin, tmax = -1.0, 1.0
-    epochs_unf = mne.Epochs(
-        raw, events, event_id, tmin, tmax, baseline=None, preload=True
-    )
+    epochs_unf = Epochs(raw, events, event_id, tmin, tmax, baseline=None, preload=True)
     epochs_unf.metadata = metadata_backup
+
+    # Select only good epochs epochs
+    epochs_unf[good_epochs]
+
+    # Equalize trial count and downsample if requested
     if tfr_equalize is not None:
         epochs_unf = epochs_unf[tfr_equalize]
         epochs_unf.equalize_event_counts()
@@ -149,13 +156,12 @@ def preprocess(
         return_itc=False,
         average=False,
     )
-    baseline = (-0.9, -0.6)
-    tfr.apply_baseline(baseline, mode="percent")
+    tfr.apply_baseline(tfr_baseline, mode="percent")
 
     # Reduce size and save
     if tfr_crop is not None:
         tfr.crop(*tfr_crop)
-        tfr.data = np.float32(tfr.data)
+    tfr.data = np.float32(tfr.data)
     tfr.save(prefix + "tfr.h5")
 
     # Compute evoked power
@@ -246,7 +252,10 @@ def _evokeds_df_from_epochs(epochs, average_by):
         query = " & ".join(query)
 
         # Average epochs belonging to this condition
-        evokeds = epochs[query].average(picks=["eeg", "misc"])
+        if isinstance(epochs, Epochs):
+            evokeds = epochs[query].average(picks=["eeg", "misc"])
+        elif isinstance(epochs, EpochsTFR):
+            evokeds = epochs[query].average()
         evokeds.comment = query
 
         # Convert to DataFrame, adding condition info
