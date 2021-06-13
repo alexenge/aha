@@ -137,7 +137,7 @@ def preprocess(
     epochs_unf.metadata = metadata_backup
 
     # Select only good epochs epochs
-    epochs_unf[good_epochs]
+    epochs_unf = epochs_unf[good_epochs]
 
     # Equalize trial count and downsample if requested
     if tfr_equalize is not None:

@@ -99,9 +99,9 @@ n_cores <- detectCores()
 fnames <- list(
   montage = "results/montage.csv",
   objects_per_condition = "results/obj-per-cond.csv",
-  evo_gavg = "results/evo_gavg.csv",
-  evo_tfr_flat = "results/evo-tfr_flat.csv",
-  evo_tfr_diff = "results/evo-tfr_diff.csv",
+  ave_grand = "results/ave_grand.csv",
+  ave_tfr_flat = "results/ave-tfr_flat.csv",
+  ave_tfr_diff = "results/ave-tfr_diff.csv",
   models_lme = "results/models_lme.RDS"
 )
 ```
@@ -253,44 +253,44 @@ import pandas as pd
 makedirs("data/processed", exist_ok=True)
 
 # Read evoked *potentials* for all subjects
-fname_evo_tfr = ["data/preprocessed/" + sub + "_ave.csv" for sub in r.subject_id]
-evo = [pd.read_csv(fname) for fname in fname_evo_tfr]
+fname_ave_tfr = ["data/preprocessed/" + sub + "_ave.csv" for sub in r.subject_id]
+evo = [pd.read_csv(fname) for fname in fname_ave_tfr]
 evo = pd.concat(evo)
 
 # Average across subjects
 id_vars = ["part", "condition", "time"]
 evo = evo.groupby(id_vars, as_index=False).mean()
-evo.to_csv(r.fnames["evo_gavg"], float_format="%.3f", index=False)
+evo.to_csv(r.fnames["ave_grand"], float_format="%.3f", index=False)
 
 # Read evoked *power* for all subjects
-fname_evo_tfr = ["data/preprocessed/" + sub + "_tfr-ave.csv" for sub in r.subject_id]
-evo_tfr = [pd.read_csv(fname) for fname in fname_evo_tfr]
-evo_tfr = pd.concat(evo_tfr)
+fname_ave_tfr = ["data/preprocessed/" + sub + "_tfr-ave.csv" for sub in r.subject_id]
+ave_tfr = [pd.read_csv(fname) for fname in fname_ave_tfr]
+ave_tfr = pd.concat(ave_tfr)
 
 # Subject 18 is weird!
-evo_tfr = evo_tfr[evo_tfr["subject_id"] != "sub-18"]
+ave_tfr = ave_tfr[ave_tfr["subject_id"] != "sub-18"]
 
 # Compute difference in power between conditions
 id_vars = ["part", "condition", "subject_id", "time", "freq"]
-electrodes = [col for col in evo_tfr.columns if (col not in id_vars)]
-evo_tfr_diff = (
-    evo_tfr.query("condition == 'Informed'")[electrodes]
-    - evo_tfr.query("condition == 'Naive'")[electrodes].values
+electrodes = [col for col in ave_tfr.columns if (col not in id_vars)]
+ave_tfr_diff = (
+    ave_tfr.query("condition == 'Informed'")[electrodes]
+    - ave_tfr.query("condition == 'Naive'")[electrodes].values
 )
-evo_tfr_diff[id_vars] = evo_tfr.query("condition == 'Informed'")[id_vars]
+ave_tfr_diff[id_vars] = ave_tfr.query("condition == 'Informed'")[id_vars]
 
 # Compute flat average across conditions
 id_vars.remove("condition")
-evo_tfr_flat = evo_tfr.groupby(id_vars, as_index=False).mean()
+ave_tfr_flat = ave_tfr.groupby(id_vars, as_index=False).mean()
 
 # Average across subjects and save
 id_vars.remove("subject_id")
-dfs = [evo_tfr_flat, evo_tfr_diff]
-fnames_tfr = [r.fnames["evo_tfr_flat"], r.fnames["evo_tfr_diff"]]
+dfs = [ave_tfr_flat, ave_tfr_diff]
+fnames_tfr = [r.fnames["ave_tfr_flat"], r.fnames["ave_tfr_diff"]]
 for df, fname in zip(dfs, fnames_tfr):
     df = df.groupby(id_vars, as_index=False).mean()
     df.to_csv(fname, float_format="%.3f", index=False)
-del df, dfs, evo, evo_tfr, evo_tfr_diff, evo_tfr_flat
+del df, dfs, evo, ave_tfr, ave_tfr_diff, ave_tfr_flat
 ```
 
 ```{r, models_lme}
@@ -491,7 +491,7 @@ mod_brm_s <- brm(
 ```{r fig1, include=TRUE, fig.height=11, fig.cap = "(ref:fig1_caption)"}
 # Load montage and evoked data
 montage <- read_csv(fnames$montage, col_types = cols())
-evokeds <- read_csv(fnames$evo_gavg, col_types = cols())
+evokeds <- read_csv(fnames$ave_grand, col_types = cols())
 
 # Create plot for Experiment 1
 plot_fig1(erp_components, evokeds, trials, models_lme)
@@ -562,8 +562,8 @@ In the post-insight part, the unfamiliar objects were presented for a third time
 
 ```{r, fig3, include=TRUE}
 # Read grand averages of evoked power
-evo_tfr_flat <- read_csv(fnames$evo_tfr_flat, col_types = cols(), progress = FALSE)
-evo_tfr_diff <- read_csv(fnames$evo_tfr_diff, col_types = cols(), progress = FALSE)
+ave_tfr_flat <- read_csv(fnames$ave_tfr_flat, col_types = cols(), progress = FALSE)
+ave_tfr_diff <- read_csv(fnames$ave_tfr_diff, col_types = cols(), progress = FALSE)
 
 # Scaling of power in all plots
 limits_power <- c(0, 0.5)
@@ -575,9 +575,9 @@ tfoi <- list(tmin = 200, tmax = 400, fmin = 34, fmax = 48)  # Gamma
 # Standard text format
 standard_text <- element_text(size = 10, color = "black", family = "Helvetica")
 
-plot_tfr_raster <- function(evo_tfr, limits, tmin, tmax, fmin, fmax, label) {
+plot_tfr_raster <- function(ave_tfr, limits, tmin, tmax, fmin, fmax, label) {
   # Average across electrodes
-  evo_tfr %>%
+  ave_tfr %>%
     pivot_longer(-c(part, time, freq), names_to = "electrode", values_to = "power") %>%
     group_by(part, time, freq) %>%
     summarise(power = mean(power), .groups = "drop") %>%
@@ -631,9 +631,9 @@ plot_tfr_raster <- function(evo_tfr, limits, tmin, tmax, fmin, fmax, label) {
   plot_grid(plotlist = plotlist, nrow = 1)
 }
 
-plot_tfr_topo <- function(evo_tfr, limits, tmin, tmax, fmin, fmax, legend) {
+plot_tfr_topo <- function(ave_tfr, limits, tmin, tmax, fmin, fmax, legend) {
   # Average across times and frequencies of interest
-  evo_tfr_diff %>%
+  ave_tfr_diff %>%
     # Select time window and frequencies of interest
     filter(time >= tmin & time <= tmax & freq >= fmin & freq <= fmax) %>%
     # Convert to long format
@@ -671,21 +671,21 @@ plot_grid(
   plot_headings(spacing = c(1, 7, 1, 7, 1, 7)),
   do.call(
     plot_tfr_raster, c(tfoi, list(
-      evo_tfr = evo_tfr_flat,
+      ave_tfr = ave_tfr_flat,
       limits = limits_power,
       label = "All channels,\nall conditions"
     ))
   ),
   do.call(
     plot_tfr_raster, c(tfoi, list(
-      evo_tfr = evo_tfr_diff,
+      ave_tfr = ave_tfr_diff,
       limits = limits_power,
       label = "All channels,\n\u0394 (informed - naive)"
     ))
   ),
   do.call(
     plot_tfr_topo, c(tfoi, list(
-      evo_tfr = evo_tfr_diff,
+      ave_tfr = ave_tfr_diff,
       limits = limits_power,
       legend = current_legend))
   ),
