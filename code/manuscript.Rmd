@@ -79,7 +79,6 @@ library(tidyverse)
 library(magrittr)
 
 # Load custom helper functions and bibliography
-pp <- import_from_path("preprocessing", path = "code")
 source("code/plots_tables.R")
 r_refs("misc/bibliography.bib")
 
@@ -89,8 +88,8 @@ knitr::opts_chunk$set(
 )
 
 # Re-run preprocessing and/or model fitting?
-rerun_preprocessing <- TRUE
-rerun_model_fitting <- TRUE
+rerun_preprocessing <- FALSE
+rerun_model_fitting <- FALSE
 
 # Number of CPU cores for parallel model fitting
 n_cores <- detectCores()
@@ -102,7 +101,10 @@ fnames <- list(
   ave_grand = "results/ave_grand.csv",
   ave_tfr_flat = "results/ave-tfr_flat.csv",
   ave_tfr_diff = "results/ave-tfr_diff.csv",
-  models_lme = "results/models_lme.RDS"
+  models_lme = "results/models_lme.RDS",
+  models_brm = paste0("results/model_brm_", c("RT", "P1", "N170", "N400"), ".RDS") %>%
+    set_names(c("RT", "P1", "N170", "N400")),
+  model_brm_prior = "results/model_brm_prior.RDS"
 )
 ```
 
@@ -130,7 +132,7 @@ All the previously mentioned studies have in common that they investigated the e
 
 The first question is if we can detect any electrophysiological correlates of *semantic insight*, that is, the critical presentation during which an understanding of the previously unfamiliar object is happening (instead of asking if this understanding leads to differential effects in an orthogonal task later on). The second question is how much learning is actually necessary before reliable top-down effects of knowledge on ERP amplitudes can be obtained: Does it actually take dozens of repetitions per object or may a single exposure to the object together with the relevant semantic information be enough? The third and closely related question is about the nature of the effects of knowledge on perception: Are they reflecting genuine top-down effects of the semantic system altering perception online (while the object is being perceived), or do they merely reflect the (re-)activation of stored representations of the objects which have been altered over the course of the learning process? By measuring the ERPs before, during, and after participants received semantic hints about unfamiliar objects, we were able to provide tentative answers to all three of these questions.
 
-In the two experiments subsequently reported, participants were presented with real-world objects that were presumed to be unfamiliar to most of them. They first viewed each of these objects without any semantic information. This first part served as a naive baseline to rule out that ERPs would differ in response to the objects based solely on low-level visual differences. Next, participants viewed each unfamiliar object for a second time, now preceded by verbal keywords. These keywords could either be matching the typical function of the object, thus making it possible for participants to understand what kind of object they were viewing, or they could be non-matching by describing the function of a different object, thus keeping the perception of the object semantically naive. During this second part, we were able to measure the online influence of semantic insight on object-evoked ERPs as it happened. Finally, the objects were presented for a third time (without keywords, as in the first part) to investigate downstream effects of having acquired semantic knowledge about them---thereby mimicking previous studies [e.g., @abdelrahman2008; @samaha2018; @weller2019]. In all three parts, we examined the influence of semantic information on ERPs associated with lower-level visual perception (P1 component, 100--150 ms), higher-level visual perception (N170 component, 150--200 ms), and semantic processing (N400 component, 400--700 ms).
+In this experiment, participants were presented with real-world objects that were presumed to be unfamiliar to most of them. They first viewed each of these objects without any semantic information. This first part served as a naive baseline to rule out that ERPs would differ in response to the objects based solely on low-level visual differences. Next, participants viewed each unfamiliar object for a second time, now preceded by verbal keywords. These keywords could either be matching the typical function of the object, thus making it possible for participants to understand what kind of object they were viewing, or they could be non-matching by describing the function of a different object, thus keeping the perception of the object semantically naive. During this second part, we were able to measure the online influence of semantic insight on object-evoked ERPs as it happened. Finally, the objects were presented for a third time (without keywords, as in the first part) to investigate downstream effects of having acquired semantic knowledge about them---thereby mimicking previous studies [e.g., @abdelrahman2008; @samaha2018; @weller2019]. In all three parts, we examined the influence of semantic information on ERPs associated with lower-level visual perception (P1 component, 100--150 ms), higher-level visual perception (N170 component, 150--200 ms), and semantic processing (N400 component, 400--700 ms).
 
 # Experiment 1
 
@@ -138,17 +140,17 @@ In the two experiments subsequently reported, participants were presented with r
 
 ### Participants
 
-Participants for Experiment 1 were 24 German native speakers (13 female, 11 male) with a mean age of 24 years (range 18 to 31) and no history of psychological disorder or treatment. No a priori power analysis was carried out and the sample size was chosen in line with previous EEG studies on object processing in our lab. All participants were right-handed according to the Edinburgh inventory [@oldfield1971] and reported normal or corrected-to-normal vision. They gave written informed consent before starting the experiment and received a compensation of €8 per hour for participating.
+Participants were 48 German native speakers (31 female, 17 male) with a mean age of 23.5 years (range 18 to 32) and no history of psychological disorder or treatment. No a priori power analysis was carried out and the sample size was chosen in line with previous EEG studies on object processing in our lab. All participants were right-handed according to the Edinburgh inventory [@oldfield1971] and reported normal or corrected-to-normal vision. They gave written informed consent before starting the experiment and received a compensation of €8 per hour for participating.
 
 ### Materials
 
-Stimuli for Experiments 1 and 2 consisted of 240 grayscale photographs of real-world objects, 120 of which were well-known everyday objects (e.g., a bicycle, a toothbrush), serving as filler stimuli of no interest, whereas the other 120 were rare objects presumed to be unfamiliar to the majority of participants (e.g., a galvanometer, an udu drum). A list of these unfamiliar objects can be found in Appendix A. All stimuli were presented on a light blue background with a size of 207 × 207 pixels on a 19-inch LCD monitor with a resolution of 1,280 × 1,024 pixels and a refresh rate of 75 Hz. At a standardized viewing distance of 90 cm, the images of the objects subtended approximately 3.9 degrees of participants' horizontal and vertical visual angle.
+Stimuli for this experiment consisted of 240 grayscale photographs of real-world objects. Of these, 120 were well-known everyday objects (e.g., a bicycle, a toothbrush) and served as filler stimuli of no interest. The other 120 were rare objects presumed to be unfamiliar to the majority of participants (e.g., a galvanometer, an udu drum; see Appendix A for a full list). All stimuli were presented on a light blue background with a size of 207 × 207 pixels on a 19-inch LCD monitor with a resolution of 1,280 × 1,024 pixels and a refresh rate of 75 Hz. At a standardized viewing distance of 90 cm, the images of the objects subtended approximately 3.9 degrees of participants' horizontal and vertical visual angle.
 
-For each unfamiliar object, a pair of keywords---a noun and a verb---was selected, describing the typical function or use of the object in a way that could typically be related to its visual features and their configuration (e.g., voltage, measuring; clay pot, drumming). As our central experimental manipulation, the presentation of half of the objects was preceded by keywords that correctly matched their respective function, whereas the presentation of the other half of the objects was preceded by non-matching keywords belonging to one of the other objects. The matching keywords were expected to induce semantically informed perception (i.e., participants suddenly understanding what kind of object they were viewing), whereas the non-matching keywords were expected to hamper such an understanding and keep the perception of the object semantically naive. All participants saw each unfamiliar object with only one type of keywords (matching or non-matching). This assignment of keywords to objects was counterbalanced across participants so that each object was presented with matching keywords (leading to semantically informed perception) and non-matching keywords (leading to naive perception) to an equal number of participants. The experiment was programmed and displayed using Presentation® software (Neurobehavioral Systems, Inc., Berkeley, CA, www.neurobs.com).
+For each unfamiliar object, a pair of German keywords---a noun and a verb---was selected, describing the typical function or use of the object in a way that could typically be related to its visual features and their configuration (e.g., voltage, measuring; clay pot, drumming). As the central experimental manipulation, the presentation of half of the objects was preceded by keywords that correctly matched their respective function, whereas the presentation of the other half of the objects was preceded by non-matching keywords belonging to one of the other objects. The matching keywords were expected to induce semantically informed perception (i.e., participants suddenly understanding what kind of object they were viewing), whereas the non-matching keywords were expected to hamper such an understanding and keep the perception of the object semantically naive. All participants saw each unfamiliar object with only one type of keywords (matching or non-matching). This assignment of keywords to objects was counterbalanced across participants so that each object was presented with matching keywords (leading to semantically informed perception) and non-matching keywords (leading to naive perception) to an equal number of participants. The experiment was programmed and displayed using Presentation® software (Neurobehavioral Systems, Inc., Berkeley, CA, www.neurobs.com).
 
 ### Procedure
 
-Each experimental session consisted of three parts (see Figure \@ref(fig:exp1-plot)A). In the *pre-insight* part, after written informed consent had been obtained and the EEG had been prepared, all 240 familiar and unfamiliar objects were presented once in random order and without any keywords. Each trial consisted of a fixation cross presented in the middle of the screen for 0.5 s, followed by the presentation of the object until participants made a response or until a time out after 3 s. The inter-trial interval until the presentation of the next fixation cross was 0.5 s and participants took a self-timed break after each block of 60 objects. The task, which was kept the same across all three parts, was to classify each object using one of four response alternatives: (a) "I know what this is or have a strong assumption," (b) "I have an assumption what this is," (c) "I have rather no assumption what this is," or (d) "I don't know what this is and have no assumption." Participants were asked to respond as quickly and as accurately as possible by pressing one out of four buttons with the index or middle finger of their left or right hand, respectively. The mapping of the rating scale to the four buttons (left to right or right to left) was counterbalanced across participants.
+The experiment consisted of three parts (see Figure \@ref(fig:exp1-plot)A). In the *pre-insight* part, after written informed consent had been obtained and the EEG had been prepared, all 240 familiar and unfamiliar objects were presented once in random order and without any keywords. Each trial consisted of a fixation cross presented in the middle of the screen for 0.5 s, followed by the presentation of the object until participants made a response or until a time out after 3 s. The inter-trial interval until the presentation of the next fixation cross was 0.5 s and participants took a self-timed break after each block of 60 objects. The task, which was kept the same across all three parts, was to classify each object using one of four response alternatives: (a) "I know what this is or have a strong assumption," (b) "I have an assumption what this is," (c) "I have rather no assumption what this is," or (d) "I don't know what this is and have no assumption." Participants were asked to respond as quickly and as accurately as possible by pressing one out of four buttons with the index or middle finger of their left or right hand, respectively. The mapping of the rating scale to the four buttons (left to right or right to left) was counterbalanced across participants.
 
 ```{r, preprocessing}
 # List EEG files and behavioral log files
@@ -185,6 +187,9 @@ tfr_cycles <- seq(3, 10, length.out = length(tfr_freqs))
 # Perform preprocessing for all subjects using MNE-Python (see code/preprocessing.py)
 # This will run only if `rerun_preprocessing = TRUE` and if the raw data are available
 if (rerun_preprocessing) {
+
+  # Import the custom Python functions for preprocessing
+  pp <- import_from_path("preprocessing", path = "code")
 
   # Do the actual preprocessing
   tibble(fname_vhdr, fname_log, subject_id) %>%
@@ -294,6 +299,11 @@ del df, dfs, evo, ave_tfr, ave_tfr_diff, ave_tfr_flat
 ```
 
 ```{r, models_lme}
+# Compute average number of objects per condition
+(objects_per_condition <- read_csv(fnames$objects_per_condition, col_types = cols()) %>%
+  summarise(across(.cols = -subject_id, .fns = mean)) %>%
+  as.list())
+
 # Read single trial data for all subjects
 paste0("data/preprocessed/", subject_id, "_trials.csv") %>%
   map(read_csv, col_types = cols()) %>%
@@ -306,6 +316,12 @@ paste0("data/preprocessed/", subject_id, "_trials.csv") %>%
     RT = ifelse(RT < 200, NA, RT),
     logRT = log(RT)
   ) -> trials
+
+# Record number of rejected ERP epochs per participant
+(rejected <- trials %>%
+  count(subject_id) %>%
+  mutate(n = 360 - n) %>%
+  pull(n))
 
 # Remove trials with unrealistically short RTs or invalid conditions
 sum(is.na(trials$RT))
@@ -334,7 +350,7 @@ if (!rerun_model_fitting) {
   map(dvs, function(dv) {
 
     # Define model formula
-    formula_lme <- paste0(
+    formula_dv <- paste0(
       dv, " ~ part * condition +
         (part * condition | subject_id) +
         (part * condition | item_id)"
@@ -347,7 +363,7 @@ if (!rerun_model_fitting) {
     # using an alpha level of .20 (see Matuschek et al., 2017, J Mem Lang)
     cl <- makeCluster(n_cores)
     build <- buildmer(
-      formula = formula_lme,
+      formula = formula_dv,
       data = trials,
       buildmerControl = buildmerControl(
         direction = c("backward", "backward"),
@@ -384,20 +400,34 @@ if (!rerun_model_fitting) {
 }
 ```
 
-```{r models_brm, eval=FALSE}
+```{r models_brm, eval=TRUE}
 # Color scheme for plots
 bayesplot::color_scheme_set("purple")
 
-# Define model formula
-formula_brm <- P1 ~ part * condition +
-  (part * condition | subject_id) +
-  (part * condition | item_id)
+# Define example model formula
+formula_brm <- bf(
+  P1 ~ part * condition +
+    (part * condition | subject_id) +
+    (part * condition | item_id),
+  sigma ~ 1 + (1 | subject_id)
+)
 
-# Default prior for slopes
-prior <- set_prior("cauchy(0, 0.707)", class = "b")
+# Default prior for slopes and sigma
+prior <- c(
+  prior(cauchy(0, 0.707), class = b),
+  prior(student_t(3, 0, 5.7), class = Intercept, dpar = sigma),
+  prior(normal(0, 5), class = sd, group = subject_id, dpar = sigma)
+)
+
+# Hypotheses of comparisons for informed vs. naive within each part
+hypotheses <- c(
+  "posthoc_1" = "condition1 - 2/3 * part1:condition1 - 1/3 * part2:condition1 = 0",
+  "posthoc_2" = "condition1 + 1/3 * part1:condition1 - 1/3 * part2:condition1 = 0",
+  "posthoc_3" = "condition1 + 1/3 * part1:condition1 + 2/3 * part2:condition1 = 0"
+)
 
 # Fit Bayesian mixed model using prior information only
-mod_brm_prior <- brm(
+fit_brm_prior <- brm(
   formula = formula_brm,
   data = trials,
   family = gaussian(),
@@ -407,85 +437,79 @@ mod_brm_prior <- brm(
   chains = 4,
   iter = 20000,
   warmup = 2000,
-  backend = "cmdstanr"
+  file = fnames$model_brm_prior,
+  file_refit = "on_change"
 )
 
 # Prior predictive checks for population-level parameters
-prior_summary(mod_brm_prior)
-summary(mod_brm_prior)
-mcmc_plot(mod_brm_prior, "areas", pars = "^b_", prob_outer = 0.95) +
+prior_summary(fit_brm_prior)
+summary(fit_brm_prior)
+mcmc_plot(fit_brm_prior, "areas", pars = "^b_", prob_outer = 0.95) +
   theme(text = element_text(family = "Helvetica", size = 10))
 
-# Refit using the actual data
-mod_brm_posterior <- update(mod_brm_prior, sample_prior = "yes")
+# Compute posterior distributions for dependent variables
+dvs <- c("logRT", "P1", "N170", "N400")
+map(dvs, function(dv) {
+
+  # Define model formula for the current dependent variable
+  formula_dv <- paste0(
+    dv, " ~ part * condition +
+      (part * condition | subject_id) +
+      (part * condition | item_id)"
+  ) %>%
+    formula()
+
+  # # Allow sigma to very for each participant
+  # formula_dv %<>% bf(sigma ~ 1 + (1 | subject_id))
+
+  # Sample from the posterior distribution
+  fit_brm <- update(
+    fit_brm_prior,
+    formula = formula_dv,
+    sample_prior = "yes",
+    file = fnames$models_brm[[dv]],
+    file_refit = "on_change"
+  )
+
+  # Compute follow-up comparisons with Bayes factors
+  hyps <- hypothesis(fit_brm, hypotheses) %>% {
+    mutate(.$hypothesis, bf01 = Evid.Ratio, bf10 = 1 / Evid.Ratio, .keep = "unused")
+  }
+
+  # Return a list of relevant model outputs
+    return(
+      list(
+        model = fit_brm,
+        summary = summary(fit_brm),
+        hypotheses = hyps
+      )
+    )
+
+}) %>%
+  set_names(dvs) -> models_brm
 
 # Posterior predictive checks for population-level parameters
-summary(mod_brm_posterior)
-mcmc_plot(mod_brm_posterior, "areas", pars = "^b_", prob_outer = 0.95) +
+summary(models_brm$P1)
+mcmc_plot(models_brm$P1, "areas", pars = "^b_", prob_outer = 0.95) +
   theme(text = element_text(family = "Helvetica", size = 10))
 
 # Posterior predictive checks subject by subject
 pp_check(
-  mod_brm_posterior,
+  models_brm$P1,
   type = "dens_overlay_grouped",
   nsamples = 50,
   group = "subject_id"
 )
 pp_check(
-  mod_brm_posterior,
+  models_brm$P1,
   type = "stat_grouped",
   nsamples = 1000,
   group = "subject_id",
   stat = "sd"
 )
 
-# Post-hoc comparisons for informed vs. naive within each part
-hyps <- c(
-  "posthoc_1" = "condition1 - 2/3 * part1:condition1 - 1/3 * part2:condition1 = 0",
-  "posthoc_2" = "condition1 + 1/3 * part1:condition1 - 1/3 * part2:condition1 = 0",
-  "posthoc_3" = "condition1 + 1/3 * part1:condition1 + 2/3 * part2:condition1 = 0"
-)
-hypothesis(mod_brm_posterior, hyps) %>%
-  mutate(.$hypothesis, bf01 = Evid.Ratio, bf10 = 1 / Evid.Ratio, .keep = "unused")
-
-# Alternative with emmeans
-specs <- pairwise ~ condition | part
-emmeans(mod_brm_posterior, specs = specs)
-
-# mod_prior <- brm(formula = formula, data = data_brm, prior = prior, sample_prior = "only")
-# prior_summary(mod_prior)
-# mcmc_plot(mod_prior)
-#
-# mod_post <- update(mod_prior, sample_prior = "yes")
-# summary(mod_post)
-# mcmc_plot(mod_post, pars = "b")
-# plot(mod_post)
-
-hypothesis <- paste0("part", c("I", "II", "III"), ":condition1 = 0")
-bf_brms <- hypothesis(mod_post, hypothesis = hypothesis)
-bf_brms$hypothesis$bf10 <- 1 / bf_brms$hypothesis$Evid.Ratio
-bf_brms
-
-bf_bayestest <- bayestestR::bayesfactor(mod_post)
+bf_bayestest <- bayestestR::bayesfactor(models_brm$P1)
 bf_bayestest
-
-mod_brm_s <- brm(
-  bf(P1 ~ part / condition + (part / condition | participant) + (part / condition | item),
-     sigma ~ 1 + (1 | participant)),
-  prior = c(
-    prior(cauchy(0, 0.707), class = b),
-    prior(student_t(3, 0, 5.7), class = Intercept, dpar = sigma),
-    prior(normal(0, 5), class = sd, group = participant, dpar = sigma)),
-  data = data_brm,
-  family = gaussian(),
-  sample_prior = "yes",
-  save_pars = save_pars(all = TRUE),
-  chains = 4,
-  iter = 20000,
-  warmup = 2000,
-  cores = 4,
-  control = list(adapt_delta = 0.9)
-)
 ```
 
 ```{r fig1, include=TRUE, fig.height=11, fig.cap = "(ref:fig1_caption)"}
@@ -517,11 +541,11 @@ Finally, in the *post-insight* part, the unfamiliar objects were presented for a
 
 The continuous EEG was recorded from 62 Ag/AgCl scalp electrodes placed according to the extended 10--20 system [@americanelectroencephalographicsociety1991] and referenced online to an external electrode placed on the left mastoid (M1). Two additional external electrodes were placed on the right mastoid (M2) and below the left eye (IO1), respectively. During the recording, electrode impedance was kept below 5 kΩ. An online band-pass filter with a high-pass time-constant of 10 s (0.016 Hz) and a low-pass cutoff frequency of 1000 Hz was applied before digitizing the signal at a sampling rate of 500 Hz.
 
-Offline, the data were preprocessed using the MNE software [Version 0.21.0\; @gramfort2013] in Python [Version 3.8.5\; @vanrossum2009]. First, all scalp electrodes were re-referenced to the common average. Next, artifacts resulting from blinks and eye movements were removed using independent component analysis (ICA). The first 15 components were extracted by the FastICA algorithm [@hyvärinen1999] after temporarily low-pass filtering the data at 1 Hz. Any components showing substantive correlations with either of two virtual EOG channels (VEOG: IO1 - Fp1, HEOG: F9 - F10) were removed automatically using the *find\_bads\_eog* function. After artifact correction, a zero-phase, non-causal FIR filter with a lower pass-band edge at 0.1 Hz (transition bandwidth: 0.1 Hz) and an upper pass-band edge at 30 Hz (transition bandwidth: 7.5 Hz) was applied. Next, the continuous EEG was epoched into segments of 2 s, starting 500 ms before the onset of the visual presentation of each unfamiliar object. The epochs were baseline-corrected by subtracting the average voltage during the 200 ms before stimulus onset. Epochs containing artifacts despite ICA, defined as peak-to-peak amplitudes exceeding 200 µV, were removed from further analysis. This led to the exclusion of an average of `r format(round(mean(rejected_exp1), 1), nsmall = 1)` trials per participant (= `r percent(mean(rejected_exp1)/360, accuracy = 0.1)`; range `r min(rejected_exp1)` to `r max(rejected_exp1)` trials). Single-trial event-related potentials were computed as the mean amplitude across time windows and regions of interests (ROIs) defined a priori, namely 100--150 ms after object onset at electrodes PO3, PO4, POz, O1, O2, and Oz for the P1 component, 150--200 ms after object onset at electrodes P7, P8, PO7, PO8, PO9, and PO10 for the N170 component, and 400--700 ms after object onset at electrodes C1, C2, Cz, CP1, CP2, and CPz for the N400 component (for the positions of these electrodes on the scalp, see the topographies in Figure \@ref(fig:exp1-plot)B).
+Offline, the data were preprocessed using the MNE software [Version `r system("mne --version", intern = TRUE) %>% str_remove("MNE ")`\; @gramfort2013] in Python [Version `r system("python3 --version", intern = TRUE) %>% str_remove("Python ")`\; @vanrossum2009]. First, all scalp electrodes were re-referenced to the common average. Next, artifacts resulting from blinks and eye movements were removed using independent component analysis (ICA). The first 15 components were extracted by the FastICA algorithm [@hyvärinen1999] after temporarily low-pass filtering the data at 1 Hz. Any components showing substantive correlations with either of two virtual EOG channels (VEOG: IO1 - Fp1, HEOG: F9 - F10) were removed automatically using the *find\_bads\_eog* function. After artifact correction, a zero-phase, non-causal FIR filter with a lower pass-band edge at 0.1 Hz (transition bandwidth: 0.1 Hz) and an upper pass-band edge at 30 Hz (transition bandwidth: 7.5 Hz) was applied. Next, the continuous EEG was epoched into segments of 2 s, starting 500 ms before the onset of the visual presentation of each unfamiliar object. The epochs were baseline-corrected by subtracting the average voltage during the 200 ms before stimulus onset. Epochs containing artifacts despite ICA, defined as peak-to-peak amplitudes exceeding 200 µV, were removed from further analysis. This led to the exclusion of an average of `r format(round(mean(rejected), 1), nsmall = 1)` trials per participant (= `r percent(mean(rejected) / 360, accuracy = 0.1)`; range `r min(rejected)` to `r max(rejected)` trials). Single-trial event-related potentials were computed as the mean amplitude across time windows and regions of interests (ROIs) defined a priori, namely 100--150 ms after object onset at electrodes PO3, PO4, POz, O1, O2, and Oz for the P1 component, 150--200 ms after object onset at electrodes P7, P8, PO7, PO8, PO9, and PO10 for the N170 component, and 400--700 ms after object onset at electrodes C1, C2, Cz, CP1, CP2, and CPz for the N400 component (for the positions of these electrodes on the scalp, see the topographies in Figure \@ref(fig:exp1-plot)B).
 
 ### Statistical Analysis
 
-First, because we were interested in the effects of knowledge on perceiving *unfamiliar* objects only, we excluded objects from all further analyses when participants classified them as being known in the pre-insight part (i.e., before any keywords were presented). This led to the exclusion of an average of `r format(round(objects_exp1["Excl_known"], 1), nsmall = 1)` objects per participant (= `r percent(objects_exp1["Excl_known"]/120, accuracy = 0.1)` of all unfamiliar objects). Next, to clearly delineate semantically informed and naive perception, the assignment of all other objects to one of these two conditions for statistical analysis was co-determined by our experimental manipulation (matching versus non-matching keywords in the insight part) and the behavioral responses of the participants themselves (see Figure \@ref(fig:exp1-plot)A). Objects were assigned to the semantically informed condition only if they were presented with matching keywords *and* if participants indicated knowing what the object was or having an assumption. This was the case for an average of `r format(round(objects_exp1["Informed"], 1), nsmall = 1)` objects per participant (= `r percent(objects_exp1["Informed"]/60, accuracy = 0.1)` of objects presented with matching keywords). Complementarily, objects were assigned to the naive condition only if they were presented with non-matching keywords *and* if participants indicated not knowing what the object was or having rather no assumption. This was the case for an average of `r format(round(objects_exp1["Naive"], 1), nsmall = 1)` objects per participant (= `r percent(objects_exp1["Naive"]/60, accuracy = 0.1)` of objects presented with non-matching keywords). Although this assignment was based on the manipulation and responses in the second part---when insight was thought to occur---the same assignment was used to analyze the data from the other two parts. This allowed us to test, on the one hand, if the objects from both conditions differed in important aspects even before any keywords were presented (pre-insight part) and, on the other hand, if the semantic understanding acquired in the insight part had any down-stream effects on the subsequent perception of the objects (post-insight part).
+First, because we were interested in the effects of knowledge on perceiving *unfamiliar* objects only, we excluded objects from all further analyses when participants classified them as being known in the pre-insight part (i.e., before any keywords were presented). This led to the exclusion of an average of `r format(round(objects_per_condition[["Excl_known"]], 1), nsmall = 1)` objects per participant (= `r percent(objects_per_condition[["Excl_known"]] / 120, accuracy = 0.1)` of all unfamiliar objects). Next, to clearly delineate semantically informed and naive perception, the assignment of all other objects to one of these two conditions for statistical analysis was co-determined by our experimental manipulation (matching versus non-matching keywords in the insight part) and the behavioral responses of the participants themselves (see Figure \@ref(fig:exp1-plot)A). Objects were assigned to the semantically informed condition only if they were presented with matching keywords *and* if participants indicated knowing what the object was or having an assumption. This was the case for an average of `r format(round(objects_per_condition[["Informed"]], 1), nsmall = 1)` objects per participant (= `r percent(objects_per_condition[["Informed"]]/60, accuracy = 0.1)` of objects presented with matching keywords). Complementarily, objects were assigned to the naive condition only if they were presented with non-matching keywords *and* if participants indicated not knowing what the object was or having rather no assumption. This was the case for an average of `r format(round(objects_per_condition[["Naive"]], 1), nsmall = 1)` objects per participant (= `r percent(objects_per_condition[["Naive"]]/60, accuracy = 0.1)` of objects presented with non-matching keywords). Although this assignment was based on the manipulation and responses in the second part---when insight was thought to occur---the same assignment was used to analyze the data from the other two parts. This allowed us to test, on the one hand, if the objects from both conditions differed in important aspects even before any keywords were presented (pre-insight part) and, on the other hand, if the semantic understanding acquired in the insight part had any down-stream effects on the subsequent perception of the objects (post-insight part).
 
 The event-related potentials in response to objects from both conditions and all three parts were analyzed on the single trial level using linear mixed-effects regression models [@baayen2008; @frömer2018]. For the purpose of the present study, these models have at least three desirable properties compared to traditional approaches such as analyses of variance (ANOVAs) performed on by-participant averages. First, they can leverage all of the information that is present in the data set on the single trial level, some of which would be lost when computing averages. Second, they can account simultaneously for the non-independence of data points coming from the same participant and/or from the same item. In contrast, the neglect of the item as a random variable in by-participant ANOVAs can lead to anti-conservative test statistics and strictly does not allow for inferences beyond the stimulus set under study [@bürki2018; @judd2012]. Finally, mixed-effects models can flexibly deal with unbalanced designs in which the number of trials differs across (combinations of) conditions. Such a situation is inevitable when the assignment of trials to conditions is co-determined by the experimental manipulation and the behavior of participants in response to this manipulation [e.g., @fröber2017].
 
@@ -538,11 +562,11 @@ Single-trial ERPs were analyzed in response to unfamiliar objects before (pre-in
 ```{r exp1-table, include=TRUE, results="asis"}
 # Create table of models for Experiment 1
 table_exp1 <- create_table(
-models = models_exp1,
-stub_anova = c("Part", "Condition", "Pt. × con."),
-stub_contrasts = c("Pre-insight part", "Insight part", "Post-insight part"),
-caption = "Results of Linear Mixed-Effects Regression Models for Experiment 1\\smallskip",
-note = "Pt. = part, con. = condition, est. = estimate, CI = 95\\% confidence interval."
+  models = models_lme,
+  stub_anova = c("Part", "Condition", "Pt. × con."),
+  stub_contrasts = c("Pre-insight part", "Insight part", "Post-insight part"),
+  caption = "Results of Linear Mixed-Effects Regression Models for Experiment 1\\smallskip",
+  note = "Pt. = part, con. = condition, est. = estimate, CI = 95\\% confidence interval."
 )
 ```
 
@@ -1017,7 +1041,7 @@ map(
 
 ```{r control-table}
 # Calculate average number of objects per condition in Experiments 1 and 2
-(stims_joint <- (objects_exp1 + objects_exp2) / 2)
+(stims_joint <- (objects_per_condition + objects_exp2) / 2)
 
 # Load linear mixed models
 models_joint_control <- readRDS("data/processed/joint-control-models.RDS")
