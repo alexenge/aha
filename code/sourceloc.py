@@ -1,5 +1,6 @@
 # %%
 import os.path as op
+from threading import stack_size
 
 import groupmne
 import matplotlib.pyplot as plt
@@ -74,8 +75,16 @@ info = evokeds_informed[0].info
 ## MNE ##
 #######################################
 
+# Setup volumn source space
+mri = op.join(fs_dir, 'mri', 'T1.mgz')
+vol_src = mne.setup_volume_source_space(
+    subject, mri=mri, pos=10.0, bem=bem,
+    subjects_dir=subjects_dir,
+    add_interpolator=True,
+    verbose=True)
+
 # Compute standard forward solution
-fwd = mne.make_forward_solution(info, trans, src, bem, meg=False, eeg=True, mindist=5.0)
+fwd = mne.make_forward_solution(info, trans, vol_src, bem, eeg=True, mindist=5.0)
 
 # # Use fwd to compute the sensitivity map for illustration purposes
 # eeg_map = mne.sensitivity_map(fwd, ch_type="eeg", mode="fixed")
@@ -101,7 +110,7 @@ for sid, ev_i, ev_n in zip(subject_id, evokeds_informed, evokeds_naive):
     ev_n.set_eeg_reference("average", projection=True)
     noise_cov = mne.compute_covariance(epochs, tmax=0.0, method=["shrunk", "empirical"])
     inverse_operator = mne.minimum_norm.make_inverse_operator(
-        info, fwd, noise_cov, loose=0.2, depth=3.5
+        info, fwd, noise_cov, loose=1.0, depth=3.5
     )
     stc_i = mne.minimum_norm.apply_inverse(
         ev_i,
@@ -133,7 +142,7 @@ for sid, ev_i, ev_n in zip(subject_id, evokeds_informed, evokeds_naive):
 condition = "Difference"
 data = np.array([stc.data for stc in stcs[condition]], dtype="float32")
 data = data.mean(axis=0)
-stc = mne.SourceEstimate(
+stc = mne.VolSourceEstimate(
     data=data,
     vertices=stcs[condition][0].vertices,
     tmin=stcs[condition][0].tmin,
@@ -142,14 +151,18 @@ stc = mne.SourceEstimate(
 )
 
 # Average across time window and plot
-tmin = 0.150
-tmax = 0.200
-stc_twin = stc.copy().crop(tmin, tmax).mean()
-stc_twin.plot(
-    hemi="lh",
-    clim={"kind": "values", "lims": [1, 2, 3]},
-    backend="matplotlib",
-)
+tmin = 0.400
+tmax = 0.700
+stc_twin = stc.copy().crop(tmin, tmax)
+stc_twin.plot(vol_src, subject='fsaverage', subjects_dir=subjects_dir)
+
+# # For non-volume
+# stc_twin = stc.copy().crop(tmin, tmax).mean()
+# stc_twin.plot(
+#     hemi="lh",
+#     #clim={"kind": "values", "pos_lims": [0, 2, 3]},
+#     backend="matplotlib",
+# )
 
 # # Save full source time course
 # stc.save("../results/stc_part-" + part + "_condition-" + condition)
@@ -159,81 +172,81 @@ stc_twin.plot(
 ## GROUPMNE ##
 #######################################
 
-# Read preprocessed epochs
-fnames_epochs = ["../data/preprocessed/" + sid + "_epo.fif" for sid in subject_id]
-epochs = [
-    mne.read_epochs(fname, preload=True).drop_channels(["P1", "N170", "N400"])
-    for fname in fnames_epochs
-]
+# # Read preprocessed epochs
+# fnames_epochs = ["../data/preprocessed/" + sid + "_epo.fif" for sid in subject_id]
+# epochs = [
+#     mne.read_epochs(fname, preload=True).drop_channels(["P1", "N170", "N400"])
+#     for fname in fnames_epochs
+# ]
 
-# Compute noise covariance matrices
-noise_covs = [
-    mne.compute_covariance(ep, tmax=0, method=["shrunk", "empirical"], rank=None)
-    for ep in epochs
-]
+# # Compute noise covariance matrices
+# noise_covs = [
+#     mne.compute_covariance(ep, tmax=0, method=["shrunk", "empirical"], rank=None)
+#     for ep in epochs
+# ]
 
-# Compute source reference space
-resolution = 5
-spacing = "oct%d" % resolution
-src_ref = mne.setup_source_space(
-    subject="fsaverage", spacing=spacing, subjects_dir=subjects_dir, add_dist=False
-)
+# # Compute source reference space
+# resolution = 5
+# spacing = "oct%d" % resolution
+# src_ref = mne.setup_source_space(
+#     subject="fsaverage", spacing=spacing, subjects_dir=subjects_dir, add_dist=False
+# )
 
-# Compute a common standard forward solution for every subject
-trans = "fsaverage"
-bem = op.join(fs_dir, "bem", "fsaverage-5120-5120-5120-bem-sol.fif")
-fwds_ = [
-    groupmne.compute_fwd(
-        subject="fsaverage",
-        src_ref=src_ref,
-        info=ev.info,
-        trans_fname=trans,
-        bem_fname=bem,
-        meg=False,
-        eeg=True,
-    )
-    for ev in evokeds
-]
-fwds = groupmne.prepare_fwds(fwds_, src_ref, copy=False)
+# # Compute a common standard forward solution for every subject
+# trans = "fsaverage"
+# bem = op.join(fs_dir, "bem", "fsaverage-5120-5120-5120-bem-sol.fif")
+# fwds_ = [
+#     groupmne.compute_fwd(
+#         subject="fsaverage",
+#         src_ref=src_ref,
+#         info=ev.info,
+#         trans_fname=trans,
+#         bem_fname=bem,
+#         meg=False,
+#         eeg=True,
+#     )
+#     for ev in evokeds
+# ]
+# fwds = groupmne.prepare_fwds(fwds_, src_ref, copy=False)
 
-# Compute forward models with a reference source space (multikllasso)
-stcs = groupmne.compute_group_inverse(
-    fwds=fwds,
-    evokeds=evokeds,
-    noise_covs=noise_covs,
-    method="multitasklasso",
-    spatiotemporal=True,
-    alpha=0.8,
-)
+# # Compute forward models with a reference source space (multikllasso)
+# stcs = groupmne.compute_group_inverse(
+#     fwds=fwds,
+#     evokeds=evokeds,
+#     noise_covs=noise_covs,
+#     method="multitasklasso",
+#     spatiotemporal=True,
+#     alpha=0.8,
+# )
 
-# Compute forward models with a reference source space (mkw)
-stcs = groupmne.compute_group_inverse(
-    fwds=fwds,
-    evokeds=evokeds,
-    noise_covs=noise_covs,
-    method="mtw",
-    spatiotemporal=False,
-    alpha=1.0,
-    beta=0.05,
-    n_jobs=2,
-)
+# # Compute forward models with a reference source space (mkw)
+# stcs = groupmne.compute_group_inverse(
+#     fwds=fwds,
+#     evokeds=evokeds,
+#     noise_covs=noise_covs,
+#     method="mtw",
+#     spatiotemporal=False,
+#     alpha=1.0,
+#     beta=0.05,
+#     n_jobs=2,
+# )
 
-# Compute group average
-data = np.average([stc.data for stc in stcs], axis=0)
-stc = mne.SourceEstimate(
-    data=data,
-    vertices=stcs["Informed"][0].vertices,
-    tmin=stcs["Informed"][0].tmin,
-    tstep=stcs["Informed"][0].tstep,
-    subject="fsaverage",
-)
+# # Compute group average
+# data = np.average([stc.data for stc in stcs], axis=0)
+# stc = mne.SourceEstimate(
+#     data=data,
+#     vertices=stcs["Informed"][0].vertices,
+#     tmin=stcs["Informed"][0].tmin,
+#     tstep=stcs["Informed"][0].tstep,
+#     subject="fsaverage",
+# )
 
-# Plot & save
-t = 0.5
-stc.plot(
-    hemi="lh",
-    clim={"kind": "value", "lims": [0.001, 0.004, 0.007]},
-    initial_time=t,
-    backend="matplotlib",
-)
-stc.save("../results/stc_part-II_condition-difference_groupmne")
+# # Plot & save
+# t = 0.5
+# stc.plot(
+#     hemi="lh",
+#     clim={"kind": "value", "lims": [0.001, 0.004, 0.007]},
+#     initial_time=t,
+#     backend="matplotlib",
+# )
+# stc.save("../results/stc_part-II_condition-difference_groupmne")
