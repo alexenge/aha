@@ -9,6 +9,7 @@
 *ave.csv
 *.stc
 renv*
+results/model_brm*
 analysis/export/
 code/__pycache__/
 code/tmp.py
