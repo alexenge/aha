@@ -68,6 +68,7 @@ library(MASS)
 library(lme4)
 library(buildmer)
 library(emmeans)
+library(bayesplot)
 library(brms)
 library(parallel)
 library(reticulate)
@@ -102,8 +103,10 @@ fnames <- list(
   ave_tfr_flat = "results/ave-tfr_flat.csv",
   ave_tfr_diff = "results/ave-tfr_diff.csv",
   models_lme = "results/models_lme.RDS",
-  models_brm = paste0("results/model_brm_", c("RT", "P1", "N170", "N400"), ".RDS") %>%
-    set_names(c("RT", "P1", "N170", "N400")),
+  models_brm = paste0(
+    "results/model_brm_", c("logRT", "P1", "N170", "N400"), ".RDS"
+  ) %>%
+    set_names(c("logRT", "P1", "N170", "N400")),
   model_brm_prior = "results/model_brm_prior.RDS"
 )
 ```
@@ -401,8 +404,9 @@ if (!rerun_model_fitting) {
 ```
 
 ```{r models_brm, eval=TRUE}
-# Color scheme for plots
-bayesplot::color_scheme_set("purple")
+# Theme for plots
+bayesplot_theme_update(text = element_text(family = "Helvetica", size = 10))
+color_scheme_set("purple")
 
 # Define example model formula
 formula_brm <- bf(
@@ -444,8 +448,7 @@ fit_brm_prior <- brm(
 # Prior predictive checks for population-level parameters
 prior_summary(fit_brm_prior)
 summary(fit_brm_prior)
-mcmc_plot(fit_brm_prior, "areas", pars = "^b_", prob_outer = 0.95) +
-  theme(text = element_text(family = "Helvetica", size = 10))
+mcmc_plot(fit_brm_prior, "areas", pars = "^b_", prob_outer = 0.95)
 
 # Compute posterior distributions for dependent variables
 dvs <- c("logRT", "P1", "N170", "N400")
@@ -466,6 +469,7 @@ map(dvs, function(dv) {
   fit_brm <- update(
     fit_brm_prior,
     formula = formula_dv,
+    newdata = trials,
     sample_prior = "yes",
     file = fnames$models_brm[[dv]],
     file_refit = "on_change"
@@ -489,26 +493,28 @@ map(dvs, function(dv) {
   set_names(dvs) -> models_brm
 
 # Posterior predictive checks for population-level parameters
-summary(models_brm$P1)
-mcmc_plot(models_brm$P1, "areas", pars = "^b_", prob_outer = 0.95) +
+example_model <- models_brm$N400
+example_model$summary
+example_model$hypotheses
+mcmc_plot(example_model$model, "areas", pars = "^b_", prob_outer = 0.95) +
   theme(text = element_text(family = "Helvetica", size = 10))
 
 # Posterior predictive checks subject by subject
 pp_check(
-  models_brm$P1,
+  example_model$model,
   type = "dens_overlay_grouped",
   nsamples = 50,
   group = "subject_id"
 )
 pp_check(
-  models_brm$P1,
+  example_model$model,
   type = "stat_grouped",
   nsamples = 1000,
   group = "subject_id",
   stat = "sd"
 )
 
-bf_bayestest <- bayestestR::bayesfactor(models_brm$P1)
+bf_bayestest <- bayestestR::bayesfactor(example_model$model)
 bf_bayestest
 ```
 
