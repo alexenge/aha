@@ -223,13 +223,13 @@ if (rerun_preprocessing) {
     )
 
   # Combine single trial data for all subjects
+  dir.create("results")
   paste0("data/preprocessed/", subject_id, "_trials.csv") %>%
     map(read_csv, col_types = cols()) %>%
     bind_rows() %>%
     write_csv(fnames$trials)
 
   # Get standard EasyCap electrode positions and project them into 2D space
-  dir.create("data/processed")
   read_csv("data/preprocessed/sub-01_tfr-ave.csv", col_types = cols()) %>%
     select(-c(part, condition, subject_id, time, freq)) %>%
     colnames() -> ch_names
