@@ -99,6 +99,7 @@ n_cores <- detectCores()
 fnames <- list(
   montage = "results/montage.csv",
   objects_per_condition = "results/obj-per-cond.csv",
+  trials = "results/trials.csv",
   ave_grand = "results/ave_grand.csv",
   ave_tfr_flat = "results/ave-tfr_flat.csv",
   ave_tfr_diff = "results/ave-tfr_diff.csv",
@@ -222,6 +223,12 @@ if (rerun_preprocessing) {
       tfr_cycles = tfr_cycles,
       tfr_crop = tuple(-0.2, 0.8)
     )
+
+  # Combine single trial data for all subjects
+  paste0("data/preprocessed/", subject_id, "_trials.csv") %>%
+    map(read_csv, col_types = cols()) %>%
+    bind_rows() %>%
+    write_csv(fnames$trials)
 
   # Get standard EasyCap electrode positions and project them into 2D space
   dir.create("data/processed")
