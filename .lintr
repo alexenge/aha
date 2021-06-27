@@ -1,1 +1,1 @@
-linters: with_defaults(line_length_linter(88))
+linters: with_defaults(line_length_linter(79))

@@ -13,8 +13,6 @@ results/model_brm*
 analysis/export/
 code/__pycache__/
 code/tmp.py
-data/raw/
-data/preprocessed_old/
-data/processed_old/
+data/
 data/processed/
 docs/
