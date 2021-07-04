@@ -266,8 +266,8 @@ import pandas as pd
 makedirs("data/processed", exist_ok=True)
 
 # Read evoked *potentials* for all subjects
-ave = [f"data/preprocessed/{sub}_ave.csv" for sub in r.subject_id]
-ave = [pd.read_csv(fname) for fname in fname_ave]
+fnames = [f"data/preprocessed/{sub}_ave.csv" for sub in r.subject_id]
+ave = [pd.read_csv(fname) for fname in fnames]
 ave = pd.concat(ave)
 
 # Average across subjects
@@ -276,8 +276,8 @@ ave = ave.groupby(id_vars, as_index=False).mean()
 ave.to_csv(r.fnames["ave_grand"], float_format="%.3f", index=False)
 
 # Read evoked *power* for all subjects
-ave_tfr = [f"data/preprocessed/{sub}_tfr-ave.csv" for sub in r.subject_id]
-ave_tfr = [pd.read_csv(fname) for fname in fname_ave_tfr]
+fnames_tfr = [f"data/preprocessed/{sub}_tfr-ave.csv" for sub in r.subject_id]
+ave_tfr = [pd.read_csv(fname) for fname in fnames_tfr]
 ave_tfr = pd.concat(ave_tfr)
 
 # # Subject 18 is weird!

@@ -6,13 +6,11 @@
 .vscode/
 *.fif
 *.h5
-*ave.csv
 *.stc
-renv*
-results/model_brm*
 analysis/export/
 code/__pycache__/
 code/tmp.py
 data/
-data/processed/
 docs/
+renv*
+results/
