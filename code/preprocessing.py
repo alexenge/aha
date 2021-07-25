@@ -251,15 +251,17 @@ def _evokeds_df_from_epochs(epochs, average_by):
         query = condition["query"].to_list()
         query = " & ".join(query)
 
-        # Average epochs belonging to this condition
+        # Average epochs belonging to this condition and convert to DataFrame
         if isinstance(epochs, Epochs):
             evokeds = epochs[query].average(picks=["eeg", "misc"])
+            scalings = {"eeg": 1e6, "misc": 1e6}
+            evokeds_df = evokeds.to_data_frame(scalings=scalings)
         elif isinstance(epochs, EpochsTFR):
             evokeds = epochs[query].average()
+            evokeds_df = evokeds.to_data_frame()
         evokeds.comment = query
 
-        # Convert to DataFrame, adding condition info
-        evokeds_df = evokeds.to_data_frame(scalings={"eeg": 1e6, "misc": 1e6})
+        # Add info about the current conditions
         condition_df = pd.concat([condition[["value"]].transpose()] * len(evokeds_df))
         condition_df.reset_index(inplace=True, drop=True)
         evokeds_df = pd.concat([condition_df, evokeds_df], axis=1)
