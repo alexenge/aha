@@ -1,34 +1,39 @@
 ---
-title             : |
-  | Event-Related Potentials of the Semantically Informed
-  | Perception of Unfamiliar Objects
-shorttitle        : "Semantic Knowledge and Unfamiliar Objects"
+title             : "Instant effects of semantic information on visual perception"
+shorttitle        : "Semantically informed perception"
 author: 
   - name          : "Alexander Enge"
     affiliation   : "1,2"
+    corresponding : yes
+    address       : "Rudower Chaussee 18, 12489 Berlin, Germany"
+    email         : "alexander.enge@hu-berlin.de"
   - name          : "Franziska Süß"
     affiliation   : "3"
   - name          : "Rasha Abdel Rahman"
     affiliation   : "1"
-    corresponding : yes
-    address       : "Rudower Chaussee 18, 12489 Berlin"
-    email         : "rasha.abdel.rahman@hu-berlin.de"
 affiliation:
   - id            : "1"
-    institution   : "Humboldt-Universität zu Berlin"
+    institution   : "Department of Psychology, Humboldt-Universität zu Berlin, 12489 Berlin, Germany"
   - id            : "2"
-    institution   : "Max Planck Institute for Human Cognitive and Brain Sciences"
+    institution   : "Research Group Learning in Early Childhood, Max Planck Institute for Human Cognitive and Brain Sciences, 04103 Leipzig, Germany"
   - id            : "3"
-    institution   : "Fachhochschule des Mittelstands"
+    institution   : "Fachhochschule des Mittelstands, 96050 Bamberg, Germany"
 authornote: |
   \addORCIDlink{Alexander Enge}{0000-0003-0100-2297}
   
   \addORCIDlink{Rasha Abdel Rahman}{0000-0002-8438-1570}
   
-  We have no conflict of interest to disclose.
-  The preprocessed data and code for this study are openly available at https://osf.io/uksbc/.
+  The authors declare no competing financial interests.
+  The preprocessed data and analaysis code for this study are openly available at https://osf.io/uksbc/.
 abstract: |
-  Does our perception of an object change as soon as we discover what function it serves? This question is relevant not only for our everyday lives, where we may encounter novel tools and gadgets as parts of our dynamic working and private environments; it also pertains to the long-standing debate around the (im)penetrability of perception by higher cognitive capacities. In this experiment, we showed participants (*n* = 24) pictures of 120 unfamiliar objects either together with matching information about their function---leading to semantically informed perception---or together with non-matching information---resulting in naive perception. We measured event-related potentials (ERPs) to investigate at which stages in the visual processing hierarchy these two types of object perception differed from one another. We found that semantically informed as compared to naive perception was associated with larger amplitudes in the N170 component and reduced amplitudes in the N400 component. When the same objects were presented once more (without any information), the N400 effect persisted and we now also observed enlarged amplitudes in the P1 component in response to objects for which semantically informed perception had taken place. We replicated these novel findings in an independent sample (*n* = 24). Consistent with previous work, these results suggest that obtaining semantic information about previously unfamiliar objects alters aspects of their lower-level visual perception (P1 component), higher-level visual perception (e.g., holistic perception; N170 component), and semantic processing (N400 component).
+  Does our perception of an object change as soon as we discover what function it serves?
+  This question matters not only when we encounter novel tools or gadgets in our everyday lives, but also pertains to the long-standing debate around the (im)penetrability of perception by higher cognitive capacities.
+  Here, we showed human participants (*n* = 48) pictures of unfamiliar objects either together with words matching their function, leading to semantically informed perception, or together with non-matching words, resulting in naive perception.
+  We measured event-related potentials (ERPs) to investigate at which stages in the visual processing hierarchy these two types of object perception differed from one another.
+  We found that semantically informed as compared to naive perception was associated with larger amplitudes in the N170 component (150--200 ms) and reduced amplitudes in the N400 component (400--700 ms).
+  When the same objects were presented once more without any information, the N400 effect persisted and we also observed enlarged amplitudes in the P1 component (100--150 ms) in response to objects for which semantically informed perception had taken place.
+  Consistent with previous work, our results suggest that obtaining semantic information about previously unfamiliar objects alters aspects of their lower-level visual perception (P1 component), higher-level visual perception (N170 component), and semantic processing (N400 component).
+  We demonstrate for the first time that these effects are instantaneous in the sense that they can be observed within the same trial as well as one trial after the information has been given, providing strong evidence that cognition affects perception.
 keywords          : "objects, semantic knowledge, visual perception, event-related potentials"
 floatsintext      : yes
 figurelist        : no
@@ -89,14 +94,14 @@ knitr::opts_chunk$set(
 )
 
 # Re-run preprocessing and/or model fitting?
-rerun_preprocessing <- FALSE
-rerun_model_fitting <- FALSE
+rerun_preprocessing <- TRUE
+rerun_model_fitting <- TRUE
 
 # Number of CPU cores for parallel model fitting
 n_cores <- detectCores()
 
 # File names for easier I/O
-dvs <- c("logRT", "P1", "N170", "N400")
+deps <- c("logRT", "P1", "N170", "N400")
 fnames <- list(
   montage = "results/montage.csv",
   obj_per_cond = "results/obj-per-cond.csv",
@@ -105,59 +110,84 @@ fnames <- list(
   ave_tfr_flat = "results/ave-tfr_flat.csv",
   ave_tfr_diff = "results/ave-tfr_diff.csv",
   models_lme = "results/models_lme.RDS",
-  models_brm = paste0("results/model_brm_", dvs, ".RDS") %>% set_names(dvs),
-  model_brm_prior = "results/model_brm_prior.RDS"
+  models_brm = str_c("results/model_brm_", deps, ".RDS") %>% set_names(deps),
+  model_brm_prior = "results/model_brm_prior.RDS",
+  models_control = "results/models_control.RDS"
 )
 ```
 
 Does our perception of an object change as soon as we discover what function it serves?
-In this study, we presented participants with unfamiliar objects that were preceded either by matching information about their function, leading to semantically informed perception, or by non-matching information, leading to naive perception.
-We expected semantically informed perception to differ from naive perception within the object processing hierarchy and we capitalized on the high temporal resolution of event-related potentials (ERPs) to find out at which stage (or stages) this was indeed the case.
-This allowed us to show for the first time that knowledge about the function of a previously unfamiliar object alters its early cortical processing in the same trial as it is being discovered and within less than 200 ms after the presentation of the object.
+In this study, we presented participants with unfamiliar objects that were preceded either by matching information about their function, thus leading to semantically informed perception, or by non-matching information, thus keeping the perception of the object semantically naive.
+We expected semantically informed perception to differ from naive perception and we capitalized on the high temporal resolution of event-related potentials (ERPs) to find out at which stage (or stages) of the visual processing hierarchy this was indeed the case.
+This allowed us to show that knowledge about the function of a previously unfamiliar object alters its early cortical processing in the same trial as it is being discovered and within less than 200 ms after the presentation of the object.
 
-The claim that higher-level cognitive capacities such as knowledge or language can modulate lower-level perceptual processes has been the source of a long-running debate.
-This debate revolves around the question of whether or not our perception of the (visual) world is "cognitively impenetrable" [@pylyshyn1999] or, in other words, determined solely by the visual input reaching our retina. According to one view, higher-level mental states and functions are not able to penetrate perception and kick in only after lower-level perceptual analysis of the visual input has taken pace [e.g., @firestone2016; @fodor1983; @pylyshyn1999]. Visual perception itself is treated as an encapsulated module that processes the retinal input in a feed-forward fashion, progressing from lower areas with smaller receptive field sizes to areas representing increasingly complex shapes and, eventually, whole objects [@dicarlo2012; @krizhevsky2012; @marr1982].
+The question if higher-level cognitive capacities such as knowledge or language can modulate lower-level perceptual processes has been the source of a long-running debate.
+According to one position, our perception of the (visual) world is "cognitively impenetrable" [@pylyshyn1999], that is, determined exclusively by the visual input reaching our retina.
+Higher-level mental states and functions are not able to penetrate perception and kick in only after lower-level perceptual analysis of the visual input has taken pace [@firestone2016; @fodor1983; @pylyshyn1999].
+Visual perception itself is treated as an encapsulated module that processes the retinal input in a feed-forward fashion, progressing from lower areas with small receptive field sizes to areas representing increasingly complex shapes and, eventually, whole objects [@dicarlo2012].
+This feed-forward visual architecture has been mirrored in both classical [e.g., @marr1982] and contemporary [e.g., @krizhevsky2012] computer vision models, allowing them to achieve human-level perfomance in predicting object category label from images.
 
-This position is challenged by the alternative view that perceptual processing dynamically interacts with other aspects of cognition from early on [e.g., @churchland1994; @lupyan2015; @teufel2017]. The myriad feedback connections from areas higher up the visual hierarchy (e.g., the middle temporal and lateral occipital cortices) to early visual areas [e.g., V1 and V2; @bullier2001; @gilbert2013]---as well as behavioral evidence---have inspired theories of visual perception that emphasize the top-down influence of cognitive processes. For instance, the reverse hierarchy theory [@ahissar2004; @hochstein2002] assumes that conscious visual perception occurs initially at the level of whole objects or object categories. Only after this high-level interpretation of the stimulus has been obtained, its more for fine grained visual details---if relevant for the current task---are being accessed from lower-level areas via top-down connections. Along similar lines, the label feedback hypothesis [@lupyan2012] posits that the activation of an object's name (i.e., a high level property) transiently warps perceptual space so that its diagnostic visual features are being processed preferentially. Finally, an active role of top-down influences is also promoted by theories of vision in the framework of Bayesian inference and predictive coding [e.g., @clark2013; @lupyan2015; @panichello2013; @yuille2006].
+However, the cognitive impenetrability hypothesis is challenged by the alternative view that perceptual processing dynamically interacts with other aspects of cognition from early on [@churchland1994; @lupyan2015; @teufel2017].
+There are myriad feedback connections from areas higher up the visual hierarchy (e.g., the middle temporal and lateral occipital cortices) to early visual areas [e.g., V1 and V2; @bullier2001; @gilbert2013].
+These anatomical recurrences as well as behavioral evidence from cognitive psychology have inspired theories of visual perception that emphasize the top-down influence of cognitive processes.
+For instance, the reverse hierarchy theory [@ahissar2004; @hochstein2002] proposes that conscious visual perception occurs initially at the level of whole objects or object categories.
+Only after this high-level interpretation of the stimulus has been obtained, its more for fine grained visual details---if relevant for the current task---are being accessed from lower-level areas via top-down connections.
+Along similar lines, the label feedback hypothesis [@lupyan2012] posits that the activation of an object's name (i.e., a high-level property) transiently warps perceptual space so that its diagnostic visual features are being processed preferentially.
+Finally, an active role of top-down influences is also promoted by theories of vision in the framework of Bayesian inference and predictive coding [e.g., @clark2013; @lupyan2015; @panichello2013; @yuille2006].
 
-Empirical findings from experimental psychology have recently added additional support to the view that perception can indeed be penetrated by other aspects of cognition [for review, see @collins2014; @vetter2014]. These aspects of cognition may include transient states such as emotions [e.g., @bocanegra2009; @phelps2016] or intentions [e.g., @balcetis2010; @cole2012] as well as learned capacities such as language [e.g., @boutonnet2015; @maier2018; @mo2011] or declarative knowledge about faces [e.g., @abdelrahman2011; @suess2015; @eiserbeck2020] and objects [e.g., @abdelrahman2008; @gauthier2003; @weller2019]. Despite this wealth of empirical evidence, critics of the idea that cognitive functions can penetrate perception have remained skeptical and pointed out important methodological shortcomings in large parts of this literature [@firestone2016; @machery2015].
-They argue, for example, that most behavioral paradigms have not been able to discern between perceptual and post-perceptual (e.g., memory-related) effects.
-Furthermore, cognitive influences in some studies were confounded with differences in the low-level visual input itself.
-We will revisit these and other potential pitfalls with regards to the present study in the Discussion section once we have laid out our methodology and results.
+Empirical findings from experimental psychology have accumulated support to the view that perception can indeed be penetrated by other aspects of cognition [for review, see @collins2014; @vetter2014].
+These aspects of cognition may include transient states such as emotions [e.g., @bocanegra2009; @phelps2016] or intentions [e.g., @balcetis2010; @cole2012] as well as learned capacities such as language [e.g., @boutonnet2015; @maier2018; @mo2011] or declarative knowledge about faces [e.g., @abdelrahman2011; @suess2015; @eiserbeck2020] and objects [e.g., @abdelrahman2008; @gauthier2003; @weller2019].
+Despite this wealth of empirical evidence, critics of the idea that cognitive functions can penetrate perception have remained skeptical and pointed out important methodological shortcomings in large parts of this literature [@firestone2016; @machery2015].
+They have argued, for example, that most behavioral paradigms had not been able to discern between perceptual and post-perceptual (e.g., memory-related) effects.
+Furthermore, cognitive influences in some studies had been confounded with differences in the low-level visual input itself.
+We will revisit these and other potential pitfalls with regards to the present study in the Discussion section once we have laid out our research methodology and results.
 
-In general, however, it is important to note that one productive way to circumvent at least some of these concerns is to use neurophysiological recording methods such as ERPs [@luck2014]: Their high temporal resolution allows for a direct test of which processing stages---perceptual and/or post-perceptual---are influenced by higher-level capacities such as semantic knowledge.
-This is made possible by the fact that when participants are presented with visual stimuli, their averaged brain responses show characteristic deflections (ERP components), each of them with its typical polarity (positive or negative), peak latency, spatial scalp distribution, and functional role(s).
+One productive way of alleviating at least some of these concerns is to use neurophysiological recording methods such as ERPs [@luck2014]: Their high temporal resolution allows for a relatively direct test of which processing stages---perceptual and/or post-perceptual---are influenced by higher-level capacities such as semantic knowledge.
+This is made possible by the fact that when participants are presented with visual stimuli, their averaged brain potentials show characteristic deflections (ERP components), each of them with its typical polarity (positive or negative), peak latency, spatial scalp distribution, and functional role(s).
 
 The visual P1 component of the ERP refers to a positive deflection peaking as early as 100--150 ms after stimulus onset at occipital channels.
-It is generated by multiple sources in the extrastriate cortices of the middle occipital and fusiform gyri [@dirusso2001; @mangun1995]. The P1 is thought to reflect the processing of low-level visual characteristics of the stimulus [e.g., size, luminance, and contrast; @dirusso2001; @luck2014; @johannes1995], which is why it being modulated by higher-level cognitive capacities would challenge a purely bottom-up, encapsulated view of visual perception. It is well-established that the P1 is enhanced when participants pay attention to the spatial location of a stimulus [@luck2000; @mangun1995; @mangun1991] but there is also more recent evidence for higher-level cognitive influences that go beyond spatial attention (see below).
+It is generated by multiple sources in the extrastriate cortices of the middle occipital and fusiform gyri [@dirusso2001; @mangun1995].
+The P1 is thought to reflect the processing of low-level visual characteristics of the stimulus [e.g., size, luminance, and contrast; @dirusso2001; @luck2014; @johannes1995], which is why it being modulated by higher-level cognitive capacities would challenge a purely bottom-up, encapsulated view of visual perception.
+It is well-established that the P1 is enhanced when participants pay attention to the spatial location of a stimulus [@luck2000; @mangun1995; @mangun1991] but there is also more recent evidence for higher-level cognitive influences that go beyond spatial attention (see below).
 
 The visual N170 (or N1) component refers to the negative deflection following the P1 and is maximal around 150--200 ms after stimulus onset at occipito-temporal channels.
-Just as the P1, it is influenced by visual parameters of the stimulus [@johannes1995] and by selective attention, especially when participants are required to discriminate between different visual stimuli [@vogel2000; @mangun1991]. The N170 is enlarged (i.e., more negative) in response to faces [@bentin1996; @rossion2011] and other visual stimuli for which one happens to be an expert [e.g., birds, dogs, or cars; @gauthier2003a; @tanaka2001]. This category selectivity seems to reflect both the processing of individual visual features of the respective objects (including faces) as well as the holistic configuration of these features [@eimer2011; @jacques2010; @rossion1999; @sagiv2001].
+Just as the P1, it is influenced by visual parameters of the stimulus [@johannes1995] and by selective attention, especially when participants are required to discriminate between different visual stimuli [@vogel2000; @mangun1991].
+The N170 is enlarged (i.e., more negative) in response to faces [@bentin1996; @rossion2011] and other visual stimuli for which one happens to be an expert [e.g., birds, dogs, or cars; @gauthier2003a; @tanaka2001].
+This category selectivity seems to reflect both the processing of individual visual features of the respective objects (including faces) as well as the holistic configuration of these features [@eimer2011; @jacques2010; @rossion1999; @sagiv2001].
 Thus, a modulation of the N170 by cognitive capacities such as knowledge would suggest these capacities having an influence on higher-level, holistic perception of the visual stimulus.
 
 Finally, the N400 component refers to more negative ERP amplitudes when stimuli require more as compared to less resources for semantic processing or integration [@kutas2011; @lau2008; @rabovsky2018].
 It begins approximately 300 ms after stimulus onset and is most pronounced at centro-parietal channels.
 A modulation of the N400 component by cognitive capacities such as knowledge can be taken as evidence for a post-perceptual influence on stimulus processing.
 
-Previous studies have focused on these and other ERP components to investigate which processing stages are indeed influenced by knowledge about visual objects [@abdelrahman2008; @gratton2009; @maier2014; @maier2019; @rossion2002; @rossion2004; @tanaka2001; @samaha2018; @weller2019]. Together, they suggest that not only higher-level ERPs like the semantic N400 component are influenced by acquiring information about objects, but also earlier components that typically reflect bottom-up visual processing. This was the case, for instance, when participants were presented with a range of unfamiliar objects, receiving in-depth verbal descriptions about their function for half of the objects and irrelevant verbal information (i.e., cooking recipes) for the other half of the objects [@abdelrahman2008, Experiment 1]. After this learning phase, the same objects were presented in three different ERP tasks which did not require explicit access to any of the learned semantic information. In all three tasks, ERP amplitudes in response to objects for which in-depth knowledge had been acquired differed from those in response to objects for which this had not been the case. These differences occurred not just in the N400 component, indexing a modulation of post-perceptual semantic processing, but also in the P1 component, suggesting a top-down modulation of lower-level perceptual processing. Interestingly, the ERPs observed for previously unfamiliar objects with newly acquired in-depth knowledge were qualitatively similar to those for untrained but well-known objects. The modulation of the P1 component has recently been replicated when the same objects were presented under circumstances of limited attentional resources in an attentional blink paradigm [@weller2019].
-In this study, the (neurophysiological) differences in P1 amplitudes between objects with in-depth versus minimal knowledge were correlated with (behavioral) differences in their detection rate during the attentional blink.
+Previous studies have focused on these ERP components to investigate which processing stages are indeed influenced by knowledge about visual objects [@abdelrahman2008; @gratton2009; @maier2014; @maier2019; @rossion2002; @rossion2004; @tanaka2001; @samaha2018; @weller2019].
+Together, they suggest that not only higher-level ERPs like the semantic N400 component are influenced by acquiring information about objects, but also earlier components that are typically taken to reflect bottom-up visual processing.
+This was the case, for instance, when participants were presented with a range of unfamiliar objects, receiving in-depth verbal descriptions about their function for half of the objects and irrelevant verbal information (i.e., cooking recipes) for the other half of the objects [@abdelrahman2008, Experiment 1].
+After this learning phase, the same objects were presented in three different ERP tasks which did not require explicit access to any of the learned semantic information.
+In all three tasks, ERP amplitudes in response to objects for which in-depth knowledge had been acquired differed from those in response to objects for which this had not been the case.
+These differences occurred not just in the N400 component, indexing a modulation of post-perceptual semantic processing, but also in the P1 component, suggesting a top-down modulation of lower-level perceptual processing.
+Interestingly, the ERPs observed for previously unfamiliar objects with newly acquired in-depth knowledge were qualitatively similar to those for untrained but well-known objects.
+The modulation of the P1 component has recently been replicated when the same objects were presented under circumstances of limited attentional resources in an attentional blink paradigm [@weller2019].
+In this study, the (neurophysiological) differences in P1 amplitudes between objects with in-depth versus minimal knowledge were correlated with (behavioral) differences in how likely participants were able to detect the objects during the attentional blink.
 This can be taken as further evidence for an influence of semantic knowledge on the early visual perception of unfamiliar objects.
 
-A complementary approach has been taken in a recent study investigating the ERPs in response to familiar (rather than unfamiliar) objects which were rendered difficult to recognize by converting them to two-tone, "Mooney" images [@samaha2018, Experiment 4].
+A complementary approach has been taken in a recent study that investigated ERPs in response to familiar (rather than unfamiliar) objects that were rendered difficult to recognize by converting them to two-tone, "Mooney" images [@samaha2018, Experiment 4].
 In this experiment, participants were trained with meaningful verbal cues, telling them what kind of objects they should look for in the images, or with a non-meaningful perceptual task, familiarizing them with the images but not with their semantic content.
 When the EEG was measured in a delayed matching task later on, the two types of training led to differential effects, again suggesting a modulation of lower-level visual perception: Over left posterior electrodes, P1 amplitudes were larger and alpha-band power was higher for meaning-trained images than for perceptually-trained images.
-As before, this effect of perceiving objects in a semantically informed way seems to be behaviorally relevant, as participants tended respond faster and more accurately to meaning-trained as compared to perceptually-trained images in the matching task.
+As before, this effect of perceiving objects in a semantically informed way seemed to be behaviorally relevant because participants tended respond faster and more accurately to meaning-trained as compared to perceptually-trained images in the delayed matching task.
 This alternative approach further corroborates an early influence of semantic information on the visual perception of objects.
 
-All the previously mentioned studies have in common that they investigated the effects of semantic knowledge on the visual perception of objects only *after* an extensive learning phase had taken place [@abdelrahman2008; @gauthier2003; @maier2014; @maier2019; @rossion2002; @rossion2004; @samaha2018; @weller2019]. Participants performed one or multiple training sessions during which they encountered each object together with its respective label or description multiple times. The EEG was usually not measured---or at least not analyzed and reported---during these training sessions, which sometimes took place on a separate day [@abdelrahman2008; @maier2014; @maier2019] or were spread out across multiple days or weeks [@rossion2002; @rossion2004].
+All the previously mentioned studies have in common that they investigated the effects of semantic knowledge on the visual perception of objects only *after* an extensive learning phase had taken place [@abdelrahman2008; @gauthier2003; @maier2014; @maier2019; @rossion2002; @rossion2004; @samaha2018; @weller2019].
+Participants performed one or multiple training sessions during which they encountered each object together with its respective label or description multiple times.
+The EEG was usually not measured---or at least not analyzed and reported---during these training sessions, which sometimes took place on a separate day [@abdelrahman2008; @maier2014; @maier2019] or were spread out across multiple days or weeks [@rossion2002; @rossion2004].
 While experimental designs with such substantive training maximize the chances of detecting even subtle top-down effects of the knowledge acquired, they leave at least three conceptual questions unresolved.
 
 The first question is if we can detect any electrophysiological correlates of *semantic insight*, that is, the critical presentation during which an understanding of the previously unfamiliar object is happening (instead of asking if this understanding leads to differential effects in an orthogonal task later on).
 The second question is how much learning is actually necessary before reliable top-down effects of knowledge on ERP amplitudes can be obtained: Does it actually take dozens of repetitions per object or may a single exposure to the object together with the relevant semantic information be enough?
-The third and closely related question is about the nature of the effects of knowledge on perception: Are they reflecting genuine top-down effects of the semantic system altering perception online (while the object is being perceived), or do they merely reflect the (re-)activation of stored representations of the objects which have been altered over the course of the learning process?
+The third and closely related question is about the nature of the effects of knowledge on perception: Are they reflecting genuine top-down effects of the semantic system altering perception online (while the object is being perceived), or do they merely reflect the (re-)activation of stored representations of the objects that have been altered over the course of the learning process?
 By measuring the ERPs before, during, and after participants received semantic hints about unfamiliar objects, we were able to provide tentative answers to all three of these questions.
 
-In this experiment, participants were presented with real-world objects that were presumed to be unfamiliar to most of them.
+In the present experiment, participants were presented with real-world objects that were presumed to be unfamiliar to most of them.
 They first viewed each of these objects without any semantic information.
 This first part served as a naive baseline to rule out that ERPs would differ in response to the objects based solely on low-level visual differences.
 Next, participants viewed each unfamiliar object for a second time, now preceded by verbal keywords.
@@ -166,38 +196,36 @@ During this second part, we were able to measure the online influence of semanti
 Finally, the objects were presented for a third time (without keywords, as in the first part) to investigate downstream effects of having acquired semantic knowledge about them---thereby mimicking previous studies [e.g., @abdelrahman2008; @samaha2018; @weller2019].
 In all three parts, we examined the influence of semantic information on ERPs associated with lower-level visual perception (P1 component, 100--150 ms), higher-level visual perception (N170 component, 150--200 ms), and semantic processing (N400 component, 400--700 ms).
 
-# Experiment 1
+# Materials and Methods
 
-## Method
+## Participants
 
-### Participants
-
-Participants were 48 German native speakers (31 female, 17 male) with a mean age of 23.5 years (range 18 to 32) and no history of psychological disorder or treatment.
+Participants were 48 German native speakers (31 female, 17 male) with a mean age of 23.5 years (range 18--32) and no history of psychological disorder or treatment.
 No a priori power analysis was carried out and the sample size was chosen in line with previous EEG studies on object processing in our lab.
 All participants were right-handed according to the Edinburgh inventory [@oldfield1971] and reported normal or corrected-to-normal vision.
-They gave written informed consent before starting the experiment and received a compensation of €8 per hour for participating.
+They provided written informed consent before starting the experiment and received a compensation of €8 per hour for participating.
 
-### Materials
+## Materials
 
-Stimuli for this experiment consisted of 240 grayscale photographs of real-world objects.
+Stimuli consisted of 240 grayscale photographs of real-world objects.
 Of these, 120 were well-known everyday objects (e.g., a bicycle, a toothbrush) and served as filler stimuli of no interest.
 The other 120 were rare objects presumed to be unfamiliar to the majority of participants (e.g., a galvanometer, an udu drum; see Appendix A for a full list).
 All stimuli were presented on a light blue background with a size of 207 × 207 pixels on a 19-inch LCD monitor with a resolution of 1,280 × 1,024 pixels and a refresh rate of 75 Hz.
-At a standardized viewing distance of 90 cm, the images of the objects subtended approximately 3.9 degrees of participants' horizontal and vertical visual angle.
+At a standardized viewing distance of 90 cm, the images subtended approximately 3.9 degrees of participants' horizontal and vertical visual angle.
 
 For each unfamiliar object, a pair of German keywords---a noun and a verb---was selected, describing the typical function or use of the object in a way that could typically be related to its visual features and their configuration (e.g., voltage, measuring; clay pot, drumming).
-As the central experimental manipulation, the presentation of half of the objects was preceded by keywords that correctly matched their respective function, whereas the presentation of the other half of the objects was preceded by non-matching keywords belonging to one of the other objects.
-The matching keywords were expected to induce semantically informed perception (i.e., participants suddenly understanding what kind of object they were viewing), whereas the non-matching keywords were expected to hamper such an understanding and keep the perception of the object semantically naive.
+As our central experimental manipulation, the presentation of half of the objects was preceded by keywords that correctly matched their respective function, whereas the presentation of the other half of the objects was preceded by non-matching keywords belonging to one of the other objects.
+The matching keywords were expected to induce semantically informed perception (i.e., participants suddenly understanding what kind of object they were viewing), whereas the non-matching keywords were expected to prevent such an understanding and keep the perception of the object semantically naive.
 All participants saw each unfamiliar object with only one type of keywords (matching or non-matching).
 This assignment of keywords to objects was counterbalanced across participants so that each object was presented with matching keywords (leading to semantically informed perception) and non-matching keywords (leading to naive perception) to an equal number of participants.
 The experiment was programmed and displayed using Presentation® software (Neurobehavioral Systems, Inc., Berkeley, CA, www.neurobs.com).
 
-### Procedure
+## Experimental Design
 
-The experiment consisted of three parts (see Figure \@ref(fig:exp1-plot)A).
+The experiment consisted of three parts (see Figure \@ref(fig:fig1)A).
 In the *pre-insight* part, after written informed consent had been obtained and the EEG had been prepared, all 240 familiar and unfamiliar objects were presented once in random order and without any keywords.
 Each trial consisted of a fixation cross presented in the middle of the screen for 0.5 s, followed by the presentation of the object until participants made a response or until a time out after 3 s.
-The inter-trial interval until the presentation of the next fixation cross was 0.5 s and participants took a self-timed break after each block of 60 objects.
+The inter-trial interval was 0.5 s and participants took a self-timed break after each block of 60 objects.
 The task, which was kept the same across all three parts, was to classify each object using one of four response alternatives: (a) "I know what this is or have a strong assumption," (b) "I have an assumption what this is," (c) "I have rather no assumption what this is," or (d) "I don't know what this is and have no assumption." Participants were asked to respond as quickly and as accurately as possible by pressing one out of four buttons with the index or middle finger of their left or right hand, respectively.
 The mapping of the rating scale to the four buttons (left to right or right to left) was counterbalanced across participants.
 
@@ -215,7 +243,7 @@ fname_log <- c(
 # Generate new BIDS-style subject IDs
 seq(length(fname_vhdr)) %>%
   str_pad(width = 2, pad = 0) %>%
-  paste0("sub-", .) -> subject_id
+  str_c("sub-", .) -> subject_id
 
 # Define ERP components of interest
 erp_components <- tibble(
@@ -271,7 +299,7 @@ if (rerun_preprocessing) {
 
   # Combine single trial data for all subjects
   dir.create("results")
-  paste0("data/preprocessed/", subject_id, "_trials.csv") %>%
+  str_c("data/preprocessed/", subject_id, "_trials.csv") %>%
     map(read_csv, col_types = cols()) %>%
     bind_rows() %>%
     write_csv(fnames$trials)
@@ -281,7 +309,7 @@ if (rerun_preprocessing) {
     select(-c(part, condition, subject_id, time, freq)) %>%
     colnames() -> ch_names
   import("mne.channels._standard_montage_utils")$MONTAGE_PATH %>%
-    paste0("/easycap-M1.txt") %>%
+    str_c("/easycap-M1.txt") %>%
     read_tsv(col_types = cols()) %>%
     rename(electrode = Site) %>%
     inner_join(tibble(electrode = ch_names), ., by = "electrode") %>%
@@ -304,17 +332,13 @@ if (rerun_preprocessing) {
 ```
 
 ```{python, grand_averaging, eval=rerun_preprocessing}
-from os import makedirs
-
 import numpy as np
 import pandas as pd
 
-# Create output folder
-makedirs("data/processed", exist_ok=True)
-
 # Read evoked *potentials* for all subjects
-ave = [f"data/preprocessed/{sub}_ave.csv" for sub in r.subject_id]
-ave = [pd.read_csv(fname) for fname in fname_ave]
+subs = r.subject_id
+fnames_ave = [f"data/preprocessed/{sub}_ave.csv" for sub in subs]
+ave = [pd.read_csv(fname) for fname in fnames_ave]
 ave = pd.concat(ave)
 
 # Average across subjects
@@ -323,8 +347,8 @@ ave = ave.groupby(id_vars, as_index=False).mean()
 ave.to_csv(r.fnames["ave_grand"], float_format="%.3f", index=False)
 
 # Read evoked *power* for all subjects
-ave_tfr = [f"data/preprocessed/{sub}_tfr-ave.csv" for sub in r.subject_id]
-ave_tfr = [pd.read_csv(fname) for fname in fname_ave_tfr]
+fnames_ave_tfr = [f"data/preprocessed/{sub}_tfr-ave.csv" for sub in subs]
+ave_tfr = [pd.read_csv(fname) for fname in fnames_ave_tfr]
 ave_tfr = pd.concat(ave_tfr)
 
 # # Subject 18 is weird!
@@ -360,12 +384,11 @@ del df, dfs, ave, ave_tfr, ave_tfr_diff, ave_tfr_flat
   as.list())
 
 # Read single trial data for all subjects
-paste0("data/preprocessed/", subject_id, "_trials.csv") %>%
+str_c("data/preprocessed/", subject_id, "_trials.csv") %>%
   map(read_csv, col_types = cols()) %>%
   bind_rows() %>%
   mutate(
     part = factor(part, levels = c("I", "II", "III")),
-    condition = factor(condition, levels = c("Informed", "Naive")),
     subject_id = factor(subject_id),
     item_id = factor(item_id),
     RT = ifelse(RT < 200, NA, RT),
@@ -388,10 +411,16 @@ cbind(c("I" = -1, "II" = 1, "III" = 0), c("I" = 0, "II" = -1, "III" = 1)) %>%
   t() %>%
   ginv() -> contrasts(trials$part)
 
+# Remove irrelevant conditions for main analysis
+trials_main <- mutate(
+  trials,
+  condition = factor(condition, levels = c("Informed", "Naive")),
+)
+
 # Contrast coding for conditions
 c("Informed" = 1, "Naive" = -1) %>%
   t() %>%
-  ginv() -> contrasts(trials$condition)
+  ginv() -> contrasts(trials_main$condition)
 
 # Load fitted models or rerun them
 if (!rerun_model_fitting) {
@@ -400,33 +429,26 @@ if (!rerun_model_fitting) {
   models_lme <- readRDS(fnames$models_lme)
 } else {
 
-  # Compute models for dependent variables in parallel
-  dvs <- c("logRT", "P1", "N170", "N400")
-  map(dvs, function(dv) {
+  # Define function for building a single mixed-effect model
+  build_lme <- function(dep, formula, data, n_cores) {
 
-    # Define model formula
-    formula_dv <- paste0(
-      dv, " ~ part * condition +
-        (part * condition | subject_id) +
-        (part * condition | item_id)"
-    ) %>% formula()
-
-    # Define follow-up comparisons
-    specs <- pairwise ~ condition | part
+    # Convert formula to terms list
+    formula <- tabulate.formula(formula)
 
     # Automic model selection via likelihood ratio tests
     # using an alpha level of .20 (see Matuschek et al., 2017, J Mem Lang)
     cl <- makeCluster(n_cores)
     build <- buildmer(
-      formula = formula_dv,
-      data = trials,
       buildmerControl = buildmerControl(
+        formula,
+        data,
         direction = c("backward", "backward"),
         cl = cl,
         crit = "LRT",
         elim = function(logp) exp(logp) >= .20,
         calc.anova = TRUE,
         ddf = "Satterthwaite",
+        dep = dep,
         REML = FALSE,
       ),
       control = lmerControl(optimizer = "bobyqa", optCtrl = list(maxfun = 1e6))
@@ -435,6 +457,7 @@ if (!rerun_model_fitting) {
 
     # Compute follow-up comparisons
     emm_options(lmer.df = "Satterthwaite", lmerTest.limit = Inf)
+    specs <- pairwise ~ condition | part
     em <- emmeans(build@model, specs, infer = TRUE)
 
     # Return a list of relevant model outputs
@@ -447,14 +470,25 @@ if (!rerun_model_fitting) {
         contrasts = as.data.frame(em$contrasts)
       )
     )
-  }) %>%
-    # Save
-    set_names(dvs) %T>%
+  }
+
+  # Compute models for all dependent variables in parallel
+  form <- RT ~ part * condition +
+    (part * condition | subject_id) +
+    (part * condition | item_id)
+  map(
+    deps,
+    build_lme,
+    formula = form,
+    data = trials_main,
+    n_cores = n_cores
+  ) %>%
+    set_names(deps) %T>%
     saveRDS(fnames$models_lme) -> models_lme
 }
 ```
 
-```{r, models_brm}
+```{r, models_brm, eval=FALSE}
 # Theme for plots
 bayesplot_theme_update(text = element_text(family = "Helvetica", size = 10))
 color_scheme_set("purple")
@@ -499,14 +533,14 @@ fit_brm_prior <- brm(
 # Prior predictive checks for population-level parameters
 prior_summary(fit_brm_prior)
 summary(fit_brm_prior)
-mcmc_plot(fit_brm_prior, "areas", pars = "^b_", prob_outer = 0.95)
+# mcmc_plot(fit_brm_prior, "areas", pars = "^b_", prob_outer = 0.95)
 
 # Compute posterior distributions for dependent variables
-dvs <- c("logRT", "P1", "N170", "N400")
-map(dvs, function(dv) {
+deps <- c("logRT", "P1", "N170", "N400")
+map(deps, function(dv) {
 
   # Define model formula for the current dependent variable
-  formula_dv <- paste0(
+  formula_dv <- str_c(
     dv, " ~ part * condition +
       (part * condition | subject_id) +
       (part * condition | item_id)"
@@ -540,38 +574,38 @@ map(dvs, function(dv) {
     )
   )
 }) %>%
-  set_names(dvs) -> models_brm
+  set_names(deps) -> models_brm
 
 # Posterior predictive checks for population-level parameters
 example_model <- models_brm$N400
 example_model$summary
 example_model$hypotheses
-mcmc_plot(example_model$model, "areas", pars = "^b_", prob_outer = 0.95) +
-  theme(text = element_text(family = "Helvetica", size = 10))
+# mcmc_plot(example_model$model, "areas", pars = "^b_", prob_outer = 0.95) +
+#   theme(text = element_text(family = "Helvetica", size = 10))
 
-# Posterior predictive checks subject by subject
-pp_check(
-  example_model$model,
-  type = "dens_overlay_grouped",
-  nsamples = 50,
-  group = "subject_id"
-)
-pp_check(
-  example_model$model,
-  type = "stat_grouped",
-  nsamples = 1000,
-  group = "subject_id",
-  stat = "sd"
-)
+# # Posterior predictive checks subject by subject
+# pp_check(
+#   example_model$model,
+#   type = "dens_overlay_grouped",
+#   nsamples = 50,
+#   group = "subject_id"
+# )
+# pp_check(
+#   example_model$model,
+#   type = "stat_grouped",
+#   nsamples = 1000,
+#   group = "subject_id",
+#   stat = "sd"
+# )
 ```
 
 ```{r, fig1, include=TRUE, fig.height=11, fig.cap = "(ref:fig1_caption)"}
 # Load montage and evoked data
 montage <- read_csv(fnames$montage, col_types = cols())
-evokeds <- read_csv(fnames$ave_grand, col_types = cols())
+evokeds <- read_csv(fnames$ave_grand, col_types = cols(), progress = FALSE)
 
 # Create plot for Experiment 1
-plot_fig1(erp_components, evokeds, trials, models_lme)
+plot_fig1(erp_components, evokeds, trials_main, models_lme)
 ```
 
 (ref:fig1_caption) Procedure and Results of Experiment 1\smallskip
@@ -581,86 +615,84 @@ plot_fig1(erp_components, evokeds, trials, models_lme)
 The papaja package does not yet deal with the placement of figure captions above rather than below the figures. Therefore, we manually need to post-process the .tex file, moving the caption{} above includegraphics{} and copying the figure note manually below includegraphics{}:
 
 \bigskip\small\textit{Note.} 
-(A) In the pre-insight part, participants were presented with 120 unfamiliar objects and indicated whether they knew what kind of object they were viewing. In the insight part, half of these objects were presented with matching keywords (in purple color for illustration), leading to semantically informed perception, and the other half with non-matching keywords (in petrol color for illustration), leading to naive perception. In the post-insight part, the same objects were presented again without the keywords. (B) ERP waveforms and scalp topographies are shown for objects with semantically informed versus naive perception within the three different parts. Semantically informed perception was associated with significantly more negative amplitudes in the N170 component in the insight part, significantly less negative amplitudes in the N400 component in the insight and post-insight parts, and significantly more positive amplitudes in the P1 component in the post-insight part. Ampl. = amplitude.\newline
+(A) In the pre-insight part, participants were presented with 120 unfamiliar objects and indicated whether they knew what kind of object they were viewing.
+In the insight part, half of these objects were presented with matching keywords (in purple color for illustration), leading to semantically informed perception, and the other half with non-matching keywords (in petrol color for illustration), leading to naive perception.
+In the post-insight part, the same objects were presented again without the keywords.
+(B) ERP waveforms and scalp topographies are shown for objects with semantically informed versus naive perception within the three different parts.
+Semantically informed perception was associated with more negative amplitudes in the N170 component during the insight part, less negative amplitudes in the N400 component during the insight and post-insight parts, and more positive amplitudes in the P1 component during the post-insight part. Ampl. = amplitude.\newline
 *\textit{p} \textless{} .05. **\textit{p} \textless{} .01. ***\textit{p} \textless{} .001.
 
 -->
 
-In the *insight* part, the 120 unfamiliar objects were presented for a second time, now preceded either by matching keywords (leading to semantically informed perception) or by non-matching keywords (leading to naive perception).
+In the *insight* part, the 120 unfamiliar objects were presented for the second time, now preceded either by matching keywords (leading to semantically informed perception) or by non-matching keywords (leading to naive perception).
 Each trial consisted of a fixation cross presented for 0.5 s, followed by the presentation of the keywords for 2.5 s.
 Then, an asterisk was presented in the middle of the screen for another 0.5 s, followed by the presentation of the object until a response was made or until a time out after 3 s.
 The objects were presented in blocks of 30 trials so that within each block (a) there were 15 objects from each of the two experimental conditions and (b) objects were heterogeneous in terms of their shape, visual complexity, and functional category (e.g., medical devices, musical instruments).
 
-Finally, in the *post-insight* part, the unfamiliar objects were presented for a third time with an identical trial structure as in the pre-insight part, that is, without any keywords.
-Note that the insight and post-insight parts were presented in an interleaved fashion so that after the presentation of one block of 30 objects in the insight part (with keywords), participants took a self-timed break and continued with the same block of 30 objects in the post-insight part (without keywords) before moving on to the next block consisting of 30 different objects.
+In the *post-insight* part, the unfamiliar objects were presented for a third time with the same trial structure as in the pre-insight part, that is, without any keywords.
+The insight and post-insight parts were presented in an interleaved fashion so that after the presentation of one block of 30 objects in the insight part (with keywords), participants took a self-timed break and continued with the same block of 30 objects in the post-insight part (without keywords) before moving on to the next block consisting of 30 different objects.
 They continued like this until all four blocks were completed in both parts.
 In total, the experiment consisted of 480 trials (120 familiar objects in the pre-insight part and 120 unfamiliar objects in the pre-insight, insight, and post-insight parts).
 It took participants approximately 35 minutes to complete.
 
-### EEG Recording and Preprocessing
+## EEG Recording and Preprocessing
 
 The continuous EEG was recorded from 62 Ag/AgCl scalp electrodes placed according to the extended 10--20 system [@americanelectroencephalographicsociety1991] and referenced online to an external electrode placed on the left mastoid (M1).
 Two additional external electrodes were placed on the right mastoid (M2) and below the left eye (IO1), respectively.
-During the recording, electrode impedance was kept below 5 kΩ.
+Electrode impedances were kept below 5 kΩ.
 An online band-pass filter with a high-pass time-constant of 10 s (0.016 Hz) and a low-pass cutoff frequency of 1000 Hz was applied before digitizing the signal at a sampling rate of 500 Hz.
 
-Offline, the data were preprocessed using the MNE software [Version `r system("mne --version", intern = TRUE) %>% str_remove("MNE ")`; @gramfort2013] in Python [Version `r system("python3 --version", intern = TRUE) %>% str_remove("Python ")`; @vanrossum2009].
+The data were preprocessed offline using the MNE software [Version `r system("mne --version", intern = TRUE) %>% str_remove("MNE ")`; @gramfort2013] in Python [Version `r system("python3 --version", intern = TRUE) %>% str_remove("Python ")`; @vanrossum2009].
 First, all scalp electrodes were re-referenced to the common average.
 Next, artifacts resulting from blinks and eye movements were removed using independent component analysis (ICA).
-The first 15 components were extracted by the FastICA algorithm [@hyvärinen1999] after temporarily low-pass filtering the data at 1 Hz.
-Any components showing substantive correlations with either of two virtual EOG channels (VEOG: IO1 - Fp1, HEOG: F9 - F10) were removed automatically using the *find_bads_eog* function.
+The first 15 components were extracted with the FastICA algorithm [@hyvärinen1999] after temporarily low-pass filtering the data at 1 Hz.
+Any components showing substantive correlations with either of two virtual EOG channels (VEOG: IO1 - Fp1, HEOG: F9 - F10) were removed automatically using the `find_bads_eog` function.
 After artifact correction, a zero-phase, non-causal FIR filter with a lower pass-band edge at 0.1 Hz (transition bandwidth: 0.1 Hz) and an upper pass-band edge at 30 Hz (transition bandwidth: 7.5 Hz) was applied.
-Next, the continuous EEG was epoched into segments of 2 s, starting 500 ms before the onset of the visual presentation of each unfamiliar object.
+Next, the continuous EEG was epoched into segments of 2 s, starting 500 ms before the onset of the presentation of each unfamiliar object.
 The epochs were baseline-corrected by subtracting the average voltage during the 200 ms before stimulus onset.
 Epochs containing artifacts despite ICA, defined as peak-to-peak amplitudes exceeding 200 µV, were removed from further analysis.
-This led to the exclusion of an average of `r format(round(mean(rejected), 1), nsmall = 1)` trials per participant (= `r percent(mean(rejected) / 360, accuracy = 0.1)`; range `r min(rejected)` to `r max(rejected)` trials).
-Single-trial event-related potentials were computed as the mean amplitude across time windows and regions of interests (ROIs) defined a priori, namely 100--150 ms after object onset at electrodes PO3, PO4, POz, O1, O2, and Oz for the P1 component, 150--200 ms after object onset at electrodes P7, P8, PO7, PO8, PO9, and PO10 for the N170 component, and 400--700 ms after object onset at electrodes C1, C2, Cz, CP1, CP2, and CPz for the N400 component (for the positions of these electrodes on the scalp, see the topographies in Figure \@ref(fig:exp1-plot)B).
+This led to the exclusion of an average of `r format(round(mean(rejected), 1), nsmall = 1)` trials per participant (= `r percent(mean(rejected) / 360, accuracy = 0.1)`; range `r min(rejected)`--`r max(rejected)` trials).
+Single-trial event-related potentials were computed as the mean amplitude across time windows and regions of interests (ROIs) defined a priori, namely 100--150 ms after object onset at electrodes PO3, PO4, POz, O1, O2, and Oz for the P1 component, 150--200 ms after object onset at electrodes P7, P8, PO7, PO8, PO9, and PO10 for the N170 component, and 400--700 ms after object onset at electrodes C1, C2, Cz, CP1, CP2, and CPz for the N400 component.
 
-### Statistical Analysis
+## Statistical Analyses
 
-First, because we were interested in the effects of knowledge on perceiving *unfamiliar* objects only, we excluded objects from all further analyses when participants classified them as being known in the pre-insight part (i.e., before any keywords were presented).
+First, we excluded from all further analyses those objects for which the participant had responded with "I know what this is" in the pre-insight part (i.e., before any keywords were presented).
 This led to the exclusion of an average of `r format(round(obj_per_cond[["Excl_known"]], 1), nsmall = 1)` objects per participant (= `r percent(obj_per_cond[["Excl_known"]] / 120, accuracy = 0.1)` of all unfamiliar objects).
-Next, to clearly delineate semantically informed and naive perception, the assignment of all other objects to one of these two conditions for statistical analysis was co-determined by our experimental manipulation (matching versus non-matching keywords in the insight part) and the behavioral responses of the participants themselves (see Figure \@ref(fig:exp1-plot)A).
-Objects were assigned to the semantically informed condition only if they were presented with matching keywords *and* if participants indicated knowing what the object was or having an assumption.
+Next, to delineate semantically informed and naive perception, the assignment of all other objects to one of these two conditions was co-determined by our experimental manipulation (matching versus non-matching keywords in the insight part) and the behavioral responses of the participant (see Figure \@ref(fig:fig1)A).
+Objects were assigned to the semantically informed condition only if they were presented with matching keywords *and* if the participant indicated knowing what the object was or having an assumption.
 This was the case for an average of `r format(round(obj_per_cond[["Informed"]], 1), nsmall = 1)` objects per participant (= `r percent(obj_per_cond[["Informed"]]/60, accuracy = 0.1)` of objects presented with matching keywords).
-Complementarily, objects were assigned to the naive condition only if they were presented with non-matching keywords *and* if participants indicated not knowing what the object was or having rather no assumption.
+Complementarily, objects were assigned to the naive condition only if they were presented with non-matching keywords *and* if the participant indicated not knowing what the object was or having rather no assumption.
 This was the case for an average of `r format(round(obj_per_cond[["Naive"]], 1), nsmall = 1)` objects per participant (= `r percent(obj_per_cond[["Naive"]]/60, accuracy = 0.1)` of objects presented with non-matching keywords).
-Although this assignment was based on the manipulation and responses in the second part---when insight was thought to occur---the same assignment was used to analyze the data from the other two parts.
+The same assignment of objects to conditions (based on the manipulation and responses in the insight part) was also used for analyzing the pre-insight and post-insight parts.
 This allowed us to test, on the one hand, if the objects from both conditions differed in important aspects even before any keywords were presented (pre-insight part) and, on the other hand, if the semantic understanding acquired in the insight part had any down-stream effects on the subsequent perception of the objects (post-insight part).
 
-The event-related potentials in response to objects from both conditions and all three parts were analyzed on the single trial level using linear mixed-effects regression models [@baayen2008; @frömer2018]. For the purpose of the present study, these models have at least three desirable properties compared to traditional approaches such as analyses of variance (ANOVAs) performed on by-participant averages. First, they can leverage all of the information that is present in the data set on the single trial level, some of which would be lost when computing averages. Second, they can account simultaneously for the non-independence of data points coming from the same participant and/or from the same item. In contrast, the neglect of the item as a random variable in by-participant ANOVAs can lead to anti-conservative test statistics and strictly does not allow for inferences beyond the stimulus set under study [@bürki2018; @judd2012]. Finally, mixed-effects models can flexibly deal with unbalanced designs in which the number of trials differs across (combinations of) conditions. Such a situation is inevitable when the assignment of trials to conditions is co-determined by the experimental manipulation and the behavior of participants in response to this manipulation [e.g., @fröber2017].
+The event-related potentials in response to objects from both conditions and all three parts were analyzed on the single trial level using linear mixed-effects regression models [@baayen2008; @frömer2018].
+Compared to traditional by-participant or by-item analyses of variance, these models allow tighter control over the false positive rate because they simultaneously account for by-participant and by-item non-independencies in the data [@bürki2018; @judd2012]. Furthermore, they flexibly handle unbalanced data which in our case arose from the rejection of ERP epochs as well as the way we constructed our experimental conditions (see above). 
 
 Three separate models were computed predicting P1, N170, and N400 mean amplitudes, respectively.
-All models included three fixed effects: (a) the part of the experiment, coded as a repeated contrast (i.e., subtracting the first from the second part and the second from the third part, the intercept being the grand mean across all three parts), (b) the condition of the object, coded as a scaled sum contrast (i.e., subtracting the naive condition from the semantically informed condition, the intercept being the grand mean across both conditions), and (c) the two-way interaction of part and condition.
-For details on these and other contrast coding schemes in linear (mixed-effects) models, please refer to @schad2020. To determine the random effects structure, we always started with a maximal model containing by-participant and by-item random intercepts and random slopes for all fixed effects [@barr2013].
-We then performed a model selection algorithm as proposed by @matuschek2017 in order to increase statistical power and avoid overparameterization: Iteratively, each random effect was removed and the resulting, more parsimonious model was compared to the previous, more complex model by means of a likelihood ratio test. Only if the parsimonious model explained the data equally well as the complex model [determined by *p* ≥ .20; @matuschek2017] did we leave the random effect out, otherwise it was kept in the final model (see Appendix B for the formulas after model selection).
+All models included three fixed effects: (a) the part of the experiment, coded as a repeated contrast [i.e., subtracting the first part from the second part and the second part from the third part, the intercept being the grand mean across all three parts; @schad2020], (b) the condition of the object, coded as a scaled sum contrast (i.e., subtracting the naive condition from the semantically informed condition, the intercept being the grand mean across both conditions), and (c) the two-way interaction of part and condition.
+To determine the random effects structure, we always started with the maximal model containing by-participant and by-item random intercepts and random slopes for all fixed effects [@barr2013].
+We then performed a model selection algorithm proposed by @matuschek2017 to increase statistical power and avoid overparameterization: Iteratively, each random effect was removed and the resulting, more parsimonious model was compared to the previous, more complex model by means of a likelihood ratio test. Only if the parsimonious model explained the data similarly well as the complex model [determined by *p* ≥ .20; @matuschek2017] did we leave the random effect out, otherwise it was kept in the final model (see Appendix B for the resulting formulas after model selection).
 All models were computed in R [Version `r as.character(packageVersion("base"))`; @R-base] using the lme4 package [Version `r as.character(packageVersion("lme4"))`; @R-lme4].
-The optimizer function *bobyqa* with 20,000 iterations was used for maximum likelihood estimation.
+The optimizer function *bobyqa* with a maximum of 10^6^ iterations was used for maximum likelihood estimation.
 The model selection algorithm via likelihood ratio tests was performed using the buildmer package [Version `r as.character(packageVersion("buildmer"))`; @R-buildmer].
 
-Finally, to answer our research question of whether or not semantically informed perception had an influence on the ERP components within each part, planned follow-up comparisons were calculated, contrasting the semantically informed against the naive condition within the pre-insight, \mbox{insight}, and post-insight parts.
-This was achieved using the emmeans package [Version `r as.character(packageVersion("emmeans"))`; @R-emmeans].
+To investiage if semantically informed perception had an influence on the ERPs within each part, planned follow-up comparisons were calculated, contrasting the semantically informed condition against the naive condition within the pre-insight, insight, and post-insight parts.
+This was done using the emmeans package [Version `r as.character(packageVersion("emmeans"))`; @R-emmeans].
 All *p*-values were computed by approximating the relevant denominator degrees of freedom using Satterthwaite's method as implemented in the lmerTest package [Version `r as.character(packageVersion("lmerTest"))`; @R-lmerTest].
 
-The materials, single trial behavioral and ERP data, and all code for data analysis can be accessed via the Open Science Framework (<https://osf.io/uksbc/>).
-We are not able to share the raw EEG data openly because we did not obtain participants' informed consent to do so.
+The materials, single trial preprocessed data, and all code for data analysis are openly available at <https://osf.io/uksbc/>.
 
-## Results
-
-Single-trial ERPs were analyzed in response to unfamiliar objects before (pre-insight part), while (insight part), and after (post-insight part) participants obtained relevant semantic information about their function.
-In the insight part, half of the objects were preceded by matching keywords, fostering semantically informed perception.
-The other half were preceded by non-matching keywords, keeping the perception of the object semantically naive.
-The objects were analyzed according to this manipulation in combination with participants' self-report in the insight part (see Figure \@ref(fig:exp1-plot)A), thereby making sure that semantically informed and naive perception did indeed occur.
-The analysis focused on differences between these two conditions in the P1 component (100--150 ms) as an index of lower-level visual perception, the N170 component (150--200 ms) as index of higher-level visual perception, and the N400 component (400--700 ms) as an index of semantic processing.
+# Results
 
 ```{r, tab1, include=TRUE, results="asis"}
-# Create table of models for Experiment 1
-table_exp1 <- create_table(
-  models = models_lme,
+# Create table of LMM results
+tab1 <- create_table(
+  models = models_lme[c("P1", "N170", "N400")],
   stub_anova = c("Part", "Condition", "Pt. × con."),
   stub_contrasts = c("Pre-insight part", "Insight part", "Post-insight part"),
   caption = paste(
-    "Linear Mixed-Effects Regression Models for Experiment 1",
+    "Linear Mixed-Effects Regression Models",
     "\\smallskip"
   ),
   note = paste(
@@ -670,33 +702,32 @@ table_exp1 <- create_table(
 )
 ```
 
-Averaged across conditions, P1, N170, and N400 amplitudes differed as a function of the part of the experiment, all *F*s ≥ `r table_exp1$anov["Part", "P1_f"]`, all *p*s `r table_exp1$anov["Part", "P1_p"]` (see Table \@ref(tab:exp1-table)).
-In addition, N400 amplitudes differed between the informed and the naive condition averaged across the three parts of the experiment, *F*`r table_exp1$anov["Condition", "N400_df"]` = `r table_exp1$anov["Condition", "N400_f"]`, *p* = `r table_exp1$anov["Condition", "N400_p"]`.
-Crucially, the part × condition interaction was significant in the N170 component, *F*`r table_exp1$anov["Pt. × con.", "N170_df"]` = `r table_exp1$anov["Pt. × con.", "N170_f"]`, *p* = `r table_exp1$anov["Pt. × con.", "N170_p"]`, and in the N400 component, *F*`r table_exp1$anov["Pt. × con.", "N400_df"]` = `r table_exp1$anov["Pt. × con.", "N400_f"]`, *p* `r table_exp1$anov["Pt. × con.", "N400_p"]`, while also showing a weak statistical trend in the P1 component, *F*`r table_exp1$anov["Pt. × con.", "P1_df"]` = `r table_exp1$anov["Pt. × con.", "P1_f"]`, *p* = `r table_exp1$anov["Pt. × con.", "P1_p"]`.
+Averaged across conditions, P1, N170, and N400 amplitudes differed as a function of the part of the experiment, all *F*s ≥ `r fig1$anov["Part", "P1_f"]`, all *p*s `r fig1$anov["Part", "P1_p"]` (see Table \@ref(tab:tab1)).
+In addition, N400 amplitudes differed between the informed and the naive condition averaged across the three parts of the experiment, *F*`r fig1$anov["Condition", "N400_df"]` = `r fig1$anov["Condition", "N400_f"]`, *p* = `r fig1$anov["Condition", "N400_p"]`.
+Crucially, the part × condition interaction was significant in the N170 component, *F*`r tab1$anov["Pt. × con.", "N170_df"]` = `r tab1$anov["Pt. × con.", "N170_f"]`, *p* = `r tab1$anov["Pt. × con.", "N170_p"]`, and in the N400 component, *F*`r tab1$anov["Pt. × con.", "N400_df"]` = `r tab1$anov["Pt. × con.", "N400_f"]`, *p* `r tab1$anov["Pt. × con.", "N400_p"]` but not in the P1 component, *F*`r tab1$anov["Pt. × con.", "P1_df"]` = `r tab1$anov["Pt. × con.", "P1_f"]`, *p* = `r tab1$anov["Pt. × con.", "P1_p"]`.
 To answer our main research question, we decomposed these interactions into the differences between the semantically informed condition and the naive condition within the three different parts of the experiment.
 
-### ERPs Before Insight Was Occurring
+## ERPs Before Insight Was Occurring
 
-In the pre-insight part, when objects were unfamiliar to participants and presented without keywords, no differences emerged between the semantically informed and the naive condition in the P1, N170, or N400 component, all *p*s ≥ `r table_exp1$conts["Pre-insight part", "N400_p"]` (see Table \@ref(tab:exp1-table) and Figure \@ref(fig:exp1-plot)B).
+In the pre-insight part, when objects were unfamiliar to participants and presented without keywords, no differences emerged between the semantically informed and the naive condition in the P1, N170, or N400 component, all *p*s ≥ `r tab1$conts["Pre-insight part", "N400_p"]` (see Table \@ref(tab:tab1) and Figure \@ref(fig:fig1)B).
 On the one hand, this was to be expected given that the critical presentation of the keywords (leading to semantically informed vs. naive perception) had not yet taken place.
 On the other hand, the absence of reliable differences in this part can be taken as evidence---with the usual caveats when interpreting null effects---that any subsequent effect of the semantic information in the other two parts cannot be accounted for by visual differences between the objects in the two conditions.
 Although the presentation of matching or non-matching keywords for each object was counterbalanced across participants, the fact that different numbers of objects were assigned to the two conditions based on participants' self-report would have made it possible for such visual differences to emerge as a confounding factor.
 If they did, however, one would expect to detect these differences even before any keywords were presented, which was apparently not the case.
 
-### ERPs While Insight Was Occurring
+## ERPs While Insight Was Occurring
 
-In the insight part, half of the unfamiliar objects were presented with matching keywords (for forming the semantically informed condition) and the other half were presented with non-matching keywords (for forming the naive condition).
-When semantic information informed the perception of the object, the amplitude of the N170 component was significantly enlarged (i.e., more negative), *b* = `r table_exp1$conts["Insight part", "N170_est"]` µV, *p* = `r table_exp1$conts["Insight part", "N170_p"]`, and the amplitude of the N400 component was significantly reduced (i.e., less negative), *b* = `r table_exp1$conts["Insight part", "N400_est"]` µV, *p* `r table_exp1$conts["Insight part", "N400_p"]`, compared to when the object was viewed naively without relevant semantic information.
-As in the pre-insight part, there were no reliable differences in the P1 component, *b* = `r table_exp1$conts["Insight part", "P1_est"]` µV, *p* = `r table_exp1$conts["Insight part", "P1_p"]`.
+In the insight part, half of the unfamiliar objects were presented with matching keywords, leading to semanitcally informed perception, and the other half were presented with non-matching keywords, keeping the perceptio nof the objects semantically naive.
+During semantically informed perception, the amplitude of the N170 component was significantly enlarged (i.e., more negative), *b* = `r tab1$conts["Insight part", "N170_est"]` µV, *p* = `r tab1$conts["Insight part", "N170_p"]`, and the amplitude of the N400 component was significantly reduced (i.e., less negative), *b* = `r tab1$conts["Insight part", "N400_est"]` µV, *p* `r tab1$conts["Insight part", "N400_p"]`, compared to naive perception.
+As in the pre-insight part, there were no reliable differences in the P1 component, *b* = `r tab1$conts["Insight part", "P1_est"]` µV, *p* = `r tab1$conts["Insight part", "P1_p"]`.
 
-### ERPs After Insight Had Occurred
+## ERPs After Insight Had Occurred
 
 In the post-insight part, the unfamiliar objects were presented for a third time, again without the keywords (as in the pre-insight part).
-This allowed us to test if the semantic information had any lasting effects on the processing of the objects.
-As in the insight part, the N400 component remained significantly reduced during semantically informed as compared to naive perception, *b* = `r table_exp1$conts["Post-insight part", "N400_est"]` µV, *p* `r table_exp1$conts["Post-insight part", "N400_p"]`, whereas the effect in the N170 component did not reoccur, *b* = `r table_exp1$conts["Post-insight part", "N170_est"]` µV, *p* = `r table_exp1$conts["Post-insight part", "N170_p"]`.
-Instead, we now observed an even earlier modulation in the P1 component which was significantly enlarged (i.e., more positive) in response to objects for which semantically informed perception had taken place, *b* = `r table_exp1$conts["Post-insight part", "P1_est"]` µV, *p* = `r table_exp1$conts["Post-insight part", "P1_p"]`.
+As in the insight part, the N400 component remained significantly reduced during semantically informed as compared to naive perception, *b* = `r tab1$conts["Post-insight part", "N400_est"]` µV, *p* `r tab1$conts["Post-insight part", "N400_p"]`, whereas the effect in the N170 component did not reoccur, *b* = `r tab1$conts["Post-insight part", "N170_est"]` µV, *p* = `r tab1$conts["Post-insight part", "N170_p"]`.
+Instead, the P1 component was significantly enlarged (i.e., more positive) in response to objects for which semantically informed perception had taken place, *b* = `r tab1$conts["Post-insight part", "P1_est"]` µV, *p* = `r tab1$conts["Post-insight part", "P1_p"]`.
 
-```{r, fig3, include=TRUE}
+```{r, fig3, eval=FALSE, include=TRUE}
 # Read grand averages of evoked power
 ave_tfr_flat <- read_csv(fnames$ave_tfr_flat, col_types = cols(), progress = FALSE)
 ave_tfr_diff <- read_csv(fnames$ave_tfr_diff, col_types = cols(), progress = FALSE)
@@ -839,486 +870,73 @@ plot_grid(
   ggsave("data/processed/tfr.pdf", width = unit(10, "cm"), height = unit(7, "cm"), device = cairo_pdf)
 ```
 
-## Discussion
+## Control Analysis
 
-In Experiment 1, we measured the ERPs of participants viewing unfamiliar objects before (pre-insight part), while (insight part) and after (post-insight part) they were able to understand what kind of object they were seeing.
-To induce this semantically informed perception, half of the objects in the insight part were preceded by matching verbal keywords about the object's typical function or use, whereas the other half were preceded by non-matching keywords, serving as a naive baseline condition.
+```{r models_control, eval=rerun_model_fitting}
+# Use a different control condition ("failed insight")
+trials_control <- mutate(
+  trials,
+  condition = factor(condition, levels = c("Informed", "Excl_informed")),
+)
 
-In the insight part, we found that semantically informed perception was associated with enlarged amplitudes in the N170 component (150--200 ms after object onset) and reduced amplitudes in the N400 component (400--700 ms).
-When the same objects were presented once more in the post-insight part, the reduction of the N400 component reoccurred and we also observed a modulation of the P1 component (100--150 ms), which was significantly larger for objects for which semantically informed perception had taken place.
+# Contrast coding for conditions
+c("Informed" = 1, "Excl_informed" = -1) %>%
+  t() %>%
+  ginv() -> contrasts(trials_control$condition)
 
-Because of the novelty of our experimental paradigm---measuring the ERPs while rather than after participants received semantic information about unfamiliar objects---and because of the novelty of our findings, we ran a replication study with another sample of participants to assess the robustness of these effects.
 
-# Experiment 2
+# Load fitted models or rerun them
+if (!rerun_model_fitting) {
 
-## Method
+  # Load models
+  models_control <- readRDS(fnames$models_control)
+} else {
 
-### Participants
-
-Participants for Experiment 2 were 24 German native speakers (15 female, 9 male) with a mean age of 26 years (range 19 to 29 years) who had not participated in Experiment 1.
-They had no history of psychological disorders or treatment, were right-handed, and reported normal or corrected-to-normal vision.
-They gave written informed consent before starting the experiment and received a compensation of €8 per hour for participating.
-
-### Materials, Procedure, and Analysis
-
-```{r exp2-preproc, eval=rerun_preproc}
-# Read behavioral data for Experiment 2
-list.files("data/exp2/RT", pattern = ".txt", full.names = TRUE) %>% map(read_behav) -> behav_exp2
-
-# Preprocess the EEG for Experiment 2 in Python
-map2(
-  .x = list.files("data/exp2/EEG", pattern = ".vhdr", full.names = TRUE),
-  .y = behav_exp2,
-  ~ do.call(py$preproc, c(list(vhdr_fname = .x, metadata = .y), preproc_params))
-) %>%
-  # Concatenate epochs of all participants
-  py$mne$epochs$concatenate_epochs() -> epochs_exp2
-
-# Backup epochs to the export folder
-epochs_exp2$save("data/processed/exp2-epo.fif")
-
-# Compute mean ERP amplitudes and bind to the behavioral data
-pmap_dfc(comps, py$compute_erps, epochs = epochs_exp2) %>%
-  set_names(comps$name) %>%
-  bind_cols(as_tibble(epochs_exp2$metadata), .) %T>%
-  write_tsv("data/processed/exp2-data.tsv") -> data_exp2
-
-# Compute grand averages per part and condition
-py$compute_evokeds(epochs = epochs_exp2, grand = TRUE, data_only = TRUE) %>%
-  saveRDS("data/processed/exp2-gaverages.RDS")
-
-# Backup number of stimuli assigned to each condition for all participants
-map(behav_exp2, function(x) table(x$condition) / 3) %>%
-  bind_rows() %>%
-  mutate(Participant = unique(data_exp2$participant), .before = 1) %>%
-  write_tsv("data/processed/exp2-objects.tsv")
-
-# Remove the epochs to free up memory
-rm(epochs_exp2)
-```
-
-```{r exp2-models, eval=rerun_models}
-# Load preprocessed single-trial data
-read_tsv("data/processed/exp2-data.tsv", col_types = cols()) %>%
-  # Factorize columns
-  mutate(
-    part = factor(part, levels = c("I", "II", "III")),
-    condition = factor(condition, levels = c(
-      "Informed", "Naive", "Excl_informed", "Excl_naive", "Excl_known"
-    )),
-    participant = factor(participant),
-    item = factor(item)
+  # Compute models for all dependent variables in parallel
+  form <- RT ~ part * condition +
+    (part * condition | subject_id) +
+    (part * condition | item_id)
+  map(
+    deps,
+    build_lme,
+    formula = form,
+    data = trials_control,
+    n_cores = n_cores
   ) %>%
-  # Remove any trials excluded from conditions
-  filter(condition %in% c("Informed", "Naive")) %>%
-  droplevels() -> data_exp2
-
-# Apply contrasts to the factors in the data
-contrasts(data_exp2$condition) <- ginv(contrasts_condition)
-contrasts(data_exp2$part) <- ginv(contrasts_part)
-
-# Compute the models for Experiment 2
-map(
-  comps$name,
-  compute_models,
-  formula = formula_exp12,
-  data = data_exp2,
-  control = control,
-  specs = specs_exp12
-) %>%
-  set_names(comps$name) %T>%
-  saveRDS("data/processed/exp2-models.RDS") -> models_exp2
+    set_names(deps) %T>%
+    saveRDS(fnames$models_control) -> models_control
+}
 ```
 
-```{r exp2-import}
-# Load average number of objects per condition
-(read_tsv("data/processed/exp2-objects.tsv", col_types = cols()) %>%
-  summarise(across(.cols = -Participant, .fns = mean)) %>%
-  slice(1) %>% unlist() -> objects_exp2)
-
-# Load preprocessed single-trial data
-read_tsv("data/processed/exp2-data.tsv", col_types = cols()) %>%
-  # Factorize columns
-  mutate(
-    part = factor(part, levels = c("I", "II", "III")),
-    condition = factor(condition, levels = c(
-      "Informed", "Naive", "Excl_informed", "Excl_naive", "Excl_known"
-    )),
-    participant = factor(participant),
-    item = factor(item)
-  ) -> data_exp2
-
-# Check number of rejected epochs
-data_exp2 %>%
-  group_by(participant) %>%
-  tally() %>%
-  mutate(n = 360 - n) %>%
-  pull(n) -> rejected_exp2
-mean(rejected_exp2) # Mean
-median(rejected_exp2) # Median
-range(rejected_exp2) # Range
-
-# Load grand-averaged ERPs and linear mixed models
-evokeds_exp2 <- readRDS("data/processed/exp2-gaverages.RDS")
-models_exp2 <- readRDS("data/processed/exp2-models.RDS")
-```
-
-All materials, procedures, EEG-related methods, and statistical analyses were identical to Experiment 1.
-An average of `r format(round(objects_exp2["Excl_known"], 1), nsmall = 1)` objects per participant (= `r percent(objects_exp2["Excl_known"]/120, accuracy = 0.1)` of all unfamiliar objects) was classified as being known in the pre-insight part and excluded from all further analyses.
-Based on participants' responses in the insight part, an average of `r format(round(objects_exp2["Informed"], 1), nsmall = 1)` objects was assigned to the semantically informed condition (= `r percent(objects_exp2["Informed"]/60, accuracy = 0.1)` of objects presented with matching keywords) and an average of `r format(round(objects_exp2["Naive"], 1), nsmall = 1)` objects was assigned to the naive condition (= `r percent(objects_exp2["Naive"]/60, accuracy = 0.1)` of objects presented with non-matching keywords).
-Automatic rejection of EEG epochs containing artifacts led to the exclusion of `r format(round(mean(rejected_exp2), 1), nsmall = 1)` trials per participant (= `r percent(mean(rejected_exp2)/360, accuracy = 0.1)`; range `r min(rejected_exp2)` to `r max(rejected_exp2)` trials).
-
-## Results
-
-```{r exp2-table, include=TRUE, results="asis"}
-# Create table of models for Experiment 2
-table_exp2 <- create_table(
-  models_exp2,
+```{r, tab2, include=TRUE, results="asis"}
+# Create table of LMM results
+tab2 <- create_table(
+  models = models_control[c("P1", "N170", "N400")],
   stub_anova = c("Part", "Condition", "Pt. × con."),
   stub_contrasts = c("Pre-insight part", "Insight part", "Post-insight part"),
-  caption = "Results of Linear Mixed-Effects Regression Models for Experiment 2\\smallskip",
-  note = "Pt. = part, con. = condition, est. = estimate, CI = 95\\% confidence interval."
-)
-```
-
-As in Experiment 1, P1, N170, and N400 amplitudes differed between the three different parts of the experiments, all *F*s ≥ `r table_exp2$anov["Part", "N170_f"]`, all *p*s `r table_exp2$anov["Part", "N170_p"]` (see Table \@ref(tab:exp2-table)).
-Also as in Experiment 1, N400 amplitudes differed between the informed and the naive condition averaged across parts, *F*`r table_exp2$anov["Condition", "N400_df"]` = `r table_exp2$anov["Condition", "N400_f"]`, *p* `r table_exp2$anov["Condition", "N400_p"]`.
-The part × condition interaction was significant in the P1 component, *F*`r table_exp2$anov["Pt. × con.", "P1_df"]` = `r table_exp2$anov["Pt. × con.", "P1_f"]`, *p* = `r table_exp2$anov["Pt. × con.", "P1_p"]`, and in the N400 component, *F*`r table_exp2$anov["Pt. × con.", "N400_df"]` = `r table_exp2$anov["Pt. × con.", "N400_f"]`, *p* `r table_exp2$anov["Pt. × con.", "N400_p"]`, but not in the N170 component, *F*`r table_exp2$anov["Pt. × con.", "N170_df"]` = `r table_exp2$anov["Pt. × con.", "N170_f"]`, *p* = `r table_exp2$anov["Pt. × con.", "N170_p"]`.
-
-```{r exp2-plot, include=TRUE, fig.height=7.5, fig.cap = "(ref:fig2_caption)"}
-# Create plot for Experiment 2
-plot_grid(
-  # plot_bars(data = data_exp2, stars = stars_exp2, ymin = -2.5),
-  plot_headings(spacing = c(10, 1, 10, 1, 10)),
-  plot_erps(comps = comps, evokeds = evokeds_exp2, models = models_exp2, montage = montage),
-  plot_legends_erps(direction = "horizontal"),
-  nrow = 3, rel_heights = c(0.3, 6, 1.2), labels = NULL
-) + # Add some lines (to separate the parts)
-  annotate_line(x = 0.328, xend = 0.328, y = 0.15, yend = Inf) +
-  annotate_line(x = 0.672, xend = 0.672, y = 0.15, yend = Inf)
-```
-
-(ref:fig2_caption) Results of Experiment 2\smallskip
-\\bigskip\\small\\textit{Note.}
-ERP waveforms and scalp topographies are shown for objects for which participants experienced semantically informed versus naive perception within the pre-insight, insight, and post-insight parts of the experiment. In an exact replication of Experiment 1, the effect of semantic information on the N400 component in the insight and post-insight parts and on the P1 component in post-insight part remained statistically significant, while the effect on the N170 component in the insight part marginally failed to reach statistical significance (\\textit{p} = .064). Ampl. = amplitude.\\newline\*\\textit{p} \\textless{} .05. \*\*\\textit{p} \\textless{} .01. \*\*\*\\textit{p} \\textless{} .001.
-
-### ERPs Before Insight Was Occurring
-
-As in Experiment 1, no differences between objects in the semantically informed and the naive condition emerged in the P1, N170, or N400 component, all *p*s ≥ `r table_exp2$conts["Pre-insight part", "P1_p"]` (see Table \@ref(tab:exp2-table) and Figure \@ref(fig:exp2-plot)).
-
-### ERPs While Insight Was Occurring
-
-As in Experiment 1, semantically informed as compared to naive perception (induced by matching vs. non-matching keywords) was associated with an enhancement of the N170 component, although this effect marginally failed to reach statistical significance, *b* = `r table_exp2$conts["Insight part", "N170_est"]` µV, *p* = `r table_exp2$conts["Insight part", "N170_p"]`.
-The reduction of the N400 component during semantically informed perception remained significant, *b* = `r table_exp2$conts["Insight part", "N400_est"]` µV, *p* `r table_exp2$conts["Insight part", "N400_p"]`.
-
-### ERPs After Insight Had Occurred
-
-As in Experiment 1, the presentation of the same unfamiliar objects for a third time (without keywords, as in the pre-insight part) again led to significantly reduced amplitudes in the N400 component in response to objects for which semantically informed perception had occurred, *b* = `r table_exp2$conts["Post-insight part", "N400_est"]` µV, *p* = `r table_exp2$conts["Post-insight part", "N400_p"]`.
-Also, P1 amplitudes in response these objects were significantly enlarged, *b* = `r table_exp2$conts["Post-insight part", "P1_est"]` µV, *p* = `r table_exp2$conts["Post-insight part", "P1_p"]`.
-
-### Joint Analysis of Experiments 1 and 2
-
-In an attempt to maximize statistical power, we combined the ERP data sets from Experiments 1 and 2.
-This allowed us to determine (a) if the above effects---including the marginally significant ones---were reliable when tested in a larger sample, and (b) if there were significant differences in the ERP amplitudes between Experiments 1 and 2.
-Methods for statistical analysis were kept unchanged apart from the addition of a new factor denoting the experiment, coded as a scaled sum contrast [i.e., subtracting Experiment 1 from Experiment 2, the intercept being the grand mean across both experiments; @schad2020]. This factor and its interactions with part, condition, and part × condition were included in the linear mixed-effects regression models as fixed effects and as potential by-item random slopes. They were not included as by-participant random slopes because different participants took part in Experiments 1 and 2. Note that, as above, random effects were eventually included only if their omission led to a significant decline in model fit [@matuschek2017; @R-buildmer].
-The resulting formulas for the models can be found in Appendix B.
-
-```{r joint-import}
-# Combine data from Experiments 1 and 2 (requires changing the participant IDs for Experiment 2)
-data_exp2 %>%
-  mutate(participant = fct_relabel(participant, ~ paste0(., "_2"))) %>%
-  bind_rows(aha, ., .id = "experiment") %>%
-  mutate(experiment = as_factor(experiment)) -> data_joint
-
-# Subset only the relevant conditions
-data_joint %>%
-  filter(condition %in% c("Informed", "Naive")) %>%
-  droplevels() -> data_joint_subs
-```
-
-```{r joint-models, eval=rerun_models}
-# Contrast coding for experiment (2-1), condition (informed-naive), and part (2-1, 3-1)
-t(contrasts_experiment <- t(cbind(c("1" = -1, "2" = 1))))
-contrasts(data_joint_subs$experiment) <- ginv(contrasts_experiment)
-contrasts(data_joint_subs$condition) <- ginv(contrasts_condition)
-contrasts(data_joint_subs$part) <- ginv(contrasts_part)
-
-# New formula for LMMs
-form_joint <- buildmer::tabulate.formula(
-  ~ part * condition * experiment +
-    (part * condition | participant) +
-    (part * condition * experiment | item)
-) %>% mutate(block = replace(block, is.na(grouping), "fixed"))
-
-# Apply the function to compute the joint models for Experiments 1 and 2
-map(
-  comps$name,
-  compute_models,
-  formula = form_joint,
-  data = data_joint_subs,
-  control = control,
-  specs = specs_exp12
-) %>%
-  set_names(comps$name) %T>%
-  saveRDS("data/processed/joint-models.RDS") -> models_joint
-```
-
-```{r joint-table, include=TRUE, results="asis"}
-# Load linear mixed models
-models_joint <- readRDS("data/processed/joint-models.RDS")
-
-# Create table of models for Experiments 1 and 2 combined
-table_joint <- create_table(
-  models_joint,
-  stub_anova = c(
-    "Part", "Condition", "Experiment", "Pt. × con.",
-    "Pt. × exp.", "Ins. × exp.", "Pt. × con. × exp."
+  caption = paste(
+    "Control Analysis",
+    "\\smallskip"
   ),
-  stub_contrasts = c("Pre-insight part", "Insight part", "Post-insight part"),
-  caption =
-    "Results of Linear Mixed-Effects Regression Models for Experiments 1 and 2 Combined\\smallskip",
-  note =
-    "Pt. = part, con. = condition, exp. = experiment, est. = estimate, CI = 95\\% confidence interval."
-)
-
-# Extract the follow-up contrast for the main effect of experiment
-suppressMessages(emmeans::emm_options(lmerTest.limit = Inf))
-suppressMessages(
-  emmeans::emmeans(
-    models_joint$N400$model,
-    specs = pairwise ~ experiment, infer = TRUE
-  )$contrasts %>%
-    as.data.frame() %>%
-    transmute(
-      est = round(estimate, 2) %>%
-        format(nsmall = 2, trim = TRUE),
-      p = round(`p.value`, 3) %>%
-        format(nsmall = 3, trim = TRUE) %>%
-        as.character() %>%
-        substr(2, nchar(.))
-    ) -> conts_N400_joint
-)
-```
-
-As shown in Table \@ref(tab:joint-table), the main effect of part was significant in the P1, N170, and N400 component, all *F*s ≥ `r table_joint$anov["Part", "P1_f"]`, all *p*s `r table_joint$anov["Part", "P1_p"]`, as was the main effect of condition in the N400, *F*`r table_joint$anov["Condition", "N400_df"]` = `r table_joint$anov["Condition", "N400_f"]`, *p* `r table_joint$anov["Condition", "N400_p"]`.
-Furthermore, the part × condition interaction was now observed reliably in all three components, all *F*s ≥ `r table_joint$anov["Pt. × con.", "P1_f"]`, all *p*s ≤ `r table_joint$anov["Pt. × con.", "P1_p"]`.
-There was a main effect of experiment in the N400, *F*`r table_joint$anov["Experiment", "N400_df"]` = `r table_joint$anov["Experiment", "N400_f"]`, *p* = `r table_joint$anov["Experiment", "N400_p"]`, with more negative amplitudes in Experiment 1 as compared to Experiment 2, *b* = `r conts_N400_joint$est`.
-However, the absence of any significant interactions of experiment with part or condition indicated that the effects of our experimental manipulations did not differ between Experiments 1 and 2.
-
-Based on the part × condition interaction, we again computed follow-up comparisons between the semantically informed and the naive condition within each part, now collapsed across the data from both experiments (see Table \@ref(tab:joint-table) and Figure \@ref(fig:joint-plot)).
-This confirmed the absence of any reliable differences between the two conditions in the pre-insight part, all *p*s ≥ `r table_joint$conts["Pre-insight part", "N400_p"]`, the significant enhancement of the N170 component in the insight part, while the semantic information was obtained, *b* = `r table_joint$conts["Insight part", "N170_est"]` µV, *p* = `r table_joint$conts["Insight part", "N170_p"]`, the significant reduction of the N400 component in the insight part, while the semantic information was obtained, *b* = `r table_joint$conts["Insight part", "N400_est"]` µV, *p* `r table_joint$conts["Insight part", "N400_p"]`, and in the post-insight part, after the information had been obtained, *b* = `r table_joint$conts["Post-insight part", "N400_est"]` µV, *p* `r table_joint$conts["Post-insight part", "N400_p"]`, as well as the significant enhancement of the P1 component in the post-insight part, after the information had been obtained, *b* = `r table_joint$conts["Post-insight part", "P1_est"]` µV, *p* = `r table_joint$conts["Post-insight part", "P1_p"]`.
-
-(ref:fig3_caption) Measured and Modeled ERP Amplitudes for Experiments 1 and 2 Combined\smallskip
-\\bigskip\\small\\textit{Note.}
-The violins and box plots show the distributions of the by-participant averaged ERPs during semantically informed perception (in purple color) and naive perception (in petrol color), separately for the pre-insight part (before insight was occurring), the insight part (while insight was occurring), and the post-insight (after insight had occurred). The yellow dots show the corresponding means of these conditions as predicted by linear mixed-effects modeling (see main text and Table \\ref{tab:joint-table}), together with their respective 95\\% confidence interval. Ampl. = amplitude, 95\\% CI = 95\\% confidence interval, LMM = linear mixed-effects model.\\newline\*\\textit{p} \\textless{} .05. \*\*\\textit{p} \\textless{} .01. \*\*\*\\textit{p} \\textless{} .001.
-
-```{r joint-plot, include=TRUE, fig.height=8, fig.cap = "(ref:fig3_caption)"}
-# Create violin plot for Experiments 1 and 2 combined
-plot_grid(
-  plot_headings(spacing = c(10, 2, 10, 2, 10)),
-  plot_violins(data = data_joint_subs, models = models_joint),
-  nrow = 2, rel_heights = c(0.3, 6.7)
-) %>% plot_grid(
-  plot_legends_violins(),
-  nrow = 1, rel_widths = c(8.5, 1.5)
-) + # Add some lines (to separate the parts)
-  annotate(
-    "segment",
-    x = 11 / 34 * 0.85, xend = 11 / 34 * 0.85,
-    y = -Inf, yend = Inf
-  ) +
-  annotate(
-    "segment",
-    x = 23 / 34 * 0.85, xend = 23 / 34 * 0.85,
-    y = -Inf, yend = Inf
+  note = paste(
+    "Pt. = part, con. = condition, est. = estimate, CI = 95\\%",
+    "confidence interval."
   )
-```
-
-### Control Analysis
-
-```{r control-models, eval=rerun_models}
-# This time, we keep only the two conditions with matching keywords
-data_joint %>%
-  filter(condition %in% c("Informed", "Excl_informed")) %>%
-  droplevels() -> data_joint_control
-
-# Contrast coding for condition (informed-no_informed) and part (2-1, 3-1)
-contrasts(data_joint_control$condition) <- ginv(contrasts_condition)
-contrasts(data_joint_control$part) <- ginv(contrasts_part)
-
-# Apply the function to re-compute the joint models
-map(
-  comps$name,
-  compute_models,
-  formula = form_joint,
-  data = data_joint_control,
-  control = control,
-  specs = specs_exp12
-) %>%
-  set_names(comps$name) %T>%
-  saveRDS("data/processed/joint-control-models.RDS") -> models_joint_control
-```
-
-```{r control-table}
-# Calculate average number of objects per condition in Experiments 1 and 2
-(stims_joint <- (obj_per_cond + objects_exp2) / 2)
-
-# Load linear mixed models
-models_joint_control <- readRDS("data/processed/joint-control-models.RDS")
-
-# Create a table but don't print
-table_joint_control <- create_table(
-  models = models_joint_control,
-  stub_anova = c(
-    "Part", "Condition", "Experiment", "Pt. × con.",
-    "Pt. × exp.", "Ins. × exp.", "Pt. × con. × exp."
-  ),
-  stub_contrasts = c("Pre-insight part", "Insight part", "Post-insight part"),
-  caption =
-    "Results of Linear Mixed-Effects Regression Models With a Different Baseline",
-  note =
-    "Pt. = part, con. = condition, exp. = experiment, est. = estimate, CI = 95\\% confidence interval."
 )
 ```
 
 One may raise concerns whether the modulation of the N170 component in the insight part genuinely reflects the semantically informed perception of the objects in the respective condition, or---as an alternative explanation---whether it may be driven by the objects in the other, semantically naive condition.
 Remember that these objects were preceded by non-matching keywords which were picked so that they could not be related to the visual features of the object and their configuration.
-Thus, the modulation of the ERP components in the insight part could be a mismatch response to those objects---reflecting, for example, the fact that the visual features of the object shown in Figure \@ref(fig:exp1-plot)A cannot be reconciled with the function of signaling messages.
+Thus, the modulation of the ERP components in the insight part could be a mismatch response to those objects---reflecting, for example, the fact that the visual features of the object shown in Figure \@ref(fig:fig1)A cannot be reconciled with the function of signaling messages.
 To preclude this alternative explanation, we repeated our analysis using a different baseline against which the objects in the semantically informed condition were contrasted.
 Instead of the naive condition (where objects were presented with non-matching keywords), we now used those objects which were presented with matching keywords (as in the informed condition), but which were excluded from the main analysis because participants indicated behaviorally that they did not understand the object they were seeing.
-Across both experiments, this was the case for `r percent(stims_joint["Excl_informed"]/60, accuracy = 0.1)` of objects presented with matching keywords, as compared to `r percent(stims_joint["Informed"]/60, accuracy = 0.1)` of objects which did indeed lead to semantically informed perception.[^1]
-Just as above, this control analysis revealed a robust N170 effect in the insight part, *b* = `r table_joint_control$conts["Insight part", "N170_est"]` µV, *p* `r table_joint_control$conts["Insight part", "N170_p"]`. Thus, this enhanced negativity seems to be a genuine marker of semantically informed perception, no matter if compared to objects presented with non-matching keywords or compared to objects presented with matching keywords on which participants failed to capitalize.
-Note that the reduction of the N400 component in the insight part also remained robust in this control analysis, *b* = `r table_joint_control$conts["Insight part", "N400_est"]` µV, *p* `r table_joint_control$conts["Insight part", "N400_p"]`.
+Across both experiments, this was the case for `r percent(obj_per_cond["Excl_informed"]/60, accuracy = 0.1)` of objects presented with matching keywords, as compared to `r percent(obj_per_cond["Informed"]/60, accuracy = 0.1)` of objects which did indeed lead to semantically informed perception.[^1]
+Just as above, this control analysis revealed a robust N170 effect in the insight part, *b* = `r tab2$conts["Insight part", "N170_est"]` µV, *p* `r tab2$conts["Insight part", "N170_p"]`. Thus, this enhanced negativity seems to be a genuine marker of semantically informed perception, no matter if compared to objects presented with non-matching keywords or compared to objects presented with matching keywords on which participants failed to capitalize.
+Note that the reduction of the N400 component in the insight part also remained robust in this control analysis, *b* = `r tab2$conts["Insight part", "N400_est"]` µV, *p* `r tab2$conts["Insight part", "N400_p"]`.
 
 [^1]: Note that these percentages do not add up to 100% because some objects were excluded from all analyses if participants indicated knowing these objects in the pre-insight part, before any keywords had been presented (see Method).
 
-## Discussion
-
-Experiment 2, which was an exact replication of Experiment 1, confirmed the effects of obtaining semantic information about previously unfamiliar objects on ERPs associated with lower-level visual perception (P1), higher-level visual perception (N170), and semantic processing (N400).
-Objects for which participants experienced semantically informed perception via matching keywords elicited enlarged N170 amplitudes and reduced N400 amplitudes.
-Note, however, that the effect in the N170 component marginally failed to reach the conventional level for statistical significance in this replication experiment.
-When the objects were presented once more without any semantic information, they again elicited reduced N400 amplitudes as well as enlarged P1 amplitudes.
-
-```{r exp3-preproc, eval=run_exp3}
-# Read behavioral data for Experiment 1
-list.files("data/exp3/RT", pattern = ".txt", full.names = TRUE) %>% map(read_behav) -> behav_exp3
-
-# Update stimulus triggers
-preproc_params$event_id <- dict(
-  "match/upright" = as.integer(241),
-  "match/inverted" = as.integer(242),
-  "mismatch/upright" = as.integer(243),
-  "mismatch/inverted" = as.integer(244)
-)
-
-# Preprocess the EEG for Experiment 3 in Python
-fnames_exp3 <- list.files("data/exp3/EEG", pattern = ".vhdr", full.names = TRUE)
-py_run_string(
-  "epochs_exp3 = [preproc(vhdr_fname=fname, metadata=meta, **r.preproc_params)
-                  for fname, meta in zip(r.fnames_exp3, r.behav_exp3)]"
-)
-message("This worked!!!")
-py_run_string("epochs_exp3 = mne.epochs.concatenate_epochs(epochs_exp3)")
-message("This also worked!!!")
-py_run_string("epochs_exp3.save('export/exp3-epo.fif', overwrite=True)")
-py_run_string("del epochs_exp3")
-
-# Preprocess the EEG for Experiment 3 in Python
-map2(
-  .x = list.files("data/exp3/EEG", pattern = ".vhdr", full.names = TRUE),
-  .y = behav_exp3,
-  ~ do.call(py$preproc, c(list(vhdr_fname = .x, metadata = .y), preproc_params))
-) %>%
-  # Concatenate epochs of all participants
-  py$mne$epochs$concatenate_epochs() -> epochs_exp3
-
-# Backup epochs to the export folder
-epochs_exp3$save("data/processed/exp3-epo.fif")
-
-# Compute mean ERP amplitudes and bind to the behavioral data
-pmap_dfc(comps, py$compute_erps, epochs = epochs_exp3) %>%
-  set_names(comps$name) %>%
-  bind_cols(as_tibble(epochs_exp3$metadata), .) %T>%
-  write_tsv("data/processed/exp3-data.tsv") -> data_exp3
-
-# Compute grand averages per part and condition
-py$compute_evokeds(epochs = epochs_exp3, grand = TRUE, data_only = TRUE) %>%
-  saveRDS("data/processed/exp3-gaverages.RDS")
-
-# Backup number of stimuli assigned to each condition for all participants
-map(behav_exp3, function(x) table(x$condition) / 3) %>%
-  bind_rows() %>%
-  mutate(Participant = unique(data_exp3$participant), .before = 1) %>%
-  write_tsv("data/processed/exp3-objects.tsv")
-
-# Remove the epochs to free up memory
-rm(epochs_exp3)
-```
-
-```{r exp3-models, eval=run_exp3}
-# Load preprocessed single-trial data
-read_tsv("data/processed/exp3-data.tsv", col_types = cols()) %>%
-  # Factorize columns
-  mutate(
-    part = factor(part, levels = c("I", "II", "III")),
-    position = factor(position, levels = c("Inverted", "Upright")),
-    condition = factor(condition, levels = c(
-      "Informed", "Naive", "Excl_informed", "Excl_naive", "Excl_known"
-    )),
-    participant = factor(participant),
-    item = factor(item)
-  ) %>%
-  # Remove any trials excluded from conditions and parts
-  filter(condition %in% c("Informed", "Naive") & part != "IV") %>%
-  droplevels() -> data_exp3
-
-# Define contrasts for position (inverted-upright), condition (informed-naive), and part (2-1, 3-1)
-t(contrasts_position <- t(cbind(c("Inverted" = 1, "Upright" = -1))))
-contrasts(data_exp3$position) <- ginv(contrasts_position)
-contrasts(data_exp3$condition) <- ginv(contrasts_condition)
-contrasts(data_exp3$part) <- ginv(contrasts_part)
-
-# Define new formula for LMMs
-formula_exp3 <- buildmer::tabulate.formula(
-  ~ part * condition * position +
-    (part * condition * position | participant) +
-    (part * condition * position | item)
-) %>% mutate(block = replace(block, is.na(grouping), "fixed"))
-
-# Define new follow-up contrasts
-specs_exp3 <- pairwise ~ condition | position * part
-
-# Compute the models for Experiment 3
-map(
-  comps$name,
-  compute_models,
-  formula = formula_exp3,
-  data = data_exp3,
-  control = control,
-  specs = specs_exp3
-) %>%
-  set_names(comps$name) %T>%
-  saveRDS("data/processed/exp3-models.RDS") -> models_exp3
-```
-
-```{r exp3-table, include=TRUE, results="asis", eval=run_exp3}
-# Create table of models for Experiment 3
-table_exp3 <- create_table(
-  models_exp3,
-  stub_anova = c(
-    "Part", "Condition", "Position", "Pt. × con.",
-    "Pt. × pos.", "Ins. × pos.", "Pt. × con. × pos."
-  ),
-  stub_contrasts = c(
-    "Part I, inverted", "Part I, upright", "Part II, inverted",
-    "Part II, upright", "Part III, inverted", "Part III, upright"
-  ),
-  caption = "Results of linear mixed-effects regression models for Experiment 3",
-  note = "Pt. = part, con. = condition, pos. = position, est. = estimate, CI = 95\\% confidence interval."
-)
-```
-
-# General Discussion
+# Discussion
 
 Here we investigated if obtaining a semantic understanding of previously unfamiliar objects has an influence on how we perceive them.
 To this end, we measured ERPs while participants viewed unfamiliar objects before, while, and after receiving semantic information about them.
@@ -1370,7 +988,7 @@ Another one is our reliance on rare and highly specialized objects (see Appendix
 This was necessary to induce the experience of semantic insight in a population of undergraduate students but the results may not necessarily generalize to the way in which we learn about everyday objects.[^2]
 One way of addressing this issue would be to adapt the present paradigm to younger participants, using everyday objects which they have not yet learned about.
 Finally, the number participants (*n* = 24 per experiment) and trials (*k* $\approx$ 30 per part in the insight condition and *k* $\approx$ 50 per part in the naive condition) can be considered small by today's standards [@baker2020]. Our analysis may therefore not have been particularly sensitive, especially given that linear mixed-effects regression models tend to have limited statistical power under a wide range of circumstances [see, e.g., the simulations by @matuschek2017].
-This lack of power may also explain why one of the effects that had been observed in the first experiment (i.e., the enlargement of the N170 component, *p* = `r table_exp1$conts["Insight part", "N170_p"]`) failed to reach statistical significance in the replication experiment (*p* = `r table_exp2$conts["Insight part", "N170_p"]`).
+This lack of power may also explain why one of the effects that had been observed in the first experiment (i.e., the enlargement of the N170 component, *p* = `r tab1$conts["Insight part", "N170_p"]`) failed to reach statistical significance in the replication experiment (*p* = `r table_exp2$conts["Insight part", "N170_p"]`).
 To discern if this was due to a lack of statistical power or due to the actual absence of an effect, it would take yet another (more highly powered) replication study and/or a different data-analytic approach where it is possible to estimate the evidence both for the alternative hypothesis and for the null hypothesis (e.g., Bayesian linear mixed models).
 It should be noted, however, that the joint analysis of both data sets yielded a very robust N170 effect (*p* = `r table_joint$conts["Insight part", "N170_p"]`).
 This makes it less likely that the effect observed in Experiment 1 was due to a false positive and instead suggests that statistical power in Experiment 2 was insufficient to render the effect significant.
