@@ -94,8 +94,8 @@ knitr::opts_chunk$set(
 )
 
 # Re-run preprocessing and/or model fitting?
-rerun_preprocessing <- TRUE
-rerun_model_fitting <- TRUE
+rerun_preprocessing <- FALSE
+rerun_model_fitting <- FALSE
 
 # Number of CPU cores for parallel model fitting
 n_cores <- detectCores()
@@ -702,8 +702,8 @@ tab1 <- create_table(
 )
 ```
 
-Averaged across conditions, P1, N170, and N400 amplitudes differed as a function of the part of the experiment, all *F*s ≥ `r fig1$anov["Part", "P1_f"]`, all *p*s `r fig1$anov["Part", "P1_p"]` (see Table \@ref(tab:tab1)).
-In addition, N400 amplitudes differed between the informed and the naive condition averaged across the three parts of the experiment, *F*`r fig1$anov["Condition", "N400_df"]` = `r fig1$anov["Condition", "N400_f"]`, *p* = `r fig1$anov["Condition", "N400_p"]`.
+Averaged across conditions, P1, N170, and N400 amplitudes differed as a function of the part of the experiment, all *F*s ≥ `r tab1$anov["Part", "P1_f"]`, all *p*s `r tab1$anov["Part", "P1_p"]` (see Table \@ref(tab:tab1)).
+In addition, N400 amplitudes differed between the informed and the naive condition averaged across the three parts of the experiment, *F*`r tab1$anov["Condition", "N400_df"]` = `r tab1$anov["Condition", "N400_f"]`, *p* = `r tab1$anov["Condition", "N400_p"]`.
 Crucially, the part × condition interaction was significant in the N170 component, *F*`r tab1$anov["Pt. × con.", "N170_df"]` = `r tab1$anov["Pt. × con.", "N170_f"]`, *p* = `r tab1$anov["Pt. × con.", "N170_p"]`, and in the N400 component, *F*`r tab1$anov["Pt. × con.", "N400_df"]` = `r tab1$anov["Pt. × con.", "N400_f"]`, *p* `r tab1$anov["Pt. × con.", "N400_p"]` but not in the P1 component, *F*`r tab1$anov["Pt. × con.", "P1_df"]` = `r tab1$anov["Pt. × con.", "P1_f"]`, *p* = `r tab1$anov["Pt. × con.", "P1_p"]`.
 To answer our main research question, we decomposed these interactions into the differences between the semantically informed condition and the naive condition within the three different parts of the experiment.
 
