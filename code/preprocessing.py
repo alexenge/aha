@@ -259,7 +259,7 @@ def _evokeds_df_from_epochs(epochs, average_by):
         evokeds.comment = query
 
         # Convert to DataFrame, adding condition info
-        evokeds_df = evokeds.to_data_frame()
+        evokeds_df = evokeds.to_data_frame(scalings={"eeg": 1e6, "misc": 1e6})
         condition_df = pd.concat([condition[["value"]].transpose()] * len(evokeds_df))
         condition_df.reset_index(inplace=True, drop=True)
         evokeds_df = pd.concat([condition_df, evokeds_df], axis=1)
