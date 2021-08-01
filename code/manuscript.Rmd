@@ -42,16 +42,17 @@ footnotelist      : no
 linenumbers       : no
 mask              : no
 draft             : no
-bibliography      : "misc/bibliography.bib"
-csl               : "misc/apa.csl"
+bibliography      : "../misc/bibliography.bib"
+csl               : "../misc/apa.csl"
 zotero            : "aha"
 documentclass     : "apa7"
 classoption       : "man"
-output            :
+fontsize          : "10pt"
+output:
   papaja::apa6_pdf:
-    latex_engine  : "xelatex"
+    latex_engine: "xelatex"
 editor_options: 
-  chunk_output_type: console
+  chunk_output_type: "console"
 header-includes:
   - \geometry{a4paper}
   - \fancyheadoffset[R,L]{0pt}
@@ -88,9 +89,15 @@ library(magrittr)
 source("code/plots_tables.R")
 r_refs("misc/bibliography.bib")
 
-# Set some global chunk options
+# Set global chunk options
 knitr::opts_chunk$set(
-  include = FALSE, fig.align = "center", out.width = "100%", fig.width = 10
+  dev = "cairo_pdf",
+  fig.align = "center",
+  fig.width = 10,
+  include = FALSE,
+  messages = FALSE,
+  out.width = "100%",
+  warnings = FALSE
 )
 
 # Re-run preprocessing and/or model fitting?
@@ -599,7 +606,7 @@ example_model$hypotheses
 # )
 ```
 
-```{r, fig1, include=TRUE, fig.height=11, fig.cap = "(ref:fig1_caption)"}
+```{r, fig1, include=TRUE, fig.height=11, fig.cap = "(ref:figure-1-caption)"}
 # Load montage and evoked data
 montage <- read_csv(fnames$montage, col_types = cols())
 evokeds <- read_csv(fnames$ave_grand, col_types = cols(), progress = FALSE)
@@ -608,7 +615,7 @@ evokeds <- read_csv(fnames$ave_grand, col_types = cols(), progress = FALSE)
 plot_fig1(erp_components, evokeds, trials_main, models_lme)
 ```
 
-(ref:fig1_caption) Procedure and Results of Experiment 1\smallskip
+(ref:figure-1-caption) Procedure and Results of Experiment 1\smallskip
 
 <!--
 
@@ -872,7 +879,7 @@ plot_grid(
 
 ## Control Analysis
 
-```{r models_control, eval=rerun_model_fitting}
+```{r models_control}
 # Use a different control condition ("failed insight")
 trials_control <- mutate(
   trials,
@@ -930,7 +937,7 @@ Remember that these objects were preceded by non-matching keywords which were pi
 Thus, the modulation of the ERP components in the insight part could be a mismatch response to those objects---reflecting, for example, the fact that the visual features of the object shown in Figure \@ref(fig:fig1)A cannot be reconciled with the function of signaling messages.
 To preclude this alternative explanation, we repeated our analysis using a different baseline against which the objects in the semantically informed condition were contrasted.
 Instead of the naive condition (where objects were presented with non-matching keywords), we now used those objects which were presented with matching keywords (as in the informed condition), but which were excluded from the main analysis because participants indicated behaviorally that they did not understand the object they were seeing.
-Across both experiments, this was the case for `r percent(obj_per_cond["Excl_informed"]/60, accuracy = 0.1)` of objects presented with matching keywords, as compared to `r percent(obj_per_cond["Informed"]/60, accuracy = 0.1)` of objects which did indeed lead to semantically informed perception.[^1]
+Across both experiments, this was the case for `r percent(obj_per_cond[["Excl_informed"]] / 60, accuracy = 0.1)` of objects presented with matching keywords, as compared to `r percent(obj_per_cond[["Informed"]] / 60, accuracy = 0.1)` of objects which did indeed lead to semantically informed perception.[^1]
 Just as above, this control analysis revealed a robust N170 effect in the insight part, *b* = `r tab2$conts["Insight part", "N170_est"]` µV, *p* `r tab2$conts["Insight part", "N170_p"]`. Thus, this enhanced negativity seems to be a genuine marker of semantically informed perception, no matter if compared to objects presented with non-matching keywords or compared to objects presented with matching keywords on which participants failed to capitalize.
 Note that the reduction of the N400 component in the insight part also remained robust in this control analysis, *b* = `r tab2$conts["Insight part", "N400_est"]` µV, *p* `r tab2$conts["Insight part", "N400_p"]`.
 
@@ -988,9 +995,9 @@ Another one is our reliance on rare and highly specialized objects (see Appendix
 This was necessary to induce the experience of semantic insight in a population of undergraduate students but the results may not necessarily generalize to the way in which we learn about everyday objects.[^2]
 One way of addressing this issue would be to adapt the present paradigm to younger participants, using everyday objects which they have not yet learned about.
 Finally, the number participants (*n* = 24 per experiment) and trials (*k* $\approx$ 30 per part in the insight condition and *k* $\approx$ 50 per part in the naive condition) can be considered small by today's standards [@baker2020]. Our analysis may therefore not have been particularly sensitive, especially given that linear mixed-effects regression models tend to have limited statistical power under a wide range of circumstances [see, e.g., the simulations by @matuschek2017].
-This lack of power may also explain why one of the effects that had been observed in the first experiment (i.e., the enlargement of the N170 component, *p* = `r tab1$conts["Insight part", "N170_p"]`) failed to reach statistical significance in the replication experiment (*p* = `r table_exp2$conts["Insight part", "N170_p"]`).
+This lack of power may also explain why one of the effects that had been observed in the first experiment (i.e., the enlargement of the N170 component, *p* = `r tab1$conts["Insight part", "N170_p"]`) failed to reach statistical significance in the replication experiment (*p* = `r tab2$conts["Insight part", "N170_p"]`).
 To discern if this was due to a lack of statistical power or due to the actual absence of an effect, it would take yet another (more highly powered) replication study and/or a different data-analytic approach where it is possible to estimate the evidence both for the alternative hypothesis and for the null hypothesis (e.g., Bayesian linear mixed models).
-It should be noted, however, that the joint analysis of both data sets yielded a very robust N170 effect (*p* = `r table_joint$conts["Insight part", "N170_p"]`).
+It should be noted, however, that the joint analysis of both data sets yielded a very robust N170 effect (*p* = `r tab1$conts["Insight part", "N170_p"]`).
 This makes it less likely that the effect observed in Experiment 1 was due to a false positive and instead suggests that statistical power in Experiment 2 was insufficient to render the effect significant.
 Also note that the effect in the P1 component was statistically significant in both experiments individually, making an even stronger case for the susceptibility of early cortical processing to newly acquired knowledge about objects.
 

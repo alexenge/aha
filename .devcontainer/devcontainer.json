@@ -19,7 +19,15 @@
 	},
 
 	// Add the IDs of extensions you want installed when the container is created.
-	"extensions": ["ms-python.python", "ms-toolsai.jupyter", "geddski.macros", "ikuyadeu.r", "reditorsupport.r-lsp", "grapecity.gc-excelviewer"],
+	"extensions": [
+		"geddski.macros",
+		"grapecity.gc-excelviewer",
+		"ikuyadeu.r",
+		"ms-python.python",
+		"ms-toolsai.jupyter",
+		"reditorsupport.r-lsp",
+		"tomoki1207.pdf"
+	],
 
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
 	// "forwardPorts": [],
