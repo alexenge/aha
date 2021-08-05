@@ -216,7 +216,7 @@ They provided written informed consent before starting the experiment and receiv
 
 Stimuli consisted of 240 grayscale photographs of real-world objects.
 Of these, 120 were well-known everyday objects (e.g., a bicycle, a toothbrush) and served as filler stimuli of no interest.
-The other 120 were rare objects presumed to be unfamiliar to the majority of participants (e.g., a galvanometer, an udu drum; see Appendix A for a full list).
+The other 120 were rare objects presumed to be unfamiliar to the majority of participants (e.g., a galvanometer, an udu drum; see Appendix A).
 All stimuli were presented on a light blue background with a size of 207 × 207 pixels on a 19-inch LCD monitor with a resolution of 1,280 × 1,024 pixels and a refresh rate of 75 Hz.
 At a standardized viewing distance of 90 cm, the images subtended approximately 3.9 degrees of participants' horizontal and vertical visual angle.
 
@@ -534,13 +534,13 @@ fit_brm_prior <- brm(
   iter = 20000,
   warmup = 2000,
   file = fnames$model_brm_prior,
-  file_refit = "on_change"
+  file_refit = "never"
 )
 
 # Prior predictive checks for population-level parameters
 prior_summary(fit_brm_prior)
 summary(fit_brm_prior)
-# mcmc_plot(fit_brm_prior, "areas", pars = "^b_", prob_outer = 0.95)
+mcmc_plot(fit_brm_prior, "areas", pars = "^b_", prob_outer = 0.95)
 
 # Compute posterior distributions for dependent variables
 deps <- c("logRT", "P1", "N170", "N400")
@@ -561,7 +561,7 @@ map(deps, function(dv) {
     newdata = trials,
     sample_prior = "yes",
     file = fnames$models_brm[[dv]],
-    file_refit = "on_change"
+    file_refit = "never"
   )
 
   # Compute follow-up comparisons with Bayes factors
@@ -587,23 +587,23 @@ map(deps, function(dv) {
 example_model <- models_brm$N400
 example_model$summary
 example_model$hypotheses
-# mcmc_plot(example_model$model, "areas", pars = "^b_", prob_outer = 0.95) +
-#   theme(text = element_text(family = "Helvetica", size = 10))
+mcmc_plot(example_model$model, "areas", pars = "^b_", prob_outer = 0.95) +
+  theme(text = element_text(family = "Helvetica", size = 10))
 
-# # Posterior predictive checks subject by subject
-# pp_check(
-#   example_model$model,
-#   type = "dens_overlay_grouped",
-#   nsamples = 50,
-#   group = "subject_id"
-# )
-# pp_check(
-#   example_model$model,
-#   type = "stat_grouped",
-#   nsamples = 1000,
-#   group = "subject_id",
-#   stat = "sd"
-# )
+# Posterior predictive checks subject by subject
+pp_check(
+  example_model$model,
+  type = "dens_overlay_grouped",
+  nsamples = 50,
+  group = "subject_id"
+)
+pp_check(
+  example_model$model,
+  type = "stat_grouped",
+  nsamples = 1000,
+  group = "subject_id",
+  stat = "sd"
+)
 ```
 
 ```{r, fig1, include=TRUE, fig.height=11, fig.cap = "(ref:figure-1-caption)"}
@@ -653,7 +653,7 @@ The data were preprocessed offline using the MNE software [Version `r system("mn
 First, all scalp electrodes were re-referenced to the common average.
 Next, artifacts resulting from blinks and eye movements were removed using independent component analysis (ICA).
 The first 15 components were extracted with the FastICA algorithm [@hyvärinen1999] after temporarily low-pass filtering the data at 1 Hz.
-Any components showing substantive correlations with either of two virtual EOG channels (VEOG: IO1 - Fp1, HEOG: F9 - F10) were removed automatically using the `find_bads_eog` function.
+Any components showing substantive correlations with either of two virtual EOG channels (VEOG: IO1 - Fp1, HEOG: F9 - F10) were removed automatically using the *find_bads_eog* function.
 After artifact correction, a zero-phase, non-causal FIR filter with a lower pass-band edge at 0.1 Hz (transition bandwidth: 0.1 Hz) and an upper pass-band edge at 30 Hz (transition bandwidth: 7.5 Hz) was applied.
 Next, the continuous EEG was epoched into segments of 2 s, starting 500 ms before the onset of the presentation of each unfamiliar object.
 The epochs were baseline-corrected by subtracting the average voltage during the 200 ms before stimulus onset.
@@ -664,7 +664,7 @@ Single-trial event-related potentials were computed as the mean amplitude across
 ## Statistical Analyses
 
 First, we excluded from all further analyses those objects for which the participant had responded with "I know what this is" in the pre-insight part (i.e., before any keywords were presented).
-This led to the exclusion of an average of `r format(round(obj_per_cond[["Excl_known"]], 1), nsmall = 1)` objects per participant (= `r percent(obj_per_cond[["Excl_known"]] / 120, accuracy = 0.1)` of all unfamiliar objects).
+This led to the exclusion of an average of `r format(round(obj_per_cond[["Excl_known"]], 1), nsmall = 1)` objects per participant (= `r percent(obj_per_cond[["Excl_known"]] / 120, accuracy = 0.1)` of unfamiliar objects).
 Next, to delineate semantically informed and naive perception, the assignment of all other objects to one of these two conditions was co-determined by our experimental manipulation (matching versus non-matching keywords in the insight part) and the behavioral responses of the participant (see Figure \@ref(fig:fig1)A).
 Objects were assigned to the semantically informed condition only if they were presented with matching keywords *and* if the participant indicated knowing what the object was or having an assumption.
 This was the case for an average of `r format(round(obj_per_cond[["Informed"]], 1), nsmall = 1)` objects per participant (= `r percent(obj_per_cond[["Informed"]]/60, accuracy = 0.1)` of objects presented with matching keywords).
@@ -674,7 +674,8 @@ The same assignment of objects to conditions (based on the manipulation and resp
 This allowed us to test, on the one hand, if the objects from both conditions differed in important aspects even before any keywords were presented (pre-insight part) and, on the other hand, if the semantic understanding acquired in the insight part had any down-stream effects on the subsequent perception of the objects (post-insight part).
 
 The event-related potentials in response to objects from both conditions and all three parts were analyzed on the single trial level using linear mixed-effects regression models [@baayen2008; @frömer2018].
-Compared to traditional by-participant or by-item analyses of variance, these models allow tighter control over the false positive rate because they simultaneously account for by-participant and by-item non-independencies in the data [@bürki2018; @judd2012]. Furthermore, they flexibly handle unbalanced data which in our case arose from the rejection of ERP epochs as well as the way we constructed our experimental conditions (see above). 
+Compared to traditional by-participant or by-item analyses of variance, these models allow tighter control over the false positive rate because they simultaneously account for by-participant and by-item non-independencies in the data [@bürki2018; @judd2012]. Furthermore, they flexibly handle unbalanced data.
+This was important in our case because of the rejection of bad ERP epochs as well as the way we constructed our experimental conditions (see above). 
 
 Three separate models were computed predicting P1, N170, and N400 mean amplitudes, respectively.
 All models included three fixed effects: (a) the part of the experiment, coded as a repeated contrast [i.e., subtracting the first part from the second part and the second part from the third part, the intercept being the grand mean across all three parts; @schad2020], (b) the condition of the object, coded as a scaled sum contrast (i.e., subtracting the naive condition from the semantically informed condition, the intercept being the grand mean across both conditions), and (c) the two-way interaction of part and condition.
@@ -688,7 +689,7 @@ To investiage if semantically informed perception had an influence on the ERPs w
 This was done using the emmeans package [Version `r as.character(packageVersion("emmeans"))`; @R-emmeans].
 All *p*-values were computed by approximating the relevant denominator degrees of freedom using Satterthwaite's method as implemented in the lmerTest package [Version `r as.character(packageVersion("lmerTest"))`; @R-lmerTest].
 
-The materials, single trial preprocessed data, and all code for data analysis are openly available at <https://osf.io/uksbc/>.
+The materials, single trial preprocessed data, and code for data analysis are openly available at <https://osf.io/uksbc/>.
 
 # Results
 
@@ -709,30 +710,27 @@ tab1 <- create_table(
 )
 ```
 
-Averaged across conditions, P1, N170, and N400 amplitudes differed as a function of the part of the experiment, all *F*s ≥ `r tab1$anov["Part", "P1_f"]`, all *p*s `r tab1$anov["Part", "P1_p"]` (see Table \@ref(tab:tab1)).
-In addition, N400 amplitudes differed between the informed and the naive condition averaged across the three parts of the experiment, *F*`r tab1$anov["Condition", "N400_df"]` = `r tab1$anov["Condition", "N400_f"]`, *p* = `r tab1$anov["Condition", "N400_p"]`.
-Crucially, the part × condition interaction was significant in the N170 component, *F*`r tab1$anov["Pt. × con.", "N170_df"]` = `r tab1$anov["Pt. × con.", "N170_f"]`, *p* = `r tab1$anov["Pt. × con.", "N170_p"]`, and in the N400 component, *F*`r tab1$anov["Pt. × con.", "N400_df"]` = `r tab1$anov["Pt. × con.", "N400_f"]`, *p* `r tab1$anov["Pt. × con.", "N400_p"]` but not in the P1 component, *F*`r tab1$anov["Pt. × con.", "P1_df"]` = `r tab1$anov["Pt. × con.", "P1_f"]`, *p* = `r tab1$anov["Pt. × con.", "P1_p"]`.
-To answer our main research question, we decomposed these interactions into the differences between the semantically informed condition and the naive condition within the three different parts of the experiment.
+Averaged across conditions, P1, N170, and N400 amplitudes differed as a function of the part of the experiment (see Table \@ref(tab:tab1)).
+In addition, N400 amplitudes differed between the informed and the naive condition averaged across the three parts of the experiment.
+Crucially, the part × condition interaction was significant for all three components.
+To answer our main research question, we decomposed these interactions into the simple effects of the semantically informed condition versus the naive condition within each of the three different parts of the experiment.
 
 ## ERPs Before Insight Was Occurring
 
-In the pre-insight part, when objects were unfamiliar to participants and presented without keywords, no differences emerged between the semantically informed and the naive condition in the P1, N170, or N400 component, all *p*s ≥ `r tab1$conts["Pre-insight part", "N400_p"]` (see Table \@ref(tab:tab1) and Figure \@ref(fig:fig1)B).
-On the one hand, this was to be expected given that the critical presentation of the keywords (leading to semantically informed vs. naive perception) had not yet taken place.
-On the other hand, the absence of reliable differences in this part can be taken as evidence---with the usual caveats when interpreting null effects---that any subsequent effect of the semantic information in the other two parts cannot be accounted for by visual differences between the objects in the two conditions.
-Although the presentation of matching or non-matching keywords for each object was counterbalanced across participants, the fact that different numbers of objects were assigned to the two conditions based on participants' self-report would have made it possible for such visual differences to emerge as a confounding factor.
-If they did, however, one would expect to detect these differences even before any keywords were presented, which was apparently not the case.
+In the pre-insight part, when objects were unfamiliar to participants and presented without keywords, no differences emerged between the semantically informed and the naive condition in the P1, N170, or N400 component (see Table \@ref(tab:tab1) and Figure \@ref(fig:fig1)B).
+This was expected because given that (a) the critical presentation of the keywords (leading either to semantically informed perception or to naive perception) had not yet taken place and (b) the assignment of objects to conditions was counterbalanced across participants as to control for low-level visual differences between conditions.
 
 ## ERPs While Insight Was Occurring
 
 In the insight part, half of the unfamiliar objects were presented with matching keywords, leading to semanitcally informed perception, and the other half were presented with non-matching keywords, keeping the perceptio nof the objects semantically naive.
-During semantically informed perception, the amplitude of the N170 component was significantly enlarged (i.e., more negative), *b* = `r tab1$conts["Insight part", "N170_est"]` µV, *p* = `r tab1$conts["Insight part", "N170_p"]`, and the amplitude of the N400 component was significantly reduced (i.e., less negative), *b* = `r tab1$conts["Insight part", "N400_est"]` µV, *p* `r tab1$conts["Insight part", "N400_p"]`, compared to naive perception.
-As in the pre-insight part, there were no reliable differences in the P1 component, *b* = `r tab1$conts["Insight part", "P1_est"]` µV, *p* = `r tab1$conts["Insight part", "P1_p"]`.
+During semantically informed perception, the amplitude of the N170 component was significantly enlarged (i.e., more negative) and the amplitude of the N400 component was significantly reduced (i.e., less negative).
+There were no reliable differences in the P1 component.
 
 ## ERPs After Insight Had Occurred
 
 In the post-insight part, the unfamiliar objects were presented for a third time, again without the keywords (as in the pre-insight part).
-As in the insight part, the N400 component remained significantly reduced during semantically informed as compared to naive perception, *b* = `r tab1$conts["Post-insight part", "N400_est"]` µV, *p* `r tab1$conts["Post-insight part", "N400_p"]`, whereas the effect in the N170 component did not reoccur, *b* = `r tab1$conts["Post-insight part", "N170_est"]` µV, *p* = `r tab1$conts["Post-insight part", "N170_p"]`.
-Instead, the P1 component was significantly enlarged (i.e., more positive) in response to objects for which semantically informed perception had taken place, *b* = `r tab1$conts["Post-insight part", "P1_est"]` µV, *p* = `r tab1$conts["Post-insight part", "P1_p"]`.
+As in the insight part, the N400 component remained significantly reduced during semantically informed as compared to naive perception, whereas the effect in the N170 component did not reoccur.
+Instead, the P1 component was significantly enlarged (i.e., more positive) in response to objects for which semantically informed perception had taken place.
 
 ```{r, fig3, eval=FALSE, include=TRUE}
 # Read grand averages of evoked power
@@ -932,16 +930,11 @@ tab2 <- create_table(
 )
 ```
 
-One may raise concerns whether the modulation of the N170 component in the insight part genuinely reflects the semantically informed perception of the objects in the respective condition, or---as an alternative explanation---whether it may be driven by the objects in the other, semantically naive condition.
-Remember that these objects were preceded by non-matching keywords which were picked so that they could not be related to the visual features of the object and their configuration.
-Thus, the modulation of the ERP components in the insight part could be a mismatch response to those objects---reflecting, for example, the fact that the visual features of the object shown in Figure \@ref(fig:fig1)A cannot be reconciled with the function of signaling messages.
-To preclude this alternative explanation, we repeated our analysis using a different baseline against which the objects in the semantically informed condition were contrasted.
-Instead of the naive condition (where objects were presented with non-matching keywords), we now used those objects which were presented with matching keywords (as in the informed condition), but which were excluded from the main analysis because participants indicated behaviorally that they did not understand the object they were seeing.
-Across both experiments, this was the case for `r percent(obj_per_cond[["Excl_informed"]] / 60, accuracy = 0.1)` of objects presented with matching keywords, as compared to `r percent(obj_per_cond[["Informed"]] / 60, accuracy = 0.1)` of objects which did indeed lead to semantically informed perception.[^1]
-Just as above, this control analysis revealed a robust N170 effect in the insight part, *b* = `r tab2$conts["Insight part", "N170_est"]` µV, *p* `r tab2$conts["Insight part", "N170_p"]`. Thus, this enhanced negativity seems to be a genuine marker of semantically informed perception, no matter if compared to objects presented with non-matching keywords or compared to objects presented with matching keywords on which participants failed to capitalize.
-Note that the reduction of the N400 component in the insight part also remained robust in this control analysis, *b* = `r tab2$conts["Insight part", "N400_est"]` µV, *p* `r tab2$conts["Insight part", "N400_p"]`.
-
-[^1]: Note that these percentages do not add up to 100% because some objects were excluded from all analyses if participants indicated knowing these objects in the pre-insight part, before any keywords had been presented (see Method).
+In the main analysis described above, objects in the semantically informed condition (matching keywords) were contrasted against objects in the naive condition (non-matching keywords) as the baseline condition.
+This may raise the question if the N170 and/or N400 effects in the insight part could be due to a mismatch response for objects in the naive condition.
+To rule out this alternative explanation, we repeated the analysis using a different baseline condition, namely those objects that were presented with matching keywords (as in the informed condition) but on which participants failed to capitalize according to their behavioral responses.
+This was the case for `r percent(obj_per_cond[["Excl_informed"]] / 60, accuracy = 0.1)` of objects presented with matching keywords.
+As before, there semantically informed perception led to a reliable increase in the N170 component and a reliable decrease in the N400 component (see Table \@ref(tab:tab2)).
 
 # Discussion
 
