@@ -323,7 +323,7 @@ create_table <- function(models, stub_anova, stub_contrasts, caption, note) {
       map(mutate, estt = kableExtra::linebreak(estt, align = "c", linebreaker = "\n")) %>%
       map(add_row, estt = "Est. [CI]; \\textit{t} (\\textit{df})", p = "\\textit{p}", .before = 1) %>%
       bind_cols() %>%
-      set_rownames(c("\\textbf{Informed - naive}", stub_contrasts_indent))
+      set_rownames(c("\\textbf{Follow-up tests}", stub_contrasts_indent))
   )
   suppressMessages(
     conts %<>%

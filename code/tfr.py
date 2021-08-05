@@ -1,19 +1,8 @@
-from os import makedirs
-
 import numpy as np
 import pandas as pd
 
-# Read evoked *potentials* for all subjects
-subject_id = ["sub-" + "{:02d}".format(sid) for sid in range(1, 49)]
-fname_evo_tfr = ["../data/preprocessed/" + sub + "_ave.csv" for sub in subject_id]
-evo = [pd.read_csv(fname) for fname in fname_evo_tfr]
-evo = pd.concat(evo)
-
-# Average across subjects
-id_vars = ["part", "condition", "time"]
-evo = evo.groupby(id_vars, as_index=False).mean()
-
 # Read evoked *power* for all subjects
+subject_id = ["sub-" + "{:02d}".format(sid) for sid in range(1, 49)]
 fname_evo_tfr = ["../data/preprocessed/" + sub + "_tfr-ave.csv" for sub in subject_id]
 evo_tfr = [pd.read_csv(fname) for fname in fname_evo_tfr]
 evo_tfr = pd.concat(evo_tfr)
