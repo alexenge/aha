@@ -15,24 +15,29 @@
 
 	// Set *default* container specific settings.json values on container create.
 	"settings": { 
-		"terminal.integrated.defaultProfile.linux": null
+		"terminal.integrated.defaultProfile.linux": "bash",
+		"r.rterm.linux": "/home/rstudio/.local/bin/radian"
 	},
 
 	// Add the IDs of extensions you want installed when the container is created.
 	"extensions": [
+		"eamodio.gitlens",
+		"ikuyadeu.r",
 		"geddski.macros",
 		"grapecity.gc-excelviewer",
-		"ikuyadeu.r",
+		"kirozen.wordcounter",
+		"ms-azuretools.vscode-docker",
 		"ms-python.python",
 		"ms-toolsai.jupyter",
-		"tomoki1207.pdf"
+		"redhat.vscode-yaml",
+		"tomoki1207.pdf",
 	],
 
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
 	// "forwardPorts": [],
 
 	// Uncomment the next line to run commands after the container is created - for example installing curl.
-	"postCreateCommand": "pip install --user black",
+	"postCreateCommand": "pip install --user black radian",
 
 	// Uncomment when using a ptrace-based debugger like C++, Go, and Rust
 	// "runArgs": [ "--cap-add=SYS_PTRACE", "--security-opt", "seccomp=unconfined" ],
