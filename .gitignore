@@ -4,13 +4,17 @@
 .Rproj.user
 .Ruserdata
 .vscode/
+*.docx
 *.fif
 *.h5
+*.pdf
 *.stc
+*.tex
 analysis/export/
 code/__pycache__/
 code/tmp.py
 data/
 docs/
+figure-latex/
 renv*
 results/
