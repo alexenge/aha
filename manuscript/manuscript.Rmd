@@ -88,26 +88,18 @@ library(magrittr)
 # Load helper functions
 source(here("manuscript", "plots_tables.R"))
 
-# Write R package citations
+# Write R package citations to bibliography
 r_refs(here("manuscript", "r-references.bib"), append = FALSE)
 
 # Set global chunk options
-opts_chunk$set(
-  fig.align = "center",
-  fig.width = 10,
-  include = FALSE,
-  out.width = "100%"
-)
+opts_chunk$set(fig.width = 10, include = FALSE, out.width = "100%")
 
 # Re-run preprocessing and/or model fitting?
-run <- list(preprocessing = FALSE, model_fitting = FALSE)
+run <- list(preprocessing = TRUE, model_fitting = TRUE)
 
-# Number of CPU cores for parallel model fitting
-n_cores <- detectCores()
-
-# File names for easier I/O
-deps <- c("logRT", "P1", "N170", "N400")
-fnames <- list(
+# File names for easier input/output
+deps <- c("logRT", "P1", "N170", "N400")  # dependent variables
+io <- list(
   montage = "results/montage.csv",
   obj_per_cond = "results/obj-per-cond.csv",
   trials = "results/trials.csv",
@@ -197,16 +189,16 @@ fname_log <- c(
   list.files("data/raw/rt/exp2", pattern = ".txt", full.names = TRUE)
 )
 
-# Generate new BIDS-style subject IDs
-seq(length(fname_vhdr)) %>%
+# Generate new BIDS-style subject IDs (sub-01, sub-02, ...)
+seq_along(fname_vhdr) %>%
   str_pad(width = 2, pad = 0) %>%
   str_c("sub-", .) -> subject_id
 
 # Define ERP components of interest
 erp_components <- tibble(
   name = c("P1", "N170", "N400"),
-  tmin = c(0.1, 0.15, 0.4),
-  tmax = c(0.15, 0.2, 0.7),
+  tmin = c(0.100, 0.150, 0.400),
+  tmax = c(0.150, 0.200, 0.700),
   roi = list(
     c("PO3", "PO4", "POz", "O1", "O2", "Oz"),
     c("P7", "P8", "PO7", "PO8", "PO9", "PO10"),
@@ -223,20 +215,21 @@ tfr_cycles <- seq(3, 10, length.out = length(tfr_freqs))
 if (run$preprocessing) {
 
   # Import the custom Python functions for preprocessing
-  pp <- import_from_path("preprocessing", path = "code")
+  pp <- import_from_path("preprocessing", path = here("manuscript"))
 
   # Do the actual preprocessing
   tibble(fname_vhdr, fname_log, subject_id) %>%
     pwalk(
       pp$preprocess,
       output_dir = "data/preprocessed",
+      resample_sfreq = 250,
       eog_names = c("HEOG", "VEOG"),
       eog_anodes = c("F9", "Auge_u"),
       eog_cathodes = c("F10", "Fp1"),
       montage_kind = "easycap-M1",
       ica_components = as.integer(15),
       ica_method = "fastica",
-      ica_seed = as.integer(1234),
+      random_seed = as.integer(1234),
       hipass = 0.1,
       lowpass = 30,
       event_id = dict(match = as.integer(221), mismatch = as.integer(222)),
@@ -247,19 +240,21 @@ if (run$preprocessing) {
       erp_components = erp_components,
       average_by = c("part", "condition", "subject_id"),
       tfr_baseline = tuple(-0.3, -0.1),
-      tfr_equalize = "condition == ['Informed', 'Naive']",
-      tfr_resample = py_none(),
+      tfr_equalize = TRUE,
+      condition_col = "condition",
+      item_col = "item_id",
+      drop_conditions = c("Excl_informed", "Excl_naive", "Excl_known"),
       tfr_freqs = tfr_freqs,
       tfr_cycles = tfr_cycles,
-      tfr_crop = tuple(-0.2, 0.8)
+      tfr_crop = tuple(-0.3, 0.7)
     )
 
   # Combine single trial data for all subjects
-  dir.create("results")
+  dir.create("results", showWarnings = FALSE)
   str_c("data/preprocessed/", subject_id, "_trials.csv") %>%
     map(read_csv, col_types = cols()) %>%
     bind_rows() %>%
-    write_csv(fnames$trials)
+    write_csv(io$trials)
 
   # Get standard EasyCap electrode positions and project them into 2D space
   read_csv("data/preprocessed/sub-01_tfr-ave.csv", col_types = cols()) %>%
@@ -275,7 +270,7 @@ if (run$preprocessing) {
       y = eegUtils:::deg2rad(Theta) * sin(eegUtils:::deg2rad(Phi)),
     ) %>%
     mutate(across(c(x, y), round, 3)) %>%
-    write_csv(fnames$montage)
+    write_csv(io$montage)
 
   # Determine number of objects per condition for each participant
   fname_log %>%
@@ -284,7 +279,7 @@ if (run$preprocessing) {
     with(table(subject_id, condition) / 3) %>%
     as.data.frame.matrix() %>%
     rownames_to_column("subject_id") %>%
-    write_csv(fnames$obj_per_cond)
+    write_csv(io$obj_per_cond)
 }
 ```
 
@@ -301,7 +296,7 @@ ave = pd.concat(ave)
 # Average across subjects
 id_vars = ["part", "condition", "time"]
 ave = ave.groupby(id_vars, as_index=False).mean()
-ave.to_csv(r.fnames["ave_grand"], float_format="%.3f", index=False)
+ave.to_csv(r.io["ave_grand"], float_format="%.3f", index=False)
 
 # Read evoked *power* for all subjects
 fnames_ave_tfr = [f"data/preprocessed/{sub}_tfr-ave.csv" for sub in subs]
@@ -327,7 +322,7 @@ ave_tfr_flat = ave_tfr.groupby(id_vars, as_index=False).mean()
 # Average across subjects and save
 id_vars.remove("subject_id")
 dfs = [ave_tfr_flat, ave_tfr_diff]
-fnames_tfr = [r.fnames["ave_tfr_flat"], r.fnames["ave_tfr_diff"]]
+fnames_tfr = [r.io["ave_tfr_flat"], r.io["ave_tfr_diff"]]
 for df, fname in zip(dfs, fnames_tfr):
     df = df.groupby(id_vars, as_index=False).mean()
     df.to_csv(fname, float_format="%.3f", index=False)
@@ -336,7 +331,7 @@ del df, dfs, ave, ave_tfr, ave_tfr_diff, ave_tfr_flat
 
 ```{r, models_lme}
 # Compute average number of objects per condition
-(obj_per_cond <- read_csv(fnames$obj_per_cond, col_types = cols()) %>%
+(obj_per_cond <- read_csv(io$obj_per_cond, col_types = cols()) %>%
   summarise(across(.cols = -subject_id, .fns = mean)) %>%
   as.list())
 
@@ -383,7 +378,7 @@ c("Informed" = 1, "Naive" = -1) %>%
 if (!run$model_fitting) {
 
   # Load models
-  models_lme <- readRDS(fnames$models_lme)
+  models_lme <- readRDS(io$models_lme)
 } else {
 
   # Define function for building a single mixed-effect model
@@ -394,6 +389,7 @@ if (!run$model_fitting) {
 
     # Automic model selection via likelihood ratio tests
     # using an alpha level of .20 (see Matuschek et al., 2017, J Mem Lang)
+    n_cores <- detectCores()
     cl <- makeCluster(n_cores)
     build <- buildmer(
       buildmerControl = buildmerControl(
@@ -441,7 +437,7 @@ if (!run$model_fitting) {
     n_cores = n_cores
   ) %>%
     set_names(deps) %T>%
-    saveRDS(fnames$models_lme) -> models_lme
+    saveRDS(io$models_lme) -> models_lme
 }
 ```
 
@@ -483,7 +479,7 @@ fit_brm_prior <- brm(
   chains = 4,
   iter = 20000,
   warmup = 2000,
-  file = fnames$model_brm_prior,
+  file = io$model_brm_prior,
   file_refit = "never"
 )
 
@@ -494,11 +490,11 @@ mcmc_plot(fit_brm_prior, "areas", pars = "^b_", prob_outer = 0.95)
 
 # Compute posterior distributions for dependent variables
 deps <- c("logRT", "P1", "N170", "N400")
-map(deps, function(dv) {
+map(deps, function(dep) {
 
   # Define model formula for the current dependent variable
   formula_dv <- str_c(
-    dv, " ~ part * condition +
+    dep, " ~ part * condition +
       (part * condition | subject_id) +
       (part * condition | item_id)"
   ) %>%
@@ -510,7 +506,7 @@ map(deps, function(dv) {
     formula = formula_dv,
     newdata = trials,
     sample_prior = "yes",
-    file = fnames$models_brm[[dv]],
+    file = io$models_brm[[dep]],
     file_refit = "never"
   )
 
@@ -558,8 +554,8 @@ pp_check(
 
 ```{r, fig1, include=TRUE, fig.height=10, fig.cap="(ref:figure-1-caption)"}
 # Load montage and evoked data
-montage <- read_csv(fnames$montage, col_types = cols())
-evokeds <- read_csv(fnames$ave_grand, col_types = cols(), progress = FALSE)
+montage <- read_csv(io$montage, col_types = cols())
+evokeds <- read_csv(io$ave_grand, col_types = cols(), progress = FALSE)
 
 # Create plot for Experiment 1
 plot_fig1(erp_components, evokeds, trials_main, models_lme)
@@ -675,8 +671,8 @@ Instead, the P1 component was significantly enlarged (i.e., more positive) in r
 
 ```{r, fig3, eval=FALSE, include=TRUE}
 # Read grand averages of evoked power
-ave_tfr_flat <- read_csv(fnames$ave_tfr_flat, col_types = cols(), progress = FALSE)
-ave_tfr_diff <- read_csv(fnames$ave_tfr_diff, col_types = cols(), progress = FALSE)
+ave_tfr_flat <- read_csv(io$ave_tfr_flat, col_types = cols(), progress = FALSE)
+ave_tfr_diff <- read_csv(io$ave_tfr_diff, col_types = cols(), progress = FALSE)
 
 # Scaling of power in all plots
 limits_power <- c(0, 0.5)
@@ -835,7 +831,7 @@ c("Informed" = 1, "Excl_informed" = -1) %>%
 if (!run$model_fitting) {
 
   # Load models
-  models_control <- readRDS(fnames$models_control)
+  models_control <- readRDS(io$models_control)
 } else {
 
   # Compute models for all dependent variables in parallel
@@ -850,7 +846,7 @@ if (!run$model_fitting) {
     n_cores = n_cores
   ) %>%
     set_names(deps) %T>%
-    saveRDS(fnames$models_control) -> models_control
+    saveRDS(io$models_control) -> models_control
 }
 ```
 
