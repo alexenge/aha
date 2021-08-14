@@ -16,7 +16,10 @@
 	// Set *default* container specific settings.json values on container create.
 	"settings": { 
 		"terminal.integrated.defaultProfile.linux": "bash",
-		"r.rterm.linux": "/home/rstudio/.local/bin/radian"
+		"r.rterm.linux": "/home/rstudio/.local/bin/radian",
+		"[python]": {
+			"editor.rulers": [88]
+		}
 	},
 
 	// Add the IDs of extensions you want installed when the container is created.

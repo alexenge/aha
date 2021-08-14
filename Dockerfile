@@ -4,10 +4,9 @@ ENV PROJDIR=${HOME}/aha
 RUN mkdir ${PROJDIR}
 WORKDIR ${PROJDIR}
 
-COPY code/ code/
 COPY data/ data/
+COPY manuscript/ manuscript/
 COPY materials/ materials/
-COPY misc/ misc/
 COPY requirements.txt .
 
 USER root

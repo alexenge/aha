@@ -10,8 +10,8 @@
 *.pdf
 *.stc
 *.tex
+__pycache__/
 analysis/export/
-code/__pycache__/
 code/tmp.py
 data/
 docs/
