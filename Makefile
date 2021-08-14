@@ -10,7 +10,7 @@ CONTAINER_TAG := $(DOCKER_USER)/$(PROJECT)
 ifeq ($(DOCKER),TRUE)
 	run := docker run \
 		--rm \
-		--volume $(HOST_PATH)/code:$(CONTAINER_PATH)/code \
+		--volume $(HOST_PATH)/manuscript:$(CONTAINER_PATH)/manuscript \
 		--volume $(HOST_PATH)/data:$(CONTAINER_PATH)/data \
 		$(CONTAINER_TAG)
 	workdir := $(CONTAINER_PATH)
@@ -19,13 +19,14 @@ else
 endif
 
 # Knit the manuscript
-all: code/manuscript.pdf
-code/manuscript.pdf: code/manuscript.Rmd
-code/manuscript.pdf: misc/apa.csl
-code/manuscript.pdf: misc/bibliography.bib
-code/manuscript.pdf: misc/potato_masher.png
-code/manuscript.pdf:
-	$(run) Rscript -e "rmarkdown::render(input = '$(workdir)/code/manuscript.Rmd')"
+all: manuscript/manuscript.pdf
+manuscript/manuscript.pdf: manuscript/manuscript.Rmd
+manuscript/manuscript.pdf: manuscript/apa.csl
+manuscript/manuscript.pdf: manuscript/references.bib
+manuscript/manuscript.pdf: manuscript/r-references.bib
+manuscript/manuscript.pdf: manuscript/example_stim.png
+manuscript/manuscript.pdf:
+	$(run) Rscript -e "rmarkdown::render(input = '$(workdir)/manuscript/manuscript.Rmd')"
 
 # Build the docker container
 build: Dockerfile
@@ -40,7 +41,7 @@ $(PROJECT).tar.gz:
 interactive:
 	docker run \
 		--rm \
-		--volume $(HOST_PATH)/code:$(CONTAINER_PATH)/code \
+		--volume $(HOST_PATH)/manuscript:$(CONTAINER_PATH)/manuscript \
 		--volume $(HOST_PATH)/data:$(CONTAINER_PATH)/data \
 		-e PASSWORD=1234 \
 		-p 8888:8888 \
