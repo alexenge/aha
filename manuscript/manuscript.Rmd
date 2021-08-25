@@ -99,7 +99,7 @@ opts_chunk$set(fig.width = 10, include = FALSE, out.width = "100%")
 run <- list(
   preprocessing = FALSE,
   model_fitting = FALSE,
-  time_frequency = FALSE
+  time_frequency = TRUE
 )
 
 # File names for easier input/output
@@ -256,7 +256,7 @@ if (run$preprocessing) {
       tfr_crop = tuple(-0.3, 0.7)
     )
 
-  # Combine single trial data for all subjects
+  # Combine single-trial data for all subjects
   dir.create("results", showWarnings = FALSE)
   str_c("data/preprocessed/", subject_id, "_trials.csv") %>%
     map(read_csv, col_types = cols()) %>%
@@ -342,7 +342,7 @@ del df, dfs, ave, ave_tfr, ave_tfr_diff, ave_tfr_flat
   summarise(across(.cols = -subject_id, .fns = mean)) %>%
   as.list())
 
-# Read single trial data for all subjects
+# Read single-trial data for all subjects
 str_c("data/preprocessed/", subject_id, "_trials.csv") %>%
   map(read_csv, col_types = cols()) %>%
   bind_rows() %>%
@@ -568,7 +568,7 @@ evokeds <- read_csv(io$ave_grand, col_types = cols(), progress = FALSE)
 plot_fig1(erp_components, evokeds, trials_main, models_lme)
 ```
 
-(ref:figure-1-caption) Procedure and results of Experiment 1. (A) In the pre-insight part, participants were presented with 120 unfamiliar objects and indicated whether they knew what kind of object they were viewing.
+(ref:figure-1-caption) Experimental procedure and ERP results. (A) In the pre-insight part, participants were presented with 120 unfamiliar objects and indicated whether they knew what kind of object they were viewing.
 In the insight part, half of these objects were presented with matching keywords (in purple color for illustration), leading to semantically informed perception, and the other half with non-matching keywords (in petrol color for illustration), leading to naive perception.
 In the post-insight part, the same objects were presented again without keywords.
 (B) ERP waveforms and scalp topographies are shown for objects with semantically informed versus naive perception within the three different parts.
@@ -617,7 +617,7 @@ This was the case for an average of `r format(round(obj_per_cond[["Naive"]], 1),
 The same assignment of objects to conditions (based on the manipulation and responses in the insight part) was also used for analyzing the pre-insight and post-insight parts.
 This allowed us to test, on the one hand, if the objects from both conditions differed in important aspects even before any keywords were presented (pre-insight part) and, on the other hand, if the semantic understanding acquired in the insight part had any down-stream effects on the subsequent perception of the objects (post-insight part).
 
-The event-related potentials in response to objects from both conditions and all three parts were analyzed on the single trial level using linear mixed-effects regression models [@baayen2008; @fromer2018].
+The event-related potentials in response to objects from both conditions and all three parts were analyzed on the single-trial level using linear mixed-effects regression models [@baayen2008; @fromer2018].
 Compared to traditional by-participant or by-item analyses of variance, these models allow tighter control over the false positive rate because they simultaneously account for by-participant and by-item non-independencies in the data [@burki2018; @judd2012]. Furthermore, they flexibly handle unbalanced data.
 This was important in our case because of the rejection of bad ERP epochs as well as the way we constructed our experimental conditions (see above). 
 
@@ -633,7 +633,26 @@ To investiage if semantically informed perception had an influence on the ERPs w
 This was done using the emmeans package [Version `r as.character(packageVersion("emmeans"))`; @R-emmeans].
 All *p*-values were computed by approximating the relevant denominator degrees of freedom using Satterthwaite's method as implemented in the lmerTest package [Version `r as.character(packageVersion("lmerTest"))`; @R-lmerTest].
 
-The materials, single trial preprocessed data, and code for data analysis are openly available at <https://osf.io/uksbc/>.
+The materials, single-trial preprocessed data, and code for data analysis are openly available at <https://osf.io/uksbc/>.
+
+## Time-frequency analysis
+
+Semantically informed perception may manifest itself not only in changes in evoked activity (as captured by the ERP analysis), but also in induced activity.
+We therefore carried out an exploratory time-frequency analysis.
+We first created new epochs from the ICA-corrected but unfiltered raw data.
+To avoid differences between conditions due to a difference in noise levels, we equated the number of objects per condition for each participant by discarding a random sample of objects from the semantically naive condition.
+Epochs that were marked as bad for the ERP analysis (defined as peak-to-peak amplitudes exceeding 200 µV) were also removed from the time-frequency analysis.
+The remaining epochs were then convolved with a family of 24 Morlet wavelets using the short-time Fourier transform.
+The frequency of these wavelets increased linearly from 4 Hz to 50 Hz in steps of 2 Hz and the number of cycles increased linearly from 3 cycles to 10 cycles in steps of 0.304 cycles.
+The resulting single-trial time-frequency data were converted into percent signal change by first subtracting and then dividing by the mean acitivity during the baseline period (300--100 ms before object onset).
+
+Because we did not have any a priori hypothesis for the time-frequency domain, we used cluster-based permutation tests [@maris2007] to explore the effects of semantically informed perception as compared to naive perception within each part of the experiment.
+We first created condition averages for each of the participant, part, and condition.
+Separately for each of the three parts, we then computed the by-participant differences between the semantically informed condition and the naive condition.
+The *permutation_cluster_1samp_test* function in MNE was then used to carry out the cluster-based permutation tests.
+This function (a) identified data points where the difference between conditions (one sample *t*-test) was significant *p* < .05, (b) combined neighboring data points where this was the case into observed clusters, and (c) computed a *p* value for each of these observed clusters by comparing its mass to an empirical null distribution of largest cluster masses at each of 1,000 permutations.
+Data points were defined as neighboring each other based on the Delaunay triangulation in 2D channel space (*find_ch_adjacency* function) and based on lattice adjacency matrices in the frequency and time domains (i.e., considering only directly adjacent frequency bands and time points).
+Observed clusters for which the claster mass exceeded 95% of permuted cluster masses were deemed as showing reliable effects of semantically informed perception in each part.
 
 # Results
 
@@ -836,10 +855,16 @@ tfrs_plotting.to_csv(r.io["tfr_grand_ave"], index=False)
 jsonlite::read_json(io$tfr_stats) %>%
   as_tibble() -> tfr_stats
 
-# Get minimum cluster p value per part
+# Get smallest cluster p value for each part
 tfr_stats$p_values %>%
-  map(as.numeric) %>%
-  map(min) %>%
+  map(function(p_values, digits = 3) {
+    p_values %>%
+      as.numeric() %>%
+      min() %>%
+      round(digits) %>%
+      format(trim = TRUE, digits = digits, nsmall = digits) -> min_p
+    min_p <- ifelse(min_p == "1.000", "1", str_replace(min_p, "0.", "."))
+  }) %>%
   set_names(c("I", "II", "III")) -> tfr_min_ps
 
 # Plot time-frequency results per part and condition
@@ -847,7 +872,12 @@ read_csv(io$tfr_grand_ave, col_types = cols(), progress = FALSE) %>%
   plot_fig2()
 ```
 
-(ref:figure-2-caption) Looks great!
+(ref:figure-2-caption) Time-frequency results. Each panel shows the time-frequency representation for a single part of the experiment (left: pre-insight part, middle: insight part, right: post-insight part) for one of the two experimental conditions (top: semantically informed, bottom: naive).
+The time-frequency data were averaged across all 48 participants and all 62 EEG channels.
+According to cluster-based permutation tests, there were no reliable differences between the two conditions in either of the three parts.
+
+Cluster-based permutation tests were run on a time-frequency representation of the ERP data for each part, obtained using Morlet wavelet convolution.
+Always comparing the semantically informed condition to the naive condition, there were no signicantly large clusters in the pre-insight part (all *p*s ≥ `r tfr_min_ps[["I"]]`), the insight part (all *p*s ≥ `r tfr_min_ps[["II"]]`), or the post-insight part (all *p*s ≥ `r tfr_min_ps[["III"]]`).
 
 # Discussion
 
