@@ -262,7 +262,7 @@ plot_fig1 <- function(erp_components, evokeds, trials, models) {
 
   # Combine evrything
   plot_grid(fig1a, fig1b, nrow = 2, labels = "AUTO", label_fontfamily = "Helvetica", label_y = c(1, 1.03)) +
-    
+
     # Add some lines to separate the three parts
     annotate("segment", x = 0.327, xend = 0.327, y = -Inf, yend = 0.48) +
     annotate("segment", x = 0.667, xend = 0.667, y = -Inf, yend = 0.48) +
@@ -270,10 +270,51 @@ plot_fig1 <- function(erp_components, evokeds, trials, models) {
     annotate("segment", x = 0.667, xend = 0.728, y = 0.48, yend = 0.55) +
     annotate("segment", x = 0.272, xend = 0.272, y = 0.55, yend = Inf) +
     annotate("segment", x = 0.728, xend = 0.728, y = 0.55, yend = Inf) +
-    
+
     # Add legend and colorbar
     draw_plot(leg, x = 0.73, y = 0.82, width = 0.2, height = 0.2) +
     draw_plot(cbar, x = 0.85, y = 0.82, width = 0.2, height = 0.2)
+}
+
+# Function to create Figure ""
+plot_fig2 <- function(tfr_grand_ave) {
+
+  # Create new labels for parts and conditions
+  part_levels <- c("I", "II", "III")
+  part_labels <- c("Pre-insight part", "Insight part", "Post-insight part")
+  cond_levels <- c("Informed", "Naive")
+  cond_labels <- c("Informed condition", "Naive condition")
+  tfr_grand_ave %>%
+    mutate(
+      part = factor(part, levels = part_levels, labels = part_labels),
+      condition = factor(condition, levels = cond_levels, labels = cond_labels)
+    ) %>%
+    # Plot
+    ggplot(aes(x = time, y = freq, fill = power)) +
+    facet_grid(vars(condition), vars(part)) +
+    geom_raster() +
+    scale_x_continuous(breaks = seq(-200, 600, 200)) +
+    scale_y_continuous(breaks = c(4, seq(10, 50, 10))) +
+    scale_fill_viridis_c(limits = c(-1, 3)) +
+    coord_cartesian(expand = FALSE) +
+    labs(x = "Time (ms)", y = "Frequency (Hz)") +
+    guides(
+      fill = guide_colorbar(
+        title.vjust = 4,
+        title = "Power\n(% over\nbaseline)",
+        barheight = 6,
+        ticks = FALSE
+      )
+    ) +
+    theme_bw() +
+    theme(
+      axis.title = element_text(family = "Helvetica", size = 10),
+      axis.text = element_text(family = "Helvetica", size = 10),
+      legend.title = element_text(family = "Helvetica", size = 10),
+      legend.text = element_text(family = "Helvetica", size = 10),
+      strip.background = element_rect(color = NA, fill = NA),
+      strip.text = element_text(family = "Helvetica", size = 10),
+    )
 }
 
 # Function to print an ANOVA-style table
@@ -362,62 +403,3 @@ create_table <- function(models, stub_anova, stub_contrasts, caption, note) {
     cat()
   return(list("anov" = anov, "conts" = conts))
 }
-
-# # Old function without t-values and performance measures
-# create_table <- function(models, stub_anova, stub_contrasts, caption, note) {
-#   anov <- map(models, function(model) {
-#     data.frame(
-#       "f" = format(round(model$anova$`F value`, 2), trim = FALSE, nsmall = 2),
-#       "df" = paste0("(", model$anova$NumDF, ", ", format(round(model$anova$DenDF, 1), trim = TRUE, nsmall = 1), ")"),
-#       "p" = format(round(model$anova$`Pr(>F)`, 3), trim = FALSE, nsmall = 3)
-#     ) %>%
-#       mutate(p = ifelse(p == "0.000", "< .001", substr(p, 2, nchar(p)))) %>%
-#       set_rownames(c(stub_anova))
-#   })
-#   suppressMessages(
-#     anov_print <- anov %>%
-#       map(unite, col = fdf, f, df, sep = " ") %>%
-#       map(add_row, fdf = "\\textit{F} (\\textit{df})", p = "\\textit{p}", .before = 1) %>%
-#       bind_cols() %>%
-#       set_rownames(c("\\textbf{Fixed effects}", stub_anova))
-#   )
-#   suppressMessages(
-#     anov %<>%
-#       bind_cols() %>%
-#       set_colnames(paste(rep(names(models), each = length(names(models))), c("f", "df", "p"), sep = "_"))
-#   )
-#   conts <- map(models, function(model) {
-#     data.frame(
-#       "est" = format(round(model$contrasts$estimate, 2), trim = FALSE, nsmall = 2),
-#       "ci" = paste0(
-#         "[", format(round(model$contrasts$lower.CL, 2), trim = TRUE, nsmall = 2), ", ",
-#         format(round(model$contrasts$upper.CL, 2), trim = TRUE, nsmall = 2), "]"
-#       ),
-#       "p" = format(round(model$contrasts$`p.value`, 3), trim = FALSE, nsmall = 3)
-#     ) %>%
-#       mutate(p = ifelse(p == "0.000", "< .001", substr(p, 2, nchar(p)))) %>%
-#       set_rownames(stub_contrasts)
-#   })
-#   suppressMessages(
-#     conts_print <- conts %>%
-#       map(unite, col = estci, est, ci, sep = " ") %>%
-#       map(add_row, estci = "Est. [95% CI]", p = "\\textit{p}", .before = 1) %>%
-#       bind_cols() %>%
-#       set_rownames(c("\\textbf{Informed - naive}", stub_contrasts))
-#   )
-#   suppressMessages(
-#     conts %<>%
-#       bind_cols() %>%
-#       set_colnames(paste(rep(names(models), each = length(names(models))), c("est", "ci", "p"), sep = "_"))
-#   )
-#   cnames <- c("\\textbf{Fixed effects}", as.character(anov_print[1, ]))
-#   list(anov_print[2:nrow(anov_print), ], conts_print) %>%
-#     map(set_colnames, paste0("V", 1:ncol(anov_print))) %>%
-#     apa_table(
-#       col.names = cnames, col_spanners = list("\\textbf{P1}" = 2:3, "\\textbf{N170}" = 4:5, "\\textbf{N400}" = 6:7),
-#       midrules = nrow(anov_print), font_size = "footnotesize", align = "lcccccc", escape = FALSE,
-#       caption = caption, note = note
-#     ) %>%
-#     cat()
-#   return(list("anov" = anov, "conts" = conts))
-# }

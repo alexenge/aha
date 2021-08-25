@@ -45,7 +45,7 @@ draft             : no
 bibliography      : ["references.bib", "r-references.bib"]
 csl               : "apa.csl"
 documentclass     : "apa7"
-classoption       : "man"
+classoption       : "man,donotrepeattitle"
 fontsize          : "10pt"
 output:
   papaja::apa6_pdf:
@@ -73,6 +73,7 @@ library(buildmer)
 library(cowplot)
 library(emmeans)
 library(here)
+library(jsonlite)
 library(knitr)
 library(lme4)
 library(lmerTest)
@@ -95,10 +96,14 @@ r_refs(here("manuscript", "r-references.bib"), append = FALSE)
 opts_chunk$set(fig.width = 10, include = FALSE, out.width = "100%")
 
 # Re-run preprocessing and/or model fitting?
-run <- list(preprocessing = TRUE, model_fitting = TRUE)
+run <- list(
+  preprocessing = FALSE,
+  model_fitting = FALSE,
+  time_frequency = FALSE
+)
 
 # File names for easier input/output
-deps <- c("logRT", "P1", "N170", "N400")  # dependent variables
+deps <- c("logRT", "P1", "N170", "N400") # dependent variables
 io <- list(
   montage = "results/montage.csv",
   obj_per_cond = "results/obj-per-cond.csv",
@@ -109,7 +114,9 @@ io <- list(
   models_lme = "results/models_lme.RDS",
   models_brm = str_c("results/model_brm_", deps, ".RDS") %>% set_names(deps),
   model_brm_prior = "results/model_brm_prior.RDS",
-  models_control = "results/models_control.RDS"
+  models_control = "results/models_control.RDS",
+  tfr_stats = "results/tfr_stats.json",
+  tfr_grand_ave = "results/tfr_grand_ave.csv"
 )
 ```
 
@@ -669,149 +676,6 @@ In the post-insight part, the unfamiliar objects were presented for a third time
 As in the insight part, the N400 component remained significantly reduced during semantically informed as compared to naive perception, whereas the effect in the N170 component did not reoccur.
 Instead, the P1 component was significantly enlarged (i.e., more positive) in response to objects for which semantically informed perception had taken place.
 
-```{r, fig3, eval=FALSE, include=TRUE}
-# Read grand averages of evoked power
-ave_tfr_flat <- read_csv(io$ave_tfr_flat, col_types = cols(), progress = FALSE)
-ave_tfr_diff <- read_csv(io$ave_tfr_diff, col_types = cols(), progress = FALSE)
-
-# Scaling of power in all plots
-limits_power <- c(0, 0.5)
-
-# Time-frequency of interest based on visual inspect
-tfoi <- list(tmin = 150, tmax = 350, fmin = 14, fmax = 24) # Beta or
-tfoi <- list(tmin = 200, tmax = 400, fmin = 34, fmax = 48) # Gamma
-
-# Standard text format
-standard_text <- element_text(size = 10, color = "black", family = "Helvetica")
-
-plot_tfr_raster <- function(ave_tfr, limits, tmin, tmax, fmin, fmax, label) {
-  # Average across electrodes
-  ave_tfr %>%
-    pivot_longer(-c(part, time, freq), names_to = "electrode", values_to = "power") %>%
-    group_by(part, time, freq) %>%
-    summarise(power = mean(power), .groups = "drop") %>%
-    # Create one raster plot per part
-    group_by(part) %>%
-    group_map(function(data_part, part) {
-      ggplot(data_part, aes(x = time, y = freq, fill = power)) +
-        geom_raster() +
-        scale_fill_viridis_c(
-          limits = limits,
-          labels = function(x) x * 100,
-          guide = guide_colorbar(
-            title = "Power (% change\nfrom baseline)",
-            title.position = "left",
-            title.theme = element_text(size = 10, color = "black", angle = 90, lineheight = 1),
-            title.hjust = 0.5,
-            label.theme = element_text(size = 10, color = "black"),
-            barheight = unit(4, "cm"),
-            ticks = FALSE,
-            direction = "vertical"
-          ),
-          oob = squish
-        ) +
-        scale_x_continuous(breaks = seq(-100, 700, 200)) +
-        coord_cartesian(expand = FALSE) +
-        annotate("rect", xmin = tmin, xmax = tmax, ymin = fmin + 1, ymax = fmax + 1, color = "white", fill = NA, linetype = "dotted") +
-        annotate("segment", x = 0, xend = 0, y = -Inf, yend = Inf, color = "white", linetype = "dotted") +
-        labs(x = "Time (ms)", y = "") +
-        theme_minimal() +
-        theme(
-          legend.position = "none",
-          axis.title = standard_text,
-          axis.text = standard_text
-        )
-    }) -> plotlist
-  # Add label and axis title to the first plot
-  plotlist[[1]] <- plotlist[[1]] + annotate(
-    "text",
-    x = -100,
-    y = 27,
-    label = label,
-    size = 10 / .pt,
-    angle = 90,
-    family = "Helvetica",
-    color = "white",
-    lineheight = 0.9
-  ) +
-    ylab("Frequency (ms)")
-  # Extract legend for another subplot
-  current_legend <<- get_legend(plotlist[[1]] + theme(legend.position = "right"))
-  plot_grid(plotlist = plotlist, nrow = 1)
-}
-
-plot_tfr_topo <- function(ave_tfr, limits, tmin, tmax, fmin, fmax, legend) {
-  # Average across times and frequencies of interest
-  ave_tfr_diff %>%
-    # Select time window and frequencies of interest
-    filter(time >= tmin & time <= tmax & freq >= fmin & freq <= fmax) %>%
-    # Convert to long format
-    pivot_longer(-c(part, time, freq), names_to = "electrode", values_to = "power") %>%
-    # Create one topoplot per part
-    group_by(part) %>%
-    group_map(function(data_part, part) {
-      data_part %>%
-        group_by(electrode) %>%
-        summarise(power = mean(power), .groups = "drop") %>%
-        inner_join(montage, by = "electrode") %>%
-        eegUtils::topoplot(
-          limits = limits,
-          palette = "viridis",
-          contour = FALSE,
-          quantity = "power",
-          scaling = 0.5
-        ) +
-        theme(legend.position = "none", )
-    }) -> plotlist
-  # plotlist <- c(plotlist, list(legend))
-  plot_grid(
-    NULL,
-    plotlist[[1]],
-    NULL,
-    plotlist[[2]],
-    NULL,
-    plotlist[[3]],
-    nrow = 1,
-    rel_widths = c(2, 7, 0, 7, 1, 7)
-  )
-}
-
-# Bring it all together
-plot_grid(
-  plot_headings(spacing = c(1, 7, 1, 7, 1, 7)),
-  do.call(
-    plot_tfr_raster, c(tfoi, list(
-      ave_tfr = ave_tfr_flat,
-      limits = limits_power,
-      label = "All channels,\nall conditions"
-    ))
-  ),
-  do.call(
-    plot_tfr_raster, c(tfoi, list(
-      ave_tfr = ave_tfr_diff,
-      limits = limits_power,
-      label = "All channels,\n\u0394 (informed - naive)"
-    ))
-  ),
-  do.call(
-    plot_tfr_topo, c(tfoi, list(
-      ave_tfr = ave_tfr_diff,
-      limits = limits_power,
-      legend = current_legend
-    ))
-  ),
-  nrow = 4,
-  rel_heights = c(1, 5, 5, 5),
-  labels = c("", "A", "B", "C"),
-  label_y = c(1, 1.16, 1.1, 1),
-  label_fontfamily = "Helvetica"
-) +
-  draw_plot(current_legend, x = -0.42, y = -0.34) +
-  annotate_line(0.344, 0.344, -Inf, Inf) +
-  annotate_line(0.676, 0.676, -Inf, Inf) +
-  ggsave("data/processed/tfr.pdf", width = unit(10, "cm"), height = unit(7, "cm"), device = cairo_pdf)
-```
-
 ## Control Analysis
 
 ```{r models_control}
@@ -872,6 +736,118 @@ This may raise the question if the N170 and/or N400 effects in the insight part 
 To rule out this alternative explanation, we repeated the analysis using a different baseline condition, namely those objects that were presented with matching keywords (as in the informed condition) but on which participants failed to capitalize according to their behavioral responses.
 This was the case for `r percent(obj_per_cond[["Excl_informed"]] / 60, accuracy = 0.1)` of objects presented with matching keywords.
 As before, there semantically informed perception led to a reliable increase in the N170 component and a reliable decrease in the N400 component (see Table \@ref(tab:tab2)).
+
+## Time-frequency analysis
+
+```{python, tfr, eval=run$time_frequency}
+import numpy as np
+import pandas as pd
+from mne import read_epochs
+from mne.channels import find_ch_adjacency
+from mne.stats import combine_adjacency, permutation_cluster_1samp_test
+from scipy import sparse
+
+# Read evoked power for all subjects
+fnames = [f"data/preprocessed/{sid}_tfr-ave.csv" for sid in r.subject_id]
+tfrs = [pd.read_csv(fname) for fname in fnames]
+tfrs = pd.concat(tfrs)
+
+# Get electrode names
+electrodes = r.montage["electrode"].tolist()
+
+# Define non-channel columns to sort by
+idx_cols = ["condition", "subject_id", "time", "freq"]
+
+# Prepare empty lists to store outputs of permutation tests
+t_obs = []
+clusters = []
+p_values = []
+h0_max = []
+
+# Loop over parts
+parts = ["I", "II", "III"]
+for part in parts:
+
+    # Get data for the current part
+    df = tfrs[tfrs["part"] == part]
+    df = df.sort_values(idx_cols)
+
+    # Extract TFR data per condition
+    dat_informed = df.loc[df["condition"] == "Informed", electrodes].values
+    dat_naive = df.loc[df["condition"] == "Naive", electrodes].values
+    dat_diff = dat_informed - dat_naive  # Shape (subs x times x freqs) x elecs
+
+    # Reshape to X matrix for permutation test
+    n_subjects = len(df["subject_id"].unique())
+    n_times = len(df["time"].unique())
+    n_freqs = len(df["freq"].unique())
+    X = dat_diff.reshape(n_subjects, n_times, n_freqs, -1)
+
+    # # Plot the data matrix, averaged across participants and channels
+    # import matplotlib.pyplot as plt
+    # plt.imshow(X.mean(axis=(0, 3)).T, aspect="auto", vmin=-0.5, vmax=0.5, origin='lower'); plt.show()
+
+    # Define adjacency matrix for frequencies
+    adjacency_freq = sparse.csr_matrix(np.ones((n_freqs, n_freqs)))
+
+    # Define adjacency matrix for channels based on channel positions
+    example_epochs = read_epochs("data/preprocessed/sub-01_epo.fif", preload=False)
+    adjacency_chan, ch_names = find_ch_adjacency(example_epochs.info, ch_type="eeg")
+
+    # Combine adjacency matrices for frequencies and channels
+    adjacency = combine_adjacency(adjacency_freq, adjacency_chan)
+
+    # # Plot the combined adjacency matrix
+    # plt.imshow(adjacency.toarray(), origin='lower', interpolation='nearest'); plt.show()
+
+    # Run permutation test and save results
+    cluster_stats = permutation_cluster_1samp_test(
+        X, adjacency=adjacency, n_permutations=1000
+    )
+
+    # Store outputs
+    t_obs.append(cluster_stats[0])
+    clusters.append(cluster_stats[1])
+    p_values.append(cluster_stats[2])
+    h0_max.append(cluster_stats[3])
+
+# Gather outputs in DataFrame and save
+cluster_stats_df = pd.DataFrame(
+    {
+        "part": parts,
+        "t_obs": t_obs,
+        "clusters": clusters,
+        "p_values": p_values,
+        "h0_max": h0_max,
+    }
+)
+cluster_stats_df.to_json(r.io["tfr_stats"])
+
+# Export averaged data for plotting
+ave_cols = ["part", "condition", "time", "freq"]
+tfrs_plotting = tfrs.groupby(ave_cols, as_index=False).mean()  # Across subjects
+tfrs_plotting["power"] = tfrs_plotting[electrodes].mean(axis=1)  # Across channels
+tfrs_plotting = tfrs_plotting.drop(electrodes, axis=1)
+tfrs_plotting.to_csv(r.io["tfr_grand_ave"], index=False)
+```
+
+```{r, fig2, include=TRUE, fig.height=4, fig.cap="(ref:figure-2-caption)"}
+# Load permutation test results
+jsonlite::read_json(io$tfr_stats) %>%
+  as_tibble() -> tfr_stats
+
+# Get minimum cluster p value per part
+tfr_stats$p_values %>%
+  map(as.numeric) %>%
+  map(min) %>%
+  set_names(c("I", "II", "III")) -> tfr_min_ps
+
+# Plot time-frequency results per part and condition
+read_csv(io$tfr_grand_ave, col_types = cols(), progress = FALSE) %>%
+  plot_fig2()
+```
+
+(ref:figure-2-caption) Looks great!
 
 # Discussion
 
