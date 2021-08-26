@@ -643,16 +643,17 @@ We first created new epochs from the ICA-corrected but unfiltered raw data.
 To avoid differences between conditions due to a difference in noise levels, we equated the number of objects per condition for each participant by discarding a random sample of objects from the semantically naive condition.
 Epochs that were marked as bad for the ERP analysis (defined as peak-to-peak amplitudes exceeding 200 µV) were also removed from the time-frequency analysis.
 The remaining epochs were then convolved with a family of 24 Morlet wavelets using the short-time Fourier transform.
-The frequency of these wavelets increased linearly from 4 Hz to 50 Hz in steps of 2 Hz and the number of cycles increased linearly from 3 cycles to 10 cycles in steps of 0.304 cycles.
-The resulting single-trial time-frequency data were converted into percent signal change by first subtracting and then dividing by the mean acitivity during the baseline period (300--100 ms before object onset).
+The frequency of these wavelets increased linearly from 4 Hz to 50 Hz in steps of 2 Hz and the number of cycles increased linearly from 3 cycles to 10 cycles in steps of 0.304 cycles [see @samaha2018].
+The resulting single-trial time-frequency data were converted into percent signal change to adjust for power-law scaling.
+This was achieved by first subtracting and then dividing by the mean acitivity during the baseline period, defined as 300--100 ms before object onset.
 
 Because we did not have any a priori hypothesis for the time-frequency domain, we used cluster-based permutation tests [@maris2007] to explore the effects of semantically informed perception as compared to naive perception within each part of the experiment.
-We first created condition averages for each of the participant, part, and condition.
+We first created condition averages for each participant, part, and condition.
 Separately for each of the three parts, we then computed the by-participant differences between the semantically informed condition and the naive condition.
-The *permutation_cluster_1samp_test* function in MNE was then used to carry out the cluster-based permutation tests.
-This function (a) identified data points where the difference between conditions (one sample *t*-test) was significant *p* $<$ .05, (b) combined neighboring data points where this was the case into observed clusters, and (c) computed a *p* value for each of these observed clusters by comparing its mass to an empirical null distribution of largest cluster masses at each of 1,000 permutations.
-Data points were defined as neighboring each other based on the Delaunay triangulation in 2D channel space (*find_ch_adjacency* function) and based on lattice adjacency matrices in the frequency and time domains (i.e., considering only directly adjacent frequency bands and time points).
-Observed clusters for which the claster mass exceeded 95% of permuted cluster masses were deemed as showing reliable effects of semantically informed perception in each part.
+Permutation tests were then run on these differences to identify clusters across space (62 electrodes), frequencies (4–40 Hz in steps of 2 Hz), and time (restricted to 0–700 ms after obejct onset), using the *permutation_cluster_1samp_test* function in MNE.
+This function (a) identified data points where the difference between conditions (one sample *t*-test) was significant at *p* $<$ .05, (b) combined neighboring data points where this was the case into observed clusters, and (c) computed a *p* value for each of these observed clusters by comparing its mass to an empirical null distribution of largest cluster masses obtained from 1,000 random permutations.
+Data points were defined as neighboring each other based on the Delaunay triangulation in 2D channel space (function *find_ch_adjacency*) and based on lattice adjacency matrices in the frequency and time domains (i.e., considering only directly adjacent frequency bands and time points).
+Observed clusters for which the cluster mass exceeded 95% of permuted cluster masses (i.e., non-parametric *p* < .05) were deemed as showing reliable effects of semantically informed perception in each part.
 
 # Results
 
@@ -791,6 +792,9 @@ for part in parts:
     df = tfrs[tfrs["part"] == part]
     df = df.sort_values(idx_cols)
 
+    # Restrict time points after object onset
+    df = df[(df["time"] >= 0) & (df["time"] <= 700)]
+
     # Extract TFR data per condition
     dat_informed = df.loc[df["condition"] == "Informed", electrodes].values
     dat_naive = df.loc[df["condition"] == "Naive", electrodes].values
@@ -872,12 +876,12 @@ read_csv(io$tfr_grand_ave, col_types = cols(), progress = FALSE) %>%
   plot_fig2()
 ```
 
-(ref:figure-2-caption) Time-frequency results. Each panel shows the time-frequency representation for a single part of the experiment (left: pre-insight part, middle: insight part, right: post-insight part) for one of the two experimental conditions (top: semantically informed, bottom: naive).
-The time-frequency data were averaged across all 48 participants and all 62 EEG channels.
+(ref:figure-2-caption) Time-frequency results. Each panel shows the time-frequency representation for one of the three parts of the experiment (left: pre-insight part, middle: insight part, right: post-insight part) and one of the two experimental conditions (top: semantically informed, bottom: naive).
+For plotting, the time-frequency data were averaged across all 48 participants and all 62 EEG channels.
 According to cluster-based permutation tests, there were no reliable differences between the two conditions in either of the three parts.
 
 Cluster-based permutation tests were run on a time-frequency representation of the ERP data for each part, obtained using Morlet wavelet convolution.
-Always comparing the semantically informed condition to the naive condition, there were no signicantly large clusters in the pre-insight part (all *p*s $\geq$ `r tfr_min_ps[["I"]]`), the insight part (all *p*s $\geq$ `r tfr_min_ps[["II"]]`), or the post-insight part (all *p*s $\geq$ `r tfr_min_ps[["III"]]`).
+Always comparing the semantically informed condition to the naive condition, there were no signicantly large clusters in the pre-insight part (all *p*s $\geq$ `r tfr_min_ps[["I"]]`), in the insight part (all *p*s $\geq$ `r tfr_min_ps[["II"]]`), or in the post-insight part (all *p*s $\geq$ `r tfr_min_ps[["III"]]`).
 
 # Discussion
 

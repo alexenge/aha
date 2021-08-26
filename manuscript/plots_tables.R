@@ -276,7 +276,7 @@ plot_fig1 <- function(erp_components, evokeds, trials, models) {
     draw_plot(cbar, x = 0.85, y = 0.82, width = 0.2, height = 0.2)
 }
 
-# Function to create Figure ""
+# Function to create Figure 2
 plot_fig2 <- function(tfr_grand_ave) {
 
   # Create new labels for parts and conditions
@@ -295,13 +295,13 @@ plot_fig2 <- function(tfr_grand_ave) {
     geom_raster() +
     scale_x_continuous(breaks = seq(-200, 600, 200)) +
     scale_y_continuous(breaks = c(4, seq(10, 50, 10))) +
-    scale_fill_viridis_c(limits = c(-1, 3)) +
+    scale_fill_viridis_c(limits = c(-1, 3), labels = scales::percent) +
     coord_cartesian(expand = FALSE) +
     labs(x = "Time (ms)", y = "Frequency (Hz)") +
     guides(
       fill = guide_colorbar(
-        title.vjust = 4,
-        title = "Power\n(% over\nbaseline)",
+        title.vjust = 5,
+        title = "Power\n(change\nfrom\nbaseline)",
         barheight = 6,
         ticks = FALSE
       )
@@ -312,6 +312,7 @@ plot_fig2 <- function(tfr_grand_ave) {
       axis.text = element_text(family = "Helvetica", size = 10),
       legend.title = element_text(family = "Helvetica", size = 10),
       legend.text = element_text(family = "Helvetica", size = 10),
+      panel.border = element_rect(colour = "black", fill = NA, size = 1),
       strip.background = element_rect(color = NA, fill = NA),
       strip.text = element_text(family = "Helvetica", size = 10),
     )
