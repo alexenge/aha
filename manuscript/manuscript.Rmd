@@ -99,7 +99,7 @@ opts_chunk$set(fig.width = 10, include = FALSE, out.width = "100%")
 run <- list(
   preprocessing = FALSE,
   model_fitting = FALSE,
-  time_frequency = TRUE
+  time_frequency = FALSE
 )
 
 # File names for easier input/output
@@ -573,7 +573,7 @@ In the insight part, half of these objects were presented with matching keywords
 In the post-insight part, the same objects were presented again without keywords.
 (B) ERP waveforms and scalp topographies are shown for objects with semantically informed versus naive perception within the three different parts.
 Semantically informed perception was associated with more negative amplitudes in the N170 component during the insight part, less negative amplitudes in the N400 component during the insight and post-insight parts, and more positive amplitudes in the P1 component during the post-insight part. Ampl. = amplitude.\newline
-\* *p* < .05. \*\* *p* < .01. \*\*\* *p* < .001.
+\* *p* $<$ .05. \*\* *p* $<$ .01. \*\*\* *p* $<$ .001.
 
 In the *insight* part, the 120 unfamiliar objects were presented for the second time, now preceded either by matching keywords (leading to semantically informed perception) or by non-matching keywords (leading to naive perception).
 Each trial consisted of a fixation cross presented for 0.5 s, followed by the presentation of the keywords for 2.5 s.
@@ -624,7 +624,7 @@ This was important in our case because of the rejection of bad ERP epochs as wel
 Three separate models were computed predicting P1, N170, and N400 mean amplitudes, respectively.
 All models included three fixed effects: (a) the part of the experiment, coded as a repeated contrast [i.e., subtracting the first part from the second part and the second part from the third part, the intercept being the grand mean across all three parts; @schad2020], (b) the condition of the object, coded as a scaled sum contrast (i.e., subtracting the naive condition from the semantically informed condition, the intercept being the grand mean across both conditions), and (c) the two-way interaction of part and condition.
 To determine the random effects structure, we always started with the maximal model containing by-participant and by-item random intercepts and random slopes for all fixed effects [@barr2013].
-We then performed a model selection algorithm proposed by @matuschek2017 to increase statistical power and avoid overparameterization: Iteratively, each random effect was removed and the resulting, more parsimonious model was compared to the previous, more complex model by means of a likelihood ratio test. Only if the parsimonious model explained the data similarly well as the complex model [determined by *p* ≥ .20; @matuschek2017] did we leave the random effect out, otherwise it was kept in the final model (see Appendix B for the resulting formulas after model selection).
+We then performed a model selection algorithm proposed by @matuschek2017 to increase statistical power and avoid overparameterization: Iteratively, each random effect was removed and the resulting, more parsimonious model was compared to the previous, more complex model by means of a likelihood ratio test. Only if the parsimonious model explained the data similarly well as the complex model [determined by *p* $\geq$ .20; @matuschek2017] did we leave the random effect out, otherwise it was kept in the final model (see Appendix B for the resulting formulas after model selection).
 All models were computed in R [Version `r as.character(packageVersion("base"))`; @R-base] using the lme4 package [Version `r as.character(packageVersion("lme4"))`; @R-lme4].
 The optimizer function *bobyqa* with a maximum of 10^6^ iterations was used for maximum likelihood estimation.
 The model selection algorithm via likelihood ratio tests was performed using the buildmer package [Version `r as.character(packageVersion("buildmer"))`; @R-buildmer].
@@ -650,7 +650,7 @@ Because we did not have any a priori hypothesis for the time-frequency domain, w
 We first created condition averages for each of the participant, part, and condition.
 Separately for each of the three parts, we then computed the by-participant differences between the semantically informed condition and the naive condition.
 The *permutation_cluster_1samp_test* function in MNE was then used to carry out the cluster-based permutation tests.
-This function (a) identified data points where the difference between conditions (one sample *t*-test) was significant *p* < .05, (b) combined neighboring data points where this was the case into observed clusters, and (c) computed a *p* value for each of these observed clusters by comparing its mass to an empirical null distribution of largest cluster masses at each of 1,000 permutations.
+This function (a) identified data points where the difference between conditions (one sample *t*-test) was significant *p* $<$ .05, (b) combined neighboring data points where this was the case into observed clusters, and (c) computed a *p* value for each of these observed clusters by comparing its mass to an empirical null distribution of largest cluster masses at each of 1,000 permutations.
 Data points were defined as neighboring each other based on the Delaunay triangulation in 2D channel space (*find_ch_adjacency* function) and based on lattice adjacency matrices in the frequency and time domains (i.e., considering only directly adjacent frequency bands and time points).
 Observed clusters for which the claster mass exceeded 95% of permuted cluster masses were deemed as showing reliable effects of semantically informed perception in each part.
 
@@ -877,7 +877,7 @@ The time-frequency data were averaged across all 48 participants and all 62 EEG 
 According to cluster-based permutation tests, there were no reliable differences between the two conditions in either of the three parts.
 
 Cluster-based permutation tests were run on a time-frequency representation of the ERP data for each part, obtained using Morlet wavelet convolution.
-Always comparing the semantically informed condition to the naive condition, there were no signicantly large clusters in the pre-insight part (all *p*s ≥ `r tfr_min_ps[["I"]]`), the insight part (all *p*s ≥ `r tfr_min_ps[["II"]]`), or the post-insight part (all *p*s ≥ `r tfr_min_ps[["III"]]`).
+Always comparing the semantically informed condition to the naive condition, there were no signicantly large clusters in the pre-insight part (all *p*s $\geq$ `r tfr_min_ps[["I"]]`), the insight part (all *p*s $\geq$ `r tfr_min_ps[["II"]]`), or the post-insight part (all *p*s $\geq$ `r tfr_min_ps[["III"]]`).
 
 # Discussion
 
