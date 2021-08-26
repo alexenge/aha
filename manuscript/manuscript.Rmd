@@ -647,6 +647,101 @@ The frequency of these wavelets increased linearly from 4 Hz to 50 Hz in steps o
 The resulting single-trial time-frequency data were converted into percent signal change to adjust for power-law scaling.
 This was achieved by first subtracting and then dividing by the mean acitivity during the baseline period, defined as 300--100 ms before object onset.
 
+```{python, tfr, eval=run$time_frequency}
+import numpy as np
+import pandas as pd
+from mne import read_epochs
+from mne.channels import find_ch_adjacency
+from mne.stats import combine_adjacency, permutation_cluster_1samp_test
+from scipy import sparse
+
+# Read evoked power for all subjects
+fnames = [f"data/preprocessed/{sid}_tfr-ave.csv" for sid in r.subject_id]
+tfrs = [pd.read_csv(fname) for fname in fnames]
+tfrs = pd.concat(tfrs)
+
+# Get electrode names
+electrodes = r.montage["electrode"].tolist()
+
+# Define non-channel columns to sort by
+idx_cols = ["condition", "subject_id", "time", "freq"]
+
+# Prepare empty lists to store outputs of permutation tests
+t_obs = []
+clusters = []
+p_values = []
+h0_max = []
+
+# Loop over parts
+parts = ["I", "II", "III"]
+for part in parts:
+
+    # Get data for the current part
+    df = tfrs[tfrs["part"] == part]
+    df = df.sort_values(idx_cols)
+
+    # Restrict time points after object onset
+    df = df[(df["time"] >= 0) & (df["time"] <= 700)]
+
+    # Extract TFR data per condition
+    dat_informed = df.loc[df["condition"] == "Informed", electrodes].values
+    dat_naive = df.loc[df["condition"] == "Naive", electrodes].values
+    dat_diff = dat_informed - dat_naive  # Shape (subs x times x freqs) x elecs
+
+    # Reshape to X matrix for permutation test
+    n_subjects = len(df["subject_id"].unique())
+    n_times = len(df["time"].unique())
+    n_freqs = len(df["freq"].unique())
+    X = dat_diff.reshape(n_subjects, n_times, n_freqs, -1)
+
+    # # Plot the data matrix, averaged across participants and channels
+    # import matplotlib.pyplot as plt
+    # plt.imshow(X.mean(axis=(0, 3)).T, aspect="auto", vmin=-0.5, vmax=0.5, origin='lower'); plt.show()
+
+    # Define adjacency matrix for frequencies
+    adjacency_freq = sparse.csr_matrix(np.ones((n_freqs, n_freqs)))
+
+    # Define adjacency matrix for channels based on channel positions
+    example_epochs = read_epochs("data/preprocessed/sub-01_epo.fif", preload=False)
+    adjacency_chan, ch_names = find_ch_adjacency(example_epochs.info, ch_type="eeg")
+
+    # Combine adjacency matrices for frequencies and channels
+    adjacency = combine_adjacency(adjacency_freq, adjacency_chan)
+
+    # # Plot the combined adjacency matrix
+    # plt.imshow(adjacency.toarray(), origin='lower', interpolation='nearest'); plt.show()
+
+    # Run permutation test and save results
+    cluster_stats = permutation_cluster_1samp_test(
+        X, adjacency=adjacency, n_permutations=1000
+    )
+
+    # Store outputs
+    t_obs.append(cluster_stats[0])
+    clusters.append(cluster_stats[1])
+    p_values.append(cluster_stats[2])
+    h0_max.append(cluster_stats[3])
+
+# Gather outputs in DataFrame and save
+cluster_stats_df = pd.DataFrame(
+    {
+        "part": parts,
+        "t_obs": t_obs,
+        "clusters": clusters,
+        "p_values": p_values,
+        "h0_max": h0_max,
+    }
+)
+cluster_stats_df.to_json(r.io["tfr_stats"])
+
+# Export averaged data for plotting
+ave_cols = ["part", "condition", "time", "freq"]
+tfrs_plotting = tfrs.groupby(ave_cols, as_index=False).mean()  # Across subjects
+tfrs_plotting["power"] = tfrs_plotting[electrodes].mean(axis=1)  # Across channels
+tfrs_plotting = tfrs_plotting.drop(electrodes, axis=1)
+tfrs_plotting.to_csv(r.io["tfr_grand_ave"], index=False)
+```
+
 Because we did not have any a priori hypothesis for the time-frequency domain, we used cluster-based permutation tests [@maris2007] to explore the effects of semantically informed perception as compared to naive perception within each part of the experiment.
 We first created condition averages for each participant, part, and condition.
 Separately for each of the three parts, we then computed the by-participant differences between the semantically informed condition and the naive condition.
@@ -758,101 +853,6 @@ This was the case for `r percent(obj_per_cond[["Excl_informed"]] / 60, accuracy 
 As before, there semantically informed perception led to a reliable increase in the N170 component and a reliable decrease in the N400 component (see Table \@ref(tab:tab2)).
 
 ## Time-frequency analysis
-
-```{python, tfr, eval=run$time_frequency}
-import numpy as np
-import pandas as pd
-from mne import read_epochs
-from mne.channels import find_ch_adjacency
-from mne.stats import combine_adjacency, permutation_cluster_1samp_test
-from scipy import sparse
-
-# Read evoked power for all subjects
-fnames = [f"data/preprocessed/{sid}_tfr-ave.csv" for sid in r.subject_id]
-tfrs = [pd.read_csv(fname) for fname in fnames]
-tfrs = pd.concat(tfrs)
-
-# Get electrode names
-electrodes = r.montage["electrode"].tolist()
-
-# Define non-channel columns to sort by
-idx_cols = ["condition", "subject_id", "time", "freq"]
-
-# Prepare empty lists to store outputs of permutation tests
-t_obs = []
-clusters = []
-p_values = []
-h0_max = []
-
-# Loop over parts
-parts = ["I", "II", "III"]
-for part in parts:
-
-    # Get data for the current part
-    df = tfrs[tfrs["part"] == part]
-    df = df.sort_values(idx_cols)
-
-    # Restrict time points after object onset
-    df = df[(df["time"] >= 0) & (df["time"] <= 700)]
-
-    # Extract TFR data per condition
-    dat_informed = df.loc[df["condition"] == "Informed", electrodes].values
-    dat_naive = df.loc[df["condition"] == "Naive", electrodes].values
-    dat_diff = dat_informed - dat_naive  # Shape (subs x times x freqs) x elecs
-
-    # Reshape to X matrix for permutation test
-    n_subjects = len(df["subject_id"].unique())
-    n_times = len(df["time"].unique())
-    n_freqs = len(df["freq"].unique())
-    X = dat_diff.reshape(n_subjects, n_times, n_freqs, -1)
-
-    # # Plot the data matrix, averaged across participants and channels
-    # import matplotlib.pyplot as plt
-    # plt.imshow(X.mean(axis=(0, 3)).T, aspect="auto", vmin=-0.5, vmax=0.5, origin='lower'); plt.show()
-
-    # Define adjacency matrix for frequencies
-    adjacency_freq = sparse.csr_matrix(np.ones((n_freqs, n_freqs)))
-
-    # Define adjacency matrix for channels based on channel positions
-    example_epochs = read_epochs("data/preprocessed/sub-01_epo.fif", preload=False)
-    adjacency_chan, ch_names = find_ch_adjacency(example_epochs.info, ch_type="eeg")
-
-    # Combine adjacency matrices for frequencies and channels
-    adjacency = combine_adjacency(adjacency_freq, adjacency_chan)
-
-    # # Plot the combined adjacency matrix
-    # plt.imshow(adjacency.toarray(), origin='lower', interpolation='nearest'); plt.show()
-
-    # Run permutation test and save results
-    cluster_stats = permutation_cluster_1samp_test(
-        X, adjacency=adjacency, n_permutations=1000
-    )
-
-    # Store outputs
-    t_obs.append(cluster_stats[0])
-    clusters.append(cluster_stats[1])
-    p_values.append(cluster_stats[2])
-    h0_max.append(cluster_stats[3])
-
-# Gather outputs in DataFrame and save
-cluster_stats_df = pd.DataFrame(
-    {
-        "part": parts,
-        "t_obs": t_obs,
-        "clusters": clusters,
-        "p_values": p_values,
-        "h0_max": h0_max,
-    }
-)
-cluster_stats_df.to_json(r.io["tfr_stats"])
-
-# Export averaged data for plotting
-ave_cols = ["part", "condition", "time", "freq"]
-tfrs_plotting = tfrs.groupby(ave_cols, as_index=False).mean()  # Across subjects
-tfrs_plotting["power"] = tfrs_plotting[electrodes].mean(axis=1)  # Across channels
-tfrs_plotting = tfrs_plotting.drop(electrodes, axis=1)
-tfrs_plotting.to_csv(r.io["tfr_grand_ave"], index=False)
-```
 
 ```{r, fig2, include=TRUE, fig.height=4, fig.cap="(ref:figure-2-caption)"}
 # Load permutation test results
