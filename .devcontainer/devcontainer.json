@@ -1,7 +1,7 @@
 // For format details, see https://aka.ms/devcontainer.json. For config options, see the README at:
 // https://github.com/microsoft/vscode-dev-containers/tree/v0.166.1/containers/docker-existing-dockerfile
 {
-	"name": "aha_dev",
+	"name": "aha",
 
 	// Sets the run context to one level up instead of the .devcontainer folder.
 	"context": "..",
@@ -11,15 +11,12 @@
 
 	// Specify project-specific workspace mount
 	"workspaceMount": "source=${localWorkspaceFolder},target=/home/rstudio/aha,type=bind,consistency=cached",
-	"workspaceFolder": "/home/rstudio/aha",
+	"workspaceFolder": "/usr/local/bin/radian",
 
 	// Set *default* container specific settings.json values on container create.
 	"settings": { 
 		"terminal.integrated.defaultProfile.linux": "bash",
-		"r.rterm.linux": "/home/rstudio/.local/bin/radian",
-		"[python]": {
-			"editor.rulers": [88]
-		}
+		"r.rterm.linux": "/usr/local/bin/radian"
 	},
 
 	// Add the IDs of extensions you want installed when the container is created.
@@ -29,6 +26,7 @@
 		"geddski.macros",
 		"grapecity.gc-excelviewer",
 		"kirozen.wordcounter",
+		"mechatroner.rainbow-csv",
 		"ms-azuretools.vscode-docker",
 		"ms-python.python",
 		"ms-toolsai.jupyter",
@@ -40,7 +38,7 @@
 	// "forwardPorts": [],
 
 	// Uncomment the next line to run commands after the container is created - for example installing curl.
-	"postCreateCommand": "pip install --user black radian",
+	// "postCreateCommand": "pip install --user radian",
 
 	// Uncomment when using a ptrace-based debugger like C++, Go, and Rust
 	// "runArgs": [ "--cap-add=SYS_PTRACE", "--security-opt", "seccomp=unconfined" ],

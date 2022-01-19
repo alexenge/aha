@@ -13,6 +13,7 @@ EEG power at a pre-specified range of frequencies.
 """
 
 from os import makedirs
+from pathlib import Path
 
 import mne
 import numpy as np
@@ -122,6 +123,10 @@ def preprocess(
             roi=component["roi"],
         )
 
+    # Save epochs to output folder
+    prefix = output_dir + "/" + subject_id + "_"
+    epochs.save(prefix + "epo.fif")
+
     # Reject bad epochs
     metadata_backup = epochs.metadata  # We'll need this later for TFR
     epochs.drop_bad(reject)
@@ -130,9 +135,7 @@ def preprocess(
     good_epochs = [x for x in epochs.drop_log if not x == ("IGNORED",)]
     good_epochs = [i for i, x in enumerate(good_epochs) if x == ()]
 
-    # Save epochs and trials to output folder
-    prefix = output_dir + "/" + subject_id + "_"
-    epochs.save(prefix + "epo.fif")
+    # Save trials to output folder
     epochs.metadata.to_csv(prefix + "trials.csv", float_format="%.3f", index=False)
 
     # Compute evoked potentials
@@ -177,6 +180,15 @@ def preprocess(
     del epochs_unf, evokeds_tfr_df, tfr
 
 
+# def repair_log(fname_log):
+#     """
+#     Removes the last column from the log file since it's producing errors.
+#     """
+#     log = pd.read_csv(fname_log, delimiter="\t", usecols=range(15),
+#                       encoding="ISO-8859-1")
+#     log.to_csv(fname_log, sep="\t", index=False, encoding="ISO-8859-1")
+
+
 def read_log(fname_log=None, subject_id=None):
     """
     Extracts the relevant information from a behavioral log file into a DataFrame.
@@ -197,6 +209,13 @@ def read_log(fname_log=None, subject_id=None):
     log["part"] = pd.Categorical(log["Wdh"])
     log["part"].cat.rename_categories({211: "I", 212: "II", 213: "III"}, inplace=True)
 
+    # Recode button presses
+    # 201: "I know what this is or have a strong assumption"    -> Recode as 3
+    # 202: "I have an assumption what this is"                  -> Recode as 2
+    # 203: "I have rather no assumption what this is"           -> Recode as 1
+    # 204: "I don't know what this is and have no assumption."  -> Recode as 0
+    log["response"] = 4 - (log["Tastencode"] - 200)
+
     # Extract conditions based on manipulations and button presses
     conditions = ["Excl_known", "Excl_informed", "Excl_naive", "Informed", "Naive"]
     queries = [
@@ -210,7 +229,7 @@ def read_log(fname_log=None, subject_id=None):
     choicelist = [log["item_id"].isin(items) for items in items_per_cond]
     log["condition"] = np.select(choicelist, conditions)
 
-    return log[["part", "condition", "subject_id", "item_id", "RT"]]
+    return log[["part", "condition", "subject_id", "item_id", "response", "RT"]]
 
 
 def _single_trial_erps_from_epochs(epochs, name, tmin, tmax, roi):

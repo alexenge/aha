@@ -1,48 +1,40 @@
-# %%
 import os.path as op
-from threading import stack_size
 
-import groupmne
-import matplotlib.pyplot as plt
 import mne
 import numpy as np
 
 # Prepare an empty dict to store the evokeds for all subjects
-evokeds_dict = {
-    "I": {"Informed": [], "Naive": [], "Difference": []},
-    "II": {"Informed": [], "Naive": [], "Difference": []},
-    "III": {"Informed": [], "Naive": [], "Difference": []},
-}
+parts = ["I", "II", "III"]
+condition_dict_empty = {"Informed": [], "Naive": [], "Combined": [], "Difference": []}
+evokeds_dict = dict(zip(parts, [condition_dict_empty] * 3))
 
 # How many subjects to include (min = 1, max = 48)
-nsubs = 48
+nsubs = 5
 
-# Read evokeds for all subjects and organize the relevant conditions in a dict
+# Read evokeds for all subjects
 subject_id = ["sub-" + "{:02d}".format(s) for s in range(1, nsubs + 1)]
-for s in subject_id:
-    evokeds = mne.read_evokeds("../data/preprocessed/" + s + "_ave.fif", verbose=False)
+for sid in subject_id:
+    evokeds = mne.read_evokeds(f"../data/preprocessed/{sid}_epo-ave.fif", verbose=False)
+
+    # Find evokeds for each part and condition
     for pt in ["I", "II", "III"]:
         for ev in evokeds:
-            #ev = ev.copy().drop_channels(["P1", "N170", "N400"])
-            if "part == '" + pt + "' & condition == 'Informed'" in ev.comment:
+            if f"part == '{pt}' & condition == 'Informed'" in ev.comment:
                 ev_informed = ev
                 evokeds_dict[pt]["Informed"].append(ev)
-            elif "part == '" + pt + "' & condition == 'Naive'" in ev.comment:
+            elif f"part == '{pt}' & condition == 'Naive'" in ev.comment:
                 ev_naive = ev
                 evokeds_dict[pt]["Naive"].append(ev)
+
+        # Compute flat average across both conditions
+        evokeds_dict[pt]["Combined"].append(
+            mne.combine_evoked([ev_informed, ev_naive], weights="nave")
+        )
 
         # Compute difference wave between conditions
         evokeds_dict[pt]["Difference"].append(
             mne.combine_evoked([ev_informed, ev_naive], weights=[1, -1])
         )
-
-# # Compute grand averages across subjects and plot
-# for pt in ["I", "II", "III"]:
-#     for cn in ["Informed", "Naive", "Difference"]:
-#         evokeds_dict[pt][cn] = mne.combine_evoked(evokeds_dict[pt][cn], weights="equal")
-#         evokeds_dict[pt][cn].comment = "part-" + pt + "_condition-" + cn
-#         print("Grand average, part " + pt + ", condition " + cn)
-#         evokeds_dict[pt][cn].plot(picks=["P1", "N170", "N400"], hline=[0], show=True)
 
 # Download fsaverage MRI template
 fs_dir = mne.datasets.fetch_fsaverage(verbose=False)
@@ -52,17 +44,13 @@ trans = "fsaverage"  # MNE has a built-in fsaverage transformation
 src = op.join(fs_dir, "bem", "fsaverage-ico-5-src.fif")
 bem = op.join(fs_dir, "bem", "fsaverage-5120-5120-5120-bem-sol.fif")
 
-# # Check that the locations of EEG electrodes is correct with respect to MRI
-# set_3d_backend("notebook")
-# plot_alignment(
-#     evokeds_dict["I"]["Informed"].info,
-#     src=src,
-#     eeg=["original", "projected"],
-#     trans=trans,
-#     show_axes=True,
-#     mri_fiducials=True,
-#     dig="fiducials",
-# )
+# Compute standard forward solution
+fwd = mne.make_forward_solution(info, trans, src, bem, eeg=True, mindist=5.0)
+
+
+
+
+# %%
 
 # For which evokeds to compute the source time course
 part = "II"
@@ -75,16 +63,18 @@ info = evokeds_informed[0].info
 ## MNE ##
 #######################################
 
-# Setup volumn source space
-mri = op.join(fs_dir, 'mri', 'T1.mgz')
-vol_src = mne.setup_volume_source_space(
-    subject, mri=mri, pos=10.0, bem=bem,
-    subjects_dir=subjects_dir,
-    add_interpolator=True,
-    verbose=True)
+# # Setup volumn source space
+# mri = op.join(fs_dir, 'mri', 'T1.mgz')
+# vol_src = mne.setup_volume_source_space(
+#     subject, mri=mri, pos=10.0, bem=bem,
+#     subjects_dir=subjects_dir,
+#     add_interpolator=True,
+#     verbose=True)
 
-# Compute standard forward solution
-fwd = mne.make_forward_solution(info, trans, vol_src, bem, eeg=True, mindist=5.0)
+# # Compute standard forward solution
+# fwd = mne.make_forward_solution(info, trans, vol_src, bem, eeg=True, mindist=5.0)
+
+fwd = mne.make_forward_solution(info, trans, src, bem, eeg=True, mindist=5.0)
 
 # # Use fwd to compute the sensitivity map for illustration purposes
 # eeg_map = mne.sensitivity_map(fwd, ch_type="eeg", mode="fixed")
@@ -99,7 +89,7 @@ fwd = mne.make_forward_solution(info, trans, vol_src, bem, eeg=True, mindist=5.0
 method = "dSPM"
 snr = 3.0
 lambda2 = 1.0 / snr ** 2
-stcs = {"Informed": [], "Naive": [], "Difference": []}
+stcs = {"Informed": [], "Naive": [], "Combined": [], "Difference": []}
 
 # Compute inverse solution for each subject
 for sid, ev_i, ev_n in zip(subject_id, evokeds_informed, evokeds_naive):
@@ -147,14 +137,14 @@ stc = mne.VolSourceEstimate(
     vertices=stcs[condition][0].vertices,
     tmin=stcs[condition][0].tmin,
     tstep=stcs[condition][0].tstep,
-    subject=stcs[condition][0].subject
+    subject=stcs[condition][0].subject,
 )
 
 # Average across time window and plot
-tmin = 0.400
-tmax = 0.700
+tmin = 0.100
+tmax = 0.150
 stc_twin = stc.copy().crop(tmin, tmax)
-stc_twin.plot(vol_src, subject='fsaverage', subjects_dir=subjects_dir)
+stc_twin.plot(vol_src, subject="fsaverage", subjects_dir=subjects_dir)
 
 # # For non-volume
 # stc_twin = stc.copy().crop(tmin, tmax).mean()

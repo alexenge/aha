@@ -296,7 +296,7 @@ import pandas as pd
 
 # Read evoked *potentials* for all subjects
 subs = r.subject_id
-fnames_ave = [f"data/preprocessed/{sub}_ave.csv" for sub in subs]
+fnames_ave = [f"data/preprocessed/{sub}_epo-ave.csv" for sub in subs]
 ave = [pd.read_csv(fname) for fname in fnames_ave]
 ave = pd.concat(ave)
 
