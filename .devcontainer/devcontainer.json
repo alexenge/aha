@@ -10,7 +10,7 @@
 	"dockerFile": "../Dockerfile",
 
 	// Specify project-specific workspace mount
-	"workspaceMount": "source=${localWorkspaceFolder},target=/home/rstudio/aha,type=bind,consistency=cached",
+	"workspaceMount": "source=${localWorkspaceFolder},target=/home/rstudio/proj,type=bind,consistency=cached",
 	"workspaceFolder": "/usr/local/bin/radian",
 
 	// Set *default* container specific settings.json values on container create.

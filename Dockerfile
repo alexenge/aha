@@ -1,13 +1,6 @@
 FROM alexenge/r_eeg:4.1.2
 
-WORKDIR "$HOME/aha"
-
-# ENV PROJDIR=${HOME}/aha
-# RUN mkdir ${PROJDIR}
-# WORKDIR ${PROJDIR}
-
+# COPY analysis/ analysis/
 # COPY data/ data/
-# COPY manuscript/ manuscript/
 # COPY materials/ materials/
-
-# USER ${NB_USER}
+# COPY output/ output/
