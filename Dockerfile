@@ -1,5 +1,7 @@
 FROM alexenge/r_eeg:4.1.2
 
+WORKDIR "$HOME/aha"
+
 # ENV PROJDIR=${HOME}/aha
 # RUN mkdir ${PROJDIR}
 # WORKDIR ${PROJDIR}

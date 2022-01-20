@@ -2,8 +2,10 @@
 .vscode/
 *.fif
 *.pdf
+*.tex
 __pycache__/
 figure-latex/
+/analysis_old/
 /data/
 /docs/
 /output/

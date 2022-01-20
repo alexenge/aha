@@ -1,0 +1,341 @@
+---
+title             : "Instant effects of semantic information on visual perception"
+shorttitle        : "Semantically informed perception"
+author: 
+  - name          : "Alexander Enge"
+    affiliation   : "1,2"
+    corresponding : yes
+    address       : "Rudower Chaussee 18, 12489 Berlin, Germany"
+    email         : "alexander.enge@hu-berlin.de"
+  - name          : "Franziska Süß"
+    affiliation   : "3"
+  - name          : "Rasha Abdel Rahman"
+    affiliation   : "1"
+affiliation:
+  - id            : "1"
+    institution   : "Humboldt-Universität zu Berlin"
+  - id            : "2"
+    institution   : "Max Planck Institute for Human Cognitive and Brain Sciences"
+  - id            : "3"
+    institution   : "Fachhochschule des Mittelstands"
+authornote: |
+  \addORCIDlink{Alexander Enge}{0000-0003-0100-2297}
+  
+  \addORCIDlink{Rasha Abdel Rahman}{0000-0002-8438-1570}
+  
+  The authors declare no competing financial interests.
+  The preprocessed data and analaysis code for this study are openly available at https://osf.io/uksbc/.
+abstract: |
+  Does our perception of an object change as soon as we discover what function it serves?
+  This question matters not only when we encounter novel tools or gadgets in our everyday lives, but also pertains to the long-standing debate around the (im)penetrability of perception by higher cognitive capacities.
+  Here, we showed human participants (*n* = 48) pictures of unfamiliar objects either together with words matching their function, leading to semantically informed perception, or together with non-matching words, resulting in naive perception.
+  We measured event-related potentials (ERPs) to investigate at which stages in the visual processing hierarchy these two types of object perception differed from one another.
+  We found that semantically informed as compared to naive perception was associated with larger amplitudes in the N170 component (150--200 ms) and reduced amplitudes in the N400 component (400--700 ms).
+  When the same objects were presented once more without any information, the N400 effect persisted and we also observed enlarged amplitudes in the P1 component (100--150 ms) in response to objects for which semantically informed perception had taken place.
+  Consistent with previous work, our results suggest that obtaining semantic information about previously unfamiliar objects alters aspects of their lower-level visual perception (P1 component), higher-level visual perception (N170 component), and semantic processing (N400 component).
+  We demonstrate for the first time that these effects are instantaneous in the sense that they can be observed within the same trial as well as one trial after the information has been given, providing strong evidence that cognition affects perception.
+keywords          : "objects, semantic knowledge, visual perception, event-related potentials"
+floatsintext      : yes
+figurelist        : no
+tablelist         : no
+footnotelist      : no
+linenumbers       : no
+mask              : no
+draft             : no
+bibliography      : ["references.bib", "r-references.bib"]
+csl               : "apa.csl"
+documentclass     : "apa7"
+classoption       : "man,donotrepeattitle"
+fontsize          : "10pt"
+output:
+  papaja::apa6_pdf:
+    latex_engine: xelatex
+  papaja::apa6_docx: default
+editor_options: 
+  chunk_output_type: console
+header-includes:
+  - \geometry{a4paper}
+  - \fancyheadoffset[R,L]{0pt}
+  - \raggedbottom
+  - \usepackage[all]{nowidow}
+  - \usepackage[bottom]{footmisc}
+  - \interfootnotelinepenalty=10000
+  - \usepackage{setspace}
+  - \AtBeginEnvironment{tabular}{\doublespacing}
+  - \usepackage{makecell}
+  - \renewcommand{\cellset}{\renewcommand{\arraystretch}{0.7}}
+  - \captionsetup{font={stretch=1}, belowskip=15pt}
+---
+
+```{r, setup, include=FALSE}
+# Load R packages
+library(buildmer)
+library(emmeans)
+library(here)
+library(knitr)
+library(lme4)
+library(lmerTest)
+library(MASS)
+library(papaja)
+library(parallel)
+library(reticulate)
+library(tidyverse)
+library(magrittr)
+
+# Set global chunk options
+opts_chunk$set(fig.width = 10, include = FALSE, out.width = "100%")
+
+# Write R packages to bibliography
+r_refs(here("analysis", "r-references.bib"), append = FALSE)
+
+# What to (re-)run
+run <- list(
+  "preprocessing" = TRUE,
+  "modeling" = TRUE
+)
+
+# Directory paths
+data_dir <- here("data")
+output_dir <- here("output")
+```
+
+```{r, preprocessing, eval=run$preprocessing}
+# Process behavioral data
+c(
+  list.files(here(data_dir, "rt/exp1"), "*.txt", full.names = TRUE),
+  list.files(here(data_dir, "rt/exp2"), "*.txt", full.names = TRUE)
+) %>%
+  # Process each log file
+  map(function(log_file) {
+
+    # Read the file
+    read_tsv(
+      log_file,
+      col_types = cols(),
+      locale = locale(encoding = "latin1")
+    ) %>%
+      # Recode some columns
+      transmute(
+
+        # Phase of the experiment
+        phase = factor(Wdh,
+          levels = c(211, 212, 213),
+          labels = c("Pre-insight", "Insight", "Post-insight")
+        ),
+
+        # # Participant ID (unique for Experiments 1 and 2)
+        # participant = ifelse(
+        #   str_detect(log_file, "exp2"), str_c(VPNummer, "_exp2"), VPNummer
+        # ),
+
+        # Keyword conditions
+        keywords = factor(Bed,
+          levels = c("richtig", "falsch"),
+          labels = c("Match", "Non-match")
+        ),
+
+        # Behavioral responses
+        # 201: "I know what this is or have a strong assumption"  -> Recode as 4
+        # 202: "I have an assumption what this is"                -> Recode as 3
+        # 203: "I have rather no assumption what this is"         -> Recode as 2
+        # 204: "I don't know what this is and have no assumption" -> Recode as 1
+        response = 5 - (Tastencode - 200),
+
+        # Reaction times
+        rt = RT,
+        log_rt = log(RT),
+
+        # Item IDs
+        item_id = factor(StimID)
+      ) %>%
+      # Remove filler items
+      drop_na(keywords) -> log
+
+    # Assign items to conditions based on manipulation (matching vs. non-
+    # matching keywords) and the responses of the participants
+    items_per_condition <- with(log, {
+      list(
+
+        # Informed condition: Matching keywords and positive response
+        "Informed" =
+          item_id[phase == "Insight" & keywords == "Match" & response >= 3],
+
+        # Naive condition: Non-matching keywords and negative response
+        "Naive" =
+          item_id[phase == "Insight" & keywords == "Non-match" & response <= 2],
+
+        # Exclude: Matching keywords and negative response
+        "Exclude_informed" =
+          item_id[phase == "Insight" & keywords == "Match" & response <= 2],
+
+        # Exclude: Non-matching keywords and positive response
+        "Exclude_naive" =
+          item_id[phase == "Insight" & keywords == "Non-match" & response >= 3],
+
+        # Exclude: Positive response *before* any info was presented
+        "Exclude_known" = item_id[phase == "Pre-insight" & response == 4]
+      )
+    })
+
+    # Assign these conditions to the trials of all three phases
+    log$condition <- NA
+    for (condition in names(items_per_condition)) {
+      item_id <- items_per_condition[[condition]]
+      log$condition[log$item_id %in% item_id] <- condition
+    }
+
+    # Sort columns
+    log %>%
+      select(item_id, phase, condition, response, rt, log_rt) %>%
+      return()
+  }) -> logs
+
+# Install latest version of the EEG pipeline
+system("pip install --user --upgrade --pre --index https://test.pypi.org/simple/ hu-neuro-pipeline")
+
+# Import EEG pipeline from Python
+pipeline <- import("pipeline")
+
+# Get list of BrainVision EEG header files
+vhdr_files <- c(
+  list.files(here(data_dir, "eeg/exp1"), "*.vhdr", full.names = TRUE),
+  list.files(here(data_dir, "eeg/exp2"), "*.vhdr", full.names = TRUE)
+)
+
+# Process EEG data
+res <- pipeline$group_pipeline(
+  vhdr_files = vhdr_files,
+  log_files = logs,
+  export_dir = output_dir,
+  downsample_sfreq = 250.,
+  # bad_channels = "auto",
+  ocular_correction = "fastica",
+  highpass_freq = 0.1,
+  lowpass_freq = 40.,
+  triggers = c(221, 222),
+  epochs_tmin = -0.5,
+  epochs_tmax = 1.5,
+  baseline = c(-0.2, 0.0),
+  reject_peak_to_peak = 200.,
+  reject_flat = 1.,
+  components = list(
+    "name" = c("P1", "N170", "N400"),
+    "tmin" = c(0.1, 0.15, 0.4),
+    "tmax" = c(0.15, 0.2, 0.7),
+    "roi" = list(
+      c("PO3", "PO4", "POz", "O1", "O2", "Oz"),
+      c("P7", "P8", "PO7", "PO8", "PO9", "PO10"),
+      c("C1", "C2", "Cz", "CP1", "CP2", "CPz")
+    )
+  ),
+  average_by = c("phase/condition"),
+  perform_tfr = TRUE,
+  perm_contrasts = list(
+    c("Pre-insight/Informed", "Pre-insight/Naive"),
+    c("Insight/Informed", "Insight/Naive"),
+    c("Post-insight/Informed", "Post-insight/Naive")
+  ),
+  n_jobs = 1
+)
+
+# Extract results
+trials <- tibble(res[[1]])
+evokeds <- tibble(res[[2]])
+clusters <- tibble(res[[3]])
+tfr_evokeds <- tibble(res[[4]])
+tfr_clusters <- tibble(res[[5]])
+```
+
+```{r, modeling, eval=run$modeling}
+# Read single trial data
+read_csv(here(output_dir, "all_trials.csv"), col_types = cols(
+  participant_id = col_factor(),
+  item_id = col_factor(),
+  phase = col_factor(),
+  condition = col_factor()
+)) %>%
+  # Subset only the relevant conditions
+  mutate(condition = factor(
+    condition,
+    levels = c("Informed", "Naive", "Excl_informed")
+  )) %>%
+  drop_na() -> trials
+
+# Contrast coding for phase
+cbind(
+  c("Pre-insight" = -1, "Insight" = 1, "Post-insight" = 0),
+  c("Pre-insight" = 0, "Insight" = -1, "Post-insight" = 1)
+) %>%
+  t() %>%
+  ginv() -> contrasts(trials$phase)
+
+# Contrast coding for condition
+cbind(
+  c("Informed" = 1, "Naive" = -1, "Excl_informed" = 0),
+  c("Informed" = 1, "Naive" = 0, "Excl_informed" = -1)
+) %>%
+  t() %>%
+  ginv() -> contrasts(trials$condition)
+
+# Prepare model formula
+mod_formula <- N170 ~ phase * condition +
+  (phase * condition | participant_id) +
+  (phase * condition | item_id)
+
+# Fit linear mixed models
+deps <- c("P1", "N170", "N400")
+mod_lists <- map(deps, function(dep, mod_formula = form, mod_data = trials) {
+
+  # Find the best fitting model (see Matuschek et al., 2017, *JML*)
+  # Uses parallelization across all available CPU cores
+  n_cores <- detectCores()
+  cl <- makeCluster(n_cores)
+  build <- buildmer(
+    buildmerControl = buildmerControl(
+      formula = mod_formula,
+      data = mod_data,
+      # args = list("control" = lmerControl(
+      #   optimizer = "bobyqa", optCtrl = list(maxfun = 1e6)
+      # )),
+      direction = c("order", "backward"),
+      cl = cl,
+      elim = LRTalpha(.20),
+      calc.anova = TRUE,
+      ddf = "Satterthwaite",
+      dep = dep
+    )
+  )
+  stopCluster(cl)
+
+  # Compute marginal means and contrasts
+  emm_options(lmer.df = "Satterthwaite", lmerTest.limit = Inf)
+  specs <- pairwise ~ condition | phase
+  em <- emmeans(build@model, specs, infer = TRUE)
+
+  # Create list of returns
+  list(
+    "model" = build@model,
+    "summary" = build@summary,
+    "anova" = build@anova,
+    "means" = em$emmeans,
+    "contrasts" = em$contrasts
+  ) %>%
+    return()
+}) %>%
+  # Add ERP component names
+  set_names(deps)
+
+# Save models
+saveRDS(mod_lists, here(output_dir, "models.RDS"))
+```
+
+\newpage
+
+# References
+
+\begingroup
+\setlength{\parindent}{-0.5in}
+\setlength{\leftskip}{0.5in}
+
+<div id="refs" custom-style="Bibliography"></div>
+\endgroup
