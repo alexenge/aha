@@ -97,6 +97,10 @@ run <- list(
 # Directory paths
 data_dir <- here("data")
 output_dir <- here("output")
+
+# File paths
+trials_file <- here(output_dir, "all_trials.csv")
+models_file <- here(output_dir, "models.RDS")
 ```
 
 ```{r, preprocessing, eval=run$preprocessing}
@@ -157,20 +161,24 @@ c(
       list(
 
         # Informed condition: Matching keywords and positive response
-        "Informed" =
-          item_id[phase == "Insight" & keywords == "Match" & response >= 3],
+        "Informed" = item_id[
+          phase == "Insight" & keywords == "Match" & response %in% c(3, 4)
+        ],
 
         # Naive condition: Non-matching keywords and negative response
-        "Naive" =
-          item_id[phase == "Insight" & keywords == "Non-match" & response <= 2],
+        "Naive" = item_id[
+          phase == "Insight" & keywords == "Non-match" & response %in% c(1, 2)
+        ],
 
         # Exclude: Matching keywords and negative response
-        "Exclude_informed" =
-          item_id[phase == "Insight" & keywords == "Match" & response <= 2],
+        "Exclude_informed" = item_id[
+          phase == "Insight" & keywords == "Match" & response %in% c(1, 2)
+        ],
 
         # Exclude: Non-matching keywords and positive response
-        "Exclude_naive" =
-          item_id[phase == "Insight" & keywords == "Non-match" & response >= 3],
+        "Exclude_naive" = item_id[
+          phase == "Insight" & keywords == "Non-match" & response %in% c(3, 4)
+        ],
 
         # Exclude: Positive response *before* any info was presented
         "Exclude_known" = item_id[phase == "Pre-insight" & response == 4]
@@ -207,11 +215,11 @@ res <- pipeline$group_pipeline(
   vhdr_files = vhdr_files,
   log_files = logs,
   export_dir = output_dir,
-  downsample_sfreq = 250.,
+  downsample_sfreq = 256.,
   # bad_channels = "auto",
   ocular_correction = "fastica",
   highpass_freq = 0.1,
-  lowpass_freq = 40.,
+  lowpass_freq = 30.,
   triggers = c(221, 222),
   epochs_tmin = -0.5,
   epochs_tmax = 1.5,
@@ -229,7 +237,7 @@ res <- pipeline$group_pipeline(
     )
   ),
   average_by = c("phase/condition"),
-  perform_tfr = TRUE,
+  perform_tfr = FALSE,
   perm_contrasts = list(
     c("Pre-insight/Informed", "Pre-insight/Naive"),
     c("Insight/Informed", "Insight/Naive"),
@@ -242,24 +250,25 @@ res <- pipeline$group_pipeline(
 trials <- tibble(res[[1]])
 evokeds <- tibble(res[[2]])
 clusters <- tibble(res[[3]])
-tfr_evokeds <- tibble(res[[4]])
-tfr_clusters <- tibble(res[[5]])
+# tfr_evokeds <- tibble(res[[4]])
+# tfr_clusters <- tibble(res[[5]])
 ```
 
 ```{r, modeling, eval=run$modeling}
 # Read single trial data
-read_csv(here(output_dir, "all_trials.csv"), col_types = cols(
+read_csv(trials_file, col_types = cols(
   participant_id = col_factor(),
   item_id = col_factor(),
   phase = col_factor(),
   condition = col_factor()
 )) %>%
-  # Subset only the relevant conditions
-  mutate(condition = factor(
-    condition,
-    levels = c("Informed", "Naive", "Excl_informed")
-  )) %>%
-  drop_na() -> trials
+  # Mark unrealistically short RTs
+  mutate(rt = ifelse(rt < 200, NA, rt))
+
+# Filter relevant conditions for the main analysis
+trials %>%
+  mutate(condition = factor(condition, levels = c("Informed", "Naive"))) %>%
+  drop_na() -> trials_main
 
 # Contrast coding for phase
 cbind(
@@ -267,37 +276,40 @@ cbind(
   c("Pre-insight" = 0, "Insight" = -1, "Post-insight" = 1)
 ) %>%
   t() %>%
-  ginv() -> contrasts(trials$phase)
+  ginv() -> contrasts(trials_main$phase)
 
 # Contrast coding for condition
-cbind(
-  c("Informed" = 1, "Naive" = -1, "Excl_informed" = 0),
-  c("Informed" = 1, "Naive" = 0, "Excl_informed" = -1)
-) %>%
+cbind(c("Informed" = 1, "Naive" = -1)) %>%
   t() %>%
-  ginv() -> contrasts(trials$condition)
+  ginv() -> contrasts(trials_main$condition)
 
-# Prepare model formula
-mod_formula <- N170 ~ phase * condition +
+# Construct model formula
+form <- ~ phase * condition +
   (phase * condition | participant_id) +
   (phase * condition | item_id)
 
 # Fit linear mixed models
 deps <- c("P1", "N170", "N400")
-mod_lists <- map(deps, function(dep, mod_formula = form, mod_data = trials) {
+map(deps, function(dep, model_formula = form, model_data = trials_main) {
 
-  # Find the best fitting model (see Matuschek et al., 2017, *JML*)
-  # Uses parallelization across all available CPU cores
+  # Modify the formula such that fixed effects are always retained
+  model_formula %<>%
+    tabulate.formula() %>%
+    mutate(block = replace(block, is.na(grouping), "fixed"))
+
+  # Start a CPU cluster so that multiple models can be fitted in parallel
   n_cores <- detectCores()
   cl <- makeCluster(n_cores)
+
+  # Find the best fitting model (see Matuschek et al., 2017, *JML*)
   build <- buildmer(
     buildmerControl = buildmerControl(
-      formula = mod_formula,
-      data = mod_data,
-      # args = list("control" = lmerControl(
-      #   optimizer = "bobyqa", optCtrl = list(maxfun = 1e6)
-      # )),
-      direction = c("order", "backward"),
+      formula = model_formula,
+      data = model_data,
+      args = list("control" = lmerControl(
+        optimizer = "bobyqa", optCtrl = list(maxfun = 1e6)
+      )),
+      direction = c("backward", "backward"),
       cl = cl,
       elim = LRTalpha(.20),
       calc.anova = TRUE,
@@ -323,10 +335,25 @@ mod_lists <- map(deps, function(dep, mod_formula = form, mod_data = trials) {
     return()
 }) %>%
   # Add ERP component names
-  set_names(deps)
+  set_names(deps) -> models
 
 # Save models
-saveRDS(mod_lists, here(output_dir, "models.RDS"))
+saveRDS(models, models_file)
+```
+
+```{r, table_1, include=TRUE}
+# Read fitted models
+models <- readRDS(models_file)
+
+# View model summaries
+walk(models, function(model) {
+  print(formula(model$model))
+  cat("\n")
+  print(model$anova)
+  cat("\n")
+  print(model$contrasts)
+  cat("\n\n")
+})
 ```
 
 \newpage
