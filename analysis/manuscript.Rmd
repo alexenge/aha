@@ -97,9 +97,11 @@ run <- list(
 # Directory paths
 data_dir <- here("data")
 output_dir <- here("output")
+report_dir <- here(output_dir, "html_reports")
 
 # File paths
 trials_file <- here(output_dir, "all_trials.csv")
+clusters_file <- here(output_dir, "clusters.csv")
 models_file <- here(output_dir, "models.RDS")
 ```
 
@@ -215,11 +217,12 @@ res <- pipeline$group_pipeline(
   vhdr_files = vhdr_files,
   log_files = logs,
   export_dir = output_dir,
-  downsample_sfreq = 256.,
-  # bad_channels = "auto",
+  report_dir = report_dir,
+  downsample_sfreq = 250.,
+  bad_channels = NULL,
   ocular_correction = "fastica",
   highpass_freq = 0.1,
-  lowpass_freq = 30.,
+  lowpass_freq = 40.,
   triggers = c(221, 222),
   epochs_tmin = -0.5,
   epochs_tmax = 1.5,
@@ -237,7 +240,7 @@ res <- pipeline$group_pipeline(
     )
   ),
   average_by = c("phase/condition"),
-  perform_tfr = FALSE,
+  perform_tfr = TRUE,
   perm_contrasts = list(
     c("Pre-insight/Informed", "Pre-insight/Naive"),
     c("Insight/Informed", "Insight/Naive"),
@@ -245,13 +248,6 @@ res <- pipeline$group_pipeline(
   ),
   n_jobs = 1
 )
-
-# Extract results
-trials <- tibble(res[[1]])
-evokeds <- tibble(res[[2]])
-clusters <- tibble(res[[3]])
-# tfr_evokeds <- tibble(res[[4]])
-# tfr_clusters <- tibble(res[[5]])
 ```
 
 ```{r, modeling, eval=run$modeling}
@@ -263,7 +259,7 @@ read_csv(trials_file, col_types = cols(
   condition = col_factor()
 )) %>%
   # Mark unrealistically short RTs
-  mutate(rt = ifelse(rt < 200, NA, rt))
+  mutate(rt = ifelse(rt < 200, NA, rt)) -> trials
 
 # Filter relevant conditions for the main analysis
 trials %>%
@@ -354,6 +350,23 @@ walk(models, function(model) {
   print(model$contrasts)
   cat("\n\n")
 })
+```
+
+```{r, clusters, include=TRUE}
+read_csv(clusters_file, col_types = cols(
+  contrast = col_factor(levels = c(
+    "Pre-insight/Informed - Pre-insight/Naive",
+    "Insight/Informed - Insight/Naive",
+    "Post-insight/Informed - Post-insight/Naive"
+  ))
+)) %>%
+  pivot_longer(-c(contrast, stat, time), names_to = "channel") %>%
+  pivot_wider(names_from = stat, values_from = value) %>%
+  ggplot(aes(x = time, y = channel, fill = p_val)) +
+  facet_grid(~contrast) +
+  geom_raster() +
+  scale_fill_viridis_c()
+ggsave("clusters.pdf")
 ```
 
 \newpage
