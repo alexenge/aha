@@ -100,7 +100,7 @@ output_dir <- here("output")
 report_dir <- here(output_dir, "html_reports")
 
 # File paths
-trials_file <- here(output_dir, "all_trials.csv")
+trials_file <- here(output_dir, "trials.csv")
 clusters_file <- here(output_dir, "clusters.csv")
 models_file <- here(output_dir, "models.RDS")
 ```
@@ -216,7 +216,7 @@ vhdr_files <- c(
 res <- pipeline$group_pipeline(
   vhdr_files = vhdr_files,
   log_files = logs,
-  export_dir = output_dir,
+  output_dir = output_dir,
   report_dir = report_dir,
   downsample_sfreq = 250.,
   bad_channels = NULL,
@@ -360,9 +360,7 @@ read_csv(clusters_file, col_types = cols(
     "Post-insight/Informed - Post-insight/Naive"
   ))
 )) %>%
-  pivot_longer(-c(contrast, stat, time), names_to = "channel") %>%
-  pivot_wider(names_from = stat, values_from = value) %>%
-  ggplot(aes(x = time, y = channel, fill = p_val)) +
+  ggplot(aes(x = time, y = channel, fill = cl_index)) +
   facet_grid(~contrast) +
   geom_raster() +
   scale_fill_viridis_c()
