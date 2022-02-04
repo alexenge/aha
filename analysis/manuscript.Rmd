@@ -101,8 +101,9 @@ report_dir <- here(output_dir, "html_reports")
 
 # File paths
 trials_file <- here(output_dir, "trials.csv")
-clusters_file <- here(output_dir, "clusters.csv")
 models_file <- here(output_dir, "models.RDS")
+clusters_file <- here(output_dir, "clusters.csv")
+tfr_clusters_file <- here(output_dir, "tfr_clusters.csv")
 ```
 
 ```{r, preprocessing, eval=run$preprocessing}
@@ -199,9 +200,6 @@ c(
       select(item_id, phase, condition, response, rt, log_rt) %>%
       return()
   }) -> logs
-
-# Install latest version of the EEG pipeline
-system("pip install --user --upgrade --pre --index https://test.pypi.org/simple/ hu-neuro-pipeline")
 
 # Import EEG pipeline from Python
 pipeline <- import("pipeline")
@@ -352,19 +350,52 @@ walk(models, function(model) {
 })
 ```
 
-```{r, clusters, include=TRUE}
+```{r, clusters, include=TRUE, fig.height=8}
+# Read results of cluster-based permutation tests for ERPs
 read_csv(clusters_file, col_types = cols(
   contrast = col_factor(levels = c(
     "Pre-insight/Informed - Pre-insight/Naive",
     "Insight/Informed - Insight/Naive",
     "Post-insight/Informed - Post-insight/Naive"
   ))
-)) %>%
-  ggplot(aes(x = time, y = channel, fill = cl_index)) +
-  facet_grid(~contrast) +
+)) -> clusters
+
+# Plot thresholded cluster images
+clusters %>%
+  filter(p_val < .05) %>%
+  ggplot(aes(x = time, y = channel, fill = cluster)) +
+  facet_grid(~contrast, drop = FALSE) +
   geom_raster() +
-  scale_fill_viridis_c()
-ggsave("clusters.pdf")
+  theme(legend.position = "top")
+```
+
+```{r, tfr, include=TRUE, fig.height=12}
+# Read results of cluster-based permutation tests for TFR
+read_csv(tfr_clusters_file, col_types = cols(
+  contrast = col_factor(levels = c(
+    "Pre-insight/Informed - Pre-insight/Naive",
+    "Insight/Informed - Insight/Naive",
+    "Post-insight/Informed - Post-insight/Naive"
+  ))
+)) -> tfr_clusters
+
+# Plot thresholded cluster images for the insight phase
+tfr_clusters %>%
+  filter(contrast == "Insight/Informed - Insight/Naive" & p_val < .05) %>%
+  ggplot(aes(x = time, y = freq, fill = cluster)) +
+  facet_wrap(~channel) +
+  geom_raster() +
+  theme(legend.position = "top")
+
+# Plot thresholded cluster images for the post-insight phase
+tfr_clusters %>%
+  filter(
+    contrast == "Post-insight/Informed - Post-insight/Naive" & p_val < .05
+  ) %>%
+  ggplot(aes(x = time, y = freq, fill = cluster)) +
+  facet_wrap(~channel) +
+  geom_raster() +
+  theme(legend.position = "top")
 ```
 
 \newpage
