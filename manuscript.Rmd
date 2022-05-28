@@ -1,6 +1,7 @@
 ---
 title             : "Instant effects of semantic information on visual perception"
 shorttitle        : "Semantically informed perception"
+
 author: 
   - name          : "Alexander Enge"
     affiliation   : "1,2"
@@ -18,6 +19,7 @@ affiliation:
     institution   : "Max Planck Institute for Human Cognitive and Brain Sciences"
   - id            : "3"
     institution   : "Fachhochschule des Mittelstands"
+
 authornote: |
   \addORCIDlink{Alexander Enge}{0000-0003-0100-2297}
   
@@ -25,6 +27,7 @@ authornote: |
   
   The authors declare no competing financial interests.
   The preprocessed data and analaysis code for this study are openly available at https://osf.io/uksbc/.
+
 abstract: |
   Does our perception of an object change as soon as we discover what function it serves?
   This question matters not only when we encounter novel tools or gadgets in our everyday lives, but also pertains to the long-standing debate around the (im)penetrability of perception by higher cognitive capacities.
@@ -34,7 +37,9 @@ abstract: |
   When the same objects were presented once more without any information, the N400 effect persisted and we also observed enlarged amplitudes in the P1 component (100--150 ms) in response to objects for which semantically informed perception had taken place.
   Consistent with previous work, our results suggest that obtaining semantic information about previously unfamiliar objects alters aspects of their lower-level visual perception (P1 component), higher-level visual perception (N170 component), and semantic processing (N400 component).
   We demonstrate for the first time that these effects are instantaneous in the sense that they can be observed within the same trial as well as one trial after the information has been given, providing strong evidence that cognition affects perception.
+
 keywords          : "objects, semantic knowledge, visual perception, event-related potentials"
+
 floatsintext      : yes
 figurelist        : no
 tablelist         : no
@@ -42,17 +47,22 @@ footnotelist      : no
 linenumbers       : no
 mask              : no
 draft             : no
-bibliography      : ["references.bib", "r-references.bib"]
-csl               : "apa.csl"
+
+bibliography      : ["manuscript_files/references.bib", "manuscript_files/r-references.bib"]
+csl               : "manuscript_files/apa.csl"
+
 documentclass     : "apa7"
 classoption       : "man,donotrepeattitle"
 fontsize          : "10pt"
+
+editor_options: 
+  chunk_output_type: console
+  
 output:
   papaja::apa6_pdf:
     latex_engine: xelatex
-  papaja::apa6_docx: default
-editor_options: 
-  chunk_output_type: console
+  papaja::apa6_docx:default
+
 header-includes:
   - \geometry{a4paper}
   - \fancyheadoffset[R,L]{0pt}
@@ -86,7 +96,7 @@ library(magrittr)
 opts_chunk$set(fig.width = 10, include = FALSE, out.width = "100%")
 
 # Write R packages to bibliography
-r_refs(here("analysis", "r-references.bib"), append = FALSE)
+r_refs(here("manuscript_files", "r-references.bib"), append = FALSE)
 
 # What to (re-)run
 run <- list(
@@ -200,9 +210,6 @@ c(
       return()
   }) -> logs
 
-# Install latest version of the EEG pipeline
-system("pip install --user --upgrade --pre --index https://test.pypi.org/simple/ hu-neuro-pipeline")
-
 # Import EEG pipeline from Python
 pipeline <- import("pipeline")
 
@@ -218,21 +225,21 @@ res <- pipeline$group_pipeline(
   log_files = logs,
   output_dir = output_dir,
   report_dir = report_dir,
-  downsample_sfreq = 250.,
-  bad_channels = NULL,
-  ocular_correction = "fastica",
+  downsample_sfreq = 125,
+  bad_channels = "auto",
+  ocular_correction = "auto",
   highpass_freq = 0.1,
-  lowpass_freq = 40.,
+  lowpass_freq = 40,
   triggers = c(221, 222),
   epochs_tmin = -0.5,
   epochs_tmax = 1.5,
-  baseline = c(-0.2, 0.0),
-  reject_peak_to_peak = 200.,
-  reject_flat = 1.,
+  baseline_tmin = -0.2,
+  baseline_tmax = 0.0,
+  reject_peak_to_peak = 200,
   components = list(
-    "name" = c("P1", "N170", "N400"),
-    "tmin" = c(0.1, 0.15, 0.4),
-    "tmax" = c(0.15, 0.2, 0.7),
+    "name" = list("P1", "N170", "N400"),
+    "tmin" = list(0.1, 0.15, 0.4),
+    "tmax" = list(0.15, 0.2, 0.7),
     "roi" = list(
       c("PO3", "PO4", "POz", "O1", "O2", "Oz"),
       c("P7", "P8", "PO7", "PO8", "PO9", "PO10"),
@@ -241,11 +248,19 @@ res <- pipeline$group_pipeline(
   ),
   average_by = c("phase/condition"),
   perform_tfr = TRUE,
+  tfr_subtract_evoked = FALSE,
+  tfr_freqs = seq(4, 40, by = 1.0),
+  tfr_cycles = seq(2, 20, by = 0.5),
+  tfr_baseline_tmin = -0.45,
+  tfr_baseline_tmax = -0.05,
+  tfr_baseline_mode = "percent",
   perm_contrasts = list(
     c("Pre-insight/Informed", "Pre-insight/Naive"),
     c("Insight/Informed", "Insight/Naive"),
     c("Post-insight/Informed", "Post-insight/Naive")
   ),
+  perm_tmin = 0.0,
+  perm_tmax = 1.0,
   n_jobs = 1
 )
 ```

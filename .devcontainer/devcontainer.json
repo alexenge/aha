@@ -10,8 +10,8 @@
 	"dockerFile": "../Dockerfile",
 
 	// Specify project-specific workspace mount
-	"workspaceMount": "source=${localWorkspaceFolder},target=/home/rstudio/proj,type=bind,consistency=cached",
-	"workspaceFolder": "/home/rstudio/proj",
+	"workspaceMount": "source=${localWorkspaceFolder},target=/home/rstudio/project,type=bind,consistency=cached",
+	"workspaceFolder": "/home/rstudio/project",
 
 	// Set *default* container specific settings.json values on container create.
 	"settings": { 
@@ -22,7 +22,7 @@
 	// Add the IDs of extensions you want installed when the container is created.
 	"extensions": [
 		"eamodio.gitlens",
-		"ikuyadeu.r",
+		"reditorsupport.r",
 		"geddski.macros",
 		"grapecity.gc-excelviewer",
 		"kirozen.wordcounter",
