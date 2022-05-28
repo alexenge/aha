@@ -21,7 +21,7 @@ analysis/manuscript.pdf:
 
 # Build the Docker container
 build: Dockerfile
-	docker build --tag $(DCKR_TAG) .
+	docker build --no-cache --progress plain --tag $(DCKR_TAG) .
 
 # Save the Docker image
 save: $(PROJECT).tar.gz
