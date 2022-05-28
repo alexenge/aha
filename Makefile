@@ -1,34 +1,37 @@
 # User-defined variables
-DOCKER_USER	:= alexenge
+DOCKER_USER		:= alexenge
+IMAGE_VERSION	:= main
+MAIN_CMD		:= Rscript -e "rmarkdown::render(input = 'manuscript.Rmd')"
 
 # Automatic workflow variables
-SHELL		:= bash
-PROJECT		:= $(notdir $(CURDIR))
-HOST_PATH 	:= $(CURDIR)
-DCKR_PATH 	:= /home/rstudio/proj
-DCKR_TAG 	:= $(DOCKER_USER)/$(PROJECT)
+PROJECT_DIR		:= $(CURDIR)
+PROJECT_NAME	:= $(notdir $(CURDIR))
+IMAGE_TAG 		:= $(DOCKER_USER)/$(PROJECT_NAME)
+REMOTE_DIR		:= /home/rstudio/project
+SHELL			:= bash
 
-# If DOCKER=TRUE, do stuff inside the Docker container
-ifeq ($(DOCKER), TRUE)
-	run := docker run --rm --volume $(HOST_PATH):$(DCKR_PATH) $(DCKR_TAG)
-endif
+# Main command
+all:
+	$(MAIN_CMD)
 
-# Knit the manuscript
-all: analysis/manuscript.pdf
-analysis/manuscript.pdf: analysis/manuscript.Rmd
-analysis/manuscript.pdf:
-	$(run) Rscript -e "rmarkdown::render(input = 'analysis/manuscript.Rmd')"
+# Main command with Docker
+docker:
+	docker run --rm --volume $(PROJECT_DIR):$(REMOTE_DIR) $(IMAGE_TAG) \
+	$(MAIN_CMD)
 
-# Build the Docker container
-build: Dockerfile
-	docker build --no-cache --progress plain --tag $(DCKR_TAG) .
-
-# Save the Docker image
-save: $(PROJECT).tar.gz
-$(PROJECT).tar.gz:
-	docker save $(PROJECT):latest | gzip > $@
-
-# Run an interactive RStudio session inside the Docker container
+# Run an interactive RStudio session with Docker
 interactive:
-	docker run --rm --volume $(HOST_PATH):$(DCKR_PATH) \
-	-e PASSWORD=1234 -p 8888:8888 $(DCKR_TAG)
+	docker run --rm --volume $(PROJECT_DIR):$(REMOTE_DIR) \
+	-e PASSWORD=1234 -p 8888:8888 $(IMAGE_TAG)
+
+# Build the container with Docker
+build: Dockerfile
+	docker build --no-cache --progress plain --tag $(IMAGE_TAG) .
+
+# Push the container with Docker
+push:
+	docker push $(IMAGE_TAG)
+
+# Pull the container with Docker
+pull:
+	docker pull $(IMAGE_TAG)
