@@ -363,24 +363,10 @@ read_csv(clusters_file, col_types = cols(
 
 clusters %>%
   filter(p_val < .05) %>%
-  ggplot(aes(x = time, y = channel, fill = cl_index)) +
+  ggplot(aes(x = time, y = channel, fill = cluster)) +
   facet_grid(~contrast, drop = FALSE) +
   geom_raster() +
-  scale_fill_viridis_c()
-
-  # Extract significant positive- or negative-going clusters
-  mutate(cl = case_when(
-    p_val < .05 & t_obs < 0 ~ paste0("neg (p = ", p_val, ")"),
-    p_val < .05 & t_obs > 0 ~ paste0("pos (p = ", p_val, ")"),
-    TRUE ~ "n.s."
-  ) %>%
-    factor()) %>%
-  # Plot cluster image
-  ggplot(aes(x = time, y = channel, fill = cl)) +
-  facet_grid(~contrast) +
-  geom_raster()
-  scale_fill_viridis_c()
-ggsave("clusters.pdf")
+  scale_fill_viridis_d()
 ```
 
 \newpage
