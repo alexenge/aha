@@ -61,7 +61,6 @@ editor_options:
 output:
   papaja::apa6_pdf:
     latex_engine: xelatex
-  papaja::apa6_docx:default
 
 header-includes:
   - \geometry{a4paper}
@@ -100,8 +99,8 @@ r_refs(here("manuscript_files", "r-references.bib"), append = FALSE)
 
 # What to (re-)run
 run <- list(
-  "preprocessing" = TRUE,
-  "modeling" = TRUE
+  "preprocessing" = FALSE,
+  "modeling" = FALSE
 )
 
 # Directory paths
@@ -225,7 +224,7 @@ res <- pipeline$group_pipeline(
   vhdr_files = vhdr_files,
   log_files = logs,
   output_dir = output_dir,
-  report_dir = report_dir,
+  report_dir = NULL,
   downsample_sfreq = 125,
   bad_channels = "auto",
   ocular_correction = "auto",
