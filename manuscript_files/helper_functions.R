@@ -1,0 +1,450 @@
+# Define colors
+aha_colors <- viridisLite::viridis(2, begin = 0.1, end = 0.6)
+
+# Helper function for text labels
+annotate_text <- function(...) {
+    ggplot2::annotate(
+        geom = "text", size = size, color = "black", family = "Helvetica"
+    )
+}
+
+plot_fig1a <- function(files_dir) {
+    # Trial structure
+    example_stim <- magick::image_read(
+        here::here(files_dir, "example_stim.png")
+    )
+    ggplot() +
+        coord_cartesian(xlim = c(-100, 100), ylim = c(0, 100), expand = FALSE) +
+        theme_void() +
+        theme(aspect.ratio = 0.5) +
+        ## PART II ##
+        # Title
+        annotate(
+            geom = "text", x = 0, y = 97.2, label = "Insight part",
+            size = 14 / .pt, family = "Helvetica", fontface = "bold"
+        ) +
+        # Arrow
+        annotate(
+            geom = "segment", x = -30, xend = 24, y = 79, yend = 85,
+            arrow = arrow(length = unit(0.1, "inches"))
+        ) +
+        # Squares
+        annotate(
+            geom = "rect", xmin = -37, xmax = -17, ymin = 55, ymax = 75,
+            color = "black", fill = "white"
+        ) +
+        annotate(
+            geom = "rect", xmin = -19, xmax = 1, ymin = 45, ymax = 65,
+            color = aha_colors[1], fill = "white"
+        ) +
+        annotate(
+            geom = "rect", xmin = -19, xmax = 1, ymin = 69, ymax = 89,
+            color = aha_colors[2], fill = "white"
+        ) +
+        annotate(
+            geom = "rect", xmin = -1, xmax = 19, ymin = 59, ymax = 79,
+            color = "black", fill = "white"
+        ) +
+        annotate(
+            geom = "rect", xmin = 17, xmax = 37, ymin = 61, ymax = 81,
+            color = "black", fill = "white"
+        ) +
+        annotate(
+            geom = "text", x = -27, y = 65.3, label = "+", size = 20 / .pt,
+            family = "Helvetica"
+        ) +
+        annotate(
+            geom = "text", x = -9, y = 55, label = "potatoes\nmashing",
+            family = "Helvetica", color = aha_colors[1]
+        ) +
+        annotate(
+            geom = "text", x = -9, y = 79, label = "message\nsignaling",
+            family = "Helvetica", color = aha_colors[2]
+        ) +
+        annotate(
+            geom = "text", x = 9, y = 67, label = "*", size = 30 / .pt,
+            family = "Helvetica"
+        ) +
+        draw_image(example_stim, x = 18, y = 62, width = 18, height = 18) +
+        # Timings
+        annotate(
+            geom = "text", x = -9, y = 67.3, label = "or",
+            family = "Helvetica"
+        ) +
+        annotate(
+            geom = "text", x = -27, y = 52, label = "0.5 s",
+            family = "Helvetica"
+        ) +
+        annotate(
+            geom = "text", x = -9, y = 42, label = "2.5 s",
+            family = "Helvetica"
+        ) +
+        annotate(
+            geom = "text", x = 9, y = 56, label = "0.5 s",
+            family = "Helvetica"
+        ) +
+        annotate(
+            geom = "text", x = 27, y = 56.3, label = "3 s or\nresponse",
+            family = "Helvetica", lineheight = 1
+        ) +
+        # Response options
+        annotate(geom = "segment", x = 27, y = 39, xend = 27, yend = 51.5) +
+        annotate(geom = "segment", x = 0, y = 39, xend = 27, yend = 39) +
+        annotate(geom = "segment", x = 0, y = 35, xend = 0, yend = 39) +
+        annotate(geom = "segment", x = -32, y = 35, xend = 32, yend = 35) +
+        annotate(geom = "segment", x = -32, y = 30.5, xend = -32, yend = 35) +
+        annotate(geom = "segment", x = -12, y = 32, xend = -12, yend = 35) +
+        annotate(geom = "segment", x = 12, y = 32, xend = 12, yend = 35) +
+        annotate(geom = "segment", x = 32, y = 32, xend = 32, yend = 35) +
+        annotate(
+            geom = "text", x = -32, y = 26,
+            label = "A. \"I know\nwhat this is\"",
+            family = "Helvetica", lineheight = 1
+        ) +
+        annotate(
+            geom = "text", x = -12, y = 26,
+            label = "B. \"I have an\nassumption\nwhat this is\"",
+            family = "Helvetica", lineheight = 1
+        ) +
+        annotate(
+            geom = "text", x = 12, y = 26,
+            label = "C. \"I have rather\nno assumption\nwhat this is\"",
+            family = "Helvetica", lineheight = 1
+        ) +
+        annotate(
+            geom = "text", x = 32, y = 26,
+            label = "D. \"I don\'t\n know what\nthis is\"",
+            family = "Helvetica", lineheight = 1
+        ) +
+        # Conditions
+        annotate(
+            geom = "segment", x = -32, y = 17, xend = -32, yend = 22,
+            color = aha_colors[1]
+        ) +
+        annotate(
+            geom = "segment", x = -12, y = 17, xend = -12, yend = 20,
+            color = aha_colors[1]
+        ) +
+        annotate(
+            geom = "segment", x = 12, y = 17, xend = 12, yend = 20,
+            color = aha_colors[2]
+        ) +
+        annotate(
+            geom = "segment", x = 32, y = 17, xend = 32, yend = 20,
+            color = aha_colors[2]
+        ) +
+        annotate(
+            geom = "segment", x = -32, y = 17, xend = -12, yend = 17,
+            color = aha_colors[1]
+        ) +
+        annotate(
+            geom = "segment", x = 12, y = 17, xend = 32, yend = 17,
+            color = aha_colors[2]
+        ) +
+        annotate(
+            geom = "segment", x = -22, y = 15, xend = -22, yend = 17,
+            color = aha_colors[1]
+        ) +
+        annotate(
+            geom = "segment", x = 22, y = 15, xend = 22, yend = 17,
+            color = aha_colors[2]
+        ) +
+        annotate(
+            geom = "text", x = -22, y = 13, label = "Informed condition",
+            family = "Helvetica", fontface = "bold",
+            color = aha_colors[1]
+        ) +
+        annotate(
+            geom = "text", x = 22, y = 13, label = "Naive condition",
+            family = "Helvetica", fontface = "bold",
+            color = aha_colors[2]
+        ) +
+        annotate(
+            geom = "text", x = -22, y = 7.9,
+            label = "Matching keywords\nand response A or B",
+            family = "Helvetica", color = aha_colors[1], lineheight = 1
+        ) +
+        annotate(
+            geom = "text", x = 22, y = 7.9,
+            label = "Non-matching keywords\nand response C or D",
+            family = "Helvetica", color = aha_colors[2],
+            lineheight = 1
+        ) +
+        ## PART I ##
+        # Title
+        annotate(
+            geom = "text", x = -72, y = 56, label = "Pre-insight part",
+            size = 14 / .pt, family = "Helvetica", fontface = "bold"
+        ) +
+        # Arrow
+        annotate(
+            geom = "segment", x = -84, xend = -66, y = 46, yend = 48,
+            arrow = arrow(length = unit(0.1, "inches"))
+        ) +
+        # Squares
+        annotate(
+            geom = "rect", xmin = -91, xmax = -71, ymin = 22, ymax = 42,
+            color = "black", fill = "white"
+        ) +
+        annotate(
+            geom = "rect", xmin = -53, xmax = -73, ymin = 24, ymax = 44,
+            color = "black", fill = "white"
+        ) +
+        annotate(
+            geom = "text", x = -81, y = 32.3, label = "+", size = 20 / .pt,
+            family = "Helvetica"
+        ) +
+        draw_image(example_stim, x = -72, y = 25, width = 18, height = 18) +
+        # Timings
+        annotate(
+            geom = "text", x = -81, y = 19, label = "0.5 s",
+            family = "Helvetica"
+        ) +
+        annotate(
+            geom = "text", x = -63, y = 19.3, label = "3 s or\nresponse",
+            family = "Helvetica", lineheight = 1
+        ) +
+        # Conditions
+        annotate(
+            geom = "text", x = -72, y = 7.9,
+            label = paste(
+                "Objects classified according",
+                "to conditions in the insight part",
+                sep = "\n"
+            ),
+            family = "Helvetica", lineheight = 1
+        ) +
+        # PART III
+        # Title
+        annotate(
+            geom = "text", x = 72, y = 56, label = "Post-insight part",
+            size = 14 / .pt, family = "Helvetica", fontface = "bold"
+        ) +
+        # Arrow
+        annotate(
+            geom = "segment", x = 60, xend = 78, y = 46, yend = 48,
+            arrow = arrow(length = unit(0.1, "inches"))
+        ) +
+        # Squares
+        annotate(
+            geom = "rect", xmin = 53, xmax = 73, ymin = 22, ymax = 42,
+            color = "black", fill = "white"
+        ) +
+        annotate(
+            geom = "rect", xmin = 71, xmax = 91, ymin = 24, ymax = 44,
+            color = "black", fill = "white"
+        ) +
+        annotate(
+            geom = "text", x = 63, y = 32.3, label = "+", size = 20 / .pt,
+            family = "Helvetica"
+        ) +
+        draw_image(example_stim, x = 72, y = 25, width = 18, height = 18) +
+        # Timings
+        annotate(
+            geom = "text", x = 63, y = 19, label = "0.5 s",
+            family = "Helvetica"
+        ) +
+        annotate(
+            geom = "text", x = 81, y = 19.3, label = "3 s or\nresponse",
+            family = "Helvetica", lineheight = 1
+        ) +
+        # Conditions
+        annotate(
+            geom = "text", x = 72, y = 7.9,
+            label = paste(
+                "Objects classified according",
+                "to conditions in the insight part",
+                sep = "\n"
+            ),
+            family = "Helvetica", lineheight = 1
+        )
+}
+
+plot_fig1b <- function(evokeds, config, channel_locations, models) {
+
+    # Loop over ERP components of interest
+    components <- config$components
+    components$model <- models
+    pmap(components, function(name, tmin, tmax, roi, model) {
+
+        # Loop over phases of the experiment
+        phases <- c("Pre-insight", "Insight", "Post-insight")
+        map(phases, function(this_phase) {
+
+            # Define axis limits and labels
+            xmin <- -0.2
+            xmax <- 0.8
+            xstep <- 0.2
+            xticks <- seq(xmin, xmax, by = xstep)
+            xticks <- xticks[!xticks == 0]
+            yticks <- c(-3, 3)
+
+            # Select dependent variable, conditions, and time window
+            evokeds %>%
+                filter(phase == this_phase) %>%
+                filter(condition %in% c("Informed", "Naive")) %>%
+                filter(between(time, xmin, xmax)) -> evokeds_plot
+
+            # Create means and SEs across participants for time course
+            evokeds_plot %>%
+                mutate(dep = evokeds_plot[[name]]) %>%
+                Rmisc::summarySEwithin(
+                    measurevar = "dep",
+                    withinvars = c("time", "phase", "condition"),
+                    idvar = "participant_id"
+                ) %>%
+                mutate(time = as.numeric(levels(time))[time]) -> evokeds_tc
+
+            # Extract significance from model
+            as_tibble(model$contrasts) %>%
+                filter(phase == this_phase) %>%
+                pull(p.value) -> p_value
+            asterisks <- case_when(
+                p_value < 0.001 ~ "***",
+                p_value < 0.01 ~ "**",
+                p_value < 0.05 ~ "*",
+                TRUE ~ ""
+            )
+
+            # Plot time course
+            ggplot(
+                evokeds_tc,
+                aes(
+                    x = time,
+                    y = dep,
+                    ymin = dep - se,
+                    ymax = dep + se,
+                    color = condition,
+                    fill = condition
+                )
+            ) +
+                # Annotate component time window
+                annotate(
+                    geom = "rect", xmin = tmin, xmax = tmax,
+                    ymin = -Inf, ymax = Inf, fill = "gray90"
+                ) +
+                annotate(
+                    geom = "text", x = (tmin + tmax) / 2, y = 7.9,
+                    label = asterisks
+                ) +
+                # X (time) axis
+                annotate(
+                    geom = "segment", x = min(xticks), y = 0,
+                    xend = max(xticks), yend = 0
+                ) +
+                annotate(
+                    geom = "segment", x = xticks, y = 0, xend = xticks,
+                    yend = -0.2
+                ) +
+                annotate(
+                    geom = "text", x = xticks, y = -0.6, label = xticks
+                ) +
+                annotate(
+                    geom = "text", x = mean(xticks), y = -1.5,
+                    label = "Time (ms)"
+                ) +
+                # Y (amplitude) axis
+                annotate(
+                    geom = "segment", x = 0, y = min(yticks), xend = 0,
+                    yend = max(yticks)
+                ) +
+                annotate(
+                    geom = "segment", x = -0.01, y = yticks, xend = 0,
+                    yend = yticks
+                ) +
+                annotate(
+                    geom = "text", x = -0.02, y = yticks, label = yticks,
+                    hjust = 1
+                ) +
+                annotate(
+                    geom = "text", x = -0.06, y = -0.2, label = "Ampl. (µV)",
+                    angle = 90
+                ) +
+                # Data
+                geom_ribbon(color = NA, alpha = 0.2) +
+                geom_line(size = 0.8) +
+                # Styling
+                scale_color_manual(
+                    values = aha_colors, aesthetics = c("color", "fill")
+                ) +
+                coord_cartesian(ylim = c(-3, 8), expand = TRUE) +
+                theme_void() +
+                theme(legend.position = "none") -> wave
+
+            # Compute difference between conditions for topography
+            channels <- channel_locations$channel
+            evokeds_informed <- filter(evokeds_plot, condition == "Informed")
+            evokeds_naive <- filter(evokeds_plot, condition == "Naive")
+            evokeds_diff <- evokeds_informed
+            evokeds_diff[channels] <-
+                evokeds_informed[channels] - evokeds_naive[channels]
+            evokeds_diff$condition <- "Difference"
+
+            # Plot topography
+            evokeds_diff %>%
+                filter(between(time, tmin, tmax)) %>%
+                pivot_longer(
+                    all_of(channels),
+                    names_to = "electrode", values_to = "amplitude"
+                ) %>%
+                group_by(electrode) %>%
+                summarise(amplitude = mean(amplitude)) %>%
+                left_join(
+                    channel_locations,
+                    by = c("electrode" = "channel")
+                ) %>%
+                eegUtils::topoplot(
+                    r = 85,
+                    contour = FALSE,
+                    interp_limit = "skirt",
+                    highlights = roi,
+                    scaling = 0.9
+                ) +
+                scale_fill_viridis_c(
+                    option = "viridis", limits = c(-1, 1), oob = scales::squish
+                ) +
+                theme(legend.position = "none") -> topo
+            # Adjust size of head elements and channel markers
+            topo$layers[[3]]$aes_params$size <- 0.5
+            topo$layers[[4]]$aes_params$size <- 0.5
+            topo$layers[[5]]$aes_params$size <- 0.5
+            topo$layers[[6]]$aes_params$size <- 0.3
+            topo$layers[[7]]$aes_params$size <- 0.4
+
+            # Combine time course and topography
+            wave + draw_plot(
+                topo,
+                x = -0.4, y = 2.7, width = 0.6, height = 6.0
+            )
+        }) %>%
+            # Combine plots for the current ERP component and all three phases
+            plot_grid(plotlist = ., nrow = 1)
+    }) %>%
+        # Combine plots for all ERP components
+        plot_grid(
+            plotlist = ., ncol = 1, labels = c("B", "C", "D"), label_size = 14,
+            label_fontfamily = "Helvetica"
+        )
+}
+
+plot_fig1 <- function(files_dir, evokeds, config, channel_locations, models) {
+
+    # Plot 2 main panels
+    plot_grid(
+        plot_fig1a(files_dir),
+        plot_fig1b(evokeds, config, channel_locations, models),
+        ncol = 1, labels = c("A", NULL), label_size = 14,
+        label_fontfamily = "Helvetica"
+    ) +
+
+        # Add some lines to separate the three experimental parts
+        annotate("segment", x = 0.331, xend = 0.331, y = -Inf, yend = 0.48) +
+        annotate("segment", x = 0.665, xend = 0.665, y = -Inf, yend = 0.48) +
+        annotate("segment", x = 0.331, xend = 0.274, y = 0.48, yend = 0.55) +
+        annotate("segment", x = 0.665, xend = 0.726, y = 0.48, yend = 0.55) +
+        annotate("segment", x = 0.274, xend = 0.274, y = 0.55, yend = Inf) +
+        annotate("segment", x = 0.726, xend = 0.726, y = 0.55, yend = Inf)
+}
+
+# plot_fig1(files_dir, evokeds, config, channel_locations, models)
+# ggsave("fig1.pdf", width = 12, height = 12)

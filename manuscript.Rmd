@@ -5,7 +5,7 @@ shorttitle        : "Semantically informed perception"
 author: 
   - name          : "Alexander Enge"
     affiliation   : "1,2"
-    corresponding : yes
+    corresponding : "yes"
     address       : "Rudower Chaussee 18, 12489 Berlin, Germany"
     email         : "alexander.enge@hu-berlin.de"
   - name          : "Franziska Süß"
@@ -86,36 +86,99 @@ library(lme4)
 library(lmerTest)
 library(MASS)
 library(papaja)
+library(cowplot)
 library(parallel)
 library(reticulate)
 library(tidyverse)
 library(magrittr)
 
-# Set global chunk options
-opts_chunk$set(fig.width = 10, include = FALSE, out.width = "100%")
+# Set global options
+options(readr.show_col_types = FALSE)
+opts_chunk$set(fig.width = 12, include = FALSE, out.width = "100%")
 
-# Write R packages to bibliography
-r_refs(here("manuscript_files", "r-references.bib"), append = FALSE)
+# Specify directory paths
+data_dir <- here("data")
+files_dir <- here("manuscript_files")
+output_dir <- here("output")
 
-# What to (re-)run
+# Load custom helper functions for creating figures and tables
+source(here(files_dir, "helper_functions.R"))
+
+# Re-run steps that take a long time to compute?
 run <- list(
-  "preprocessing" = FALSE,
-  "modeling" = FALSE
+  eeg_processing = FALSE,
+  mixed_models = FALSE
 )
 
-# Directory paths
-data_dir <- here("data")
-output_dir <- here("output")
-report_dir <- here(output_dir, "html_reports")
-
-# File paths
-trials_file <- here(output_dir, "trials.csv")
-models_file <- here(output_dir, "models.RDS")
-clusters_file <- here(output_dir, "clusters.csv")
-tfr_clusters_file <- here(output_dir, "tfr_clusters.csv")
+# Write R packages to bibliography
+r_refs(here(files_dir, "r-references.bib"), append = FALSE)
 ```
 
-```{r, preprocessing, eval=run$preprocessing}
+# Introduction
+
+Does our perception of an object change as soon as we discover what function it serves?
+This question speaks not only to our everyday experiences, where we encounter novel tools and gadgets in our dynamic working and private environments.
+It also pertains to the long-standing debate about the cognitive (im)penetrability [@pylyshyn1999] of perception by higher-level capacities such as semantic knowledge or language.
+According to one view, these cognitive capacities kick in only after the retinal input has been processed by a specialized module for visual perception [@firestone2016; @fodor1983].
+This module is encapsulated from higher-level inputs and therefore processes the visual information in a purely feedforward fashion, progressing from lower areas with small receptive field sizes to areas representing increasingly complex shapes and, eventually, whole objects [@dicarlo2012].
+This architecture has been mirrored in classical [e.g., @marr1982] and contemporary [e.g., @krizhevsky2012] computer vision models, allowing them to achieve human-level perfomance in predicting object category labels from images [for review, see @lindsay2020].
+
+The cognitive impenetrability hypothesis is challenged by the alternative view that perception dynamically interacts with different aspects of cognition from early on [@churchland1994; @lupyan2015].
+This view is supported by a variety of theoretical, behavioral, and neurophysiological accounts.
+On the theoretical level, the reverse hierarchy theory [@ahissar2004; @hochstein2002] posits that conscious processing initally occurs at the level of whole objects or object categories.
+Only after this high-level interpretation has been obtained, more fine grained visual details---if relevant for the current task---are being accessed via top-down connections.
+Along similar lines, Bayesian inference and predictive coding theories [e.g., @clark2013; @panichello2013; @yuille2006] propose bi-directional loops of predictions and prediction errors between visual and non-visual processes.
+
+On the behavioral level, these ideas are supported by psychological studies that showed differences in ratings, detection rates, or reaction times for visual stimuli depending on their emotional [e.g., @phelps2016], motivational [e.g., @balcetis2010], linguistic [e.g., @boutonnet2015] or semantic [e.g., @gauthier2003] background.
+However, some of these studies confounded tentantive high-level effects with low-level differences between conditions.
+Furthermore, many studies were not able to discern between perceptual and post-perceptual (e.g., memory-related) effects [@firestone2016].
+
+On the neurophysiological level, event-related potentials (ERPs) measured from the human EEG can mitigate most of these concerns:
+Their excellent temporal resolution allows us to probe how early we can detect influences of high-level (e.g., semantic) information.
+To this end, participants were typically trained to associate visual objects with different amounts of semantic information.
+After training, an orthogonal task was used to compare the ERPs in response to semantically trained objects versus non-semantically trained objects.
+This revealed differences not only in late ERP components associated with semantic processing (i.e., the N400 component) but also in the visual P1 component [@abdelrahman2008; @maier2019; @samaha2018; @weller2019].
+The early peak of this component and its source in the occipital cortex [@abdelrahman2008] point to an immediate effect of semantic knowledge on visual perception.
+
+Here we measured ERPs in response to unfamiliar objects instantly while participants gained an semantic understanding of their function.
+To this end, we presented half of the objects together with matching keywords, thus allowing participants to understand what kind of object they were viweing, or together with non-matching keywords, thus keeping the perception of the object semantically naive.
+We then presented the same objects again to test for downstream effects of semantic information as in previous studies.
+We examined the influence of semantic information on ERPs associated with lower-level visual perception (P1 component), higher-level visual perception (N170 component), and semantic processing (N400 component).
+
+# Materials and Methods
+
+## Participants
+
+Participants were 48 German native speakers (31 female, 17 male) with a mean age of 23.5 years (range 18--32) and no history of psychological disorder or treatment.
+No a priori power analysis was carried out and the sample size was chosen in line with previous EEG studies on object processing in our lab.
+All participants were right-handed according to the Edinburgh inventory [@oldfield1971] and reported normal or corrected-to-normal vision.
+They provided written informed consent before starting the experiment and received a compensation of €8 per hour for participating.
+
+## Materials
+
+Stimuli consisted of 240 grayscale photographs of real-world objects.
+Of these, 120 were well-known everyday objects (e.g., a bicycle, a toothbrush) and served as filler stimuli of no interest.
+The other 120 were rare objects presumed to be unfamiliar to the majority of participants (e.g., a galvanometer, an udu drum; see Appendix A).
+All stimuli were presented on a light blue background with a size of 207 × 207 pixels on a 19-inch LCD monitor with a resolution of 1,280 × 1,024 pixels and a refresh rate of 75 Hz.
+At a standardized viewing distance of 90 cm, the images subtended approximately 3.9 degrees of participants' horizontal and vertical visual angle.
+
+For each unfamiliar object, a pair of German keywords---a noun and a verb---was selected, describing the typical function or use of the object in a way that could typically be related to its visual features and their configuration (e.g., voltage, measuring; clay pot, drumming).
+As our central experimental manipulation, the presentation of half of the objects was preceded by keywords that correctly matched their respective function, whereas the presentation of the other half of the objects was preceded by non-matching keywords belonging to one of the other objects.
+The matching keywords were expected to induce semantically informed perception (i.e., participants suddenly understanding what kind of object they were viewing), whereas the non-matching keywords were expected to prevent such an understanding and keep the perception of the object semantically naive.
+All participants saw each unfamiliar object with only one type of keywords (matching or non-matching).
+This assignment of keywords to objects was counterbalanced across participants so that each object was presented with matching keywords (leading to semantically informed perception) and non-matching keywords (leading to naive perception) to an equal number of participants.
+The experiment was programmed and displayed using Presentation® software (Neurobehavioral Systems, Inc., Berkeley, CA, www.neurobs.com).
+
+## Experimental Design
+
+The experiment consisted of three parts (see Figure \@ref(fig:fig1)A).
+In the *pre-insight* part, after written informed consent had been obtained and the EEG had been prepared, all 240 familiar and unfamiliar objects were presented once in random order and without any keywords.
+Each trial consisted of a fixation cross presented in the middle of the screen for 0.5 s, followed by the presentation of the object until participants made a response or until a time out after 3 s.
+The inter-trial interval was 0.5 s and participants took a self-timed break after each block of 60 objects.
+The task, which was kept the same across all three parts, was to classify each object using one of four response alternatives: (a) "I know what this is or have a strong assumption," (b) "I have an assumption what this is," (c) "I have rather no assumption what this is," or (d) "I don't know what this is and have no assumption." Participants were asked to respond as quickly and as accurately as possible by pressing one out of four buttons with the index or middle finger of their left or right hand, respectively.
+The mapping of the rating scale to the four buttons (left to right or right to left) was counterbalanced across participants.
+
+```{r, eeg_processing, eval=run$eeg_processing}
 # Process behavioral data
 c(
   list.files(here(data_dir, "rt/exp1"), "*.txt", full.names = TRUE),
@@ -139,11 +202,6 @@ c(
           labels = c("Pre-insight", "Insight", "Post-insight")
         ),
 
-        # # Participant ID (unique for Experiments 1 and 2)
-        # participant = ifelse(
-        #   str_detect(log_file, "exp2"), str_c(VPNummer, "_exp2"), VPNummer
-        # ),
-
         # Keyword conditions
         keywords = factor(Bed,
           levels = c("richtig", "falsch"),
@@ -159,7 +217,6 @@ c(
 
         # Reaction times
         rt = RT,
-        log_rt = log(RT),
 
         # Item IDs
         item_id = factor(StimID)
@@ -206,7 +263,7 @@ c(
 
     # Sort columns
     log %>%
-      select(item_id, phase, condition, response, rt, log_rt) %>%
+      select(item_id, phase, condition, response, rt) %>%
       return()
   }) -> logs
 
@@ -265,7 +322,7 @@ res <- pipeline$group_pipeline(
 )
 ```
 
-```{r, modeling, eval=run$modeling}
+```{r, mixed_models, eval=run$mixed_models}
 # Read single trial data
 read_csv(trials_file, col_types = cols(
   participant_id = col_factor(),
@@ -352,10 +409,24 @@ map(deps, function(dep, model_formula = form, model_data = trials_main) {
 saveRDS(models, models_file)
 ```
 
-```{r, table_1, include=TRUE}
-# Read fitted models
-models <- readRDS(models_file)
+```{r, fig1, include=TRUE, fig.height=12, fig.cap="(ref:figure-1-caption)"}
+# Read pipeline configuration
+config <- jsonlite::read_json(here(output_dir, "config.json"))
 
+# Read by-participant ERP averages and channel locations
+evokeds <- read_csv(here(output_dir, "ave.csv"))
+
+# Read channel locations
+channel_locations <- read_csv(here(output_dir, "channel_locations.csv"))
+
+# Read fitted models
+models <- readRDS(here(output_dir, "models.RDS"))
+
+# Create Figure 1
+plot_fig1(files_dir, evokeds, config, channel_locations, models)
+```
+
+```{r, table_1, include=TRUE}
 # View model summaries
 walk(models, function(model) {
   print(formula(model$model))
@@ -369,7 +440,7 @@ walk(models, function(model) {
 
 ```{r, clusters, include=TRUE, fig.height=8}
 # Read results of cluster-based permutation tests for ERPs
-read_csv(clusters_file, col_types = cols(
+read_csv(here(output_dir, "clusters.csv"), col_types = cols(
   contrast = col_factor(levels = c(
     "Pre-insight/Informed - Pre-insight/Naive",
     "Insight/Informed - Insight/Naive",
@@ -388,7 +459,7 @@ clusters %>%
 
 ```{r, tfr, include=TRUE, fig.height=12}
 # Read results of cluster-based permutation tests for TFR
-read_csv(tfr_clusters_file, col_types = cols(
+read_csv(here(output_dir, "tfr_clusters.csv"), col_types = cols(
   contrast = col_factor(levels = c(
     "Pre-insight/Informed - Pre-insight/Naive",
     "Insight/Informed - Insight/Naive",
@@ -413,6 +484,75 @@ tfr_clusters %>%
   facet_wrap(~channel) +
   geom_raster() +
   theme(legend.position = "top")
+```
+
+```{r}
+# Read grand-averaged power
+tfr_grand_ave <- read_csv(here(output_dir, "tfr_grand_ave.csv")) %>%
+  mutate(
+    phase = factor(phase, levels = c("Pre-insight", "Insight", "Post-insight")),
+    condition = factor(condition, levels = c("Informed", "Naive"))
+  ) %>%
+  filter(!is.na(condition))
+
+channels <- tfr_grand_ave %>%
+  select(-average_by, -phase, -condition, -time, -freq) %>%
+  colnames()
+
+tfr_grand_ave_informed <- filter(tfr_grand_ave, condition == "Informed")
+tfr_grand_ave_naive <- filter(tfr_grand_ave, condition == "Naive")
+tfr_grand_ave_diff <- mutate(tfr_grand_ave_informed, condition = "Difference")
+tfr_grand_ave_diff[channels] <- tfr_grand_ave_informed[channels] -
+  tfr_grand_ave_naive[channels]
+
+bind_rows(tfr_grand_ave, tfr_grand_ave_diff) %>%
+  mutate(
+    condition = factor(condition, levels = c("Informed", "Naive", "Difference"))
+  ) %>%
+  pivot_longer(
+    cols = all_of(channels), names_to = "electrode", values_to = "amplitude"
+  ) %>%
+  select(-average_by, -electrode) %>%
+  group_by(phase, condition, time, freq) %>%
+  summarise(amplitude = mean(amplitude), .groups = "drop") %>%
+  ggplot(aes(x = time, y = freq, fill = amplitude)) +
+  facet_grid(phase ~ condition) +
+  geom_raster() +
+  scale_fill_viridis_c(option = "turbo", limits = c(-0.6, 0.6)) +
+  coord_cartesian(expand = FALSE)
+
+tmins <- seq(0.0, 1.2, 0.2)
+fmins <- seq(4, 36, 4)
+
+channel_locations <- read_csv(here(output_dir, "channel_locations.csv"))
+
+map(c("Pre-insight", "Insight", "Post-insight"), function(this_phase) {
+  map(tmins, function(tmin, tstep = 0.2) {
+    tmax <- tmin + tstep
+    map(fmins, function(fmin, fstep = 4) {
+      fmax <- fmin + fstep
+      tfr_grand_ave_diff %>%
+        filter(time >= tmin & time < tmax & freq >= fmin & freq < fmax) %>%
+        filter(phase == this_phase) %>%
+        pivot_longer(
+          cols = all_of(channels), names_to = "electrode", values_to = "power"
+        ) %>%
+        left_join(channel_locations, by = c("electrode" = "channel")) %>%
+        group_by(electrode, x, y) %>%
+        summarise(power = mean(power), .groups = "drop") %>%
+        eegUtils::topoplot(
+          quantity = "power",
+          contour = FALSE,
+          interp_limit = "skirt",
+          scaling = 0.7
+        ) +
+        scale_fill_viridis_c(limits = c(-0.3, 0.3), option = "turbo") +
+        theme(legend.position = "none")
+    }) %>%
+      plot_grid(plotlist = ., nrow = 1)
+  }) %>%
+    plot_grid(plotlist = ., nrow = length(tmins))
+})
 ```
 
 \newpage
