@@ -17,10 +17,10 @@ plot_fig1a <- function(files_dir) {
         coord_cartesian(xlim = c(-100, 100), ylim = c(0, 100), expand = FALSE) +
         theme_void() +
         theme(aspect.ratio = 0.5) +
-        ## PART II ##
+        ## INSIGHT PHASE ##
         # Title
         annotate(
-            geom = "text", x = 0, y = 97.2, label = "Insight part",
+            geom = "text", x = 0, y = 97.2, label = "Insight phase",
             size = 14 / .pt, family = "Helvetica", fontface = "bold"
         ) +
         # Arrow
@@ -170,10 +170,10 @@ plot_fig1a <- function(files_dir) {
             family = "Helvetica", color = aha_colors[2],
             lineheight = 1
         ) +
-        ## PART I ##
+        ## PRE-INSIGHT PHASE ##
         # Title
         annotate(
-            geom = "text", x = -72, y = 56, label = "Pre-insight part",
+            geom = "text", x = -72, y = 56, label = "Pre-insight phase",
             size = 14 / .pt, family = "Helvetica", fontface = "bold"
         ) +
         # Arrow
@@ -209,15 +209,15 @@ plot_fig1a <- function(files_dir) {
             geom = "text", x = -72, y = 7.9,
             label = paste(
                 "Objects classified according",
-                "to conditions in the insight part",
+                "to conditions in the insight phase",
                 sep = "\n"
             ),
             family = "Helvetica", lineheight = 1
         ) +
-        # PART III
+        ## POST-INSIGHT PHASE ##
         # Title
         annotate(
-            geom = "text", x = 72, y = 56, label = "Post-insight part",
+            geom = "text", x = 72, y = 56, label = "Post-insight phase",
             size = 14 / .pt, family = "Helvetica", fontface = "bold"
         ) +
         # Arrow
@@ -253,7 +253,7 @@ plot_fig1a <- function(files_dir) {
             geom = "text", x = 72, y = 7.9,
             label = paste(
                 "Objects classified according",
-                "to conditions in the insight part",
+                "to conditions in the insight phase",
                 sep = "\n"
             ),
             family = "Helvetica", lineheight = 1
@@ -410,6 +410,9 @@ plot_fig1b <- function(evokeds, config, channel_locations, models) {
             topo$layers[[5]]$aes_params$size <- 0.5
             topo$layers[[6]]$aes_params$size <- 0.3
             topo$layers[[7]]$aes_params$size <- 0.4
+
+            # Extract colorbar
+            colorbar <<- get_legend(topo + theme(legend.position = "right"))
 
             # Combine time course and topography
             wave + draw_plot(

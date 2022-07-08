@@ -1,6 +1,7 @@
 .DS_Store
 .vscode/
 *.fif
+*.log
 *.pdf
 *.tex
 __pycache__/
