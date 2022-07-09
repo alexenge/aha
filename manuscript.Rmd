@@ -280,10 +280,10 @@ res <- pipeline$group_pipeline(
   output_dir = output_dir,
   report_dir = NULL,
   downsample_sfreq = 125,
-  bad_channels = "auto",
+  bad_channels = NULL,
   ocular_correction = "auto",
   highpass_freq = 0.1,
-  lowpass_freq = 40,
+  lowpass_freq = 30,
   triggers = c(221, 222),
   epochs_tmin = -0.5,
   epochs_tmax = 1.5,
@@ -426,7 +426,7 @@ map(deps, function(dep, model_formula = form, model_data = trials_main) {
   set_names(deps) -> models
 
 # Save models
-saveRDS(models, models_file)
+saveRDS(models, here(output_dir, "models.RDS"))
 ```
 
 ```{r, fig1, include=TRUE, fig.height=12, fig.cap="(ref:figure-1-caption)"}
