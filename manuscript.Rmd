@@ -28,18 +28,6 @@ authornote: |
   The authors declare no competing financial interests.
   The preprocessed data and analaysis code for this study are openly available at https://osf.io/uksbc/.
 
-abstract: |
-  Does our perception of an object change as soon as we discover what function it serves?
-  This question matters not only when we encounter novel tools or gadgets in our everyday lives, but also pertains to the long-standing debate around the (im)penetrability of perception by higher cognitive capacities.
-  Here, we showed human participants (*n* = 48) pictures of unfamiliar objects either together with words matching their function, leading to semantically informed perception, or together with non-matching words, resulting in naive perception.
-  We measured event-related potentials (ERPs) to investigate at which stages in the visual processing hierarchy these two types of object perception differed from one another.
-  We found that semantically informed as compared to naive perception was associated with larger amplitudes in the N170 component (150--200 ms) and reduced amplitudes in the N400 component (400--700 ms).
-  When the same objects were presented once more without any information, the N400 effect persisted and we also observed enlarged amplitudes in the P1 component (100--150 ms) in response to objects for which semantically informed perception had taken place.
-  Consistent with previous work, our results suggest that obtaining semantic information about previously unfamiliar objects alters aspects of their lower-level visual perception (P1 component), higher-level visual perception (N170 component), and semantic processing (N400 component).
-  We demonstrate for the first time that these effects are instantaneous in the sense that they can be observed within the same trial as well as one trial after the information has been given, providing strong evidence that cognition affects perception.
-
-keywords          : "objects, semantic knowledge, visual perception, event-related potentials"
-
 floatsintext      : yes
 figurelist        : no
 tablelist         : no
@@ -49,7 +37,7 @@ mask              : no
 draft             : no
 
 bibliography      : ["manuscript_files/references.bib", "manuscript_files/r-references.bib"]
-csl               : "manuscript_files/apa.csl"
+csl               : "manuscript_files/citation_style.csl"
 
 documentclass     : "apa7"
 classoption       : "man,donotrepeattitle"
@@ -64,12 +52,9 @@ output:
 
 header-includes:
   - \geometry{a4paper}
-  - \fancyheadoffset[R,L]{0pt}
   - \raggedbottom
   - \usepackage[all]{nowidow}
-  - \usepackage[bottom]{footmisc}
-  - \interfootnotelinepenalty=10000
-  - \captionsetup[figure]{belowskip=10pt,font=small,labelfont=bf,labelsep=period,name=Figure,textfont=normalfont}
+  - \captionsetup[figure]{belowskip=10pt,font={small,stretch=1},labelfont=bf,labelsep=period,name=Figure,textfont=normalfont}
 ---
 
 ```{r, setup, include=FALSE}
@@ -110,6 +95,29 @@ run <- list(
 # Write R packages to bibliography
 r_refs(here(files_dir, "r-references.bib"), append = FALSE)
 ```
+
+# Abstract
+
+Does our perception of an object change as soon as we discover what function it serves?
+This question matters not only when we encounter novel tools or gadgets in our everyday lives, but also pertains to the long-standing debate around the (im)penetrability of perception by higher cognitive capacities.
+Here, we showed human participants (*n* = 48) pictures of unfamiliar objects either together with words matching their function, leading to semantically informed perception, or together with non-matching words, resulting in naive perception.
+We measured event-related potentials (ERPs) to investigate at which stages in the visual processing hierarchy these two types of object perception differed from one another.
+We found that semantically informed as compared to naive perception was associated with larger amplitudes in the N170 component (150--200 ms) and reduced amplitudes in the N400 component (400--700 ms).
+When the same objects were presented once more without any information, the N400 effect persisted and we also observed enlarged amplitudes in the P1 component (100--150 ms) in response to objects for which semantically informed perception had taken place.
+Consistent with previous work, our results suggest that obtaining semantic information about previously unfamiliar objects alters aspects of their lower-level visual perception (P1 component), higher-level visual perception (N170 component), and semantic processing (N400 component).
+We demonstrate for the first time that these effects are instantaneous in the sense that they can be observed within the same trial as well as one trial after the information has been given, providing strong evidence that cognition affects perception.
+
+*Key words*: objects; semantic knowledge; visual perception; event-related potentials
+
+# Significance statement
+
+There has been a long-standing debate about whether or not higher-level cognitive capacities such as semantic knowledge can influence lower-level perceptual processing in a top-down fashion.
+Here we could show for the first time that information about the function of previously unfamiliar objects immediately influences cortical processing within less than 200 ms.
+Of note, this influence does not require training or experience with the objects and related semantic information.
+Therefore, our study is the first to show effects of cognition on perception while ruling out the possibility that prior knowledge merely acts by pre-activating or altering stored visual representations.
+Instead, this knowledge seems to alter perception online, thus providing a compelling case against the cognitive impenetrability of perception by cognition.
+
+\newpage
 
 # Introduction
 
@@ -654,9 +662,6 @@ map(c("Pre-insight", "Insight", "Post-insight"), function(this_phase) {
 
 # References
 
-\begingroup
-\setlength{\parindent}{-0.5in}
-\setlength{\leftskip}{0.5in}
+\bigskip
 
 <div id="refs" custom-style="Bibliography"></div>
-\endgroup
