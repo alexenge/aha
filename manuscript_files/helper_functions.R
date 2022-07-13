@@ -9,12 +9,19 @@ annotate_text <- function(...) {
 }
 
 plot_fig1a <- function(files_dir) {
+
+    # Make sure that packages are loaded
+    require(tidyverse)
+    require(cowplot)
+
     # Trial structure
     example_stim <- magick::image_read(
         here::here(files_dir, "example_stim.png")
     )
     ggplot() +
-        coord_cartesian(xlim = c(-100, 100), ylim = c(0, 100), expand = FALSE) +
+        coord_cartesian(
+            xlim = c(-100, 100), ylim = c(0, 100), expand = FALSE
+        ) +
         theme_void() +
         theme(aspect.ratio = 0.5) +
         ## INSIGHT PHASE ##
@@ -35,11 +42,11 @@ plot_fig1a <- function(files_dir) {
         ) +
         annotate(
             geom = "rect", xmin = -19, xmax = 1, ymin = 45, ymax = 65,
-            color = aha_colors[1], fill = "white"
+            color = aha_colors[2], fill = "white"
         ) +
         annotate(
             geom = "rect", xmin = -19, xmax = 1, ymin = 69, ymax = 89,
-            color = aha_colors[2], fill = "white"
+            color = aha_colors[1], fill = "white"
         ) +
         annotate(
             geom = "rect", xmin = -1, xmax = 19, ymin = 59, ymax = 79,
@@ -54,12 +61,12 @@ plot_fig1a <- function(files_dir) {
             family = "Helvetica"
         ) +
         annotate(
-            geom = "text", x = -9, y = 55, label = "potatoes\nmashing",
-            family = "Helvetica", color = aha_colors[1]
+            geom = "text", x = -9, y = 55, label = "message\nsignaling",
+            family = "Helvetica", color = aha_colors[2]
         ) +
         annotate(
-            geom = "text", x = -9, y = 79, label = "message\nsignaling",
-            family = "Helvetica", color = aha_colors[2]
+            geom = "text", x = -9, y = 79, label = "potatoes\nmashing",
+            family = "Helvetica", color = aha_colors[1]
         ) +
         annotate(
             geom = "text", x = 9, y = 67, label = "*", size = 30 / .pt,
@@ -262,6 +269,10 @@ plot_fig1a <- function(files_dir) {
 
 plot_fig1b <- function(evokeds, config, channel_locations, models) {
 
+    # Make sure that packages are loaded
+    require(tidyverse)
+    require(cowplot)
+
     # Loop over ERP components of interest
     components <- config$components
     components$model <- models
@@ -371,6 +382,24 @@ plot_fig1b <- function(evokeds, config, channel_locations, models) {
                 theme_void() +
                 theme(legend.position = "none") -> wave
 
+            # Extract legend
+            wave_legend <<- get_legend(
+                wave +
+                    guides(
+                        color = guide_legend(title = "Conditions"),
+                        fill = guide_legend(title = "Conditions"),
+                    ) +
+                    theme(
+                        legend.position = "right",
+                        legend.title = element_text(
+                            family = "Helvetica", size = 10, face = "bold"
+                        ),
+                        legend.text = element_text(
+                            family = "Helvetica", size = 10
+                        )
+                    )
+            )
+
             # Compute difference between conditions for topography
             channels <- channel_locations$channel
             evokeds_informed <- filter(evokeds_plot, condition == "Informed")
@@ -412,7 +441,28 @@ plot_fig1b <- function(evokeds, config, channel_locations, models) {
             topo$layers[[7]]$aes_params$size <- 0.4
 
             # Extract colorbar
-            colorbar <<- get_legend(topo + theme(legend.position = "right"))
+            colorbar <<- get_legend(
+                topo +
+                    guides(
+                        fill = guide_colorbar(
+                            title.hjust = 0.5,
+                            title = "Informed - naive\nampl. (µV)",
+                            title.position = "left",
+                            barheight = 6.5,
+                            ticks = FALSE
+                        )
+                    ) +
+                    theme(
+                        legend.position = "right",
+                        legend.title = element_text(
+                            size = 10, angle = 90, family = "Helvetica",
+                            face = "bold"
+                        ),
+                        legend.text = element_text(
+                            size = 10, family = "Helvetica"
+                        ),
+                    )
+            )
 
             # Combine time course and topography
             wave + draw_plot(
@@ -432,6 +482,10 @@ plot_fig1b <- function(evokeds, config, channel_locations, models) {
 
 plot_fig1 <- function(files_dir, evokeds, config, channel_locations, models) {
 
+    # Make sure that packages are loaded
+    require(tidyverse)
+    require(cowplot)
+
     # Plot 2 main panels
     plot_grid(
         plot_fig1a(files_dir),
@@ -439,7 +493,9 @@ plot_fig1 <- function(files_dir, evokeds, config, channel_locations, models) {
         ncol = 1, labels = c("A", NULL), label_size = 14,
         label_fontfamily = "Helvetica"
     ) +
-
+        # Add legend and colorbar
+        draw_plot(wave_legend, x = 0.354, y = 0.434) +
+        draw_plot(colorbar, x = 0.454, y = 0.434) +
         # Add some lines to separate the three experimental parts
         annotate("segment", x = 0.331, xend = 0.331, y = -Inf, yend = 0.48) +
         annotate("segment", x = 0.665, xend = 0.665, y = -Inf, yend = 0.48) +
