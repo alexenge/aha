@@ -26,7 +26,7 @@ authornote: |
   \addORCIDlink{Rasha Abdel Rahman}{0000-0002-8438-1570}
   
   The authors declare no competing financial interests.
-  The preprocessed data and analaysis code for this study are openly available at https://osf.io/uksbc/.
+  The code for this study is available at [https://osf.io/uksbc](https://osf.io/uksbc).
 
 floatsintext      : yes
 figurelist        : no
@@ -109,6 +109,8 @@ We demonstrate for the first time that these effects are instantaneous in the se
 
 *Key words*: objects; semantic knowledge; visual perception; event-related potentials
 
+\bigskip
+
 # Significance statement
 
 There has been a long-standing debate about whether or not higher-level cognitive capacities such as semantic knowledge can influence lower-level perceptual processing in a top-down fashion.
@@ -167,7 +169,7 @@ The other 120 were rare objects presumed to be unfamiliar to the majority of par
 All stimuli were presented on a light blue background with a size of 207 × 207 pixels on a 19-inch LCD monitor with a resolution of 1,280 × 1,024 pixels and a refresh rate of 75 Hz.
 At a standardized viewing distance of 90 cm, the images subtended approximately 3.9 degrees of participants' horizontal and vertical visual angle.
 
-For each unfamiliar object, a pair of German keywords---a noun and a verb---was selected, describing the typical function or use of the object in a way that could typically be related to its visual features and their configuration (e.g., voltage, measuring; clay pot, drumming).
+For each unfamiliar object, a pair of German keywords (a noun and a verb) was selected, describing the typical function or use of the object in a way that could typically be related to its visual features and their configuration (e.g., voltage, measuring; clay pot, drumming).
 As our central experimental manipulation, the presentation of half of the objects was preceded by keywords that correctly matched their respective function, whereas the presentation of the other half of the objects was preceded by non-matching keywords belonging to one of the other objects.
 The matching keywords were expected to induce semantically informed perception (i.e., participants suddenly understanding what kind of object they were viewing), whereas the non-matching keywords were expected to prevent such an understanding and keep the perception of the object semantically naive.
 All participants saw each unfamiliar object with only one type of keywords (matching or non-matching).
@@ -183,97 +185,94 @@ The inter-trial interval was 0.5 s and participants took a self-timed break afte
 The task, which was kept the same across all three parts, was to classify each object using one of four response alternatives: (a) "I know what this is or have a strong assumption," (b) "I have an assumption what this is," (c) "I have rather no assumption what this is," or (d) "I don't know what this is and have no assumption." Participants were asked to respond as quickly and as accurately as possible by pressing one out of four buttons with the index or middle finger of their left or right hand, respectively.
 The mapping of the rating scale to the four buttons (left to right or right to left) was counterbalanced across participants.
 
-```{r, eeg_processing, eval=run$eeg_processing}
-# Process behavioral data
-c(
+```{r, eeg_processing}
+# Define function for processing behavioral log files
+read_log <- function(log_file) {
+
+  # Read the file
+  read_tsv(
+    log_file,
+    col_types = cols(),
+    locale = locale(encoding = "latin1")
+  ) %>%
+    # Recode some columns
+    transmute(
+
+      # Phase of the experiment
+      phase = factor(Wdh,
+        levels = c(211, 212, 213),
+        labels = c("Pre-insight", "Insight", "Post-insight")
+      ),
+
+      # Keyword conditions
+      keywords = factor(Bed,
+        levels = c("richtig", "falsch"),
+        labels = c("Match", "Non-match")
+      ),
+
+      # Behavioral responses
+      # 201: "I know what this is or have a strong assumption"  -> Recode as 4
+      # 202: "I have an assumption what this is"                -> Recode as 3
+      # 203: "I have rather no assumption what this is"         -> Recode as 2
+      # 204: "I don't know what this is and have no assumption" -> Recode as 1
+      response = 5 - (Tastencode - 200),
+
+      # Reaction times
+      rt = RT,
+
+      # Item IDs
+      item_id = factor(StimID)
+    ) %>%
+    # Remove filler items
+    drop_na(keywords) -> log
+
+  # Assign items to conditions based on manipulation (matching vs. non-
+  # matching keywords) and the responses of the participants
+  items_per_condition <- with(log, {
+    list(
+
+      # Informed condition: Matching keywords and positive response
+      "Informed" = item_id[
+        phase == "Insight" & keywords == "Match" & response %in% c(3, 4)
+      ],
+
+      # Naive condition: Non-matching keywords and negative response
+      "Naive" = item_id[
+        phase == "Insight" & keywords == "Non-match" & response %in% c(1, 2)
+      ],
+
+      # Exclude: Matching keywords and negative response
+      "Exclude_informed" = item_id[
+        phase == "Insight" & keywords == "Match" & response %in% c(1, 2)
+      ],
+
+      # Exclude: Non-matching keywords and positive response
+      "Exclude_naive" = item_id[
+        phase == "Insight" & keywords == "Non-match" & response %in% c(3, 4)
+      ],
+
+      # Exclude: Positive response *before* any info was presented
+      "Exclude_known" = item_id[phase == "Pre-insight" & response == 4]
+    )
+  })
+
+  # Assign these conditions to the trials of all three phases
+  log$condition <- NA
+  for (condition in names(items_per_condition)) {
+    item_id <- items_per_condition[[condition]]
+    log$condition[log$item_id %in% item_id] <- condition
+  }
+
+  # Sort columns
+  log %>%
+    select(item_id, phase, condition, response, rt)
+}
+
+# Get list of behavioral log files
+log_files <- c(
   list.files(here(data_dir, "rt/exp1"), "*.txt", full.names = TRUE),
   list.files(here(data_dir, "rt/exp2"), "*.txt", full.names = TRUE)
-) %>%
-  # Process each log file
-  map(function(log_file) {
-
-    # Read the file
-    read_tsv(
-      log_file,
-      col_types = cols(),
-      locale = locale(encoding = "latin1")
-    ) %>%
-      # Recode some columns
-      transmute(
-
-        # Phase of the experiment
-        phase = factor(Wdh,
-          levels = c(211, 212, 213),
-          labels = c("Pre-insight", "Insight", "Post-insight")
-        ),
-
-        # Keyword conditions
-        keywords = factor(Bed,
-          levels = c("richtig", "falsch"),
-          labels = c("Match", "Non-match")
-        ),
-
-        # Behavioral responses
-        # 201: "I know what this is or have a strong assumption"  -> Recode as 4
-        # 202: "I have an assumption what this is"                -> Recode as 3
-        # 203: "I have rather no assumption what this is"         -> Recode as 2
-        # 204: "I don't know what this is and have no assumption" -> Recode as 1
-        response = 5 - (Tastencode - 200),
-
-        # Reaction times
-        rt = RT,
-
-        # Item IDs
-        item_id = factor(StimID)
-      ) %>%
-      # Remove filler items
-      drop_na(keywords) -> log
-
-    # Assign items to conditions based on manipulation (matching vs. non-
-    # matching keywords) and the responses of the participants
-    items_per_condition <- with(log, {
-      list(
-
-        # Informed condition: Matching keywords and positive response
-        "Informed" = item_id[
-          phase == "Insight" & keywords == "Match" & response %in% c(3, 4)
-        ],
-
-        # Naive condition: Non-matching keywords and negative response
-        "Naive" = item_id[
-          phase == "Insight" & keywords == "Non-match" & response %in% c(1, 2)
-        ],
-
-        # Exclude: Matching keywords and negative response
-        "Exclude_informed" = item_id[
-          phase == "Insight" & keywords == "Match" & response %in% c(1, 2)
-        ],
-
-        # Exclude: Non-matching keywords and positive response
-        "Exclude_naive" = item_id[
-          phase == "Insight" & keywords == "Non-match" & response %in% c(3, 4)
-        ],
-
-        # Exclude: Positive response *before* any info was presented
-        "Exclude_known" = item_id[phase == "Pre-insight" & response == 4]
-      )
-    })
-
-    # Assign these conditions to the trials of all three phases
-    log$condition <- NA
-    for (condition in names(items_per_condition)) {
-      item_id <- items_per_condition[[condition]]
-      log$condition[log$item_id %in% item_id] <- condition
-    }
-
-    # Sort columns
-    log %>%
-      select(item_id, phase, condition, response, rt) %>%
-      return()
-  }) -> logs
-
-# Import EEG pipeline from Python
-pipeline <- import("pipeline")
+)
 
 # Get list of BrainVision EEG header files
 vhdr_files <- c(
@@ -281,53 +280,65 @@ vhdr_files <- c(
   list.files(here(data_dir, "eeg/exp2"), "*.vhdr", full.names = TRUE)
 )
 
-# Process EEG data
-res <- pipeline$group_pipeline(
-  vhdr_files = vhdr_files,
-  log_files = logs,
-  output_dir = output_dir,
-  report_dir = NULL,
-  downsample_sfreq = 125,
-  bad_channels = NULL,
-  ocular_correction = "auto",
-  highpass_freq = 0.1,
-  lowpass_freq = 30,
-  triggers = c(221, 222),
-  epochs_tmin = -0.5,
-  epochs_tmax = 1.5,
-  baseline_tmin = -0.2,
-  baseline_tmax = 0.0,
-  reject_peak_to_peak = 200,
-  components = list(
-    "name" = list("P1", "N170", "N400"),
-    "tmin" = list(0.1, 0.15, 0.4),
-    "tmax" = list(0.15, 0.2, 0.7),
-    "roi" = list(
-      c("PO3", "PO4", "POz", "O1", "O2", "Oz"),
-      c("P7", "P8", "PO7", "PO8", "PO9", "PO10"),
-      c("C1", "C2", "Cz", "CP1", "CP2", "CPz")
-    )
-  ),
-  average_by = c("phase/condition"),
-  perform_tfr = TRUE,
-  tfr_subtract_evoked = FALSE,
-  tfr_freqs = seq(4, 40, by = 1.0),
-  tfr_cycles = seq(2, 20, by = 0.5),
-  tfr_baseline_tmin = -0.45,
-  tfr_baseline_tmax = -0.05,
-  tfr_baseline_mode = "percent",
-  perm_contrasts = list(
-    c("Pre-insight/Informed", "Pre-insight/Naive"),
-    c("Insight/Informed", "Insight/Naive"),
-    c("Post-insight/Informed", "Post-insight/Naive")
-  ),
-  perm_tmin = 0.0,
-  perm_tmax = 1.0,
-  n_jobs = 1
-)
-```
+# Import EEG pipeline from Python
+pipeline <- import("pipeline")
 
-```{r, read_results}
+# Extract versions of Python packages
+pipeline_version <- pipeline$`__version__`
+mne_version <- import("mne")$`__version__`
+
+# Do the actual preprocessing if requested
+if (run$eeg_processing) {
+
+  # Process behavioral data
+  logs <- map(log_files, read_log)
+
+  # Process EEG data
+  res <- pipeline$group_pipeline(
+    vhdr_files = vhdr_files,
+    log_files = logs,
+    output_dir = output_dir,
+    report_dir = NULL,
+    downsample_sfreq = 125,
+    bad_channels = NULL,
+    ocular_correction = "auto",
+    highpass_freq = 0.1,
+    lowpass_freq = 30,
+    triggers = c(221, 222),
+    epochs_tmin = -0.5,
+    epochs_tmax = 1.5,
+    baseline_tmin = -0.2,
+    baseline_tmax = 0.0,
+    reject_peak_to_peak = 200,
+    components = list(
+      "name" = list("P1", "N170", "N400"),
+      "tmin" = list(0.1, 0.15, 0.4),
+      "tmax" = list(0.15, 0.2, 0.7),
+      "roi" = list(
+        c("PO3", "PO4", "POz", "O1", "O2", "Oz"),
+        c("P7", "P8", "PO7", "PO8", "PO9", "PO10"),
+        c("C1", "C2", "Cz", "CP1", "CP2", "CPz")
+      )
+    ),
+    average_by = c("phase/condition"),
+    perform_tfr = TRUE,
+    tfr_subtract_evoked = FALSE,
+    tfr_freqs = seq(4, 40, by = 1.0),
+    tfr_cycles = seq(2, 20, by = 0.5),
+    tfr_baseline_tmin = -0.45,
+    tfr_baseline_tmax = -0.05,
+    tfr_baseline_mode = "percent",
+    perm_contrasts = list(
+      c("Pre-insight/Informed", "Pre-insight/Naive"),
+      c("Insight/Informed", "Insight/Naive"),
+      c("Post-insight/Informed", "Post-insight/Naive")
+    ),
+    perm_tmin = 0.0,
+    perm_tmax = 1.0,
+    n_jobs = 1
+  )
+}
+
 # Read single trial data
 read_csv(here(output_dir, "trials.csv"), col_types = cols(
   participant_id = col_factor(),
@@ -474,17 +485,34 @@ Two additional external electrodes were placed on the right mastoid (M2) and bel
 Electrode impedances were kept below 5 kΩ.
 An online band-pass filter with a high-pass time-constant of 10 s (0.016 Hz) and a low-pass cutoff frequency of 1000 Hz was applied before digitizing the signal at a sampling rate of 500 Hz.
 
-The data were preprocessed offline using the MNE software [Version `r system("mne --version", intern = TRUE) %>% str_remove("MNE ")`\; @gramfort2013] in Python [Version `r system("python3 --version", intern = TRUE) %>% str_remove("Python ")`\; @vanrossum2009].
-First, all scalp electrodes were re-referenced to the common average.
+The data were preprocessed offline using custom scripts, packaged in the hu-neuro-pipeline library (Version `r pipeline_version`; https://github.com/alexenge/hu-neuro-pipeline) and based on the MNE-Python software [Version `r mne_version`\; @gramfort2013] in Python [Version `r py_version()`\; @vanrossum2009].
+First, the data were were downsampled to `r config$downsample_sfreq` Hz re-referenced to the common average of all scalp channels.
 Next, artifacts resulting from blinks and eye movements were removed using independent component analysis (ICA).
 The first 15 components were extracted with the FastICA algorithm [@hyvarinen1999] after temporarily low-pass filtering the data at 1 Hz.
-Any components showing substantive correlations with either of two virtual EOG channels (VEOG: IO1 - Fp1, HEOG: F9 - F10) were removed automatically using the *find_bads_eog* function.
-After artifact correction, a zero-phase, non-causal FIR filter with a lower pass-band edge at 0.1 Hz (transition bandwidth: 0.1 Hz) and an upper pass-band edge at 30 Hz (transition bandwidth: 7.5 Hz) was applied.
-Next, the continuous EEG was epoched into segments of 2 s, starting 500 ms before the onset of the presentation of each unfamiliar object.
-The epochs were baseline-corrected by subtracting the average voltage during the 200 ms before stimulus onset.
-Epochs containing artifacts despite ICA, defined as peak-to-peak amplitudes exceeding 200 µV, were removed from further analysis.
+Any components showing significant correlations with either of two virtual EOG channels (VEOG: IO1 - Fp1, HEOG: F9 - F10) were removed automatically using the MNE-Python's `find_bads_eog` method.
+
+## ERP analysis
+
+For the analysis of ERP voltages, a zero-phase, non-causal FIR filter with a lower pass-band edge at `r config$highpass_freq` Hz (transition bandwidth: 0.1 Hz) and an upper pass-band edge at `r config$lowpass_freq` Hz (transition bandwidth: 7.5 Hz) was applied.
+Next, the continuous EEG was segmented into epochs ranging from `r config$epochs_tmin` s to `r config$epochs_tmax` relative the onset of the presentation of each unfamiliar object.
+These epochs were baseline-corrected by subtracting the average voltage during the interval of `r config$baseline_tmin` to `r config$baseline_tmax` relative to stimulus onset.
+Epochs containing artifacts despite ICA, defined as peak-to-peak amplitudes exceeding `r config$reject_peak_to_peak` µV, were removed from further analysis.
 This led to the exclusion of an average of `r mean(rejected_epochs)` trials per participant (= `r percent(mean(rejected_epochs) / 360, accuracy = 0.1)`; range `r min(rejected_epochs)`--`r max(rejected_epochs)` trials).
-Single-trial event-related potentials were computed as the mean amplitude across time windows and regions of interests (ROIs) defined a priori, namely 100--150 ms after object onset at electrodes PO3, PO4, POz, O1, O2, and Oz for the P1 component, 150--200 ms after object onset at electrodes P7, P8, PO7, PO8, PO9, and PO10 for the N170 component, and 400--700 ms after object onset at electrodes C1, C2, Cz, CP1, CP2, and CPz for the N400 component.
+Single-trial event-related potentials were computed as the mean amplitude across time windows and regions of interests (ROIs) defined a priori, namely 100--150 ms after object onset at electrodes PO3, POz, PO4, O1, Oz, and O2 and for the P1 component, 150--200 ms after object onset at electrodes P7, P8, PO7, PO8, PO9, and PO10 for the N170 component, and 400--700 ms after object onset at electrodes C1, Cz, C2, CP1, CPz, and CP2 for the N400 component.
+
+## Time-frequency analysis
+
+For the analysis of event-related power, 
+
+Semantically informed perception may manifest itself not only in changes in evoked activity (as captured by the ERP analysis), but also in induced activity.
+We therefore carried out an exploratory time-frequency analysis.
+We first created new epochs from the ICA-corrected but unfiltered raw data.
+To avoid differences between conditions due to a difference in noise levels, we equated the number of objects per condition for each participant by discarding a random sample of objects from the semantically naive condition.
+Epochs that were marked as bad for the ERP analysis (defined as peak-to-peak amplitudes exceeding 200 µV) were also removed from the time-frequency analysis.
+The remaining epochs were then convolved with a family of 24 Morlet wavelets using the short-time Fourier transform.
+The frequency of these wavelets increased linearly from 4 Hz to 50 Hz in steps of 2 Hz and the number of cycles increased linearly from 3 cycles to 10 cycles in steps of 0.304 cycles [see @samaha2018].
+The resulting single-trial time-frequency data were converted into percent signal change to adjust for power-law scaling.
+This was achieved by first subtracting and then dividing by the mean acitivity during the baseline period, defined as 300--100 ms before object onset.
 
 ## Statistical Analyses
 
@@ -516,18 +544,6 @@ All *p*-values were computed by approximating the relevant denominator degrees o
 
 The stimuli and analysis code for this study are available at [https://osf.io/uksbc/](https://osf.io/uksbc/).
 Lack of consent prevents us from sharing the raw EEG data.
-
-## Time-frequency analysis
-
-Semantically informed perception may manifest itself not only in changes in evoked activity (as captured by the ERP analysis), but also in induced activity.
-We therefore carried out an exploratory time-frequency analysis.
-We first created new epochs from the ICA-corrected but unfiltered raw data.
-To avoid differences between conditions due to a difference in noise levels, we equated the number of objects per condition for each participant by discarding a random sample of objects from the semantically naive condition.
-Epochs that were marked as bad for the ERP analysis (defined as peak-to-peak amplitudes exceeding 200 µV) were also removed from the time-frequency analysis.
-The remaining epochs were then convolved with a family of 24 Morlet wavelets using the short-time Fourier transform.
-The frequency of these wavelets increased linearly from 4 Hz to 50 Hz in steps of 2 Hz and the number of cycles increased linearly from 3 cycles to 10 cycles in steps of 0.304 cycles [see @samaha2018].
-The resulting single-trial time-frequency data were converted into percent signal change to adjust for power-law scaling.
-This was achieved by first subtracting and then dividing by the mean acitivity during the baseline period, defined as 300--100 ms before object onset.
 
 ```{r, table_1, include=TRUE}
 # View model summaries
