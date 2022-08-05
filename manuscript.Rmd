@@ -301,17 +301,18 @@ if (run$eeg_processing) {
     output_dir = output_dir,
     epochs_dir = here(output_dir, "epochs"),
     report_dir = report_dir,
-    downsample_sfreq = 125,
+    downsample_sfreq = 125.0,
     bad_channels = NULL,
-    ocular_correction = "auto",
+    ica_method = "fastica",
+    ica_n_components = 0.99,
     highpass_freq = 0.1,
-    lowpass_freq = 30,
+    lowpass_freq = 30.0,
     triggers = c(221, 222),
     epochs_tmin = -0.5,
     epochs_tmax = 1.5,
     baseline_tmin = -0.2,
     baseline_tmax = 0.0,
-    reject_peak_to_peak = 150,
+    reject_peak_to_peak = 150.0,
     components = list(
       "name" = list("P1", "N170", "N400"),
       "tmin" = list(0.1, 0.15, 0.4),
@@ -367,7 +368,7 @@ config <- jsonlite::read_json(
 )
 
 # Count number of rejected epochs per participant
-rejected_epochs <- lengths(config$rejected_epochs)
+rejected_epochs <- lengths(config$auto_rejected_epochs)
 
 # Read channel locations
 channel_locations <- read_csv(here(output_dir, "channel_locations.csv"))
