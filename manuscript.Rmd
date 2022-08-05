@@ -432,15 +432,17 @@ map(deps, function(dep, model_formula = form, model_data = trials_main) {
   # Compute marginal means and contrasts
   emm_options(lmer.df = "Satterthwaite", lmerTest.limit = Inf)
   specs <- pairwise ~ condition | phase
-  em <- emmeans(build@model, specs, infer = TRUE)
+  means <- emmeans(build@model, specs = c("phase", "condition"))
+  contrasts <- contrast(means, "pairwise", simple = "condition") %>%
+    summary(by = NULL, adjust = "bonferroni")
 
   # Create list of returns
   list(
     "model" = build@model,
     "summary" = build@summary,
     "anova" = build@anova,
-    "means" = em$emmeans,
-    "contrasts" = em$contrasts
+    "means" = means,
+    "contrasts" = contrasts
   ) %>%
     return()
 }) %>%
