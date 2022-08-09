@@ -82,14 +82,15 @@ opts_chunk$set(fig.width = 12, include = FALSE, out.width = "100%")
 data_dir <- here("data")
 files_dir <- here("manuscript_files")
 output_dir <- here("output")
+report_dir <- here("output/qc_reports")
 
 # Load custom helper functions for creating figures and tables
 source(here(files_dir, "helper_functions.R"))
 
 # Re-run steps that take a long time to compute?
 run <- list(
-  eeg_processing = FALSE,
-  mixed_models = FALSE
+  eeg_processing = TRUE,
+  mixed_models = TRUE
 )
 
 # Write R packages to bibliography
@@ -298,18 +299,20 @@ if (run$eeg_processing) {
     vhdr_files = vhdr_files,
     log_files = logs,
     output_dir = output_dir,
-    report_dir = NULL,
-    downsample_sfreq = 125,
+    epochs_dir = here(output_dir, "epochs"),
+    report_dir = report_dir,
+    downsample_sfreq = 125.0,
     bad_channels = NULL,
-    ocular_correction = "auto",
+    ica_method = "fastica",
+    ica_n_components = 0.99,
     highpass_freq = 0.1,
-    lowpass_freq = 30,
+    lowpass_freq = 30.0,
     triggers = c(221, 222),
     epochs_tmin = -0.5,
     epochs_tmax = 1.5,
     baseline_tmin = -0.2,
     baseline_tmax = 0.0,
-    reject_peak_to_peak = 200,
+    reject_peak_to_peak = 150.0,
     components = list(
       "name" = list("P1", "N170", "N400"),
       "tmin" = list(0.1, 0.15, 0.4),
@@ -365,7 +368,7 @@ config <- jsonlite::read_json(
 )
 
 # Count number of rejected epochs per participant
-rejected_epochs <- lengths(config$rejected_epochs)
+rejected_epochs <- lengths(config$auto_rejected_epochs)
 
 # Read channel locations
 channel_locations <- read_csv(here(output_dir, "channel_locations.csv"))
@@ -469,15 +472,17 @@ map(deps, function(dep, model_formula = form, model_data = trials_main) {
   # Compute marginal means and contrasts
   emm_options(lmer.df = "Satterthwaite", lmerTest.limit = Inf)
   specs <- pairwise ~ condition | phase
-  em <- emmeans(build@model, specs, infer = TRUE)
+  means <- emmeans(build@model, specs = c("phase", "condition"))
+  contrasts <- contrast(means, "pairwise", simple = "condition") %>%
+    summary(by = NULL, adjust = "bonferroni")
 
   # Create list of returns
   list(
     "model" = build@model,
     "summary" = build@summary,
     "anova" = build@anova,
-    "means" = em$emmeans,
-    "contrasts" = em$contrasts
+    "means" = means,
+    "contrasts" = contrasts
   ) %>%
     return()
 }) %>%
