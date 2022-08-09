@@ -9,8 +9,7 @@ USER root
 
 RUN \
     # Install latest version of the EEG pipeline
-    pip uninstall --yes hu-neuro-pipeline \
-    && pip install --user --upgrade --pre --index \
+    pip install --upgrade --pre --index \
     https://test.pypi.org/simple/ hu-neuro-pipeline \
     # Add default user permissions
     && chown -R "$NB_USER" "$HOME"
