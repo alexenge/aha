@@ -1,15 +1,12 @@
 # User-defined variables
-
-
 MAIN_CMD		:= Rscript -e "rmarkdown::render(input = 'manuscript.Rmd')"
+IMAGE_USER		:= alexenge
+IMAGE_NAME      := aha
+IMAGE_TAG	    := latest
 
 # Automatic workflow variables
-
 PROJECT_DIR		:= $(CURDIR)
 PROJECT_NAME	:= $(notdir $(CURDIR))
-IMAGE_USER		:= alexenge
-IMAGE_NAME      := r_eeg
-IMAGE_TAG	    := 4.1.2
 IMAGE_URL       := docker://$(IMAGE_USER)/$(IMAGE_NAME):$(IMAGE_TAG)
 IMAGE_FILE      := $(PROJECT_DIR)/$(IMAGE_NAME)_$(IMAGE_TAG).sif
 REMOTE_DIR		:= /home/rstudio/project
