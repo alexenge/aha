@@ -170,7 +170,7 @@ The other 120 were rare objects presumed to be unfamiliar to the majority of par
 All stimuli were presented on a light blue background with a size of 207 × 207 pixels on a 19-inch LCD monitor with a resolution of 1,280 × 1,024 pixels and a refresh rate of 75 Hz.
 At a standardized viewing distance of 90 cm, the images subtended approximately 3.9 degrees of participants' horizontal and vertical visual angle.
 
-For each unfamiliar object, a pair of German keywords (a noun and a verb) was selected, describing the typical function or use of the object in a way that could typically be related to its visual features and their configuration (e.g., voltage, measuring; clay pot, drumming).
+For each unfamiliar object, a pair of German keywords (a noun and a verb) was selected, describing the typical function or use of the object in a way that could typically be related to its visual features and their configuration (e.g., voltage--measuring; clay pot--drumming).
 As our central experimental manipulation, the presentation of half of the objects was preceded by keywords that correctly matched their respective function, whereas the presentation of the other half of the objects was preceded by non-matching keywords belonging to one of the other objects.
 The matching keywords were expected to induce semantically informed perception (i.e., participants suddenly understanding what kind of object they were viewing), whereas the non-matching keywords were expected to prevent such an understanding and keep the perception of the object semantically naive.
 All participants saw each unfamiliar object with only one type of keywords (matching or non-matching).
@@ -179,11 +179,11 @@ The experiment was programmed and displayed using Presentation® software (Neuro
 
 ## Experimental Design
 
-The experiment consisted of three parts (see Figure \@ref(fig:fig1)A).
+The experiment consisted of three phases (see Figure \@ref(fig:fig1)A).
 In the *pre-insight* phase, after written informed consent had been obtained and the EEG had been prepared, all 240 familiar and unfamiliar objects were presented once in random order and without any keywords.
 Each trial consisted of a fixation cross presented in the middle of the screen for 0.5 s, followed by the presentation of the object until participants made a response or until a time out after 3 s.
 The inter-trial interval was 0.5 s and participants took a self-timed break after each block of 60 objects.
-The task, which was kept the same across all three parts, was to classify each object using one of four response alternatives: (a) "I know what this is or have a strong assumption," (b) "I have an assumption what this is," (c) "I have rather no assumption what this is," or (d) "I don't know what this is and have no assumption." Participants were asked to respond as quickly and as accurately as possible by pressing one out of four buttons with the index or middle finger of their left or right hand, respectively.
+The task, which was kept the same across all three phases, was to classify each object using one of four response alternatives: (a) "I know what this is or have a strong assumption," (b) "I have an assumption what this is," (c) "I have rather no assumption what this is," or (d) "I don't know what this is and have no assumption." Participants were asked to respond as quickly and as accurately as possible by pressing one out of four buttons with the index or middle finger of their left or right hand, respectively.
 The mapping of the rating scale to the four buttons (left to right or right to left) was counterbalanced across participants.
 
 ```{r, eeg_processing}
@@ -372,46 +372,6 @@ rejected_epochs <- lengths(config$auto_rejected_epochs)
 
 # Read channel locations
 channel_locations <- read_csv(here(output_dir, "channel_locations.csv"))
-
-channels <- channel_locations$channel
-# evokeds %>%
-#   filter(phase == "Pre-insight" & between(time, 0.4, 0.7)) %>%
-#   select(participant_id, condition, all_of(channels)) %>%
-#   group_by(participant_id, condition) %>%
-#   summarise(across(channels, mean), .groups = "drop") -> means
-
-# diffs <- filter(means, condition == "Informed")[channels] -
-#   filter(means, condition == "Naive")[channels]
-# diffs %>%
-#   as_tibble() %>%
-#   print(n = Inf)
-
-# evokeds %>%
-#   filter(participant_id == "VP0001" & phase == "Pre-insight" & condition == "Informed") %>%
-#   print(n = Inf)
-
-epochs <- read_csv(here(output_dir, "epochs", "VP0001_epo.csv"))
-# epochs %>%
-#   filter(phase == "Pre-insight") %>%
-#   filter(between(time, 0.4, 0.7)) %>%
-#   mutate(epoch = factor(epoch)) %>%
-#   ggplot(aes(x = time, y = AF7, color = epoch, group = epoch)) +
-#   geom_line()
-
-epochs %>%
-  filter(phase == "Pre-insight" & between(time, 0.4, 0.7)) %>%
-  group_by(condition, epoch) %>%
-  summarise(across(all_of(channels), mean)) %>%
-  arrange((AF7))
-
-
-
-
-  # filter(Wdh == 211 & condition == 222) %>%
-  # filter(between(time, 0.4, 0.7)) %>%
-  # group_by(epoch) %>%
-  # summarise(AF7 = mean(AF7)) %>%
-  # print(n = Inf)
 ```
 
 ```{r, mixed_models, eval=run$mixed_models}
@@ -505,9 +465,9 @@ plot_fig1(files_dir, evokeds, config, channel_locations, models)
 ***A***, In the pre-insight phase, participants were presented with 120 unfamiliar objects and indicated whether they knew what kind of object they were viewing.
 In the insight phase, half of these objects were presented with matching keywords (in purple color for illustration), leading to semantically informed perception, and the other half with non-matching keywords (in green color for illustration), leading to naive perception.
 In the post-insight phase, the same objects were presented again without keywords.
-***B***, ***C***, ***D***, ERP waveforms and scalp topographies of the P1 component (100--150 ms, ***B***), of the N170 component (150--200 ms, ***C***), and of the N400 component (400--700 ms, ***D***) are shown for objects with semantically informed versus naive perception within the three different parts.
-Semantically informed perception was associated with more negative amplitudes in the N170 component during the insight phase, less negative amplitudes in the N400 component during the insight and post-insight parts, and more positive amplitudes in the P1 component during the post-insight phase.
-The time windows and channels for quantifying the different ERP components are highlighted by the gray areas in the ERP waveforms and the white markers on the scalp topographies, respectively.
+***B***, ***C***, ***D***, ERP waveforms and scalp topographies of the P1 component (100--150 ms, ***B***), of the N170 component (150--200 ms, ***C***), and of the N400 component (400--700 ms, ***D***) are shown for objects with semantically informed perception versus naive perception within the three different phases.
+Semantically informed perception was associated with more negative amplitudes in the N170 component during the insight phase, less negative amplitudes in the N400 component during the insight and post-insight phases, and more positive amplitudes in the P1 component during the post-insight phase.
+The time windows and channels for quantifying the different ERP components are highlighted by the gray areas in the ERP waveforms and by the white markers on the scalp topographies, respectively.
 Colored ribbons around the ERP waveforms show ± 1 standard error of the mean across participants.
 Ampl. = amplitude.\newline
 \* *p* $<$ .05. \*\* *p* $<$ .01. \*\*\* *p* $<$ .001.
@@ -518,21 +478,21 @@ Then, an asterisk was presented in the middle of the screen for another 0.5 s, f
 The objects were presented in blocks of 30 trials so that within each block (a) there were 15 objects from each of the two experimental conditions and (b) objects were heterogeneous in terms of their shape, visual complexity, and functional category (e.g., medical devices, musical instruments).
 
 In the *post-insight* phase, the unfamiliar objects were presented for a third time with the same trial structure as in the pre-insight phase, that is, without any keywords.
-The insight and post-insight parts were presented in an interleaved fashion so that after the presentation of one block of 30 objects in the insight phase (with keywords), participants took a self-timed break and continued with the same block of 30 objects in the post-insight phase (without keywords) before moving on to the next block consisting of 30 different objects.
-They continued like this until all four blocks were completed in both parts.
-In total, the experiment consisted of 480 trials (120 familiar objects in the pre-insight phase and 120 unfamiliar objects in the pre-insight, insight, and post-insight parts).
+The insight and post-insight phases were presented in an interleaved fashion so that after the presentation of one block of 30 objects in the insight phase (with keywords), participants took a self-timed break and continued with the same block of 30 objects in the post-insight phase (without keywords) before moving on to the next block consisting of 30 different objects.
+They continued like this until all four blocks were completed in both phases.
+In total, the experiment consisted of 480 trials (120 familiar objects in the pre-insight phase and 120 unfamiliar objects in the pre-insight, insight, and post-insight phases).
 It took participants approximately 35 minutes to complete.
 
 ## Behavioral Data Analysis
 
 We first excluded from all further analyses those objects for which the participant had responded with "I know what this is" in the pre-insight phase (i.e., before any keywords were presented).
-This led to the exclusion of an average of `r mean(objects_per_condition$Exclude_known)` objects per participant (= `r percent(mean(objects_per_condition$Exclude_known) / 120, accuracy = 0.1)` of unfamiliar objects).
-Next, to delineate semantically informed and naive perception, the assignment of all other objects to one of these two conditions was co-determined by our experimental manipulation (matching versus non-matching keywords) and the behavioral responses of the participant in the insight phase (see Figure \@ref(fig:fig1)A).
+This led to the exclusion of an average of `r mean(objects_per_condition$Exclude_known)` objects per participant (= `r percent(mean(objects_per_condition$Exclude_known) / 120, accuracy = 0.1)` of all unfamiliar objects).
+Next, to delineate semantically informed and naive perception, the assignment of the remaining objects to one of these two conditions was co-determined by our experimental manipulation (matching versus non-matching keywords) and the behavioral responses of the participant in the insight phase (see Figure \@ref(fig:fig1)A).
 Objects were assigned to the semantically informed condition if they were presented with matching keywords *and* if the participant indicated knowing what the object was or having an assumption.
 This was the case for an average of `r mean(objects_per_condition$Informed)` objects per participant (= `r percent(mean(objects_per_condition$Informed) / 60, accuracy = 0.1)` of objects presented with matching keywords).
 Complementarily, objects were assigned to the naive condition if they were presented with non-matching keywords *and* if the participant indicated not knowing what the object was or having rather no assumption.
 This was the case for an average of `r mean(objects_per_condition$Naive)` objects per participant (= `r percent(mean(objects_per_condition$Naive) / 60, accuracy = 0.1)` of objects presented with non-matching keywords).
-The same assignment of objects to conditions (based on the manipulation and responses in the insight phase) was also used for analyzing the pre-insight and post-insight parts.
+The same assignment of objects to conditions, based on the manipulation and responses in the insight phase, was also used for analyzing the pre-insight and post-insight phases.
 This allowed us to test, on the one hand, if the objects from both conditions differed in important aspects even before any keywords were presented (pre-insight phase) and, on the other hand, if the semantic understanding acquired in the insight phase had any down-stream effects on the subsequent perception of the objects (post-insight phase).
 
 ## EEG Recording and Preprocessing
@@ -545,31 +505,32 @@ An online band-pass filter with a high-pass time-constant of 10 s (0.016 Hz) and
 The data were preprocessed offline using custom scripts, available online in the hu-neuro-pipeline package (Version `r pipeline_version`; https://github.com/alexenge/hu-neuro-pipeline) and based on the MNE-Python software [Version `r mne_version`\; @gramfort2013] in Python [Version `r py_version()`\; @vanrossum2009].
 First, the data were were downsampled to `r config$downsample_sfreq` Hz and re-referenced to the common average of all scalp channels.
 Next, artifacts resulting from blinks and eye movements were removed via independent component analysis (ICA) on a low-pass filtered copy of the data (cutoff = 1 Hz).
-A variable number of components per participants were extracted from an initial principal component analysis (PCA) so that they explained at least `r percent(config$ica_n_components)` of the variance in the data (median = `r mean(config$auto_ica_n_components)` components, range `r min(config$auto_ica_n_components)`--`r max(config$auto_ica_n_components)`).
+A variable number of components per participants were extracted from an initial principal component analysis (PCA) so that they explained at least `r percent(config$ica_n_components)` of the variance in the data (mean = `r mean(unlist(config$auto_ica_n_components))` components, range `r min(unlist(config$auto_ica_n_components))`--`r max(unlist(config$auto_ica_n_components))`).
 Then the ICA was fitted using the FastICA algorithm [@hyvarinen1999].
 Any independent components showing significant correlations with either of two virtual EOG channels (VEOG: IO1 - Fp1, HEOG: F9 - F10) were removed automatically using the MNE-Python's `find_bads_eog` method.
+This was the case for an average of `r mean(lengths(config$auto_ica_bad_components))` components per participant (range = `r min(lengths(config$auto_ica_bad_components))`--`r max(lengths(config$auto_ica_bad_components))`)
 
 ## Event-Related Potential Analysis
 
 For the analysis of ERP voltages, a zero-phase, non-causal FIR filter with a lower pass-band edge at `r config$highpass_freq` Hz (transition bandwidth: 0.1 Hz) and an upper pass-band edge at `r config$lowpass_freq` Hz (transition bandwidth: 7.5 Hz) was applied.
-Next, the continuous EEG was segmented into epochs ranging from `r config$epochs_tmin` s to `r config$epochs_tmax` relative the onset of the presentation of each unfamiliar object.
-These epochs were baseline-corrected by subtracting the average voltage during the interval of `r config$baseline_tmin` to `r config$baseline_tmax` relative to stimulus onset.
+Next, the continuous EEG was segmented into epochs ranging from `r config$epochs_tmin` s to `r config$epochs_tmax` s relative the onset of the presentation of each unfamiliar object.
+These epochs were baseline-corrected by subtracting the average voltage during the interval of `r config$baseline_tmin` s to `r config$baseline_tmax` s relative to stimulus onset.
 Epochs containing artifacts despite ICA, defined as peak-to-peak amplitudes exceeding `r config$reject_peak_to_peak` µV, were removed from further analysis.
 This led to the exclusion of an average of `r mean(rejected_epochs)` trials per participant (= `r percent(mean(rejected_epochs) / 360, accuracy = 0.1)`; range `r min(rejected_epochs)`--`r max(rejected_epochs)` trials).
 Single-trial event-related potentials were computed as the mean amplitude across time windows and regions of interests (ROIs) defined a priori, namely 100--150 ms at electrodes PO3, POz, PO4, O1, Oz, and O2 and for the P1 component, 150--200 ms at electrodes P7, P8, PO7, PO8, PO9, and PO10 for the N170 component, and 400--700 ms at electrodes C1, Cz, C2, CP1, CPz, and CP2 for the N400 component.
 
-The resulting mean ERP amplitudes were analyzed on the single-trial level using linear mixed-effects regression models because they allow to control for repeated measures of participants and items while also being robust against an unbalanced number of trials per condition [@baayen2008; @burki2018; @fromer2018].
+The resulting mean ERP amplitudes were analyzed on the single-trial level using linear mixed-effects regression models because they allow controlling for repeated measures of participants and stimuli while also being robust against unbalanced numbers of trials per condition [@baayen2008; @burki2018; @fromer2018].
 
 We computed three models predicting P1, N170, and N400 amplitudes, respectively.
-All models included three fixed effects: (a) the phase of the experiment, coded as a repeated contrast [i.e., subtracting the first phase from the second phase and the second phase from the third phase, the intercept being the grand mean across all three parts; @schad2020], (b) the condition of the object, coded as a scaled sum contrast (i.e., subtracting the naive condition from the semantically informed condition, the intercept being the grand mean across both conditions), and (c) the two-way interaction of phase and condition.
+All models included three fixed effects: (a) the phase of the experiment, coded as a repeated contrast [i.e., subtracting the first phase from the second phase and the second phase from the third phase, the intercept being the grand mean across all three phases\; @schad2020], (b) the condition of the object, coded as a scaled sum contrast (i.e., subtracting the naive condition from the semantically informed condition, the intercept being the grand mean across both conditions), and (c) the two-way interaction of phase and condition.
 We determined the most parsimonous random effect structure supported by the data using the automatic procedure proposed by @matuschek2017.
 This involved starting with a maximal model that contained all random parameters (intercepts, slopes, and correlations) and then iteratively removing terms as long as this did not result in a significant drop in model fit (likelihood ratio test, $p$ value cutoff = .20).
-All models were fitted in R [Version `r as.character(packageVersion("base"))`; @R-base] using the lme4 package [Version `r as.character(packageVersion("lme4"))`; @R-lme4] with the optimizer function *bobyqa* and a maximum of 10^6^ iterations for maximum likelihood estimation.
-The model selection algorithm via likelihood ratio tests was performed using the buildmer package [Version `r as.character(packageVersion("buildmer"))`; @R-buildmer].
+All models were fitted in R [Version `r as.character(packageVersion("base"))`\; @R-base] using the lme4 package [Version `r as.character(packageVersion("lme4"))`\; @R-lme4] with the optimizer function *bobyqa* and a maximum of 10^6^ iterations for maximum likelihood estimation.
+The model selection algorithm via likelihood ratio tests was performed using the buildmer package [Version `r as.character(packageVersion("buildmer"))`\; @R-buildmer].
 
 To investiage if semantically informed perception had an influence on the ERPs within each phase, planned follow-up comparisons were calculated, contrasting the semantically informed condition against the naive condition within the pre-insight, insight, and post-insight phases.
-This was done using the emmeans package [Version `r as.character(packageVersion("emmeans"))`; @R-emmeans].
-All *p*-values were computed by approximating the relevant denominator degrees of freedom using Satterthwaite's method as implemented in the lmerTest package [Version `r as.character(packageVersion("lmerTest"))`; @R-lmerTest].
+This was done using the emmeans package [Version `r as.character(packageVersion("emmeans"))`\; @R-emmeans].
+All *p*-values were computed by approximating the relevant denominator degrees of freedom using Satterthwaite's method as implemented in the lmerTest package [Version `r as.character(packageVersion("lmerTest"))`\; @R-lmerTest].
 
 ## Time-Frequency Analysis
 
@@ -577,11 +538,11 @@ For our exploratory analysis of event-related power, we first created new epochs
 Epochs that were marked as bad for the ERP analysis (i.e., with peak-to-peak amplitudes exceeding `r config$reject_peak_to_peak` µV) were also removed from the time-frequency analysis.
 The remaining epochs were convolved with a family of Morlet wavelets, increasing linearly in their frequency from `r min(config$tfr_freqs)` Hz to `r max(config$tfr_freqs)` Hz in steps of `r config$tfr_freqs[2] - config$tfr_freqs[1]` Hz and in their number of cycles from `r min(config$tfr_cycles)` to `r max(config$tfr_cycles)` in steps of `r config$tfr_freqs[2] - config$tfr_cycles[1]` [cf. @samaha2018].
 To adjust for the power-law scaling of the human EEG, the power values were transformed into percent signal change by first subtracting and then dividing by the average power at each frequency over the entire epoch [@grandchamp2011].
-We then performed baseline correction by subtracting the average during the pre-stimulus interval from `r config$tfr_baseline_tmin` to `r config$tfr_baseline_tmax` relative to object onset.
+We then performed baseline correction by subtracting the average during the pre-stimulus interval from `r config$tfr_baseline_tmin` s to `r config$tfr_baseline_tmax` s relative to object onset.
 
 ## Data and Code Availability
 
-The EEG data are available upon reasonable request from the corresponding author because we did not ask participants for their consent to make the data publicly avaible.
+The EEG data are available upon reasonable request from the corresponding author because we had not asked participants for their consent to make the data publicly avaible.
 The stimuli and code for data analysis are available at [https://osf.io/uksbc/](https://osf.io/uksbc/).
 
 ```{r, table_1, include=TRUE}
