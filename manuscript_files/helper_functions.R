@@ -507,3 +507,111 @@ plot_fig1 <- function(files_dir, evokeds, config, channel_locations, models) {
 
 # plot_fig1(files_dir, evokeds, config, channel_locations, models)
 # ggsave("fig1.pdf", width = 12, height = 12)
+
+plot_fig2 <- function(tfr_grand_ave,
+                      tfr_clusters,
+                      channel_locations,
+                      tmin = 0.0,
+                      tmax = 1.0,
+                      tstep = 0.1,
+                      fmin = 4,
+                      fmax = 40,
+                      fstep = 4) {
+
+    # Read grand-averaged power
+    tfr_grand_ave %>%
+        mutate(
+            phase = factor(phase, levels = c("Pre-insight", "Insight", "Post-insight")),
+            condition = factor(condition, levels = c("Informed", "Naive"))
+        ) %>%
+        filter(!is.na(condition))
+
+    # Compute difference between conditions within each phase
+    channels <- channel_locations$channel
+    tfr_grand_ave_informed <- filter(tfr_grand_ave, condition == "Informed")
+    tfr_grand_ave_naive <- filter(tfr_grand_ave, condition == "Naive")
+    tfr_grand_ave_diff <- mutate(tfr_grand_ave_informed, condition = "Difference")
+    tfr_grand_ave_diff[channels] <- tfr_grand_ave_informed[channels] -
+        tfr_grand_ave_naive[channels]
+
+    # Plot topography at each time and frequency bin
+    tstep <- 0.1
+    fstep <- 4
+    tmins <- seq(tmin, tmax - tstep, tstep)
+    fmins <- seq(fmin, fmax - fstep, fstep)
+    map(c("Pre-insight", "Insight", "Post-insight"), function(this_phase) {
+        # map(c("Insight"), function(this_phase) {
+        map(tmins, function(tmin) {
+            tmax <- tmin + tstep
+            map(fmins, function(fmin) {
+                fmax <- fmin + fstep
+                tfr_clusters %>%
+                    filter(time >= tmin & time < tmax & freq >= fmin & freq < fmax) %>%
+                    filter(str_detect(contrast, this_phase) & p_val < .05) %>%
+                    pull(channel) %>%
+                    unique() -> significant_channels
+                tfr_grand_ave_diff %>%
+                    filter(time >= tmin & time < tmax & freq >= fmin & freq < fmax) %>%
+                    filter(phase == this_phase) %>%
+                    pivot_longer(
+                        cols = all_of(channels), names_to = "electrode", values_to = "power"
+                    ) %>%
+                    left_join(channel_locations, by = c("electrode" = "channel")) %>%
+                    group_by(electrode, x, y) %>%
+                    summarise(power = mean(power), .groups = "drop") %>%
+                    eegUtils::topoplot(
+                        r = 85,
+                        quantity = "power",
+                        contour = FALSE,
+                        interp_limit = "skirt",
+                        highlights = significant_channels,
+                        scaling = 1.1
+                    ) +
+                    scale_fill_distiller(limits = c(-0.25, 0.25), palette = "RdBu") +
+                    # scale_fill_viridis_c(limits = c(-0.25, 0.25)) +
+                    theme(
+                        plot.margin = unit(rep(-0.2, 4), "cm"),
+                        legend.position = "none"
+                    ) -> topo
+                topo$layers[[3]]$aes_params$size <- 0.7
+                topo$layers[[4]]$aes_params$size <- 0.7
+                topo$layers[[5]]$aes_params$size <- 0.7
+                topo$layers[[6]]$aes_params$colour <- NA
+                topo$layers[[7]]$aes_params$size <- 0.4
+                topo$layers[[7]]$aes_params$colour <- "black"
+                topo
+            }) -> plotlist
+            plotlist <- c(plotlist, list(NULL))
+            rel_heights <- c(rep(1, length(fmins)), 0.15)
+            if (tmin == min(tmins)) {
+                labels <- paste0(fmins, "-", fmins + fstep, " Hz")
+                labels <- c(labels, "")
+                plot_grid(
+                    plotlist = plotlist, nrow = length(plotlist),
+                    rel_heights = rel_heights, labels = labels,
+                    label_size = 10, label_fontfamily = "Helvetica",
+                    label_fontface = "plain", label_x = -0.3, label_y = 0.5, vjust = 0.5,
+                    hjust = 0.5
+                )
+            } else {
+                plot_grid(
+                    plotlist = plotlist, nrow = length(plotlist), rel_heights = rel_heights
+                )
+            }
+        }) -> plotlist
+        tmins_str <- format(tmins, nsmall = 1)
+        tmaxs_str <- format(tmins + tstep, nsmall = 1)
+        labels <- paste0(tmins_str, "-", tmaxs_str, " s")
+        plotlist <- c(list(NULL), plotlist)
+        labels <- c("", labels)
+        tfr_plot <- plot_grid(
+            plotlist = plotlist, nrow = 1, rel_widths = c(0.6, rep(1, length(tmins))),
+            labels = labels, label_size = 10, label_fontfamily = "Helvetica",
+            label_fontface = "plain", label_x = 0.5, label_y = 0.01, vjust = 0.5,
+            hjust = 0.5
+        )
+        filename <- paste0("tfr_", this_phase, ".pdf")
+        ggsave(filename, tfr_plot, width = 12, height = 10)
+        tfr_plot
+    })
+}
