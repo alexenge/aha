@@ -14,19 +14,19 @@ author:
     affiliation   : "1"
 affiliation:
   - id            : "1"
-    institution   : "Department of Psychology, Humboldt-Universität zu Berlin, Rudower Chaussee 18, 12489 Berlin, Germany"
+    institution   : "Department of Psychology, Humboldt-Universität zu Berlin"
   - id            : "2"
-    institution   : "Research Group Learning in Early Childhood, Max Planck Institute for Human Cognitive and Brain Sciences, Stephanstraße 1a, 04103 Leipzig, Germany"
+    institution   : "Research Group Learning in Early Childhood, Max Planck Institute for Human Cognitive and Brain Sciences, Leipzig"
   - id            : "3"
-    institution   : "Fachhochschule des Mittelstands, Minna-Neuburger-Straße 3, 96050 Bamberg, Germany"
+    institution   : "Fachhochschule des Mittelstands, Bamberg"
 
 authornote: |
-  \addORCIDlink{Alexander Enge}{0000-0003-0100-2297}
+  Alexander Enge \orcidlink{0000-0003-0100-2297} [https://orcid.org/0000-0003-0100-2297](0000-0003-0100-2297)
   
-  \addORCIDlink{Rasha Abdel Rahman}{0000-0002-8438-1570}
+  Rasha Abdel Rahman \orcidlink{0000-0002-8438-1570} [https://orcid.org/0000-0002-8438-1570](0000-0002-8438-1570)
   
   The authors declare no competing financial interests.
-  The code for this study is available at [https://osf.io/uksbc](https://osf.io/uksbc).
+  The materials and code for this study are available at [https://osf.io/uksbc](https://osf.io/uksbc).
 
 floatsintext      : yes
 figurelist        : no
@@ -39,7 +39,7 @@ draft             : no
 bibliography      : ["manuscript_files/references.bib", "manuscript_files/r-references.bib"]
 csl               : "manuscript_files/citation_style.csl"
 
-documentclass     : "apa7"
+documentclass     : "apa6"
 classoption       : "man,donotrepeattitle"
 fontsize          : "10pt"
 
@@ -53,6 +53,7 @@ output:
 header-includes:
   - \geometry{a4paper}
   - \raggedbottom
+  - \usepackage{orcidlink}
   - \usepackage[all]{nowidow}
   - \captionsetup[figure]{belowskip=10pt,font={small,stretch=1},labelfont=bf,labelsep=period,name=Figure,textfont=normalfont}
 ---
@@ -543,7 +544,7 @@ We then performed baseline correction by subtracting the average during the pre-
 ## Data and Code Availability
 
 The EEG data are available upon reasonable request from the corresponding author because we had not asked participants for their consent to make the data publicly avaible.
-The stimuli and code for data analysis are available at [https://osf.io/uksbc/](https://osf.io/uksbc/).
+The materials and code for data analysis are available at [https://osf.io/uksbc/](https://osf.io/uksbc/).
 
 ```{r, table_1, include=TRUE}
 # View model summaries
