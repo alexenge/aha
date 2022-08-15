@@ -1,4 +1,4 @@
-aha_colors <- viridisLite::viridis(2, begin = 0.1, end = 0.6)
+aha_colors <- c("#ca0020", "#0571b0")
 
 plot_fig1a <- function(files_dir) {
 
@@ -397,16 +397,20 @@ plot_fig1b <- function(evokeds, config, channel_locations, models) {
           highlights = roi,
           scaling = 0.9
         ) +
-        scale_fill_viridis_c(
-          option = "viridis", limits = c(-1, 1), oob = scales::squish
+        # scale_fill_viridis_c(
+        #   option = "viridis", limits = c(-1, 1), oob = scales::squish
+        # ) +
+        scale_fill_distiller(
+          palette = "RdBu", limits = c(-1, 1), oob = scales::squish
         ) +
         theme(legend.position = "none") -> topo
       # Adjust size of head elements and channel markers
       topo$layers[[3]]$aes_params$size <- 0.5
       topo$layers[[4]]$aes_params$size <- 0.5
       topo$layers[[5]]$aes_params$size <- 0.5
-      topo$layers[[6]]$aes_params$size <- 0.3
+      topo$layers[[6]]$aes_params$colour <- NA
       topo$layers[[7]]$aes_params$size <- 0.4
+      topo$layers[[7]]$aes_params$colour <- "black"
 
       # Extract colorbar
       colorbar <<- get_legend(
