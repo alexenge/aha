@@ -1,17 +1,18 @@
 # User-defined variables
-MAIN_CMD		:= Rscript -e "rmarkdown::render(input = 'manuscript.Rmd')"
-IMAGE_USER		:= alexenge
+MAIN_CMD        := Rscript -e "rmarkdown::render(input = 'manuscript.Rmd')"
+IMAGE_USER      := alexenge
 IMAGE_NAME      := aha
-IMAGE_TAG	    := latest
+IMAGE_TAG       := latest
 
 # Automatic workflow variables
-PROJECT_DIR		:= $(CURDIR)
-PROJECT_NAME	:= $(notdir $(CURDIR))
-IMAGE_URL       := docker://$(IMAGE_USER)/$(IMAGE_NAME):$(IMAGE_TAG)
+PROJECT_DIR     := $(CURDIR)
+PROJECT_NAME    := $(notdir $(CURDIR))
+IMAGE           := $(IMAGE_USER)/$(IMAGE_NAME):$(IMAGE_TAG)
+IMAGE_URL       := docker://$(IMAGE)
 IMAGE_FILE      := $(PROJECT_DIR)/$(IMAGE_NAME)_$(IMAGE_TAG).sif
-REMOTE_DIR		:= /home/rstudio/project
+REMOTE_DIR      := /home/rstudio/project
 REMOTE_HOME     := /home/rstudio
-SHELL			:= bash
+SHELL           := bash
 
 # Main command
 all:
@@ -19,7 +20,7 @@ all:
 
 # Main command with Docker
 docker:
-	docker run --rm --volume $(PROJECT_DIR):$(REMOTE_DIR) $(IMAGE_TAG) \
+	docker run --rm --volume $(PROJECT_DIR):$(REMOTE_DIR) $(IMAGE) \
 	$(MAIN_CMD)
 
 # Main command via SLURM and Singularity on an HPC cluster
@@ -35,19 +36,19 @@ srun:
 # Run an interactive RStudio session with Docker
 interactive:
 	docker run --rm --volume $(PROJECT_DIR):$(REMOTE_DIR) \
-	-e PASSWORD=1234 -p 8888:8888 $(IMAGE_TAG)
+	-e PASSWORD=1234 -p 8888:8888 $(IMAGE)
 
 # Build the container with Docker
 build: Dockerfile
-	docker build --no-cache --progress plain --tag $(IMAGE_TAG) .
+	docker build --no-cache --progress plain --tag $(IMAGE) .
 
 # Push the container with Docker
 push:
-	docker push $(IMAGE_TAG)
+	docker push $(IMAGE)
 
 # Pull the container with Docker
 pull:
-	docker pull $(IMAGE_TAG)
+	docker pull $(IMAGE)
 
 # Pull the container with Singularity
 pull_singularity:
