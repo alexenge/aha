@@ -161,6 +161,9 @@ Here we measured ERPs in response to unfamiliar objects instantly while particip
 To this end, we presented half of the objects together with matching keywords, thus allowing participants to understand what kind of object they were viweing, or together with non-matching keywords, thus keeping the perception of the object semantically naive.
 We then presented the same objects again to test for downstream effects of semantic information as in previous studies.
 We examined the influence of semantic information on ERPs associated with lower-level visual perception (P1 component), higher-level visual perception (N170 component), and semantic processing (N400 component).
+We hypothesized that semantic information would have instant effects on visual perception, by which we mean (a) that these effects can already be observed on the same trial as the semantic information is being presented for the first time, and (b) that these effects are found not only in later, higher-level cognition-related ERP components (i.e., N400), but also in earlier, perception-related ERP components (i.e., P1 and/or N170).
+We furthermore conducted an exploratory time-frequency analysis to test if event-related power also showed instant effects of semantic information.
+This was to make sure that we would also capture any non-phase-locked, putatively oscillatory activity related to semantically informed perception.
 
 # Materials and Methods
 
