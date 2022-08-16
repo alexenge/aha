@@ -77,7 +77,13 @@ library(magrittr)
 
 # Set global options
 options(readr.show_col_types = FALSE)
-opts_chunk$set(fig.width = 12, include = FALSE, out.width = "100%")
+opts_chunk$set(
+  fig.width = 12,
+  include = FALSE,
+  message = FALSE,
+  out.width = "100%",
+  warning = FALSE
+)
 
 # Specify directory paths
 data_dir <- here("data")
