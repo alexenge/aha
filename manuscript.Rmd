@@ -549,6 +549,13 @@ The remaining epochs were convolved with a family of Morlet wavelets, increasing
 To adjust for the power-law scaling of the human EEG, the power values were transformed into percent signal change by first subtracting and then dividing by the average power at each frequency over the entire epoch [@grandchamp2011].
 We then performed baseline correction by subtracting the average during the pre-stimulus interval from `r config$tfr_baseline_tmin` s to `r config$tfr_baseline_tmax` s relative to object onset.
 
+For statistical analysis of event-related power, we conducted cluster-based permutation tests [@maris2007], separately for each of the three phases of the experiment (pre-insight, insight, post-insight).
+First, we averaged trials belonging to the same condition and then subtracted these average responses from one another to compute the difference between the semantically informed condition versus the naive condition for each participant.
+Then, we conducted one-sample $t$ tests in a mass-univariate fashion and grouped significant results (cluster-forming threshold $p < .05$) into clusters if they ocurred at neighbouring time points, frequencies, or channels.
+Neighbouring channels were defined using Delaunay triangulation based on 2D electrode locations as implemented in MNE-Python.
+To obtain family-wise error-corrected $p$ values at the cluster level, we compared the cluster mass (i.e., the sum the $t$ values) of each observed cluster to an empirical null distribution of cluster masses obtained from 5,000 permutations with random sign flips.
+Clusters were considered to be statistically significant if their mass exceeded the 95^th^ percentile of this distribution (i.e., cluster-level treshold $p < .05$).
+
 ## Data and Code Availability
 
 The EEG data are available upon reasonable request from the corresponding author because we had not asked participants for their consent to make the data publicly avaible.
