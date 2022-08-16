@@ -55,7 +55,9 @@ header-includes:
   - \raggedbottom
   - \usepackage{orcidlink}
   - \usepackage[all]{nowidow}
-  - \captionsetup[figure]{belowskip=10pt,font={small,stretch=1},labelfont=bf,labelsep=period,name=Figure,textfont=normalfont}
+  - \captionsetup[figure]{belowskip=10pt}
+  - \captionsetup[figure]{font={small,stretch=1},textfont=normalfont}
+  - \captionsetup[figure]{labelfont=bf,labelsep=period,name=Figure}
 ---
 
 ```{r, setup, include=FALSE}
