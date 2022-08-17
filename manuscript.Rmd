@@ -32,7 +32,7 @@ floatsintext      : yes
 figurelist        : no
 tablelist         : no
 footnotelist      : no
-linenumbers       : no
+linenumbers       : yes
 mask              : no
 draft             : no
 
@@ -58,6 +58,10 @@ header-includes:
   - \captionsetup[figure]{belowskip=10pt}
   - \captionsetup[figure]{font={small,stretch=1},textfont=normalfont}
   - \captionsetup[figure]{labelfont=bf,labelsep=period,name=Figure}
+  - \captionsetup[table]{labelfont=bf,labelsep=period,textfont=bf}
+  - \usepackage[export]{adjustbox}
+  - \usepackage{makecell}
+  - \usepackage{setspace}
 ---
 
 ```{r, setup, include=FALSE}
@@ -545,6 +549,7 @@ We computed three models predicting P1, N170, and N400 amplitudes, respectively.
 All models included three fixed effects: (a) the phase of the experiment, coded as a repeated contrast [i.e., subtracting the first phase from the second phase and the second phase from the third phase, the intercept being the grand mean across all three phases\; @schad2020], (b) the condition of the object, coded as a scaled sum contrast (i.e., subtracting the naive condition from the semantically informed condition, the intercept being the grand mean across both conditions), and (c) the two-way interaction of phase and condition.
 We determined the most parsimonous random effect structure supported by the data using the automatic procedure proposed by @matuschek2017.
 This involved starting with a maximal model that contained all random parameters (intercepts, slopes, and correlations) and then iteratively removing terms as long as this did not result in a significant drop in model fit (likelihood ratio test, $p$ value cutoff = .20).
+See Supplementary Results 1 for the final model syntax and model outputs.
 All models were fitted in R [Version `r as.character(packageVersion("base"))`\; @R-base] using the lme4 package [Version `r as.character(packageVersion("lme4"))`\; @R-lme4] with the optimizer function *bobyqa* and a maximum of 10^6^ iterations for maximum likelihood estimation.
 The model selection algorithm via likelihood ratio tests was performed using the buildmer package [Version `r as.character(packageVersion("buildmer"))`\; @R-buildmer].
 
@@ -591,18 +596,6 @@ There was no reliable difference between conditions in the P1 component, $b$ = `
 In the post-insight phase, the unfamiliar objects were presented for a third time and without any keywords, mirroring the pre-insight phase.
 As in the insight phase, semantically informed perception was associated with reduced (i.e., less negative) amplitudes in the N400 component, $b$ = `r filter(contrast_table, component == "N400" & phase == "Post-insight")$estimate` µV, $t$(`r filter(contrast_table, component == "N400" & phase == "Post-insight")$df`) = `r filter(contrast_table, component == "N400" & phase == "Post-insight")$t_value`, $p_\text{corr}$ `r print_p(filter(contrast_table, component == "N400" & phase == "Post-insight")$p_value)`, while the effect in the N170 component did not recur, $b$ = `r filter(contrast_table, component == "N170" & phase == "Post-insight")$estimate` µV, $t$(`r filter(contrast_table, component == "N170" & phase == "Post-insight")$df`) = `r filter(contrast_table, component == "N170" & phase == "Post-insight")$t_value`, $p_\text{corr}$ = `r print_p(filter(contrast_table, component == "N170" & phase == "Post-insight")$p_value)`.
 Instead, the P1 component was significantly enlarged (i.e., more positive) in response to objects for which semantically informed perception had taken place, $b$ = `r filter(contrast_table, component == "P1" & phase == "Post-insight")$estimate` µV, $t$(`r filter(contrast_table, component == "P1" & phase == "Post-insight")$df`) = `r filter(contrast_table, component == "P1" & phase == "Post-insight")$t_value`, $p_\text{corr}$ = `r print_p(filter(contrast_table, component == "P1" & phase == "Post-insight")$p_value)`.
-
-```{r, table_1, include=TRUE}
-# View model summaries
-walk(models, function(model) {
-  print(formula(model$model))
-  cat("\n")
-  print(model$anova)
-  cat("\n")
-  print(model$contrasts)
-  cat("\n\n")
-})
-```
 
 ```{r, clusters, include=TRUE, fig.height=8}
 # Read results of cluster-based permutation tests for ERPs
@@ -673,12 +666,6 @@ tfr_plots[[2]]
 tfr_plots[[3]]
 ```
 
-# Results
-
-## Event-Related Potentials
-
-
-
 \newpage
 
 # References
@@ -686,3 +673,101 @@ tfr_plots[[3]]
 \bigskip
 
 <div id="refs" custom-style="Bibliography"></div>
+
+\newpage
+\renewcommand{\thefigure}{S\arabic{figure}}
+\renewcommand{\thetable}{S\arabic{table}}
+\setcounter{figure}{0}
+\setcounter{table}{0}
+\setcounter{page}{1}
+
+# Supplementary Information
+
+\bigskip
+
+```{r tabs1, include=TRUE, results="asis"}
+# Print table of materials
+read_tsv(here("materials", "items.txt"), col_types = cols()) %>%
+  mutate(
+    match_ger = paste0(match_noun_ger, ", ", match_verb_ger),
+    match_en = paste0("{[", match_noun_en, ", ", match_verb_en, "]}"),
+    nonmatch_ger = paste0(nonmatch_noun_ger, ", ", nonmatch_verb_ger),
+    nonmatch_en = paste0("{[", nonmatch_noun_en, ", ", nonmatch_verb_en, "]}"),
+  ) %>%
+  transmute(
+    img = paste0(
+      "\\includegraphics[valign=c,scale=0.245]{materials/unfamiliar/",
+      item,
+      ".png}"
+    ),
+    item = as.character(item),
+    match = paste(match_ger, match_en, sep = "\n") %>%
+      kableExtra::linebreak(align = "l", linebreaker = "\n"),
+    nonmatch = paste(nonmatch_ger, nonmatch_en, sep = "\n") %>%
+      kableExtra::linebreak(align = "l", linebreaker = "\n")
+  ) %>%
+  apa_table(
+    booktabs = TRUE,
+    col.names = c(
+      "Stimulus", "ID", "Matching keywords", "Non-matching keywords"
+    ),
+    escape = FALSE,
+    longtable = TRUE,
+    caption = "Unfamiliar Object Stimuli\\smallskip",
+    font_size = "footnotesize"
+  )
+```
+
+\newpage
+
+## Results S1. *Linear Mixed-Effects Models*
+
+## *P1 Component (100--150 ms)*
+
+\small
+\singlespacing
+
+```{r, ress1a, include=TRUE}
+# Helper function for printing model summary, ANOVA (F tests), and contrasts
+print_model_outputs <- function(model_object) {
+  model <- model_object$model
+  model@call$data <- NULL # Prevents cluttering the `summary` output
+  print(summary(model))
+  cat("\n")
+  print(model_object$anova)
+  cat("\nFollow-Up Contrasts (Simple Effects)\n")
+  print(model_object$contrasts)
+  cat("\n\n")
+}
+
+# Print model outputs
+print_model_outputs(models$P1)
+```
+
+\newpage
+\normalsize
+\doublespacing
+
+## *N170 Component (150--200 ms)*
+
+\small
+\singlespacing
+
+```{r, ress1b, include=TRUE}
+# Print model outputs
+print_model_outputs(models$N170)
+```
+
+\newpage
+\normalsize
+\doublespacing
+
+## *N400 Component (400--700 ms)*
+
+\small
+\singlespacing
+
+```{r, ress1c, include=TRUE}
+# Print model outputs
+print_model_outputs(models$N400)
+```
