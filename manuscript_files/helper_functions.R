@@ -511,8 +511,6 @@ plot_fig2 <- function(tfr_grand_ave,
     tfr_grand_ave_naive[channels]
 
   # Plot topography at each time and frequency bin
-  tstep <- 0.1
-  fstep <- 4
   tmins <- seq(tmin, tmax - tstep, tstep)
   fmins <- seq(fmin, fmax - fstep, fstep)
   map(c("Pre-insight", "Insight", "Post-insight"), function(this_phase) {
