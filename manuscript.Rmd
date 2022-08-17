@@ -64,7 +64,6 @@ library(buildmer)
 library(emmeans)
 library(here)
 library(knitr)
-library(lme4)
 library(lmerTest)
 library(MASS)
 library(scales)
@@ -423,7 +422,7 @@ map(deps, function(dep, model_formula = form, model_data = trials_main) {
     buildmerControl = buildmerControl(
       formula = model_formula,
       data = model_data,
-      args = list("control" = lmerControl(
+      args = list("control" = lme4::lmerControl(
         optimizer = "bobyqa", optCtrl = list(maxfun = 1e6)
       )),
       direction = c("backward", "backward"),
