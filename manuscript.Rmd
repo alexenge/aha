@@ -349,8 +349,8 @@ if (run$eeg_processing) {
       c("Insight/Informed", "Insight/Naive"),
       c("Post-insight/Informed", "Post-insight/Naive")
     ),
-    perm_tmin = -0.45,
-    perm_tmax = 1.45,
+    perm_tmin = -0.4,
+    perm_tmax = 1.4,
     n_jobs = 1
   )
 }
