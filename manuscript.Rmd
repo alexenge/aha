@@ -340,8 +340,8 @@ if (run$eeg_processing) {
       c("Insight/Informed", "Insight/Naive"),
       c("Post-insight/Informed", "Post-insight/Naive")
     ),
-    perm_tmin = 0.0,
-    perm_tmax = 1.0,
+    perm_tmin = -0.45,
+    perm_tmax = 1.45,
     n_jobs = 1
   )
 }
@@ -614,7 +614,7 @@ tfr_clusters %>%
 tfr_grand_ave <- read_csv(here(output_dir, "tfr_grand_ave.csv"))
 
 # Create topographic plots for event-related power in each phase
-tfr_plots <- plot_fig2(tfr_grand_ave, tfr_clusters, channel_locations)
+tfr_plots <- plot_fig2(tfr_grand_ave, tfr_clusters, channel_locations, tmin = -0.4, tmax = 1.4, tstep = 0.2)
 
 # Plot Pre-Insight Phase
 tfr_plots[[1]]
