@@ -387,6 +387,12 @@ rejected_epochs <- lengths(config$auto_rejected_epochs)
 
 # Read channel locations
 channel_locations <- read_csv(here(output_dir, "channel_locations.csv"))
+
+# Read results of cluster-based permutation tests for ERPs
+clusters <- read_csv(here(output_dir, "clusters.csv"))
+
+# Read results of cluster-based permutation tests for TFR
+tfr_clusters <- read_csv(here(output_dir, "tfr_clusters.csv"))
 ```
 
 ```{r, mixed_models, eval=run$mixed_models}
@@ -596,55 +602,16 @@ In the post-insight phase, the unfamiliar objects were presented for a third tim
 As in the insight phase, semantically informed perception was associated with reduced (i.e., less negative) amplitudes in the N400 component, $b$ = `r filter(contrast_table, component == "N400" & phase == "Post-insight")$estimate` µV, $t$(`r filter(contrast_table, component == "N400" & phase == "Post-insight")$df`) = `r filter(contrast_table, component == "N400" & phase == "Post-insight")$t_value`, $p_\text{corr}$ `r print_p(filter(contrast_table, component == "N400" & phase == "Post-insight")$p_value)`, while the effect in the N170 component did not recur, $b$ = `r filter(contrast_table, component == "N170" & phase == "Post-insight")$estimate` µV, $t$(`r filter(contrast_table, component == "N170" & phase == "Post-insight")$df`) = `r filter(contrast_table, component == "N170" & phase == "Post-insight")$t_value`, $p_\text{corr}$ = `r print_p(filter(contrast_table, component == "N170" & phase == "Post-insight")$p_value)`.
 Instead, the P1 component was significantly enlarged (i.e., more positive) in response to objects for which semantically informed perception had taken place, $b$ = `r filter(contrast_table, component == "P1" & phase == "Post-insight")$estimate` µV, $t$(`r filter(contrast_table, component == "P1" & phase == "Post-insight")$df`) = `r filter(contrast_table, component == "P1" & phase == "Post-insight")$t_value`, $p_\text{corr}$ = `r print_p(filter(contrast_table, component == "P1" & phase == "Post-insight")$p_value)`.
 
-```{r, clusters, include=TRUE, fig.height=8}
-# Read results of cluster-based permutation tests for ERPs
-read_csv(here(output_dir, "clusters.csv"), col_types = cols(
-  contrast = col_factor(levels = c(
-    "Pre-insight/Informed - Pre-insight/Naive",
-    "Insight/Informed - Insight/Naive",
-    "Post-insight/Informed - Post-insight/Naive"
-  ))
-)) -> clusters
+## Event-Related Power
 
-# Plot thresholded cluster images
-clusters %>%
-  filter(p_val < .05) %>%
-  ggplot(aes(x = time, y = channel, fill = cluster)) +
-  facet_grid(~contrast, drop = FALSE) +
-  geom_raster() +
-  theme(legend.position = "top")
-```
+In an exploratory time-frequency analysis, we checked for differences in event-related power between semantically informed perception and naive perception within each of the three phases of the experiment.
+Cluster-based permutation tests [@maris2007] revealed no significant clusters in the pre-insight phase (see Figure 2), all $p$s > `r print_p(min(filter(tfr_clusters, contrast == "Pre-insight/Informed - Pre-insight/Naive")$p_val))`, but one significant cluster in the insight phase (see Figure 3), $p_\text{cluster}$ = `r print_p(unique(filter(tfr_clusters, contrast == "Insight/Informed - Insight/Naive" & p_val < 0.05)$p_val))`, and one significant cluster in the post-insight phase (see Figure 4), $p_\text{cluster}$ = `r print_p(unique(filter(tfr_clusters, contrast == "Post-insight/Informed - Post-insight/Naive" & p_val < 0.05)$p_val))`.
+These two significant clusters in the insight and post-insight phases were similar in their direction, latency, frequency range, and topographic distribution.
+Both clusters had a negative sign, started around 600 ms after object onset and continued all the way until the end of the analyzed period at 1,400 ms.
+They spanned a broad range of frequencies in the alpha and lower beta range as well as a broad set of channels, but appeared to be most focal at around 15 Hz at parietal channels.
+Thus, semantically informed perception seems to alter not only early, evoked activity (see Event-Related Potentials above) but also later, induced activity, in the form of a reduction of post-stimulus power at parietal channels in the range of alpha and lower beta frequencies.
 
-```{r, tfr, fig.height=12, include=TRUE}
-# Read results of cluster-based permutation tests for TFR
-read_csv(here(output_dir, "tfr_clusters.csv"), col_types = cols(
-  contrast = col_factor(levels = c(
-    "Pre-insight/Informed - Pre-insight/Naive",
-    "Insight/Informed - Insight/Naive",
-    "Post-insight/Informed - Post-insight/Naive"
-  ))
-)) -> tfr_clusters
-
-# Plot thresholded cluster images for the insight phase
-tfr_clusters %>%
-  filter(contrast == "Insight/Informed - Insight/Naive" & p_val < .05) %>%
-  ggplot(aes(x = time, y = freq, fill = cluster)) +
-  facet_wrap(~channel) +
-  geom_raster() +
-  theme(legend.position = "top")
-
-# Plot thresholded cluster images for the post-insight phase
-tfr_clusters %>%
-  filter(
-    contrast == "Post-insight/Informed - Post-insight/Naive" & p_val < .05
-  ) %>%
-  ggplot(aes(x = time, y = freq, fill = cluster)) +
-  facet_wrap(~channel) +
-  geom_raster() +
-  theme(legend.position = "top")
-```
-
-```{r, fig2a, fig.height=10, include=TRUE}
+```{r, fig2, fig.height=10, include=TRUE, eval=FALSE}
 # Read grand-averaged power
 tfr_grand_ave <- read_csv(here(output_dir, "tfr_grand_ave.csv"))
 
@@ -769,4 +736,54 @@ print_model_outputs(models$N170)
 ```{r, ress1c, include=TRUE}
 # Print model outputs
 print_model_outputs(models$N400)
+```
+
+\newpage
+
+```{r, figclusters, include=TRUE, fig.height=8}
+# Read results of cluster-based permutation tests for ERPs
+read_csv(here(output_dir, "clusters.csv"), col_types = cols(
+  contrast = col_factor(levels = c(
+    "Pre-insight/Informed - Pre-insight/Naive",
+    "Insight/Informed - Insight/Naive",
+    "Post-insight/Informed - Post-insight/Naive"
+  ))
+)) -> clusters
+
+# Plot thresholded cluster images
+clusters %>%
+  filter(p_val < .05) %>%
+  ggplot(aes(x = time, y = channel, fill = cluster)) +
+  facet_grid(~contrast, drop = FALSE) +
+  geom_raster() +
+  theme(legend.position = "top")
+```
+
+```{r, figtfrclusters, fig.height=12, include=TRUE}
+# Read results of cluster-based permutation tests for TFR
+read_csv(here(output_dir, "tfr_clusters.csv"), col_types = cols(
+  contrast = col_factor(levels = c(
+    "Pre-insight/Informed - Pre-insight/Naive",
+    "Insight/Informed - Insight/Naive",
+    "Post-insight/Informed - Post-insight/Naive"
+  ))
+)) -> tfr_clusters
+
+# Plot thresholded cluster images for the insight phase
+tfr_clusters %>%
+  filter(contrast == "Insight/Informed - Insight/Naive" & p_val < .05) %>%
+  ggplot(aes(x = time, y = freq, fill = cluster)) +
+  facet_wrap(~channel) +
+  geom_raster() +
+  theme(legend.position = "top")
+
+# Plot thresholded cluster images for the post-insight phase
+tfr_clusters %>%
+  filter(
+    contrast == "Post-insight/Informed - Post-insight/Naive" & p_val < .05
+  ) %>%
+  ggplot(aes(x = time, y = freq, fill = cluster)) +
+  facet_wrap(~channel) +
+  geom_raster() +
+  theme(legend.position = "top")
 ```
