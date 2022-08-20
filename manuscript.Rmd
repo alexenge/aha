@@ -102,7 +102,8 @@ source(here(files_dir, "helper_functions.R"))
 # Re-run steps that take a long time to compute?
 run <- list(
   eeg_processing = TRUE,
-  mixed_models = TRUE
+  mixed_models = TRUE,
+  control_analysis = TRUE,
 )
 
 # Write R packages to bibliography
@@ -303,7 +304,7 @@ pipeline <- import("pipeline")
 pipeline_version <- pipeline$`__version__`
 mne_version <- import("mne")$`__version__`
 
-# Do the actual preprocessing if requested
+# (Re-)do the actual preprocessing if requested
 if (run$eeg_processing) {
 
   # Process behavioral data
@@ -398,88 +399,91 @@ clusters <- read_csv(here(output_dir, "clusters.csv"))
 tfr_clusters <- read_csv(here(output_dir, "tfr_clusters.csv"))
 ```
 
-```{r, mixed_models, eval=run$mixed_models}
-# Filter relevant conditions for the main analysis
-trials %>%
-  mutate(condition = factor(condition, levels = c("Informed", "Naive"))) %>%
-  drop_na() -> trials_main
+```{r, mixed_models}
+# (Re-)do the actual model fitting if requested
+if (run$mixed_models) {
 
-# Contrast coding for phase
-cbind(
-  c("Pre-insight" = -1, "Insight" = 1, "Post-insight" = 0),
-  c("Pre-insight" = 0, "Insight" = -1, "Post-insight" = 1)
-) %>%
-  t() %>%
-  ginv() -> contrasts(trials_main$phase)
+  # Filter relevant conditions for the main analysis
+  trials %>%
+    mutate(condition = factor(condition, levels = c("Informed", "Naive"))) %>%
+    drop_na() -> trials_main
 
-# Contrast coding for condition
-cbind(c("Informed" = 1, "Naive" = -1)) %>%
-  t() %>%
-  ginv() -> contrasts(trials_main$condition)
-
-# Construct model formula
-form <- ~ phase * condition +
-  (phase * condition | participant_id) +
-  (phase * condition | item_id)
-
-# Fit linear mixed models
-deps <- c("P1", "N170", "N400")
-map(deps, function(dep, model_formula = form, model_data = trials_main) {
-
-  # Modify the formula such that fixed effects are always retained
-  model_formula %<>%
-    tabulate.formula() %>%
-    mutate(block = replace(block, is.na(grouping), "fixed"))
-
-  # Start a CPU cluster so that multiple models can be fitted in parallel
-  n_cores <- detectCores()
-  cl <- makeCluster(n_cores)
-
-  # Find the best fitting model (see Matuschek et al., 2017, *JML*)
-  build <- buildmer(
-    buildmerControl = buildmerControl(
-      formula = model_formula,
-      data = model_data,
-      args = list("control" = lme4::lmerControl(
-        optimizer = "bobyqa", optCtrl = list(maxfun = 1e6)
-      )),
-      direction = c("backward", "backward"),
-      cl = cl,
-      elim = LRTalpha(.20),
-      calc.anova = TRUE,
-      ddf = "Satterthwaite",
-      dep = dep
-    )
-  )
-  stopCluster(cl)
-
-  # Compute marginal means and contrasts
-  emm_options(lmer.df = "Satterthwaite", lmerTest.limit = Inf)
-  specs <- pairwise ~ condition | phase
-  means <- emmeans(build@model, specs = c("phase", "condition"))
-  contrasts <- contrast(means, "pairwise", simple = "condition") %>%
-    summary(by = NULL, adjust = "bonferroni")
-
-  # Create list of returns
-  list(
-    "model" = build@model,
-    "summary" = build@summary,
-    "anova" = build@anova,
-    "means" = means,
-    "contrasts" = contrasts
+  # Contrast coding for phase
+  cbind(
+    c("Pre-insight" = -1, "Insight" = 1, "Post-insight" = 0),
+    c("Pre-insight" = 0, "Insight" = -1, "Post-insight" = 1)
   ) %>%
-    return()
-}) %>%
-  # Add ERP component names
-  set_names(deps) -> models
+    t() %>%
+    ginv() -> contrasts(trials_main$phase)
 
-# Save models
-saveRDS(models, here(output_dir, "models.RDS"))
-```
+  # Contrast coding for condition
+  cbind(c("Informed" = 1, "Naive" = -1)) %>%
+    t() %>%
+    ginv() -> contrasts(trials_main$condition)
 
-```{r, fig1, include=TRUE, fig.height=12, fig.cap="(ref:figure-1-caption)"}
-# Read fitted models
-models <- readRDS(here(output_dir, "models.RDS"))
+  # Construct model formula
+  form <- ~ phase * condition +
+    (phase * condition | participant_id) +
+    (phase * condition | item_id)
+
+  # Helper function for fitting linear mixed models and computing contrasts
+  fit_mixed_models <- function(dep, formula, data) {
+
+    # Modify the formula such that fixed effects are always retained
+    formula %<>%
+      tabulate.formula() %>%
+      mutate(block = replace(block, is.na(grouping), "fixed"))
+
+    # Start a CPU cluster so that multiple models can be fitted in parallel
+    n_cores <- detectCores()
+    cl <- makeCluster(n_cores)
+
+    # Find the best fitting model (see Matuschek et al., 2017, *JML*)
+    build <- buildmer(
+      buildmerControl = buildmerControl(
+        formula, data,
+        args = list("control" = lme4::lmerControl(
+          optimizer = "bobyqa", optCtrl = list(maxfun = 1e6)
+        )),
+        direction = c("backward", "backward"),
+        cl = cl,
+        elim = LRTalpha(.20),
+        calc.anova = TRUE,
+        ddf = "Satterthwaite",
+        dep = dep
+      )
+    )
+    stopCluster(cl)
+
+    # Compute marginal means and contrasts
+    emm_options(lmer.df = "Satterthwaite", lmerTest.limit = Inf)
+    specs <- pairwise ~ condition | phase
+    means <- emmeans(build@model, specs = c("phase", "condition"))
+    contrasts <- contrast(means, "pairwise", simple = "condition") %>%
+      summary(by = NULL, adjust = "bonferroni")
+
+    # Create list of returns
+    list(
+      "model" = build@model,
+      "summary" = build@summary,
+      "anova" = build@anova,
+      "means" = means,
+      "contrasts" = contrasts
+    )
+  }
+
+  # Actually fit the model for each component
+  deps <- config$components$name
+  map(deps, fit_mixed_models, formula = form, data = trials_main) %>%
+    set_names(deps) -> models
+
+  # Save models
+  saveRDS(models, here(output_dir, "models.RDS"))
+} else {
+
+  # Read fitted models
+  models <- readRDS(here(output_dir, "models.RDS"))
+}
 
 # Extract relevant statistics to print in the main text
 map(models, function(model) as_tibble(model$anova, rownames = "effect")) %>%
@@ -488,7 +492,9 @@ map(models, function(model) as_tibble(model$anova, rownames = "effect")) %>%
 map(models, function(model) as_tibble(model$contrasts)) %>%
   bind_rows(.id = "component") %>%
   rename(t_value = `t.ratio`, p_value = `p.value`) -> contrast_table
+```
 
+```{r, fig1, include=TRUE, fig.height=12, fig.cap="(ref:figure-1-caption)"}
 # Create Figure 1
 plot_fig1(files_dir, evokeds, config, channel_locations, models)
 ```
@@ -643,6 +649,52 @@ tfr_plots[[3]]
 (ref:figure-4-caption) Time-frequency results for the post-insight phase.
 Each topographic plot shows the difference in event-related power (in units of percent signal change) between the semantically informed condition and the naive condition, grand-averaged across participants.
 Black dots highlight EEG channels that were part of a cluster for which this difference was statistically significant ($p_\text{cluster}$ = `r print_p(unique(filter(tfr_clusters, contrast == "Post-insight/Informed - Post-insight/Naive" & p_val < 0.05)$p_val))`).
+
+## Control Analysis
+
+```{r, control_analysis}
+# (Re-)do the actual model fitting if requested
+if (run$mixed_models_control) {
+
+  # Filter relevant conditions for the main analysis
+  conditions_control <- c("Informed", "Exclude_informed")
+  trials %>%
+    mutate(condition = factor(condition, levels = conditions_control)) %>%
+    drop_na() -> trials_control
+
+  # Contrast coding for phase
+  cbind(
+    c("Pre-insight" = -1, "Insight" = 1, "Post-insight" = 0),
+    c("Pre-insight" = 0, "Insight" = -1, "Post-insight" = 1)
+  ) %>%
+    t() %>%
+    ginv() -> contrasts(trials_control$phase)
+
+  # Contrast coding for condition
+  cbind(c("Informed" = 1, "Exclude_informed" = -1)) %>%
+    t() %>%
+    ginv() -> contrasts(trials_control$condition)
+
+  # Fit the model for each component
+  map(deps, fit_mixed_models, formula = form, data = trials_control) %>%
+    set_names(deps) -> models_control
+
+  # Save models
+  saveRDS(models_control, here(output_dir, "models_control.RDS"))
+} else {
+
+  # Read fitted models
+  models_control <- readRDS(here(output_dir, "models_control.RDS"))
+}
+
+# Extract relevant statistics to print in the main text
+map(models_control, function(mod) as_tibble(mod$anova, rownames = "effect")) %>%
+  bind_rows(.id = "component") %>%
+  rename(f_value = `F value`, p_value = `Pr(>F)`) -> anova_table_control
+map(models_control, function(mod) as_tibble(mod$contrasts)) %>%
+  bind_rows(.id = "component") %>%
+  rename(t_value = `t.ratio`, p_value = `p.value`) -> contrast_table_control
+```
 
 \newpage
 
