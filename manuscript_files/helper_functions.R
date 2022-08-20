@@ -477,9 +477,9 @@ plot_fig1 <- function(files_dir, evokeds, config, channel_locations, models) {
 plot_fig2 <- function(tfr_grand_ave,
                       tfr_clusters,
                       channel_locations,
-                      tmin = 0.0,
-                      tmax = 1.0,
-                      tstep = 0.1,
+                      tmin = -0.4,
+                      tmax = 1.4,
+                      tstep = 0.2,
                       fmin = 4,
                       fmax = 40,
                       fstep = 4) {
@@ -487,17 +487,6 @@ plot_fig2 <- function(tfr_grand_ave,
   # Make sure that packages are loaded
   require(tidyverse)
   require(cowplot)
-
-  # Read grand-averaged power
-  tfr_grand_ave %>%
-    mutate(
-      phase = factor(
-        phase,
-        levels = c("Pre-insight", "Insight", "Post-insight")
-      ),
-      condition = factor(condition, levels = c("Informed", "Naive"))
-    ) %>%
-    filter(!is.na(condition))
 
   # Compute difference between conditions within each phase
   channels <- channel_locations$channel
@@ -528,6 +517,7 @@ plot_fig2 <- function(tfr_grand_ave,
             cols = all_of(channels), names_to = "electrode",
             values_to = "power"
           ) %>%
+          mutate(power = power * 100) %>% # Convert from decimal to percent
           left_join(channel_locations, by = c("electrode" = "channel")) %>%
           group_by(electrode, x, y) %>%
           summarise(power = mean(power), .groups = "drop") %>%
@@ -539,12 +529,35 @@ plot_fig2 <- function(tfr_grand_ave,
             highlights = significant_channels,
             scaling = 1.1
           ) +
-          scale_fill_distiller(limits = c(-0.25, 0.25), palette = "RdBu") +
+          scale_fill_distiller(limits = c(-25, 25), palette = "RdBu") +
           # scale_fill_viridis_c(limits = c(-0.25, 0.25)) +
           theme(
             plot.margin = unit(rep(-0.2, 4), "cm"),
             legend.position = "none"
           ) -> topo
+        colorbar <<- get_legend(
+          topo +
+            guides(
+              fill = guide_colorbar(
+                title.hjust = 0.5,
+                title.vjust = 0.6,
+                title = "Informed - naive\npower\n(% signal change)",
+                title.position = "left",
+                barheight = 1.5,
+                barwidth = 8.0,
+                ticks = FALSE
+              )
+            ) +
+            theme(
+              legend.box.background = element_rect(
+                fill = "white", color = NA
+              ),
+              legend.box.margin = margin(20, 30, 20, 30),
+              legend.position = "top",
+              legend.title = element_text(size = 10, family = "Helvetica"),
+              legend.text = element_text(size = 10, family = "Helvetica"),
+            )
+        )
         topo$layers[[3]]$aes_params$size <- 0.7
         topo$layers[[4]]$aes_params$size <- 0.7
         topo$layers[[5]]$aes_params$size <- 0.7
@@ -553,11 +566,11 @@ plot_fig2 <- function(tfr_grand_ave,
         topo$layers[[7]]$aes_params$colour <- "black"
         topo
       }) -> plotlist
-      plotlist <- c(plotlist, list(NULL))
+      plotlist <- c(rev(plotlist), list(NULL))
       rel_heights <- c(rep(1, length(fmins)), 0.15)
       if (tmin == min(tmins)) {
-        labels <- paste0(fmins, "-", fmins + fstep, " Hz")
-        labels <- c(labels, "")
+        labels <- paste(fmins, "to", fmins + fstep, "Hz")
+        labels <- c(rev(labels), "")
         plot_grid(
           plotlist = plotlist, nrow = length(plotlist),
           rel_heights = rel_heights, labels = labels,
@@ -572,9 +585,9 @@ plot_fig2 <- function(tfr_grand_ave,
         )
       }
     }) -> plotlist
-    tmins_str <- format(tmins, nsmall = 1)
-    tmaxs_str <- format(tmins + tstep, nsmall = 1)
-    labels <- paste0(tmins_str, "-", tmaxs_str, " s")
+    tmins_str <- format(tmins, trim = TRUE, nsmall = 1)
+    tmaxs_str <- format(tmins + tstep, trim = TRUE, nsmall = 1)
+    labels <- paste(tmins_str, "to", tmaxs_str, "s")
     plotlist <- c(list(NULL), plotlist)
     labels <- c("", labels)
     plot_grid(
@@ -583,6 +596,7 @@ plot_fig2 <- function(tfr_grand_ave,
       label_size = 10, label_fontfamily = "Helvetica",
       label_fontface = "plain", label_x = 0.5, label_y = 0.01, vjust = 0.5,
       hjust = 0.5
-    )
+    ) +
+      draw_plot(colorbar, x = -0.28, y = 0.445)
   })
 }
