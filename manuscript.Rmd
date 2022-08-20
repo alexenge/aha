@@ -398,7 +398,59 @@ tfr_clusters <- read_csv(here(output_dir, "tfr_clusters.csv"))
 ```
 
 ```{r, mixed_models}
+# Construct model formula
+form <- ~ phase * condition +
+  (phase * condition | participant_id) +
+  (phase * condition | item_id)
+
+# Define helper function for fitting linear mixed models and computing contrasts
+fit_mixed_models <- function(dep, formula, data) {
+
+  # Modify the formula such that fixed effects are always retained
+  formula %<>%
+    tabulate.formula() %>%
+    mutate(block = replace(block, is.na(grouping), "fixed"))
+
+  # Start a CPU cluster so that multiple models can be fitted in parallel
+  n_cores <- detectCores()
+  cl <- makeCluster(n_cores)
+
+  # Find the best fitting model (see Matuschek et al., 2017, *JML*)
+  build <- buildmer(
+    buildmerControl = buildmerControl(
+      formula, data,
+      args = list("control" = lme4::lmerControl(
+        optimizer = "bobyqa", optCtrl = list(maxfun = 1e6)
+      )),
+      direction = c("backward", "backward"),
+      cl = cl,
+      elim = LRTalpha(.20),
+      calc.anova = TRUE,
+      ddf = "Satterthwaite",
+      dep = dep
+    )
+  )
+  stopCluster(cl)
+
+  # Compute marginal means and contrasts
+  emm_options(lmer.df = "Satterthwaite", lmerTest.limit = Inf)
+  specs <- pairwise ~ condition | phase
+  means <- emmeans(build@model, specs = c("phase", "condition"))
+  contrasts <- contrast(means, "pairwise", simple = "condition") %>%
+    summary(by = NULL, adjust = "bonferroni")
+
+  # Create list of returns
+  list(
+    "model" = build@model,
+    "summary" = build@summary,
+    "anova" = build@anova,
+    "means" = means,
+    "contrasts" = contrasts
+  )
+}
+
 # (Re-)do the actual model fitting if requested
+deps <- config$components$name
 if (run$mixed_models) {
 
   # Filter relevant conditions for the main analysis
@@ -419,59 +471,7 @@ if (run$mixed_models) {
     t() %>%
     ginv() -> contrasts(trials_main$condition)
 
-  # Construct model formula
-  form <- ~ phase * condition +
-    (phase * condition | participant_id) +
-    (phase * condition | item_id)
-
-  # Helper function for fitting linear mixed models and computing contrasts
-  fit_mixed_models <- function(dep, formula, data) {
-
-    # Modify the formula such that fixed effects are always retained
-    formula %<>%
-      tabulate.formula() %>%
-      mutate(block = replace(block, is.na(grouping), "fixed"))
-
-    # Start a CPU cluster so that multiple models can be fitted in parallel
-    n_cores <- detectCores()
-    cl <- makeCluster(n_cores)
-
-    # Find the best fitting model (see Matuschek et al., 2017, *JML*)
-    build <- buildmer(
-      buildmerControl = buildmerControl(
-        formula, data,
-        args = list("control" = lme4::lmerControl(
-          optimizer = "bobyqa", optCtrl = list(maxfun = 1e6)
-        )),
-        direction = c("backward", "backward"),
-        cl = cl,
-        elim = LRTalpha(.20),
-        calc.anova = TRUE,
-        ddf = "Satterthwaite",
-        dep = dep
-      )
-    )
-    stopCluster(cl)
-
-    # Compute marginal means and contrasts
-    emm_options(lmer.df = "Satterthwaite", lmerTest.limit = Inf)
-    specs <- pairwise ~ condition | phase
-    means <- emmeans(build@model, specs = c("phase", "condition"))
-    contrasts <- contrast(means, "pairwise", simple = "condition") %>%
-      summary(by = NULL, adjust = "bonferroni")
-
-    # Create list of returns
-    list(
-      "model" = build@model,
-      "summary" = build@summary,
-      "anova" = build@anova,
-      "means" = means,
-      "contrasts" = contrasts
-    )
-  }
-
-  # Actually fit the model for each component
-  deps <- config$components$name
+  # Actually fit the model for each ERP component
   map(deps, fit_mixed_models, formula = form, data = trials_main) %>%
     set_names(deps) -> models
 
@@ -654,7 +654,7 @@ Black dots highlight EEG channels that were part of a cluster for which this dif
 # (Re-)do the actual model fitting if requested
 if (run$mixed_models_control) {
 
-  # Filter relevant conditions for the main analysis
+  # Filter relevant conditions for the control analysis
   conditions_control <- c("Informed", "Exclude_informed")
   trials %>%
     mutate(condition = factor(condition, levels = conditions_control)) %>%
