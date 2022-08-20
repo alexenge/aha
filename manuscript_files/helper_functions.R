@@ -349,7 +349,9 @@ plot_fig1b <- function(evokeds, config, channel_locations, models) {
         geom_line(size = 0.8) +
         # Styling
         scale_color_manual(
-          values = aha_colors, aesthetics = c("color", "fill")
+          values = aha_colors,
+          labels = c("Informed condition", "Naive condition"),
+          aesthetics = c("color", "fill")
         ) +
         coord_cartesian(ylim = c(-3, 8), expand = TRUE) +
         theme_void() +
@@ -364,9 +366,7 @@ plot_fig1b <- function(evokeds, config, channel_locations, models) {
           ) +
           theme(
             legend.position = "right",
-            legend.title = element_text(
-              family = "Helvetica", size = 10, face = "bold"
-            ),
+            legend.title = element_blank(),
             legend.text = element_text(family = "Helvetica", size = 10)
           )
       )
@@ -428,11 +428,8 @@ plot_fig1b <- function(evokeds, config, channel_locations, models) {
             legend.position = "right",
             legend.title = element_text(
               size = 10, angle = 90, family = "Helvetica",
-              face = "bold"
             ),
-            legend.text = element_text(
-              size = 10, family = "Helvetica"
-            ),
+            legend.text = element_text(size = 10, family = "Helvetica"),
           )
       )
 
@@ -463,7 +460,7 @@ plot_fig1 <- function(files_dir, evokeds, config, channel_locations, models) {
     label_fontfamily = "Helvetica"
   ) +
     # Add legend and colorbar
-    draw_plot(wave_legend, x = 0.354, y = 0.434) +
+    draw_plot(wave_legend, x = 0.330, y = 0.434) +
     draw_plot(colorbar, x = 0.454, y = 0.434) +
     # Add some lines to separate the three experimental parts
     annotate("segment", x = 0.331, xend = 0.331, y = -Inf, yend = 0.48) +
