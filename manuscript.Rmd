@@ -326,8 +326,7 @@ if (run$eeg_processing) {
     triggers = c(221, 222),
     epochs_tmin = -0.5,
     epochs_tmax = 1.5,
-    baseline_tmin = -0.2,
-    baseline_tmax = 0.0,
+    baseline = c(-0.2, 0.0),
     reject_peak_to_peak = 150.0,
     components = list(
       "name" = list("P1", "N170", "N400"),
@@ -344,16 +343,15 @@ if (run$eeg_processing) {
     tfr_subtract_evoked = FALSE,
     tfr_freqs = seq(4, 40, by = 1.0),
     tfr_cycles = seq(2, 20, by = 0.5),
-    tfr_baseline_tmin = -0.45,
-    tfr_baseline_tmax = -0.05,
-    tfr_baseline_mode = "percent",
+    tfr_mode = "percent",
+    tfr_baseline = c(-0.45, -0.05),
     perm_contrasts = list(
       c("Pre-insight/Informed", "Pre-insight/Naive"),
       c("Insight/Informed", "Insight/Naive"),
       c("Post-insight/Informed", "Post-insight/Naive")
     ),
-    perm_tmin = 0.0,
-    perm_tmax = 1.0,
+    perm_tmin = -0.4,
+    perm_tmax = 1.4,
     n_jobs = 1
   )
 }
@@ -622,7 +620,7 @@ Thus, semantically informed perception seems to alter not only early, evoked act
 
 ```{r, fig2, fig.height=11, fig.cap="(ref:figure-2-caption)", include=TRUE}
 # Create topographic plots for event-related power in each phase
-tfr_plots <- plot_fig2(tfr_grand_ave, tfr_clusters, channel_locations)
+tfr_plots <- plot_fig2(tfr_grand_ave, tfr_clusters, channel_locations, tmin = -0.4, tmax = 1.4, tstep = 0.2)
 
 # Plot Pre-Insight Phase
 tfr_plots[[1]]
