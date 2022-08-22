@@ -620,7 +620,7 @@ Thus, semantically informed perception seems to alter not only early, evoked act
 
 ```{r, fig2, fig.height=11, fig.cap="(ref:figure-2-caption)", include=TRUE}
 # Create topographic plots for event-related power in each phase
-tfr_plots <- plot_fig2(tfr_grand_ave, tfr_clusters, channel_locations, tmin = -0.4, tmax = 1.4, tstep = 0.2)
+tfr_plots <- plot_fig2(tfr_grand_ave, tfr_clusters, channel_locations)
 
 # Plot Pre-Insight Phase
 tfr_plots[[1]]
