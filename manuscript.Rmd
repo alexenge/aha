@@ -74,6 +74,7 @@ library(lmerTest)
 library(MASS)
 library(scales)
 library(papaja)
+library(eegUtils)
 library(cowplot)
 library(parallel)
 library(reticulate)
@@ -149,7 +150,7 @@ The cognitive impenetrability hypothesis is challenged by the alternative view t
 This view is supported by a variety of theoretical, behavioral, and neurophysiological accounts.
 On the theoretical level, the reverse hierarchy theory [@ahissar2004; @hochstein2002] posits that conscious processing initally occurs at the level of whole objects or object categories.
 Only after this high-level interpretation has been obtained, more fine grained visual details---if relevant for the current task---are being accessed via top-down connections.
-Along similar lines, Bayesian inference and predictive coding theories [e.g., @clark2013; @panichello2013; @yuille2006] propose bi-directional loops of predictions and prediction errors between visual and non-visual processes.
+Along similar lines, Bayesian inference and predictive coding theories [e.g., @yuille2006; @clark2013; @panichello2013] propose bi-directional loops of predictions and prediction errors between visual and non-visual processes.
 
 On the behavioral level, these ideas are supported by psychological studies that showed differences in ratings, detection rates, or reaction times for visual stimuli depending on their emotional [e.g., @phelps2016], motivational [e.g., @balcetis2010], linguistic [e.g., @boutonnet2015] or semantic [e.g., @gauthier2003] content.
 However, some of these studies have received legitimate criticism for confounding tentantive high-level effects with low-level differences between conditions as well as for not being able to discern between perceptual and post-perceptual (e.g., memory-related) effects [@firestone2016].
