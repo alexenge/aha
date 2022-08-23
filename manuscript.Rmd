@@ -83,6 +83,7 @@ library(magrittr)
 # Set global options
 options(readr.show_col_types = FALSE)
 opts_chunk$set(
+  fig.pos = "tp",
   fig.width = 12,
   include = FALSE,
   message = FALSE,
