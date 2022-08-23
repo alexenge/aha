@@ -476,6 +476,7 @@ plot_fig1 <- function(files_dir, evokeds, config, channel_locations, models) {
 
 plot_fig2 <- function(tfr_grand_ave,
                       tfr_clusters,
+                      p_cluster,
                       channel_locations,
                       tmin = -0.4,
                       tmax = 1.4,
@@ -507,7 +508,7 @@ plot_fig2 <- function(tfr_grand_ave,
         fmax <- fmin + fstep
         tfr_clusters %>%
           filter(time >= tmin & time < tmax & freq >= fmin & freq < fmax) %>%
-          filter(str_detect(contrast, this_phase) & p_val < .05) %>%
+          filter(str_detect(contrast, this_phase) & p_val < p_cluster) %>%
           pull(channel) %>%
           unique() -> significant_channels
         tfr_grand_ave_diff %>%

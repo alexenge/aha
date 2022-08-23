@@ -396,6 +396,9 @@ clusters <- read_csv(here(output_dir, "clusters.csv"))
 
 # Read results of cluster-based permutation tests for TFR
 tfr_clusters <- read_csv(here(output_dir, "tfr_clusters.csv"))
+
+# Define Bonferroni-corrected cluster-level p value threshold
+p_cluster <- 0.05 / length(unique(clusters$contrast))
 ```
 
 ```{r, mixed_models}
@@ -576,12 +579,12 @@ The remaining epochs were convolved with a family of Morlet wavelets, increasing
 To adjust for the typical $1/f$ shape of the EEG, the power values were transformed into percent signal change by first subtracting and then dividing by the average power at each frequency over the entire epoch [@grandchamp2011].
 We then performed baseline correction by subtracting the average during the pre-stimulus interval from `r config$tfr_baseline[1]` s to `r config$tfr_baseline[2]` s relative to object onset.
 
-For statistical analysis of event-related power, we conducted cluster-based permutation tests [@maris2007], separately for each of the three phases of the experiment (pre-insight, insight, post-insight).
-First, we averaged trials belonging to the same condition and then subtracted these average responses from one another to compute the difference between the semantically informed condition versus the naive condition for each participant.
-Then, we conducted one-sample $t$ tests in a mass-univariate fashion and grouped significant results (cluster-forming threshold $p < .05$) into clusters if they ocurred at neighbouring time points, frequencies, or channels.
-Neighbouring channels were defined using Delaunay triangulation based on 2D electrode locations as implemented in MNE-Python.
-To obtain family-wise error-corrected $p$ values at the cluster level, we compared the cluster mass (i.e., the sum the $t$ values) of each observed cluster to an empirical null distribution of cluster masses obtained from 5,000 permutations with random sign flips.
-Clusters were considered to be statistically significant if their mass exceeded the 95^th^ percentile of this distribution (i.e., cluster-level treshold $p < .05$).
+For statistical analysis of event-related power, we conducted cluster-based permutation tests [@maris2007], separately for each of the three phases of the experiment (pre-insight, insight, and post-insight).
+First, we averaged trials belonging to the same condition and then subtracted these average responses from one another to compute the difference between the semantically informed condition and the naive condition for each participant.
+We then conducted one-sample $t$ tests in a mass-univariate fashion and grouped significant results (cluster-forming threshold $p < .05$) into clusters if they ocurred at neighbouring time points, frequencies, or channels.
+Neighbouring channels were defined using the Delaunay triangulation based on 2D electrode locations as implemented in MNE-Python.
+To obtain family-wise error-corrected $p$ values at the cluster level, we compared the cluster mass (i.e., the sum of the $t$ values) of each observed cluster to an empirical null distribution of cluster masses obtained from 5,000 permutations with random sign flips.
+Clusters were considered to be statistically significant if their mass exceeded the `r (1 - p_cluster) * 100`^th^ percentile of this distribution (i.e., cluster-level treshold $p < .05$, Bonferroni-corrected for three seperate tests).
 
 ## Data and Code Availability
 
@@ -611,7 +614,7 @@ Instead, the P1 component was significantly enlarged (i.e., more positive) in r
 ## Event-Related Power
 
 In an exploratory time-frequency analysis, we checked for differences in event-related power between semantically informed perception and naive perception within each of the three phases of the experiment.
-Cluster-based permutation tests [@maris2007] revealed no significant clusters in the pre-insight phase (see Figure 2), all $p$s > `r print_p(min(filter(tfr_clusters, contrast == "Pre-insight/Informed - Pre-insight/Naive")$p_val))`, but one significant cluster in the insight phase (see Figure 3), $p_\text{cluster}$ = `r print_p(unique(filter(tfr_clusters, contrast == "Insight/Informed - Insight/Naive" & p_val < 0.05)$p_val))`, and one significant cluster in the post-insight phase (see Figure 4), $p_\text{cluster}$ = `r print_p(unique(filter(tfr_clusters, contrast == "Post-insight/Informed - Post-insight/Naive" & p_val < 0.05)$p_val))`.
+Cluster-based permutation tests [@maris2007] revealed no significant clusters in the pre-insight phase (see Figure 2), all $p$s~>~`r print_p(min(filter(tfr_clusters, contrast == "Pre-insight/Informed - Pre-insight/Naive")$p_val))`, but one significant cluster in the insight phase (see Figure 3), $p_\text{cluster}$ = `r print_p(unique(filter(tfr_clusters, contrast == "Insight/Informed - Insight/Naive" & p_val < p_cluster)$p_val))`, and one significant cluster in the post-insight phase (see Figure 4), $p_\text{cluster}$ = `r print_p(unique(filter(tfr_clusters, contrast == "Post-insight/Informed - Post-insight/Naive" & p_val < p_cluster)$p_val))`.
 These two significant clusters in the insight and post-insight phases were similar in their direction, latency, frequency range, and topographic distribution.
 Both clusters had a negative sign, started around 600 ms after object onset [but see @sassenhagen2019] and continued all the way until the end of the analyzed period at 1,400 ms.
 They spanned a broad range of frequencies in the alpha and lower beta range as well as a broad set of channels, but appeared to be most focal at around 15 Hz and parietal channels.
@@ -619,7 +622,9 @@ Thus, semantically informed perception seems to alter not only early, evoked act
 
 ```{r, fig2, fig.height=11, fig.cap="(ref:figure-2-caption)", include=TRUE}
 # Create topographic plots for event-related power in each phase
-tfr_plots <- plot_fig2(tfr_grand_ave, tfr_clusters, channel_locations)
+tfr_plots <- plot_fig2(
+  tfr_grand_ave, tfr_clusters, p_cluster, channel_locations
+)
 
 # Plot Pre-Insight Phase
 tfr_plots[[1]]
@@ -636,7 +641,7 @@ tfr_plots[[2]]
 
 (ref:figure-3-caption) Time-frequency results for the insight phase.
 Each topographic plot shows the difference in event-related power (in units of percent signal change) between the semantically informed condition and the naive condition, grand-averaged across participants.
-Black dots highlight EEG channels that were part of a cluster for which this difference was statistically significant ($p_\text{cluster}$ = `r print_p(unique(filter(tfr_clusters, contrast == "Insight/Informed - Insight/Naive" & p_val < 0.05)$p_val))`).
+Black dots highlight EEG channels that were part of a cluster for which this difference was statistically significant ($p_\text{cluster}$ = `r print_p(unique(filter(tfr_clusters, contrast == "Insight/Informed - Insight/Naive" & p_val < p_cluster)$p_val))`).
 
 ```{r, fig4, fig.height=11, fig.cap="(ref:figure-4-caption)", include=TRUE}
 # Plot Post-Insight Phase
@@ -645,7 +650,7 @@ tfr_plots[[3]]
 
 (ref:figure-4-caption) Time-frequency results for the post-insight phase.
 Each topographic plot shows the difference in event-related power (in units of percent signal change) between the semantically informed condition and the naive condition, grand-averaged across participants.
-Black dots highlight EEG channels that were part of a cluster for which this difference was statistically significant ($p_\text{cluster}$ = `r print_p(unique(filter(tfr_clusters, contrast == "Post-insight/Informed - Post-insight/Naive" & p_val < 0.05)$p_val))`).
+Black dots highlight EEG channels that were part of a cluster for which this difference was statistically significant ($p_\text{cluster}$ = `r print_p(unique(filter(tfr_clusters, contrast == "Post-insight/Informed - Post-insight/Naive" & p_val < p_cluster)$p_val))`).
 
 ## Control Analysis
 
