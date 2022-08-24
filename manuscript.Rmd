@@ -105,7 +105,7 @@ source(here(files_dir, "helper_functions.R"))
 run <- list(
   eeg_processing = TRUE,
   mixed_models = TRUE,
-  control_analysis = TRUE,
+  control_analysis = TRUE
 )
 
 # Write R packages to bibliography
@@ -925,15 +925,6 @@ print_model_outputs(models$N400)
 \newpage
 
 ```{r, figclusters, include=TRUE, fig.height=8}
-# Read results of cluster-based permutation tests for ERPs
-read_csv(here(output_dir, "clusters.csv"), col_types = cols(
-  contrast = col_factor(levels = c(
-    "Pre-insight/Informed - Pre-insight/Naive",
-    "Insight/Informed - Insight/Naive",
-    "Post-insight/Informed - Post-insight/Naive"
-  ))
-)) -> clusters
-
 # Plot thresholded cluster images
 clusters %>%
   filter(p_val < .05) %>%
@@ -944,15 +935,6 @@ clusters %>%
 ```
 
 ```{r, figtfrclusters, fig.height=12, include=TRUE}
-# Read results of cluster-based permutation tests for TFR
-read_csv(here(output_dir, "tfr_clusters.csv"), col_types = cols(
-  contrast = col_factor(levels = c(
-    "Pre-insight/Informed - Pre-insight/Naive",
-    "Insight/Informed - Insight/Naive",
-    "Post-insight/Informed - Post-insight/Naive"
-  ))
-)) -> tfr_clusters
-
 # Plot thresholded cluster images for the insight phase
 tfr_clusters %>%
   filter(contrast == "Insight/Informed - Insight/Naive" & p_val < .05) %>%
@@ -965,6 +947,16 @@ tfr_clusters %>%
 tfr_clusters %>%
   filter(
     contrast == "Post-insight/Informed - Post-insight/Naive" & p_val < .05
+  ) %>%
+  ggplot(aes(x = time, y = freq, fill = cluster)) +
+  facet_wrap(~channel) +
+  geom_raster() +
+  theme(legend.position = "top")
+
+# Plot thresholded cluster images for the control analysis
+tfr_clusters %>%
+  filter(
+    contrast == "Insight/Informed - Insight/Exclude_informed" & p_val < .05
   ) %>%
   ggplot(aes(x = time, y = freq, fill = cluster)) +
   facet_wrap(~channel) +
