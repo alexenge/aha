@@ -399,8 +399,8 @@ clusters <- read_csv(here(output_dir, "clusters.csv"))
 # Read results of cluster-based permutation tests for TFR
 tfr_clusters <- read_csv(here(output_dir, "tfr_clusters.csv"))
 
-# Define Bonferroni-corrected cluster-level p value threshold
-p_cluster <- 0.05 / length(unique(clusters$contrast))
+# Define cluster-level p value threshold
+p_cluster <- 0.05 / 3 # Bonferroni-corrected for three phases
 ```
 
 ```{r, mixed_models}
@@ -625,32 +625,41 @@ Both clusters had a negative sign, started around 600 ms after object onset [but
 They spanned a broad range of frequencies in the alpha and lower beta range as well as a broad set of channels, but appeared to be most focal at around 15 Hz and parietal channels.
 Thus, semantically informed perception seems to alter not only early, evoked activity (see Event-Related Potentials above) but also later, induced activity, in the form of a reduction of post-stimulus power at parietal channels in the range of alpha and lower beta frequencies.
 
-```{r, fig2, fig.height=11, fig.cap="(ref:figure-2-caption)", include=TRUE}
-# Create topographic plots for event-related power in each phase
-tfr_plots <- plot_fig2(
-  tfr_grand_ave, tfr_clusters, p_cluster, channel_locations
+```{r, fig2, fig.height=11, fig.cap="(ref:figure-2-caption)", include=TRUE, eval=TRUE}
+# Create topographic plots for event-related power in the pre-insight phase
+plot_tfr_topos(
+  filter(tfr_grand_ave, phase == "Pre-insight"),
+  filter(tfr_clusters, contrast == "Pre-insight/Informed - Pre-insight/Naive"),
+  p_cluster = p_cluster
 )
-
-# Plot Pre-Insight Phase
-tfr_plots[[1]]
 ```
 
 (ref:figure-2-caption) Time-frequency results for the pre-insight phase.
 Each topographic plot shows the difference in event-related power (in units of percent signal change) between the semantically informed condition and the naive condition, grand-averaged across participants.
 A cluster-based permutation test indicated no clusters for which this difference was statistically significant (all $p$s > `r print_p(min(filter(tfr_clusters, contrast == "Pre-insight/Informed - Pre-insight/Naive")$p_val))`).
 
-```{r, fig3, fig.height=11, fig.cap="(ref:figure-3-caption)", include=TRUE}
-# Plot Insight Phase
-tfr_plots[[2]]
+```{r, fig3, fig.height=11, fig.cap="(ref:figure-3-caption)", include=TRUE, eval=TRUE}
+# Create topographic plots for event-related power in the insight phase
+plot_tfr_topos(
+  filter(tfr_grand_ave, phase == "Insight"),
+  filter(tfr_clusters, contrast == "Insight/Informed - Insight/Naive"),
+  p_cluster = p_cluster
+)
 ```
 
 (ref:figure-3-caption) Time-frequency results for the insight phase.
 Each topographic plot shows the difference in event-related power (in units of percent signal change) between the semantically informed condition and the naive condition, grand-averaged across participants.
 Black dots highlight EEG channels that were part of a cluster for which this difference was statistically significant ($p_\text{cluster}$ = `r print_p(unique(filter(tfr_clusters, contrast == "Insight/Informed - Insight/Naive" & p_val < p_cluster)$p_val))`).
 
-```{r, fig4, fig.height=11, fig.cap="(ref:figure-4-caption)", include=TRUE}
-# Plot Post-Insight Phase
-tfr_plots[[3]]
+```{r, fig4, fig.height=11, fig.cap="(ref:figure-4-caption)", include=TRUE, eval=TRUE}
+# Create topographic plots for event-related power in the post-insight phase
+plot_tfr_topos(
+  filter(tfr_grand_ave, phase == "Post-insight"),
+  filter(
+    tfr_clusters, contrast == "Post-insight/Informed - Post-insight/Naive"
+  ),
+  p_cluster = p_cluster
+)
 ```
 
 (ref:figure-4-caption) Time-frequency results for the post-insight phase.
