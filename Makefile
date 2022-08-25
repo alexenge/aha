@@ -1,5 +1,5 @@
 # User-defined variables
-MAIN_CMD        := Rscript -e "rmarkdown::render(input = 'manuscript.Rmd')"
+MAIN_CMD        := Rscript -e "rmarkdown::render(input = 'manuscript.Rmd', output_format = 'all')"
 IMAGE_USER      := alexenge
 IMAGE_NAME      := aha
 IMAGE_TAG       := latest
