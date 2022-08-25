@@ -745,7 +745,7 @@ Like the ERP effects, this difference immediately ocurred on the first trial on 
 The reduction of the N400 component (400--700 ms after object onset) during semantically informed perception was the numerically largest effect.
 It indicates that acquiring an understanding of the objects in the insight phase lessened participants' demand for effortful semantic processing in comparison to the naive condition [@kutas2011].
 This finding replicates previous work showing that N400 amplitudes are larger in response to pictures when they are either difficult to understand in and of themselves [e.g., @abdelrahman2008; @supp2005] or difficult to integrate into the preceding context [e.g., @barrett1990; @ganis1996; @hirschfeld2011].
-The latency of this effect and the computational role of the N400 component [@lau2008; @rabovsky2018] suggest that it has a post-perceptual locus in the semantic system.
+The latency of this effect and the computational role of the N400 component [@bornkessel-schlesewsky2019; @lau2008; @rabovsky2018] suggest that it has a post-perceptual locus in the semantic system.
 
 In contrast to the N400, the N170 component (150--200 ms after object onset) was modulated only on those initial trials on which the objects were presented together with the relevant semantic information.
 It therefore constitutes an online marker of semantic insight, that is, participants suddenly understanding the visual objects in the light of the additional information provided by the verbal keywords.
@@ -793,7 +793,7 @@ A theoretical framework that would explicitly predict or explain the observed P1
 The effects are consistent, however, with the reverse hierarchy theory [@ahissar2004; @hochstein2002], which posits that objects first enter our visual consciousness at an abstract, conceptual level.
 Once this initial "vision at a glance" has taken place, feedback connections to earlier layers of the visual system are being accessed to extract the relevant lower-level features ("vision with scrutiny").
 This reverse trajectory down the visual hierarchy may explain (a) the semantically induced changes to the fMRI signal in LOC and retinotopic cortex [@hsieh2010] as well as (b) the modulations of early visual ERP components observed in the present study and others [@abdelrahman2008; @maier2014; @maier2019; @samaha2018; @weller2019]. 
-Besides this specific theory, an important role of top-down mechanisms for vision, or object recognition more specifically, is also posited by the family of predictive coding and Bayesian inference theories [e.g., @yuille2006; @clark2013; @lupyan2015; @panichello2013].
+Besides this specific theory, an important role of top-down mechanisms for vision, or object recognition more specifically, is also posited by the family of predictive coding and Bayesian inference theories [e.g., @yuille2006; @clark2013; @lupyan2015; @panichello2013; @xu2007].
 Despite the theoretical advances, a detailled description of these top-down effects at the algorithmic and implementational level remains a challenge for future work [@marr1982].
 
 Taken together, the current study provides preliminary evidence that whenever we receive meaningful semantic information about a previously unfamiliar object, this information has an immediate influence on the visual processing of this object.
