@@ -1,5 +1,8 @@
 .DS_Store
 .vscode/
+*.aux
+*.docx
+*.fdb_latexmk
 *.fif
 *.log
 *.pdf
@@ -7,6 +10,7 @@
 *.tex
 slurm-*
 __pycache__/
+figure-docx/
 figure-latex/
 /analysis_old/
 /data/
