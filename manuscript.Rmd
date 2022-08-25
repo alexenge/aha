@@ -25,7 +25,17 @@ authornote: |
   
   Rasha Abdel Rahman \orcidlink{0000-0002-8438-1570} [https://orcid.org/0000-0002-8438-1570](0000-0002-8438-1570)
   
+  Number of pages: 23
+
+  Number of figures: 4
+
+  Number of tables: 0
+
+  Number of words: ??? (abstract), ??? (introduction), ??? (discussion)
+
   The authors declare no competing financial interests.
+
+  We would like to thank Nele Langosch for assistance with data collection and analysis as well as Guido Kiecker for technical support.
   The materials and code for this study are available at [https://osf.io/uksbc](https://osf.io/uksbc).
 
 floatsintext      : yes
