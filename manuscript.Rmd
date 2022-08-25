@@ -103,9 +103,9 @@ source(here(files_dir, "helper_functions.R"))
 
 # Re-run steps that take a long time to compute?
 run <- list(
-  eeg_processing = TRUE,
-  mixed_models = TRUE,
-  control_analysis = TRUE
+  eeg_processing = FALSE,
+  mixed_models = FALSE,
+  control_analysis = FALSE
 )
 
 # Write R packages to bibliography
