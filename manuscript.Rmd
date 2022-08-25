@@ -853,23 +853,6 @@ read_tsv(here("materials", "items.txt"), col_types = cols()) %>%
 
 \newpage
 
-```{r, figs1, fig.height=11, fig.cap="(ref:figure-s1-caption)", include=TRUE, eval=TRUE}
-# Create topographic plots for control analysis of event-related power
-plot_tfr_topos(
-  filter(tfr_grand_ave, phase == "Insight"),
-  filter(
-    tfr_clusters, contrast == "Insight/Informed - Insight/Exclude_informed"
-  ),
-  p_cluster = p_cluster,
-  condition_plus = "Informeed",
-  condition_minus = "Exclude_informed"
-)
-```
-
-(ref:figure-s1-caption) Time-frequency results for the control analysis.
-Each topographic plot shows the difference in event-related power (in units of percent signal change) between the semantically informed condition and the "failed insight" condition (see Results: Control Analysis in the main text), grand-averaged across participants.
-Black dots highlight EEG channels that were part of a cluster for which this difference was statistically significant ($p_\text{cluster}$ = `r print_p(unique(filter(tfr_clusters, contrast == "Insight/Informed - Insight/Exclude_informed" & p_val < p_cluster)$p_val))`).
-
 ## Results S1. *Linear Mixed-Effects Models*
 
 ## *P1 Component (100--150 ms)*
@@ -924,7 +907,26 @@ print_model_outputs(models$N400)
 
 \newpage
 
-```{r, figclusters, include=TRUE, fig.height=8}
+```{r, figs1, fig.height=11, fig.cap="(ref:figure-s1-caption)", eval=TRUE}
+# Create topographic plots for control analysis of event-related power
+plot_tfr_topos(
+  filter(tfr_grand_ave, phase == "Insight"),
+  filter(
+    tfr_clusters, contrast == "Insight/Informed - Insight/Exclude_informed"
+  ),
+  p_cluster = p_cluster,
+  condition_plus = "Informeed",
+  condition_minus = "Exclude_informed"
+)
+```
+
+(ref:figure-s1-caption) Time-frequency results for the control analysis.
+Each topographic plot shows the difference in event-related power (in units of percent signal change) between the semantically informed condition and the "failed insight" condition (see Results: Control Analysis in the main text), grand-averaged across participants.
+Black dots highlight EEG channels that were part of a cluster for which this difference was statistically significant ($p_\text{cluster}$ = `r print_p(unique(filter(tfr_clusters, contrast == "Insight/Informed - Insight/Exclude_informed" & p_val < p_cluster)$p_val))`).
+
+\newpage
+
+```{r, figclusters, fig.height=8, include=FALSE}
 # Plot thresholded cluster images
 clusters %>%
   filter(p_val < .05) %>%
