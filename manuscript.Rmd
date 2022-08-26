@@ -31,7 +31,7 @@ authornote: |
 
   Number of tables: 0
 
-  Number of words: 251 (abstract), 842 (introduction), 1,847 (discussion)
+  Number of words: 212 (abstract), 849 (introduction), 1,856 (discussion)
 
   The authors declare no competing financial interests.
 
@@ -809,7 +809,7 @@ Despite the theoretical advances, a detailed description of these top-down effec
 Taken together, the present study provides preliminary evidence that whenever we receive meaningful semantic information about a previously unfamiliar object, this information has an immediate influence on our visual processing of this object.
 The immediacy of this influence is remarkable in at least two different ways:
 First, it does not require extensive training but can instead be observed within the same trial in which the information has been presented and/or a single trial later.
-Second, the time course of this influence suggests that it manifests itself not only at later, post-perceptual stages (≥ 400 ms), typically associated with semantic processing, but also at much earlier stages (≤ 200 ms), typically associated with visual perception itself.
+Second, the time course of this influence suggests that it manifests itself not only at later, post-perceptual stages (> 400 ms), typically associated with semantic processing, but also at much earlier stages (< 200 ms), typically associated with visual perception itself.
 
 # References
 
