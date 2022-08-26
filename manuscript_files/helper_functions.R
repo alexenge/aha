@@ -1,4 +1,5 @@
 aha_colors <- c("#ca0020", "#0571b0")
+stimulus_bg_color <- "#a9d9ff"
 
 plot_fig1a <- function(files_dir) {
 
@@ -7,7 +8,9 @@ plot_fig1a <- function(files_dir) {
   require(cowplot)
 
   # Trial structure
-  example_stim <- magick::image_read(here::here(files_dir, "example_stim.png"))
+  example_stim <- magick::image_read(
+    here::here("materials", "unfamiliar", "103.png")
+  )
   ggplot() +
     coord_cartesian(xlim = c(-100, 100), ylim = c(0, 100), expand = FALSE) +
     theme_void() +
@@ -26,23 +29,23 @@ plot_fig1a <- function(files_dir) {
     # Squares
     annotate(
       geom = "rect", xmin = -37, xmax = -17, ymin = 55, ymax = 75,
-      color = "black", fill = "white"
+      color = "black", fill = stimulus_bg_color
     ) +
     annotate(
       geom = "rect", xmin = -19, xmax = 1, ymin = 45, ymax = 65,
-      color = aha_colors[2], fill = "white"
+      color = aha_colors[2], fill = stimulus_bg_color
     ) +
     annotate(
       geom = "rect", xmin = -19, xmax = 1, ymin = 69, ymax = 89,
-      color = aha_colors[1], fill = "white"
+      color = aha_colors[1], fill = stimulus_bg_color
     ) +
     annotate(
       geom = "rect", xmin = -1, xmax = 19, ymin = 59, ymax = 79,
-      color = "black", fill = "white"
+      color = "black", fill = stimulus_bg_color
     ) +
     annotate(
       geom = "rect", xmin = 17, xmax = 37, ymin = 61, ymax = 81,
-      color = "black", fill = "white"
+      color = "black", fill = stimulus_bg_color
     ) +
     annotate(
       geom = "text", x = -27, y = 65.3, label = "+", size = 20 / .pt,
@@ -172,11 +175,11 @@ plot_fig1a <- function(files_dir) {
     # Squares
     annotate(
       geom = "rect", xmin = -91, xmax = -71, ymin = 22, ymax = 42,
-      color = "black", fill = "white"
+      color = "black", fill = stimulus_bg_color
     ) +
     annotate(
       geom = "rect", xmin = -53, xmax = -73, ymin = 24, ymax = 44,
-      color = "black", fill = "white"
+      color = "black", fill = stimulus_bg_color
     ) +
     annotate(
       geom = "text", x = -81, y = 32.3, label = "+", size = 20 / .pt,
@@ -215,11 +218,11 @@ plot_fig1a <- function(files_dir) {
     # Squares
     annotate(
       geom = "rect", xmin = 53, xmax = 73, ymin = 22, ymax = 42,
-      color = "black", fill = "white"
+      color = "black", fill = stimulus_bg_color
     ) +
     annotate(
       geom = "rect", xmin = 71, xmax = 91, ymin = 24, ymax = 44,
-      color = "black", fill = "white"
+      color = "black", fill = stimulus_bg_color
     ) +
     annotate(
       geom = "text", x = 63, y = 32.3, label = "+", size = 20 / .pt,
