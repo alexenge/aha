@@ -1,4 +1,4 @@
-﻿item,img,match_noun_ger,match_verb_ger,match_noun_en,match_verb_en,nonmatch_noun_ger,nonmatch_verb_ger,nonmatch_noun_en,nonmatch_verb_en
+﻿item_id,orig_filename,match_noun_ger,match_verb_ger,match_noun_en,match_verb_en,nonmatch_noun_ger,nonmatch_verb_ger,nonmatch_noun_en,nonmatch_verb_en
 40,kimkim.bmp,Tonpott,trommeln,clay pot,drumming,Piano ,stimmen,piano,tuning
 76,galvanometer_2.bmp,Stromstärke,messen,electric current,measuring,Mandeln ,operieren,kidneys,operating
 90,elektroschockspiel.bmp,Elektroschock ,spielen,electric shock,playing,Weinfass,Loch einschlagen,wine cask,broaching
