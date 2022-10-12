@@ -317,7 +317,8 @@ plot_fig1b <- function(evokeds, config, channel_locations, models) {
           fill = "gray90"
         ) +
         annotate(
-          geom = "text", x = (tmin + tmax) / 2, y = 7.9, label = asterisks
+          geom = "text", x = (tmin + tmax) / 2, y = 7.9, label = asterisks,
+          size = 5
         ) +
         # X (time) axis
         annotate(
@@ -437,7 +438,13 @@ plot_fig1b <- function(evokeds, config, channel_locations, models) {
       )
 
       # Combine time course and topography
-      wave + draw_plot(topo, x = -0.4, y = 2.7, width = 0.6, height = 6.0)
+      if (p_value < 0.05) {
+        wave + draw_plot(
+          plot = topo, x = tmin - 0.46, y = 2.7, width = 0.6, height = 6.0
+        )
+      } else {
+        wave
+      }
     }) %>%
       # Combine plots for the current ERP component and all three phases
       plot_grid(plotlist = ., nrow = 1)
