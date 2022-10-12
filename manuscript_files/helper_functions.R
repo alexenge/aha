@@ -97,12 +97,12 @@ plot_fig1a <- function(files_dir) {
     ) +
     annotate(
       geom = "text", x = -12, y = 26,
-      label = "B. \"I have an\nassumption\nwhat this is\"",
+      label = "B. \"I rather have\nan assumption\nwhat this is\"",
       family = "Helvetica", lineheight = 1
     ) +
     annotate(
       geom = "text", x = 12, y = 26,
-      label = "C. \"I have rather\nno assumption\nwhat this is\"",
+      label = "C. \"I rather have\nno assumption\nwhat this is\"",
       family = "Helvetica", lineheight = 1
     ) +
     annotate(
