@@ -365,6 +365,14 @@ if (run$eeg_processing) {
       c("Post-insight/Informed", "Post-insight/Naive"),
       c("Insight/Informed", "Insight/Exclude_informed")
     ),
+    tfr_components = list(
+      name = list("alpha_beta"),
+      tmin = list(0.6),
+      tmax = list(1.2),
+      fmin = list(8.0),
+      fmax = list(20.0),
+      roi = list(c("P3", "Pz", "P4", "PO3", "POz", "PO4"))
+    ),
     perm_tmin = -0.4,
     perm_tmax = 1.4,
     n_jobs = 1
@@ -703,9 +711,16 @@ if (run$control_analysis) {
     t() %>%
     ginv() -> contrasts(trials_control$condition)
 
-  # Fit the model for each component
+  # Fit the model for each ERP component
   map(deps, fit_mixed_models, formula = form, data = trials_control) %>%
     set_names(deps) -> models_control
+
+  # Fit an additional model for event-related power, controlling for RTs
+  form_rt <- ~ phase * condition + log(rt) +
+    (phase * condition | participant_id) +
+    (phase * condition | item_id)
+  models_control$alpha_beta <-
+    fit_mixed_models(form = form_rt, data = trials_main, dep = "alpha_beta")
 
   # Save models
   saveRDS(models_control, here(output_dir, "models_control.RDS"))
@@ -716,9 +731,6 @@ if (run$control_analysis) {
 }
 
 # Extract relevant statistics to print in the main text
-map(models_control, function(mod) as_tibble(mod$anova, rownames = "effect")) %>%
-  bind_rows(.id = "component") %>%
-  rename(f_value = `F value`, p_value = `Pr(>F)`) -> anova_table_control
 map(models_control, function(mod) as_tibble(mod$contrasts)) %>%
   bind_rows(.id = "component") %>%
   rename(t_value = `t.ratio`, p_value = `p.value`) -> contrast_table_control
