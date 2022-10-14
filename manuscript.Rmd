@@ -713,6 +713,7 @@ if (run$control_analysis) {
     set_names(deps) -> models_control
 
   # Fit an additional model for event-related power, controlling for RTs
+  trials_main$alpha_beta <- trials_main$alpha_beta * 100 # Convert to percent
   form_rt <- ~ phase * condition + log(rt) +
     (phase * condition | participant_id) +
     (phase * condition | item_id)
