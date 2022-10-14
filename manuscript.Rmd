@@ -369,7 +369,7 @@ if (run$eeg_processing) {
       tmax = list(1.2),
       fmin = list(8.0),
       fmax = list(20.0),
-      roi = list(c("P3", "Pz", "P4", "PO3", "POz", "PO4"))
+      roi = list(c("P3", "P4", "Pz", "PO3", "PO4", "POz"))
     ),
     perm_tmin = -0.4,
     perm_tmax = 1.4
@@ -575,7 +575,7 @@ Next, the continuous EEG was segmented into epochs ranging from `r config$epochs
 These epochs were baseline-corrected by subtracting the average voltage during the interval of `r config$baseline[1]` s to `r config$baseline[2]` s relative to stimulus onset.
 Epochs containing artifacts despite ICA, defined as peak-to-peak amplitudes exceeding `r config$reject_peak_to_peak` µV, were removed from further analysis.
 This led to the exclusion of an average of `r mean(rejected_epochs)` trials per participant (= `r percent(mean(rejected_epochs) / 360, accuracy = 0.1)`; range `r min(rejected_epochs)`--`r max(rejected_epochs)` trials).
-Single-trial event-related potentials were computed as the mean amplitude across time windows and regions of interests (ROIs) defined a priori, namely 100--150 ms at channels PO3, POz, PO4, O1, Oz, and O2 and for the P1 component, 150--200 ms at channels P7, P8, PO7, PO8, PO9, and PO10 for the N170 component, and 400--700 ms at channels C1, Cz, C2, CP1, CPz, and CP2 for the N400 component.
+Single-trial event-related potentials were computed as the mean amplitude across time windows and regions of interests (ROIs) defined a priori, namely 100--150 ms at channels PO3, PO4, POz, O1, O2, and Oz and for the P1 component, 150--200 ms at channels P7, P8, PO7, PO8, PO9, and PO10 for the N170 component, and 400--700 ms at channels C1, C2, Cz, CP1, CP2, and CPz for the N400 component.
 
 The resulting mean ERP amplitudes were analyzed on the single-trial level using linear mixed-effects regression models because these models allow to control for repeated measures of participants and stimuli, while also being robust against an unbalanced number of trials per condition [@baayen2008; @burki2018; @fromer2018].
 We computed three models predicting P1, N170, and N400 amplitudes, respectively.
@@ -752,7 +752,7 @@ Likewise, the reduction of the N400 was replicated in this control analysis, $b$
 This adds credibility to the notion that these effects are specific to those objects for which participants experienced a moment of insight induced by semantic information.
 
 Finally, we had wondered if the reduction in alpha/beta power might merely reflect differences in the timing of motor preparation between conditions, given the well-established link between motor processes and beta power over sensorimotor cortex [@kilavik2013].
-To rule this out, we extracted single trial percent signal change based on the distribution of clusters from the permutation tests (time window 600–1,200 ms, frequency range 8–20 Hz, electrodes P3, Pz, P4, PO3, POz, and PO4; see Figures 3 and 4).
+To rule this out, we extracted single trial percent signal change based on the distribution of clusters from the permutation tests (time window 600–1,200 ms, frequency range 8–20 Hz, electrodes P3, P4, Pz, PO3, PO4, and POz; see Figures 3 and 4).
 We then subjected these to a linear-mixed effects model that controlled for log-transformed reaction time as a covariate of no interest.
 This confirmed the significant reduction in alpha/beta power for the semantically informed condition as compared to the naive condition in the insight phase, $b$ = `r filter(contrast_table_control, component == "alpha_beta" & phase == "Insight")$estimate`%, $t$(`r print_df(filter(contrast_table_control, component == "alpha_beta" & phase == "Insight")$df)`) = `r filter(contrast_table_control, component == "alpha_beta" & phase == "Insight")$t_value`, $p_\text{corr}$ `r print_p(filter(contrast_table_control, component == "alpha_beta" & phase == "Insight")$p_value)`, as well as in the post-insight phase, $b$ = `r filter(contrast_table_control, component == "alpha_beta" & phase == "Post-insight")$estimate`%, $t$(`r print_df(filter(contrast_table_control, component == "alpha_beta" & phase == "Post-insight")$df)`) = `r filter(contrast_table_control, component == "alpha_beta" & phase == "Post-insight")$t_value`, $p_\text{corr}$ `r print_p(filter(contrast_table_control, component == "alpha_beta" & phase == "Post-insight")$p_value)`.
 
