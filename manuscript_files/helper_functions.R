@@ -622,3 +622,5 @@ plot_tfr_topos <- function(tfr_grand_ave,
   ) +
     draw_plot(colorbar, x = -0.28, y = 0.445)
 }
+
+print_df <- function(x) format(round(x), big.mark = ",")
