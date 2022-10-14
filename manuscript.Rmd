@@ -57,9 +57,9 @@ editor_options:
   chunk_output_type: console
   
 output:
-  papaja::apa6_docx: default
   papaja::apa6_pdf:
     latex_engine: xelatex
+  papaja::apa6_docx: default
 
 header-includes:
   - \geometry{a4paper}
@@ -263,27 +263,27 @@ read_log <- function(log_file) {
     list(
 
       # Informed condition: Matching keywords and positive response
-      "Informed" = item_id[
+      Informed = item_id[
         phase == "Insight" & keywords == "Match" & response %in% c(3, 4)
       ],
 
       # Naive condition: Non-matching keywords and negative response
-      "Naive" = item_id[
+      Naive = item_id[
         phase == "Insight" & keywords == "Non-match" & response %in% c(1, 2)
       ],
 
       # Exclude: Matching keywords and negative response
-      "Exclude_informed" = item_id[
+      Exclude_informed = item_id[
         phase == "Insight" & keywords == "Match" & response %in% c(1, 2)
       ],
 
       # Exclude: Non-matching keywords and positive response
-      "Exclude_naive" = item_id[
+      Exclude_naive = item_id[
         phase == "Insight" & keywords == "Non-match" & response %in% c(3, 4)
       ],
 
       # Exclude: Positive response *before* any info was presented
-      "Exclude_known" = item_id[phase == "Pre-insight" & response == 4]
+      Exclude_known = item_id[phase == "Pre-insight" & response == 4]
     )
   })
 
@@ -329,7 +329,6 @@ if (run$eeg_processing) {
     vhdr_files = vhdr_files,
     log_files = logs,
     output_dir = output_dir,
-    epochs_dir = here(output_dir, "epochs"),
     report_dir = report_dir,
     downsample_sfreq = 125.0,
     bad_channels = NULL,
@@ -343,10 +342,10 @@ if (run$eeg_processing) {
     baseline = c(-0.2, 0.0),
     reject_peak_to_peak = 150.0,
     components = list(
-      "name" = list("P1", "N170", "N400"),
-      "tmin" = list(0.1, 0.15, 0.4),
-      "tmax" = list(0.15, 0.2, 0.7),
-      "roi" = list(
+      name = list("P1", "N170", "N400"),
+      tmin = list(0.1, 0.15, 0.4),
+      tmax = list(0.15, 0.2, 0.7),
+      roi = list(
         c("PO3", "PO4", "POz", "O1", "O2", "Oz"),
         c("P7", "P8", "PO7", "PO8", "PO9", "PO10"),
         c("C1", "C2", "Cz", "CP1", "CP2", "CPz")
@@ -365,9 +364,16 @@ if (run$eeg_processing) {
       c("Post-insight/Informed", "Post-insight/Naive"),
       c("Insight/Informed", "Insight/Exclude_informed")
     ),
+    tfr_components = list(
+      name = list("alpha_beta"),
+      tmin = list(0.6),
+      tmax = list(1.2),
+      fmin = list(8.0),
+      fmax = list(20.0),
+      roi = list(c("P3", "Pz", "P4", "PO3", "POz", "PO4"))
+    ),
     perm_tmin = -0.4,
-    perm_tmax = 1.4,
-    n_jobs = 1
+    perm_tmax = 1.4
   )
 }
 
@@ -437,7 +443,7 @@ fit_mixed_models <- function(dep, formula, data) {
   build <- buildmer(
     buildmerControl = buildmerControl(
       formula, data,
-      args = list("control" = lme4::lmerControl(
+      args = list(control = lme4::lmerControl(
         optimizer = "bobyqa", optCtrl = list(maxfun = 1e6)
       )),
       direction = c("backward", "backward"),
@@ -452,18 +458,17 @@ fit_mixed_models <- function(dep, formula, data) {
 
   # Compute marginal means and contrasts
   emm_options(lmer.df = "Satterthwaite", lmerTest.limit = Inf)
-  specs <- pairwise ~ condition | phase
   means <- emmeans(build@model, specs = c("phase", "condition"))
   contrasts <- contrast(means, "pairwise", simple = "condition") %>%
     summary(by = NULL, adjust = "bonferroni")
 
   # Create list of returns
   list(
-    "model" = build@model,
-    "summary" = build@summary,
-    "anova" = build@anova,
-    "means" = means,
-    "contrasts" = contrasts
+    model = build@model,
+    summary = build@summary,
+    anova = build@anova,
+    means = means,
+    contrasts = contrasts
   )
 }
 
@@ -478,14 +483,14 @@ if (run$mixed_models) {
 
   # Contrast coding for phase
   cbind(
-    c("Pre-insight" = -1, "Insight" = 1, "Post-insight" = 0),
-    c("Pre-insight" = 0, "Insight" = -1, "Post-insight" = 1)
+    c(`Pre-insight` = -1, `Insight` = 1, `Post-insight` = 0),
+    c(`Pre-insight` = 0, `Insight` = -1, `Post-insight` = 1)
   ) %>%
     t() %>%
     ginv() -> contrasts(trials_main$phase)
 
   # Contrast coding for condition
-  cbind(c("Informed" = 1, "Naive" = -1)) %>%
+  cbind(c(`Informed` = 1, `Naive` = -1)) %>%
     t() %>%
     ginv() -> contrasts(trials_main$condition)
 
@@ -692,20 +697,28 @@ if (run$control_analysis) {
 
   # Contrast coding for phase
   cbind(
-    c("Pre-insight" = -1, "Insight" = 1, "Post-insight" = 0),
-    c("Pre-insight" = 0, "Insight" = -1, "Post-insight" = 1)
+    c(`Pre-insight` = -1, `Insight` = 1, `Post-insight` = 0),
+    c(`Pre-insight` = 0, `Insight` = -1, `Post-insight` = 1)
   ) %>%
     t() %>%
     ginv() -> contrasts(trials_control$phase)
 
   # Contrast coding for condition
-  cbind(c("Informed" = 1, "Exclude_informed" = -1)) %>%
+  cbind(c(`Informed` = 1, `Exclude_informed` = -1)) %>%
     t() %>%
     ginv() -> contrasts(trials_control$condition)
 
-  # Fit the model for each component
+  # Fit the model for each ERP component
   map(deps, fit_mixed_models, formula = form, data = trials_control) %>%
     set_names(deps) -> models_control
+
+  # Fit an additional model for event-related power, controlling for RTs
+  trials_main$alpha_beta <- trials_main$alpha_beta * 100 # Convert to percent
+  form_rt <- ~ phase * condition + log(rt) +
+    (phase * condition | participant_id) +
+    (phase * condition | item_id)
+  models_control$alpha_beta <-
+    fit_mixed_models(form = form_rt, data = trials_main, dep = "alpha_beta")
 
   # Save models
   saveRDS(models_control, here(output_dir, "models_control.RDS"))
@@ -716,9 +729,6 @@ if (run$control_analysis) {
 }
 
 # Extract relevant statistics to print in the main text
-map(models_control, function(mod) as_tibble(mod$anova, rownames = "effect")) %>%
-  bind_rows(.id = "component") %>%
-  rename(f_value = `F value`, p_value = `Pr(>F)`) -> anova_table_control
 map(models_control, function(mod) as_tibble(mod$contrasts)) %>%
   bind_rows(.id = "component") %>%
   rename(t_value = `t.ratio`, p_value = `p.value`) -> contrast_table_control
