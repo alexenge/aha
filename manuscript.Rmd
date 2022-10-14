@@ -57,9 +57,9 @@ editor_options:
   chunk_output_type: console
   
 output:
-  papaja::apa6_docx: default
   papaja::apa6_pdf:
     latex_engine: xelatex
+  papaja::apa6_docx: default
 
 header-includes:
   - \geometry{a4paper}
