@@ -59,7 +59,6 @@ editor_options:
 output:
   papaja::apa6_pdf:
     latex_engine: xelatex
-  papaja::apa6_docx: default
 
 header-includes:
   - \geometry{a4paper}
