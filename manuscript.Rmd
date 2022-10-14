@@ -891,8 +891,8 @@ read_csv(here("example_stimuli", "stimuli.csv")) %>%
 ```{r, ress1a}
 # Helper function for printing model summary, ANOVA (F tests), and contrasts
 print_model_outputs <- function(model_object) {
-  model_object$summary$data <- NULL # Prevents cluttering the summary output
-  print(model_object$summary$data)
+  model_object$summary$call$data <- NULL # Prevents cluttering the output
+  print(model_object$summary)
   cat("\n")
   print(model_object$anova)
   cat("\nFollow-Up Contrasts (Simple Effects)\n")
