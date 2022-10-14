@@ -742,7 +742,7 @@ Contrasting the semantically informed condition and the failed insight condition
 Likewise, the reduction of the N400 was replicated in this control analysis, $b$ = `r filter(contrast_table_control, component == "N400" & phase == "Insight")$estimate` µV, $t$(`r filter(contrast_table_control, component == "N400" & phase == "Insight")$df`) = `r filter(contrast_table_control, component == "N400" & phase == "Insight")$t_value`, $p_\text{corr}$ `r print_p(filter(contrast_table_control, component == "N400" & phase == "Insight")$p_value)`, as was the late reduction in event-related power ($p_\text{cluster}$ = `r print_p(unique(filter(tfr_clusters, contrast == "Insight/Informed - Insight/Exclude_informed" & p_val < p_cluster)$p_val))`; see Supplementary Figure 1).
 This adds credibility to the notion that these effects are specific to those objects for which participants experienced a moment of insight induced by semantic information.
 
-Finally, we had wondered if the reduction in alpha/beta power might merely reflect differences in the timing of motor preparation between conditions, given the well-established link between motor processes and beta power over sensorimotor cortex [@kivalik2013].
+Finally, we had wondered if the reduction in alpha/beta power might merely reflect differences in the timing of motor preparation between conditions, given the well-established link between motor processes and beta power over sensorimotor cortex [@kilavik2013].
 To rule this out, we extracted single trial percent signal change based on the distribution of clusters from the permutation tests (time window 600–1,200 ms, frequency range 8–20 Hz, electrodes P3, Pz, P4, PO3, POz, and PO4; see Figures 3 and 4).
 We then subjected these to a linear-mixed effects model that controlled for log-transformed reaction time as a covariate of no interest.
 This confirmed the significant reduction in alpha/beta power for the semantically informed condition as compared to the naive condition in the insight phase, $b$ = `r filter(contrast_table_control, component == "alpha_beta" & phase == "Insight")$estimate`%, $t$(`r filter(contrast_table_control, component == "alpha_beta" & phase == "Insight")$df`) = `r filter(contrast_table_control, component == "alpha_beta" & phase == "Insight")$t_value`, $p_\text{corr}$ `r print_p(filter(contrast_table_control, component == "alpha_beta" & phase == "Insight")$p_value)`, as well as in the post-insight phase, $b$ = `r filter(contrast_table_control, component == "alpha_beta" & phase == "Post-insight")$estimate`%, $t$(`r filter(contrast_table_control, component == "alpha_beta" & phase == "Post-insight")$df`) = `r filter(contrast_table_control, component == "alpha_beta" & phase == "Post-insight")$t_value`, $p_\text{corr}$ `r print_p(filter(contrast_table_control, component == "alpha_beta" & phase == "Post-insight")$p_value)`.
@@ -849,7 +849,9 @@ read_csv(here("example_stimuli", "stimuli.csv")) %>%
   ) %>%
   transmute(
     img = paste0(
-      "\\includegraphics[valign=c,scale=0.25]{example_stimuli/", item, ".png}"
+      "\\includegraphics[valign=c,scale=0.25]{example_stimuli/",
+      item_id,
+      ".png}"
     ),
     match = paste(match_ger, match_en, sep = "\n") %>%
       kableExtra::linebreak(align = "l", linebreaker = "\n"),
@@ -880,9 +882,8 @@ read_csv(here("example_stimuli", "stimuli.csv")) %>%
 ```{r, ress1a}
 # Helper function for printing model summary, ANOVA (F tests), and contrasts
 print_model_outputs <- function(model_object) {
-  model <- model_object$model
-  model@call$data <- NULL # Prevents cluttering the `summary` output
-  print(summary(model))
+  model_object$summary$data <- NULL # Prevents cluttering the summary output
+  print(model_object$summary$data)
   cat("\n")
   print(model_object$anova)
   cat("\nFollow-Up Contrasts (Simple Effects)\n")

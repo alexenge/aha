@@ -8,9 +8,7 @@ plot_fig1a <- function(files_dir) {
   require(cowplot)
 
   # Trial structure
-  example_stim <- magick::image_read(
-    here::here("materials", "unfamiliar", "103.png")
-  )
+  example_stim <- magick::image_read(here::here("example_stimuli", "103.png"))
   ggplot() +
     coord_cartesian(xlim = c(-100, 100), ylim = c(0, 100), expand = FALSE) +
     theme_void() +
