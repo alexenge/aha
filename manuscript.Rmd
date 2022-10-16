@@ -421,6 +421,24 @@ p_cluster <- 0.05 / 3 # Bonferroni-corrected for three phases
 ```
 
 ```{r, mixed_models, include=FALSE}
+# Filter relevant conditions for the main analysis
+trials %>%
+  mutate(condition = factor(condition, levels = c("Informed", "Naive"))) %>%
+  drop_na() -> trials_main
+
+# Contrast coding for phase
+cbind(
+  c(`Pre-insight` = -1, `Insight` = 1, `Post-insight` = 0),
+  c(`Pre-insight` = 0, `Insight` = -1, `Post-insight` = 1)
+) %>%
+  t() %>%
+  ginv() -> contrasts(trials_main$phase)
+
+# Contrast coding for condition
+cbind(c(`Informed` = 1, `Naive` = -1)) %>%
+  t() %>%
+  ginv() -> contrasts(trials_main$condition)
+
 # Construct model formula
 form <- ~ phase * condition +
   (phase * condition | participant_id) +
@@ -475,25 +493,7 @@ fit_mixed_models <- function(dep, formula, data) {
 deps <- config$components$name
 if (run$mixed_models) {
 
-  # Filter relevant conditions for the main analysis
-  trials %>%
-    mutate(condition = factor(condition, levels = c("Informed", "Naive"))) %>%
-    drop_na() -> trials_main
-
-  # Contrast coding for phase
-  cbind(
-    c(`Pre-insight` = -1, `Insight` = 1, `Post-insight` = 0),
-    c(`Pre-insight` = 0, `Insight` = -1, `Post-insight` = 1)
-  ) %>%
-    t() %>%
-    ginv() -> contrasts(trials_main$phase)
-
-  # Contrast coding for condition
-  cbind(c(`Informed` = 1, `Naive` = -1)) %>%
-    t() %>%
-    ginv() -> contrasts(trials_main$condition)
-
-  # Actually fit the model for each ERP component
+  # Fit the model for each ERP component
   map(deps, fit_mixed_models, formula = form, data = trials_main) %>%
     set_names(deps) -> models
 
@@ -685,9 +685,6 @@ Black dots highlight EEG channels that were part of a cluster for which this dif
 ## Control Analysis
 
 ```{r, control_analysis, include=FALSE}
-# (Re-)do the actual model fitting if requested
-if (run$control_analysis) {
-
   # Filter relevant conditions for the control analysis
   conditions_control <- c("Informed", "Exclude_informed")
   trials %>%
@@ -706,6 +703,9 @@ if (run$control_analysis) {
   cbind(c(`Informed` = 1, `Exclude_informed` = -1)) %>%
     t() %>%
     ginv() -> contrasts(trials_control$condition)
+
+# (Re-)do the actual model fitting if requested
+if (run$control_analysis) {
 
   # Fit the model for each ERP component
   map(deps, fit_mixed_models, formula = form, data = trials_control) %>%
