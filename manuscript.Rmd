@@ -20,11 +20,7 @@ affiliation:
   - id            : "3"
     institution   : "Fachhochschule des Mittelstands, Bamberg"
 
-authornote: |
-  Alexander Enge \orcidlink{0000-0003-0100-2297} [https://orcid.org/0000-0003-0100-2297](0000-0003-0100-2297)
-  
-  Rasha Abdel Rahman \orcidlink{0000-0002-8438-1570} [https://orcid.org/0000-0002-8438-1570](0000-0002-8438-1570)
-  
+authornote: |  
   Number of pages: 23
 
   Number of figures: 4
@@ -35,8 +31,8 @@ authornote: |
 
   The authors declare no competing financial interests.
 
-  We would like to thank Nele Langosch for assistance with data collection as well as Guido Kiecker for technical support.
-  The materials and code for this study are available at [https://osf.io/uksbc](https://osf.io/uksbc).
+  We would like to thank Nele Langosch for assistance with the preparation of materials and data collection, Olaf Dimigen and the Neurocognitive Psychology lab at Humboldt-Universität zu Berlin for insightful discussions, as well as Guido Kiecker for technical support.
+  This work was supported by the Deutsche Forschungsgemeinschaft (DFG, German Research Foundation) under Germany’s Excellence Strategy (EXC 2002/1 "Science of Intelligence") project number 390523135 and grants AB277-5 and AB277-6 to R.A.R.
 
 floatsintext      : yes
 figurelist        : no
@@ -149,36 +145,28 @@ Instead, this knowledge seems to alter perception online, thus providing a compe
 # Introduction
 
 Does our perception of an object change once we discover what function it serves?
-This question speaks not only to our everyday experiences, where we encounter novel tools and gadgets in our dynamic working and private environments.
-It also pertains to the long-standing debate about the cognitive (im)penetrability [@pylyshyn1999] of perception by higher-level capacities such as semantic knowledge or language.
+This question speaks to the long-standing debate about the cognitive (im)penetrability [@pylyshyn1999] of perception by higher-level capacities such as semantic knowledge or language.
 According to one view, these cognitive capacities kick in only after the retinal input has been processed by a specialized module for visual perception [@firestone2016; @fodor1983].
-This module is encapsulated from higher-level inputs and therefore processes the visual information in a purely feed-forward fashion, progressing from lower areas with small receptive field sizes to areas representing increasingly complex shapes and, eventually, whole objects [@dicarlo2012].
-This architecture has been mirrored in classical [e.g., @marr1982] and more contemporary [e.g., @krizhevsky2012] computer vision models, allowing them to achieve human-level performance in predicting object category labels from images [for review, see @lindsay2020].
+This module is encapsulated from higher-level inputs and processes visual information in a purely feed-forward fashion, progressing from lower areas with small receptive field sizes to areas representing increasingly complex shapes and, eventually, whole objects [@dicarlo2012].
 
-The cognitive impenetrability hypothesis is challenged by the alternative view that perception dynamically interacts with different aspects of cognition from early on [@churchland1994; @lupyan2015].
-This view is supported by a variety of theoretical, behavioral, and neurophysiological accounts.
-On the theoretical level, the reverse hierarchy theory [@ahissar2004; @hochstein2002] posits that conscious processing initially occurs at the level of whole objects or object categories.
-Only after this high-level interpretation has been obtained, more fine-grained visual details---if relevant for the current task---are being accessed via top-down connections.
-Along similar lines, Bayesian inference and predictive coding theories [e.g., @yuille2006; @clark2013; @panichello2013] propose bi-directional loops of predictions and prediction errors between visual and non-visual processes.
+The cognitive impenetrability hypothesis is challenged by the alternative view that perception dynamically interacts with different cognitive aspects from early on [@ahissar2004; @churchland1994; @clark2013; @lupyan2015; @lupyan2020; @yuille2006].
+On the behavioral level, this is supported by psychological studies that found differences in ratings, detection rates, or reaction times for visual stimuli depending on their emotional [e.g., @phelps2016], motivational [e.g., @balcetis2010], linguistic [e.g., @boutonnet2015] or semantic [e.g., @gauthier2003] content.
+However, some studies have received legitimate criticism for confounding tentative high-level effects with low-level differences between conditions, as well as for not being able to discern perceptual from post-perceptual (e.g., memory-related) effects [@firestone2016].
 
-On the behavioral level, these ideas are supported by psychological studies that found differences in ratings, detection rates, or reaction times for visual stimuli depending on their emotional [e.g., @phelps2016], motivational [e.g., @balcetis2010], linguistic [e.g., @boutonnet2015] or semantic [e.g., @gauthier2003] content.
-However, some of these studies have received legitimate criticism for confounding tentative high-level effects with low-level differences between conditions, as well as for not being able to discern between perceptual and post-perceptual (e.g., memory-related) effects [@firestone2016].
-
-On the neurophysiological level, event-related potentials (ERPs) measured from the human EEG can mitigate most of these concerns:
+On the physiological level, event-related potentials (ERPs) measured from the human EEG can mitigate most of these concerns:
 Their excellent temporal resolution makes it possible to probe how early one can detect influences of high-level (e.g., semantic) information.
-To this end, participants in previous studies by our lab and others were trained to associate visual objects with different amounts of semantic information.
-After training, an orthogonal task was used to compare the ERPs in response to semantically trained objects versus non-semantically trained objects.
-This contrast revealed differences not only in late ERP components associated with semantic processing (i.e., the N400 component) but also in the visual P1 (or P100) component [@abdelrahman2008; @maier2019; @samaha2018; @weller2019].
+To this end, participants in previous studies by our lab and others learned to associate visual objects with different amounts of semantic information.
+After learning, an orthogonal task was used to compare ERPs in response to objects learned with versus without semantic information.
+This revealed differences not only in late ERP components associated with semantic processing (i.e., the N400 component) but also in the visual P1 component [@abdelrahman2008; @maier2019; @samaha2018; @weller2019].
 The early peak of this component and its source in the occipital cortex [@abdelrahman2008] point to an immediate effect of semantic knowledge on visual perception.
-It is less clear, however, if these effects arise immediately once participants obtain semantic information about an object or if, instead, they require more extensive amounts of training.
-Closely related to this question is the debate if tentative top-down effects of semantic cognition on perception act in an online fashion (i.e., directly modulating perceptual processing), or more indirectly, by altering stored visual representations over the course of training, which would then get reactivated once the object is reencountered later on.
+It is less clear, however, if this tentative top-down effect of semantic cognition on perception acts in an online fashion (i.e., directly modulating perceptual processing), or more indirectly, by altering stored visual representations over the course of learning, which would then get reactivated once the object is reencountered later on.
 
-To answer these open questions, we measured ERPs in response to unfamiliar objects directly while participants gained a semantic understanding of their function.
-To this end, we presented half of the objects together with matching keywords, thus allowing participants to understand what kind of object they were viewing, or together with non-matching keywords, thus keeping the perception of the object semantically naive.
-We then presented the same objects again to test for downstream effects of semantic information, as in previous studies.
+To answer this question, we measured ERPs in response to unfamiliar objects directly while participants gained a semantic understanding of their function.
+We presented half of the objects together with matching keywords, thus allowing participants to understand what kind of object they were viewing, or together with non-matching keywords, thus keeping the perception of the object semantically naive.
+We then presented the same objects again to test for downstream effects of semantic information.
 We examined the influence of semantic information on ERPs associated with lower-level visual perception (P1 component), higher-level visual perception (N170 component), and semantic processing (N400 component).
 We hypothesized that semantic information would have instant effects on visual perception, by which we mean (a) that these effects can already be observed on the same trial as the semantic information is being presented for the first time, and (b) that these effects are found not only in later, higher-level cognition-related ERP components (i.e., N400), but also in earlier, perception-related ERP components (i.e., P1 and/or N170).
-We furthermore conducted an exploratory time-frequency analysis to test if semantic information also has instant effects on event-related power which, unlike ERP effects, do not need to be tightly phase-locked to stimulus onset.
+We furthermore conducted an exploratory time-frequency analysis to test for effects on event-related power which, unlike ERP effects, do not need to be tightly phase-locked to stimulus onset.
 
 # Materials and Methods
 
@@ -187,20 +175,20 @@ We furthermore conducted an exploratory time-frequency analysis to test if seman
 Participants were 48 German native speakers (31 female, 17 male) with a mean age of 23.5 years (range 18--32 years) and no history of psychological disorder or treatment.
 No a priori power analysis was carried out and the sample size was chosen in line with previous EEG studies on object processing in our lab.
 All participants were right-handed according to the Edinburgh inventory [@oldfield1971] and reported normal or corrected-to-normal vision.
-They provided written informed consent before starting the experiment and received a compensation of €8 per hour for participating.
+They provided written informed consent before starting the experiment and received a monetary compensation of €8 per hour for participating.
 
 ## Stimuli
 
 Stimuli consisted of 240 grayscale photographs of real-world objects.
 Of these, 120 stimuli were well-known everyday objects (e.g., a bicycle, a toothbrush).
 These served as filler stimuli of no interest.
-The other 120 stimuli were rare objects presumed to be unfamiliar to the majority of participants (e.g., a galvanometer, an udu drum; see Supplementary Table 1 for the full list).
+The other 120 stimuli were rare objects presumed to be unfamiliar to the majority of participants (e.g., a galvanometer, an udu drum; see Supplementary Table 1 for example images).
 All stimuli were presented on a light blue background with a size of 207 × 207 pixels on a 19-inch LCD monitor with a resolution of 1,280 × 1,024 pixels and a refresh rate of 75 Hz.
 At a standardized viewing distance of 90 cm, the images subtended approximately 3.9 degrees of participants' horizontal and vertical visual angle.
 
-For each unfamiliar object, a pair of German keywords (a noun and a verb) was selected, describing the typical function or use of the object in a way that could be related to its visual features and their configuration (e.g., electric current, measuring; clay pot, drumming; see Supplementary Table 1 for the full list).
+For each unfamiliar object, a pair of German keywords (a noun and a verb) was selected, describing the typical function or use of the object in a way that could be related to its visual features and their configuration (e.g., *Stromstärke, messen* [electric current, measuring]; *Tonpott, trommeln* [clay pot, drumming]; see Supplementary Table 1 for more examples).
 As our central experimental manipulation, half of the objects were presented together with keywords that correctly matched their respective function, whereas the other half of the objects were presented together with non-matching keywords belonging to one of the other objects.
-The matching keywords were expected to induce semantically informed perception, that is, participants suddenly understanding what kind of object they were viewing.
+The matching keywords were expected to induce semantically informed perception, that is, participants suddenly understanding what kind of object they were viewing.
 The non-matching keywords were expected to prevent such an understanding and keep the perception of the object semantically naive.
 All participants saw each unfamiliar object with only one type of keywords (matching or non-matching).
 This assignment of keywords to objects was counterbalanced across participants so that each object was presented with matching keywords (leading to semantically informed perception) and non-matching keywords (leading to naive perception) to an equal number of participants.
@@ -212,7 +200,12 @@ The experiment consisted of three phases (see Figure \@ref(fig:fig1)A).
 In the *pre-insight* phase, after written informed consent had been obtained and the EEG had been prepared, all 240 familiar and unfamiliar objects were presented once in random order and without any keywords.
 Each trial consisted of a fixation cross presented in the middle of the screen for 0.5 s, followed by the presentation of the object until participants made a response or until a time out after 3 s.
 The inter-trial interval was 0.5 s and participants took a self-timed break after each block of 60 objects.
-The task, which was kept the same across all three phases of the experiment, was to classify each object using one of four response alternatives: (a) "I know what this is or have a strong assumption," (b) "I have an assumption what this is," (c) "I have rather no assumption what this is," or (d) "I don't know what this is and have no assumption." Participants were asked to respond as quickly and as accurately as possible by pressing one out of four buttons with the index or middle finger of their left or right hand, respectively.
+The task, which was kept the same across all three phases of the experiment, was to classify each object using one of four response alternatives:
+(a) *Ich weiß was das ist oder habe eine starke Vermutung* [I know what this is or have a strong assumption],
+(b) *Ich habe eher eine Vermutung, was das ist* [I rather have an assumption what this is],
+(c) *Ich habe eher keine Vermutung, was das ist* [I rather have no assumption what this is], or
+(d) *Ich weiß nicht, was das ist, und habe auch keine Vermutung* [I don’t know what this is and have no assumption].
+Participants were asked to respond as quickly and as accurately as possible by pressing one out of four buttons with the index or middle finger of their left or right hand, respectively.
 The mapping of the rating scale to the four buttons (left to right or right to left) was counterbalanced across participants.
 
 ```{r, eeg_processing, include=FALSE}
@@ -550,7 +543,7 @@ Objects were assigned to the semantically informed condition if and only if they
 This was the case for an average of `r mean(objects_per_condition$Informed)` objects per participant (= `r percent(mean(objects_per_condition$Informed) / 60, accuracy = 0.1)` of objects presented with matching keywords).
 Complementarily, objects were assigned to the naive condition if and only if they were presented with non-matching keywords and the participant responded with not knowing what the object was or having rather no assumption.
 This was the case for an average of `r mean(objects_per_condition$Naive)` objects per participant (= `r percent(mean(objects_per_condition$Naive) / 60, accuracy = 0.1)` of objects presented with non-matching keywords).
-This same assignment of objects conditions based on the insight phase was carried over to the pre-insight and post-insight phases.
+This same assignment of objects to conditions based on the insight phase was carried over to the pre-insight and post-insight phases for each participant individually.
 This allowed us to test, on the one hand, if the objects from both conditions differed in important aspects even before any keywords were presented (pre-insight phase) and, on the other hand, if the semantic understanding acquired in the insight phase had any down-stream effects on the subsequent perception of the objects (post-insight phase).
 
 ## EEG Recording and Preprocessing
@@ -560,7 +553,7 @@ Two additional external electrodes were placed on the right mastoid (M2) and bel
 Electrode impedances were kept below 5 kΩ.
 An online band-pass filter with a high-pass time-constant of 10 s (0.016 Hz) and a low-pass cutoff frequency of 1000 Hz was applied before digitizing the signal at a sampling rate of 500 Hz.
 
-The data were preprocessed offline using custom scripts, available in the hu-neuro-pipeline package (Version `r pipeline_version`; https://github.com/alexenge/hu-neuro-pipeline) and based on the MNE-Python software [Version `r mne_version`\; @gramfort2013] in Python [Version `r py_version()`\; @vanrossum2009].
+The data were preprocessed offline using custom functions (available at [https://github.com/alexenge/hu-neuro-pipeline/tree/v0.6.1](https://github.com/alexenge/hu-neuro-pipeline/tree/v0.6.1)) based on the MNE-Python software [Version `r mne_version`\; @gramfort2013] in Python [Version `r py_version()`\; @vanrossum2009].
 First, the data were downsampled to `r config$downsample_sfreq` Hz and re-referenced to the common average of all scalp channels.
 Next, artifacts resulting from blinks and eye movements were removed via independent component analysis (ICA) on a low-pass filtered copy of the data (cutoff = 1 Hz).
 A variable number of components per participant were extracted from an initial principal component analysis (PCA) so that they explained at least `r percent(config$ica_n_components)` of the variance in the data (mean = `r mean(unlist(config$auto_ica_n_components))` components, range `r min(unlist(config$auto_ica_n_components))`--`r max(unlist(config$auto_ica_n_components))`).
@@ -576,6 +569,7 @@ These epochs were baseline-corrected by subtracting the average voltage during t
 Epochs containing artifacts despite ICA, defined as peak-to-peak amplitudes exceeding `r config$reject_peak_to_peak` µV, were removed from further analysis.
 This led to the exclusion of an average of `r mean(rejected_epochs)` trials per participant (= `r percent(mean(rejected_epochs) / 360, accuracy = 0.1)`; range `r min(rejected_epochs)`--`r max(rejected_epochs)` trials).
 Single-trial event-related potentials were computed as the mean amplitude across time windows and regions of interests (ROIs) defined a priori, namely 100--150 ms at channels PO3, PO4, POz, O1, O2, and Oz and for the P1 component, 150--200 ms at channels P7, P8, PO7, PO8, PO9, and PO10 for the N170 component, and 400--700 ms at channels C1, C2, Cz, CP1, CP2, and CPz for the N400 component.
+We chose a later time window for the N400 component than what is typically used in experiments with verbal materials (e.g., 300--500 ms), in accordance with a previously published data set that showed the 400--700 ms time window to be most robustly associated with the semantic processing of visual objects [@kovalenko2012].
 
 The resulting mean ERP amplitudes were analyzed on the single-trial level using linear mixed-effects regression models because these models allow to control for repeated measures of participants and stimuli, while also being robust against an unbalanced number of trials per condition [@baayen2008; @burki2018; @fromer2018].
 We computed three models predicting P1, N170, and N400 amplitudes, respectively.
@@ -586,7 +580,7 @@ All models were fitted in R [Version `r as.character(packageVersion("base"))`\; 
 The model selection algorithm via likelihood ratio tests was performed using the buildmer package [Version `r as.character(packageVersion("buildmer"))`\; @R-buildmer].
 
 To investigate if semantically informed perception had an influence on the ERPs within each phase of the experiment, we calculated follow-up comparisons contrasting the semantically informed condition against the naive condition within the pre-insight, insight, and post-insight phases.
-This was done using the emmeans package [Version `r as.character(packageVersion("emmeans"))`\; @R-emmeans].
+This was done using the emmeans package [Version `r as.character(packageVersion("emmeans"))`\; @R-emmeans] and with Bonferroni correction for the three separate tests.
 All *p* values were computed by approximating the relevant denominator degrees of freedom using Satterthwaite's method as implemented in the lmerTest package [Version `r as.character(packageVersion("lmerTest"))`\; @R-lmerTest].
 
 ## Time-Frequency Analysis
@@ -685,24 +679,24 @@ Black dots highlight EEG channels that were part of a cluster for which this dif
 ## Control Analysis
 
 ```{r, control_analysis, include=FALSE}
-  # Filter relevant conditions for the control analysis
-  conditions_control <- c("Informed", "Exclude_informed")
-  trials %>%
-    mutate(condition = factor(condition, levels = conditions_control)) %>%
-    drop_na() -> trials_control
+# Filter relevant conditions for the control analysis
+conditions_control <- c("Informed", "Exclude_informed")
+trials %>%
+  mutate(condition = factor(condition, levels = conditions_control)) %>%
+  drop_na() -> trials_control
 
-  # Contrast coding for phase
-  cbind(
-    c(`Pre-insight` = -1, `Insight` = 1, `Post-insight` = 0),
-    c(`Pre-insight` = 0, `Insight` = -1, `Post-insight` = 1)
-  ) %>%
-    t() %>%
-    ginv() -> contrasts(trials_control$phase)
+# Contrast coding for phase
+cbind(
+  c(`Pre-insight` = -1, `Insight` = 1, `Post-insight` = 0),
+  c(`Pre-insight` = 0, `Insight` = -1, `Post-insight` = 1)
+) %>%
+  t() %>%
+  ginv() -> contrasts(trials_control$phase)
 
-  # Contrast coding for condition
-  cbind(c(`Informed` = 1, `Exclude_informed` = -1)) %>%
-    t() %>%
-    ginv() -> contrasts(trials_control$condition)
+# Contrast coding for condition
+cbind(c(`Informed` = 1, `Exclude_informed` = -1)) %>%
+  t() %>%
+  ginv() -> contrasts(trials_control$condition)
 
 # (Re-)do the actual model fitting if requested
 if (run$control_analysis) {
@@ -737,17 +731,15 @@ There are at least two important alternative explanations for our finding that s
 First, differences in the P1 and/or N170 components might be driven by low-level visual differences between object images rather than by our experimental manipulation (matching versus non-matching keywords in the insight phase).
 We ruled out this alternative explanation by counter-balancing the assignment of objects to conditions across participants, meaning that the same visual object entered the analysis in both conditions on an approximately equal number of trials, barring differences in participants' classification of the object and differences in the number of rejected EEG trials (see Materials and Methods).
 Furthermore, we did not detect reliable differences between the two conditions in the pre-insight phase, that is, before any keywords had been presented.
-It therefore seems unlikely that low-level differences could account for the tentative effects of semantic information reported above.
+It therefore seems unlikely that low-level differences could account for the effects of semantic information reported above.
 
 Second, there is an alternative explanation specifically for the effects observed in the insight phase, when the objects were presented together with matching or non-matching keywords.
-Namely, the early difference in the N170 component might in fact not be due to semantic information changing the processing of objects in the semantically informed condition (as we had hypothesized), but rather a mismatch response to the objects in the naive condition.
-In this condition, objects were presented with non-matching keywords that led participants to indicate that they did not understand what kind of object they were viewing.
-These non-matching keywords might have primed participants to expect a certain set of visual features that did actually not come true once the object was displayed, potentially provoking a fast and strong brain response within the first 200 ms.
+The N170 modulation might in fact not be due to semantic information changing the processing of objects in the semantically informed condition (as we had hypothesized), but rather a mismatch response to the objects in the naive condition.
+The non-matching keywords might have primed participants to expect a certain set of visual features that did actually not come true once the object was displayed, potentially provoking a fast and strong brain response within the first 200 ms.
 However, in a control analysis for this alternative explanation, we could show that the N170 effect in the insight phase does not depend on the naive condition.
-For this control analysis, we again used the semantically informed condition as defined above, but contrasted it against a different control condition.
-Namely, we used those objects that were presented with matching keywords (as in the semantically informed condition) but for which participants failed to capitalize on the keywords and instead indicated that they still did not know what kind of object they were viewing (a kind of "failed insight").
+For this control analysis, we contrasted the semantically informed condition (i.e., matching key words and participants indicating in their response that they knew what the object was or had an assumption) against a different control condition, namely, those objects that were presented with matching keywords (as in the semantically informed condition), but for which participants failed to capitalize on the keywords and instead indicated that they still did not know what kind of object they were viewing (a kind of "failed insight").
 This was the case for an average of `r mean(objects_per_condition$Exclude_informed)` objects per participant (= `r percent(mean(objects_per_condition$Exclude_informed) / 60, accuracy = 0.1)` of objects presented with matching keywords).
-Contrasting the semantically informed condition and the failed insight condition, we again observed an enlarged (i.e., more negative) N170 component during semantically informed perception, $b$ = `r filter(contrast_table_control, component == "N170" & phase == "Insight")$estimate` µV, $t$(`r print_df(filter(contrast_table_control, component == "N170" & phase == "Insight")$df)`) = `r filter(contrast_table_control, component == "N170" & phase == "Insight")$t_value`, $p_\text{corr}$ `r print_p(filter(contrast_table_control, component == "N170" & phase == "Insight")$p_value)`.
+Contrasting the semantically informed condition and the failed insight condition with matching key words, we again observed an enlarged (i.e., more negative) N170 component during semantically informed perception, $b$ = `r filter(contrast_table_control, component == "N170" & phase == "Insight")$estimate` µV, $t$(`r print_df(filter(contrast_table_control, component == "N170" & phase == "Insight")$df)`) = `r filter(contrast_table_control, component == "N170" & phase == "Insight")$t_value`, $p_\text{corr}$ `r print_p(filter(contrast_table_control, component == "N170" & phase == "Insight")$p_value)`.
 Likewise, the reduction of the N400 was replicated in this control analysis, $b$ = `r filter(contrast_table_control, component == "N400" & phase == "Insight")$estimate` µV, $t$(`r print_df(filter(contrast_table_control, component == "N400" & phase == "Insight")$df)`) = `r filter(contrast_table_control, component == "N400" & phase == "Insight")$t_value`, $p_\text{corr}$ `r print_p(filter(contrast_table_control, component == "N400" & phase == "Insight")$p_value)`, as was the late reduction in event-related power ($p_\text{cluster}$ = `r print_p(unique(filter(tfr_clusters, contrast == "Insight/Informed - Insight/Exclude_informed" & p_val < p_cluster)$p_val))`; see Supplementary Figure 1).
 This adds credibility to the notion that these effects are specific to those objects for which participants experienced a moment of insight induced by semantic information.
 
@@ -758,73 +750,63 @@ This confirmed the significant reduction in alpha/beta power for the semanticall
 
 # Discussion
 
-We investigated if gaining a semantic understanding of visual objects has an influence on how we perceive them.
-To this end, we measured ERPs while participants viewed unfamiliar objects before, while, and after receiving semantic information about them.
-For half of the objects, this information was matching the function of the object, thus leading to semantically informed perception.
-For the other half of the objects, the information was non-matching, thus keeping the perception of the object semantically naive.
-We found that semantically informed perception was immediately accompanied by enlarged (i.e., more negative) ERP amplitudes in the N170 component and reduced (i.e., less negative) ERP amplitudes in the N400 component.
-When the same objects were presented once more (without the semantic information), the N400 component remained significantly reduced and we also observed a modulation of the P1 component, which was enlarged (i.e., more positive) in response to objects that had previously triggered semantically informed perception.
+We found that providing participants with semantic information about previously unfamiliar objects instantly led to enlarged (i.e., more negative) ERP amplitudes in the N170 component and reduced (i.e., less negative) ERP amplitudes in the N400 component.
+When the same objects were presented once more (without the semantic information), the N400 component remained reduced and the P1 component was now enlarged (i.e., more positive) in response to objects that had previously triggered semantically informed perception.
 Finally, an exploratory time-frequency analysis revealed that semantically informed perception was accompanied by a late reduction in event-related power in the alpha and lower beta ranges.
-Like the ERP effects, this difference immediately occurred on the first trial on which the objects were presented together with the critical semantic information, and it recurred when the objects were presented once more without any information.
 
-The reduction of the N400 component (400--700 ms after object onset) during semantically informed perception was the numerically largest effect.
-It indicates that acquiring an understanding of the objects in the insight phase lessened participants' demand for effortful semantic processing in comparison to the naive condition [@kutas2011].
-This finding replicates previous work showing that N400 amplitudes are larger in response to pictures when they are either difficult to understand in and of themselves [e.g., @supp2005; @abdelrahman2008] or difficult to integrate into the preceding context [e.g., @barrett1990; @ganis1996; @hirschfeld2011].
-The latency of this effect and the computational role of the N400 component [@bornkessel-schlesewsky2019; @lau2008; @rabovsky2018] suggest that it has a post-perceptual locus in the semantic system.
+The N400 effect during semantically informed perception indicates that acquiring an understanding of the objects lessened participants' demand for effortful semantic processing [@kutas2011].
+It replicates previous work showing that N400 amplitudes are larger in response to pictures when they are either difficult to understand in and of themselves [e.g., @abdelrahman2008; @supp2005] or difficult to integrate into the preceding context [e.g., @barrett1990; @ganis1996; @hirschfeld2011].
+The latency of this effect and the computational role of the N400 [@lau2008; @rabovsky2018; @bornkessel-schlesewsky2019] suggest a post-perceptual locus in the semantic system.
 
-In contrast to the N400, the N170 component (150--200 ms after object onset) was modulated only on those initial trials on which the objects were presented together with the relevant semantic information.
-It therefore constitutes an online marker of semantic insight, that is, of participants suddenly understanding the visual objects in the light of the additional information provided by the verbal keywords.
-The N170 is typically associated with the holistic perception of faces [@eimer2011; @sagiv2001] and other stimuli of visual expertise [@rossion2002; @tanaka2001].
-It being enlarged during semantically informed perception may reflect that the additional semantic information made participants experience the configuration of the visual features of the objects in a new and meaningful way.
-This interpretation is supported by previous findings with similar experimental paradigms in the domain of face perception [@bentin2002].
-In this study, participants showed a face-like (i.e., enlarged) N170 response to a scrambled version of a schematic face after but not before they were primed with the intact version of the same face.
-This effect was absent when a visual control stimulus (a non-face object) was shown instead of the intact face.
-In the domain of non-face stimuli, enlarged N170 amplitudes have also been observed when participants were asked to discriminate between composite line drawings of meaningful objects as compared to composite line drawings of non-objects [@beaucousin2011].
-Of note, this effect was present only when participants were asked to decide based on the global shape of the object and it was reversed in polarity when they were asked to decide based on the constituent parts of the object.
+Our exploratory time-frequency analysis revealed a late (> 600 ms) reduction in post-stimulus power in the alpha and lower beta ranges (approx. 8--20 Hz).
+While not predicted in advance, this is consistent with the finding that the dampening of oscillations in this range is associated with a facilitation in representing stimulus-specific information [@griffiths2019] and with successfully forming new semantic memories [@hanslmayr2009].
+Like the N400 effect in the ERP, this reduction in power occurred as soon as participants had received the relevant semantic information and recurred once the same objects were re-encountered without any semantic information.
+
+In contrast to the N400 and event-related power, the N170 component was modulated only on those initial trials on which the relevant semantic information was presented directly before the object.
+It therefore constitutes an online marker of semantic insight, that is, of participants suddenly understanding the visual objects in the light of the information provided by the keywords.
+The N170 is typically associated with the holistic perception of faces [@sagiv2001; @eimer2011] and other stimuli of visual expertise [@tanaka2001; @rossion2002].
+It being enlarged during semantically informed perception may reflect that the semantic information made participants experience the configuration of the visual features of the objects in a new and meaningful way.
+This interpretation is supported by previous findings of enlarged N170 amplitudes for scrambled (schematic) face stimuli after participants had been shown the original version of the face [@bentin2002], as well as for line drawings of meaningful objects as compared to non-objects [@beaucousin2011]. 
 Together with the present study, these findings suggest an online impact of meaningfulness on the higher-level perception of visual objects, integrating across their visual features.
 
-The P1 component (100--150 ms after object onset), unlike the N400 and N170 components, was modulated by semantic information only one trial after this information had been obtained.
-This is consistent with previous studies showing modulations of the P1 component when participants had learned meaningful information about previously unfamiliar objects [@abdelrahman2008; @maier2018; @maier2019; @weller2019] or about familiar objects that were rendered difficult to recognize [@samaha2018].
-What the present study adds to these findings is that the P1 effect does not take an extensive learning history to develop.
-Instead, it can be observed as soon as one trial after semantic insight has happened. Because the P1 is typically associated with lower-level sensory processing [e.g., @johannes1995; @luck2014; @pratt2011], we take its susceptibility to semantic information as an indicator that knowledge about the function of an object can change how we perceive it visually.
+The P1 component, unlike the N400 and N170 components, was modulated by semantic information only one trial after this information had been obtained.
+This is consistent with previous studies showing modulations of the P1 when participants had learned meaningful information about previously unfamiliar objects [@abdelrahman2008; @maier2018; @maier2019; @samaha2018; @weller2019].
+What the present study adds is that the P1 effect does not take an extensive learning history to develop.
+Instead, it can be observed as soon as one trial after semantic insight has happened.
+Because the P1 is typically associated with lower-level sensory processing [@johannes1995; @pratt2011; @luck2014], we take its susceptibility to semantic information as an indicator that knowledge about the function of an object can change how we perceive its low-level features.
 
 Both the N170 and the P1 components therefore seem to be sensitive to the semantic meaningfulness of visual objects.
-However, the finding that these two components were modulated in different phases of our experimental design suggests that they reflect different aspects of top-down processing with different time courses and neuroanatomical implementations.
-It has been pointed out that the time course of the N170 component is consistent with a top-down influence of (non-visual) areas in the prefrontal and parietal cortices on visual areas, whereas modulations of the P1 component seems to reflect recurrent processing *within* the visual system [@wyatte2014].
+The finding that these two components were modulated in different phases of our experimental design suggests that they reflect different aspects of top-down processing with different time courses and neuroanatomical implementations.
+The time course of the N170 is consistent with a top-down influence of (non-visual) areas in the prefrontal and temporal-parietal cortices on visual areas, whereas modulations of the P1 component seem to reflect recurrent processing within the visual system [@wyatte2014].
 Here we could show that the former pathway seems to be able to convey semantic information instantaneously (i.e., within the same trial), whereas the latter pathway seems to take at least one additional encounter with the visual object to emerge.
+While the limited spatial resolution of the EEG precludes precise localization, there is converging fMRI evidence showing that semantic information can feed back into higher-level areas in the lateral occipital cortex (LOC) and early retinotopic cortex [areas V1, V2, and V3\; @hsieh2010], consistent with the neural generators of the N170 and P1 components in the ERP.
 
-While the limited spatial resolution of the EEG precludes a precise localization of these effects within the ventral stream for object recognition, there is converging evidence coming from fMRI showing that semantic information can feed back into the earliest of visual areas.
-@hsieh2010 showed participants indiscernible two-tone ("Mooney") versions of images before and after showing them the original versions. They found that the brain responses to the original image were correlated more strongly with the second presentation of the Mooney image (after insight had taken place) than with the first presentation of the Mooney image (before insight had taken place).
-This increase in representational similarity was observed not only in higher-level object-sensitive areas in the lateral occipital cortex (LOC), but also in early retinotopic cortex (areas V1, V2, and V3).
-These cortical regions are consistent with the neural generators of the N170 and P1 components in the ERP, which we have found to be sensitive to the semantically informed perception of previously unfamiliar objects.
-
-On a theoretical level, the top-down modulation of these visual ERPs by semantic information challenges a modular view of visual perception [@firestone2016; @fodor1983; @pylyshyn1999; but see @clarke2020].
-However, proponents of the modular view have pointed out important shortcomings of previous studies that had claimed to demonstrate top-down effects of cognition on perception [@firestone2016; @machery2015].
-We took care to address as many of these shortcomings as possible in the present study:
-First, we showed that no difference between conditions had been present before any semantic information was presented.
-Second, we used an objective and time-resolved measure (ERPs) to disentangle effects with an early, more perceptual locus from those with a late, more post-perceptual locus.
+The top-down modulation of visual ERPs by semantic information challenges a modular view of visual perception [@fodor1983; @pylyshyn1999; but see @clarke2020].
+Proponents of this view have pointed out important shortcomings of previous studies that had claimed to demonstrate top-down effects of cognition on perception [@firestone2016; @machery2015].
+We addressed as many of these shortcomings as possible:
+First, no difference between conditions had been present before any semantic information was presented.
+Second, we used ERPs as an objective and time-resolved measure to disentangle perceptual and post-perceptual effects.
 Third, we reduced response and demand biases by keeping the manipulation (i.e., matching or non-matching keywords) obscure to the participants and by including well-known objects as filler stimuli.
 Fourth, we precluded low-level visual differences between conditions by counterbalancing the assignment of objects to conditions across participants.
-Fifth, we reduced priming and attentional effects by presenting all objects in a randomized order and at the same location.
+Fifth, we reduced priming and attentional effects by presenting all objects in a randomized order.
 Sixth, we reduced memory effects by using only unfamiliar objects and by measuring online ERPs rather than delayed behavioral responses.
-We hope that these measures were effective in ruling out many alternative explanations for the top-down effects that we have observed, thus making a more compelling case against the claim that visual perception is "cognitively impenetrable."
+We hope that these measures were effective in ruling out many alternative explanations, thus making a compelling case against the "cognitively impenetrability" of visual perception.
 
-An interactive view of object vision with an abundance of top-down feedback also challenges the predominantly feed-forward models in computer vision [e.g., @marr1982; @serre2007].
-In fact, the lack of a semantic knowledge base that dynamically interacts with the processing of lower-level visual features may be one key reason why even state-of-the-art deep-learning algorithms need orders of magnitude more training examples to achieve human-level performance in object recognition.
-For these models, single-trial learning of previously unfamiliar objects, as was observed on the behavioral and on the neurophysiological level in the present study, seems to be out of reach until the models overcome this "barrier of meaning" [@mitchell2020].
-Drawing inspiration from cognitive psychology and human neuroscientific data may help to make these models more biologically plausible and, at the same time, more data efficient.
+A theoretical framework that would explicitly predict the observed P1 and N170 effects in our study is lacking at present.
+The effects are consistent, however, with the reverse hierarchy theory [@ahissar2004], which posits that objects first enter our visual consciousness at an abstract, conceptual level. Once this initial "vision at a glance" has taken place, feedback connections to earlier layers of the visual system are being accessed to extract the relevant lower-level features ("vision with scrutiny").
+This reverse trajectory down the visual hierarchy may explain (a) the semantically induced changes to the fMRI signal in LOC and retinotopic cortex [@hsieh2010] as well as (b) the modulations of early visual ERP components observed in the present study and others [e.g., @abdelrahman2008; @maier2014; @samaha2018].
+An important role of top-down mechanisms for object recognition is also posited by theories of predictive coding and Bayesian inference [e.g., @clark2013; @lupyan2015; @panichello2013; @xu2007; @yuille2006].
+Despite the theoretical advances, detailed descriptions of these top-down effects at the algorithmic and implementational levels remain a challenge for future work.
 
-A theoretical framework that would explicitly predict or explain the observed P1 and N170 effects in our study is lacking at present.
-The effects are consistent, however, with the reverse hierarchy theory [@ahissar2004; @hochstein2002], which posits that objects first enter our visual consciousness at an abstract, conceptual level.
-Once this initial "vision at a glance" has taken place, feedback connections to earlier layers of the visual system are being accessed to extract the relevant lower-level features ("vision with scrutiny").
-This reverse trajectory down the visual hierarchy may explain (a) the semantically induced changes to the fMRI signal in LOC and retinotopic cortex [@hsieh2010] as well as (b) the modulations of early visual ERP components observed in the present study and others [@abdelrahman2008; @maier2014; @maier2019; @samaha2018; @weller2019]. 
-Besides this specific theory, an important role of top-down mechanisms for vision, or object recognition more specifically, is also posited by the family of predictive coding and Bayesian inference theories [e.g., @yuille2006; @clark2013; @lupyan2015; @panichello2013; @xu2007].
-Despite the theoretical advances, a detailed description of these top-down effects at the algorithmic and implementational level remains a challenge for future work [@marr1982].
+An interactive view of visual object processing with an abundance of top-down feedback also challenges the predominantly feed-forward models in computer vision [e.g., @krizhevsky2012; @marr1982; @serre2007; for review, see @lindsay2020].
+The lack of semantic knowledge that dynamically interacts with the processing of visual features may be one key reason why even state-of-the-art deep-learning algorithms need orders of magnitude more training examples to achieve human-level performance in object recognition.
+For these models, single-trial learning seems to be out of reach until the models overcome this "barrier of meaning" [@mitchell2020].
+Drawing inspiration from neurocognitive data may help to make these models more biologically plausible and, at the same time, more data efficient [@maier2022].
 
 Taken together, the present study provides preliminary evidence that whenever we receive meaningful semantic information about a previously unfamiliar object, this information has an immediate influence on our visual processing of this object.
 The immediacy of this influence is remarkable in at least two different ways:
 First, it does not require extensive training but can instead be observed within the same trial in which the information has been presented and/or a single trial later.
-Second, the time course of this influence suggests that it manifests itself not only at later, post-perceptual stages (> 400 ms), typically associated with semantic processing, but also at much earlier stages (< 200 ms), typically associated with visual perception itself.
+Second, the time course of this influence suggests that it manifests itself not only at later, post-perceptual stages (≥ 400 ms), typically associated with semantic processing, but also at much earlier stages within the first 200 ms, associated with visual perception itself.
 
 # References
 
