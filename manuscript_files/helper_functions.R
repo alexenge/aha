@@ -1,6 +1,8 @@
+# Define color scheme
 aha_colors <- c("#ca0020", "#0571b0")
 stimulus_bg_color <- "#a9d9ff"
 
+# Helper function to create Figure 1A (trial structure)
 plot_fig1a <- function(files_dir) {
 
   # Make sure that packages are loaded
@@ -247,6 +249,7 @@ plot_fig1a <- function(files_dir) {
     )
 }
 
+# Helper function to create Figure 1B (ERP results)
 plot_fig1b <- function(evokeds, config, channel_locations, models) {
 
   # Make sure that packages are loaded
@@ -399,9 +402,6 @@ plot_fig1b <- function(evokeds, config, channel_locations, models) {
           highlights = roi,
           scaling = 0.9
         ) +
-        # scale_fill_viridis_c(
-        #   option = "viridis", limits = c(-1, 1), oob = scales::squish
-        # ) +
         scale_fill_distiller(
           palette = "RdBu", limits = c(-1, 1), oob = scales::squish
         ) +
@@ -454,6 +454,7 @@ plot_fig1b <- function(evokeds, config, channel_locations, models) {
     )
 }
 
+# Helper function to create Figure 1 (trial structure + ERP results)
 plot_fig1 <- function(files_dir, evokeds, config, channel_locations, models) {
 
   # Make sure that packages are loaded
@@ -479,9 +480,7 @@ plot_fig1 <- function(files_dir, evokeds, config, channel_locations, models) {
     annotate("segment", x = 0.726, xend = 0.726, y = 0.55, yend = Inf)
 }
 
-# plot_fig1(files_dir, evokeds, config, channel_locations, models)
-# ggsave("fig1.pdf", width = 12, height = 12)
-
+# Helper function to plot time-frequency results
 plot_tfr_topos <- function(tfr_grand_ave,
                            tfr_clusters,
                            p_cluster,
@@ -545,7 +544,6 @@ plot_tfr_topos <- function(tfr_grand_ave,
           scaling = 1.1
         ) +
         scale_fill_distiller(limits = c(-25, 25), palette = "RdBu") +
-        # scale_fill_viridis_c(limits = c(-0.25, 0.25)) +
         theme(
           plot.margin = unit(rep(-0.2, 4), "cm"),
           legend.position = "none"
@@ -623,4 +621,5 @@ plot_tfr_topos <- function(tfr_grand_ave,
     draw_plot(colorbar, x = -0.28, y = 0.445)
 }
 
-print_df <- function(x) format(round(x), big.mark = ",")
+# Helper function to create print degrees of freedom
+print_dof <- function(x) format(round(x), big.mark = ",")
