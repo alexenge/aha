@@ -1,8 +1,8 @@
 # User-defined variables
 MAIN_CMD        := Rscript -e "rmarkdown::render(input = 'manuscript.Rmd', output_format = 'all')"
 IMAGE_USER      := alexenge
-IMAGE_NAME      := aha
-IMAGE_TAG       := latest
+IMAGE_NAME      := r_eeg
+IMAGE_TAG       := 4.2.1
 
 # Automatic workflow variables
 PROJECT_DIR     := $(CURDIR)
@@ -37,10 +37,6 @@ srun:
 interactive:
 	docker run --rm --volume $(PROJECT_DIR):$(REMOTE_DIR) \
 	-e PASSWORD=1234 -p 8888:8888 $(IMAGE)
-
-# Build the container with Docker
-build: Dockerfile
-	docker build --no-cache --progress plain --tag $(IMAGE) .
 
 # Push the container with Docker
 push:
