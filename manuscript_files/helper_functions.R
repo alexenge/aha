@@ -333,7 +333,7 @@ plot_fig1b <- function(evokeds, config, channel_locations, models) {
           geom = "text", x = xticks, y = -0.6, label = xticks
         ) +
         annotate(
-          geom = "text", x = mean(xticks), y = -1.5, label = "Time (ms)"
+          geom = "text", x = mean(xticks), y = -1.5, label = "Time (s)"
         ) +
         # Y (amplitude) axis
         annotate(

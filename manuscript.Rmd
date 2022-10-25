@@ -21,18 +21,16 @@ affiliation:
     institution   : "Fachhochschule des Mittelstands, Bamberg"
 
 authornote: |  
-  Number of pages: 23
+  Number of pages: 22
 
-  Number of figures: 4
+  Number of figures: 3
 
-  Number of tables: 0
+  Number of words: 212 (abstract), 644 (introduction), 1,487 (discussion)
 
-  Number of words: 212 (abstract), 849 (introduction), 1,856 (discussion)
+  We would like to thank Nele Langosch for assistance with the preparation of materials and data collection, Olaf Dimigen and the Abdel Rahman Lab for Neurocognitive Psychology at Humboldt-Universität zu Berlin for insightful discussions, as well as Guido Kiecker for technical support.
+  This work was supported by the Deutsche Forschungsgemeinschaft (DFG, German Research Foundation) under Germany’s Excellence Strategy (EXC 2002/1 "Science of Intelligence") project number 390523135 as well as grants AB277-5 and AB277-6 to R.A.R.
 
   The authors declare no competing financial interests.
-
-  We would like to thank Nele Langosch for assistance with the preparation of materials and data collection, Olaf Dimigen and the Neurocognitive Psychology lab at Humboldt-Universität zu Berlin for insightful discussions, as well as Guido Kiecker for technical support.
-  This work was supported by the Deutsche Forschungsgemeinschaft (DFG, German Research Foundation) under Germany’s Excellence Strategy (EXC 2002/1 "Science of Intelligence") project number 390523135 and grants AB277-5 and AB277-6 to R.A.R.
 
 floatsintext      : yes
 figurelist        : no
@@ -55,6 +53,7 @@ editor_options:
 output:
   papaja::apa6_pdf:
     latex_engine: xelatex
+  papaja::apa6_docx: default
 
 header-includes:
   - \geometry{a4paper}
@@ -145,7 +144,7 @@ Instead, this knowledge seems to alter perception online, thus providing a compe
 # Introduction
 
 Does our perception of an object change once we discover what function it serves?
-This question speaks to the long-standing debate about the cognitive (im)penetrability [@pylyshyn1999] of perception by higher-level capacities such as semantic knowledge or language.
+This question speaks to the long-standing debate about the cognitive (im)penetrability of perception by higher-level capacities such as semantic knowledge or language [@pylyshyn1999].
 According to one view, these cognitive capacities kick in only after the retinal input has been processed by a specialized module for visual perception [@firestone2016; @fodor1983].
 This module is encapsulated from higher-level inputs and processes visual information in a purely feed-forward fashion, progressing from lower areas with small receptive field sizes to areas representing increasingly complex shapes and, eventually, whole objects [@dicarlo2012].
 
@@ -201,7 +200,7 @@ In the *pre-insight* phase, after written informed consent had been obtained and
 Each trial consisted of a fixation cross presented in the middle of the screen for 0.5 s, followed by the presentation of the object until participants made a response or until a time out after 3 s.
 The inter-trial interval was 0.5 s and participants took a self-timed break after each block of 60 objects.
 The task, which was kept the same across all three phases of the experiment, was to classify each object using one of four response alternatives:
-(a) *Ich weiß was das ist oder habe eine starke Vermutung* [I know what this is or have a strong assumption],
+(a) *Ich weiß, was das ist, oder habe eine starke Vermutung* [I know what this is or have a strong assumption],
 (b) *Ich habe eher eine Vermutung, was das ist* [I rather have an assumption what this is],
 (c) *Ich habe eher keine Vermutung, was das ist* [I rather have no assumption what this is], or
 (d) *Ich weiß nicht, was das ist, und habe auch keine Vermutung* [I don’t know what this is and have no assumption].
@@ -561,17 +560,17 @@ Then the ICA was fitted based on these components using the FastICA algorithm [@
 Any independent components showing significant correlations with either of two virtual EOG channels (VEOG: IO1 - Fp1, HEOG: F9 - F10) were removed automatically using the MNE-Python's `find_bads_eog` method.
 This was the case for an average of `r mean(lengths(config$auto_ica_bad_components))` components per participant (range = `r min(lengths(config$auto_ica_bad_components))`--`r max(lengths(config$auto_ica_bad_components))` components).
 
-## Event-Related Potential Analysis
-
 For the analysis of ERP amplitudes, a zero-phase, non-causal FIR filter with a lower pass-band edge at `r config$highpass_freq` Hz (transition bandwidth: 0.1 Hz) and an upper pass-band edge at `r config$lowpass_freq` Hz (transition bandwidth: 7.5 Hz) was applied.
-Next, the continuous EEG was segmented into epochs ranging from `r config$epochs_tmin` s to `r config$epochs_tmax` s relative to the onset of the presentation of each unfamiliar object.
-These epochs were baseline-corrected by subtracting the average voltage during the interval of `r config$baseline[1]` s to `r config$baseline[2]` s relative to stimulus onset.
+Next, the continuous EEG was segmented into epochs ranging from -500 ms to 1,500 ms relative to the onset of the presentation of each unfamiliar object.
+These epochs were baseline-corrected by subtracting the average voltage during the interval of -200 ms to 0 ms relative to stimulus onset.
 Epochs containing artifacts despite ICA, defined as peak-to-peak amplitudes exceeding `r config$reject_peak_to_peak` µV, were removed from further analysis.
 This led to the exclusion of an average of `r mean(rejected_epochs)` trials per participant (= `r percent(mean(rejected_epochs) / 360, accuracy = 0.1)`; range `r min(rejected_epochs)`--`r max(rejected_epochs)` trials).
 Single-trial event-related potentials were computed as the mean amplitude across time windows and regions of interests (ROIs) defined a priori, namely 100--150 ms at channels PO3, PO4, POz, O1, O2, and Oz and for the P1 component, 150--200 ms at channels P7, P8, PO7, PO8, PO9, and PO10 for the N170 component, and 400--700 ms at channels C1, C2, Cz, CP1, CP2, and CPz for the N400 component.
 We chose a later time window for the N400 component than what is typically used in experiments with verbal materials (e.g., 300--500 ms), in accordance with a previously published data set that showed the 400--700 ms time window to be most robustly associated with the semantic processing of visual objects [@kovalenko2012].
 
-The resulting mean ERP amplitudes were analyzed on the single-trial level using linear mixed-effects regression models because these models allow to control for repeated measures of participants and stimuli, while also being robust against an unbalanced number of trials per condition [@baayen2008; @burki2018; @fromer2018].
+## Statistical Analysis
+
+The resulting mean ERP amplitudes were analyzed on the single-trial level using linear mixed-effects regression models because these models allow to control for repeated measures of participants and stimuli, while also being robust against an unbalanced number of trials per condition [@brown2021; @burki2018; @fromer2018].
 We computed three models predicting P1, N170, and N400 amplitudes, respectively.
 All models included three fixed effects: (a) the phase of the experiment, coded as a repeated contrast [i.e., subtracting the first phase from the second phase and the second phase from the third phase, the intercept being the grand mean across all three phases\; @schad2020], (b) the condition of the object, coded as a scaled sum contrast (i.e., subtracting the naive condition from the semantically informed condition, the intercept being the grand mean across both conditions), and (c) the two-way interaction of phase and condition.
 We determined the most parsimonious random effect structure supported by the data using the automatic procedure proposed by @matuschek2017.
@@ -579,17 +578,17 @@ This involved starting with a maximal model that contained all random parameters
 All models were fitted in R [Version `r as.character(packageVersion("base"))`\; @R-base] using the lme4 package [Version `r as.character(packageVersion("lme4"))`\; @R-lme4] with the optimizer function *bobyqa* and a maximum of 10^6^ iterations for maximum likelihood estimation.
 The model selection algorithm via likelihood ratio tests was performed using the buildmer package [Version `r as.character(packageVersion("buildmer"))`\; @R-buildmer].
 
-To investigate if semantically informed perception had an influence on the ERPs within each phase of the experiment, we calculated follow-up comparisons contrasting the semantically informed condition against the naive condition within the pre-insight, insight, and post-insight phases.
-This was done using the emmeans package [Version `r as.character(packageVersion("emmeans"))`\; @R-emmeans] and with Bonferroni correction for the three separate tests.
+To investigate if semantically informed perception had an influence on the ERPs within each phase of the experiment, we calculated pairwise comparisons contrasting the semantically informed condition against the naive condition within the pre-insight, insight, and post-insight phases.
+This was done using the emmeans package [Version `r as.character(packageVersion("emmeans"))`\; @R-emmeans] and with Bonferroni correction for three separate tests.
 All *p* values were computed by approximating the relevant denominator degrees of freedom using Satterthwaite's method as implemented in the lmerTest package [Version `r as.character(packageVersion("lmerTest"))`\; @R-lmerTest].
 
 ## Time-Frequency Analysis
 
 For our exploratory analysis of event-related power, we first created new epochs from the ICA-corrected but unfiltered raw data.
 Epochs that were marked as bad for the ERP analysis (i.e., with peak-to-peak amplitudes exceeding `r config$reject_peak_to_peak` µV) were also removed from the time-frequency analysis.
-The remaining epochs were convolved with a family of Morlet wavelets, increasing linearly in their frequency from `r min(config$tfr_freqs)` Hz to `r max(config$tfr_freqs)` Hz in steps of `r config$tfr_freqs[2] - config$tfr_freqs[1]` Hz and in their width from `r min(config$tfr_cycles)` cycles to `r max(config$tfr_cycles)` cycles in steps of `r config$tfr_cycles[2] - config$tfr_cycles[1]` cycles.
+The remaining epochs were convolved with a family of Morlet wavelets, increasing linearly in their frequency from `r min(config$tfr_freqs)` Hz to `r max(config$tfr_freqs)` Hz in steps of `r config$tfr_freqs[2] - config$tfr_freqs[1]` Hz and in their width from `r min(config$tfr_cycles)` cycles to `r max(config$tfr_cycles)` cycles in steps of `r round(config$tfr_cycles[2] - config$tfr_cycles[1], 1)` cycles.
 To adjust for the typical $1/f$ shape of the EEG, the power values were transformed into percent signal change by first subtracting and then dividing by the average power at each frequency over the entire epoch [@grandchamp2011].
-We then performed baseline correction by subtracting the average power during the pre-stimulus interval from `r config$tfr_baseline[1]` s to `r config$tfr_baseline[2]` s relative to object onset.
+We then performed baseline correction by subtracting the average power during the pre-stimulus interval from -450 ms to -50 ms s relative to object onset.
 
 For statistical analysis of event-related power, we conducted cluster-based permutation tests [@maris2007], separately for each of the three phases of the experiment (pre-insight, insight, and post-insight).
 First, we averaged trials belonging to the same condition and then subtracted these average responses from one another to compute the difference between the semantically informed condition and the naive condition for each participant.
@@ -598,7 +597,7 @@ Neighboring channels were defined using the Delaunay triangulation based on 2D e
 To obtain family-wise error-corrected $p$ values at the cluster level, we compared the cluster mass (i.e., the sum of the $t$ values) of each observed cluster to an empirical null distribution of cluster masses obtained from 5,000 permutations with random sign flips.
 Clusters were considered to be statistically significant if their mass exceeded the `r (1 - p_cluster) * 100`^th^ percentile of this distribution (i.e., cluster-level threshold $p < .05$, Bonferroni-corrected for three separate tests).
 
-## Data and Code Availability
+## Data and Code Accessibility
 
 The EEG data are available upon reasonable request from the corresponding author because we had not asked participants for their consent to make the data publicly available.
 The materials and code for data analysis are available at [https://osf.io/uksbc/](https://osf.io/uksbc/).
@@ -613,7 +612,7 @@ We followed the workflow developed by @peikert2021 to ensure the long-term repro
 Averaged across conditions, P1, N170, and N400 amplitudes differed as a function of the phase of the experiment (pre-insight, insight, or post-insight), all $F$s > `r min(filter(anova_table, effect == "phase")$f_value)`, all $p$s `r print_p(max(filter(anova_table, effect == "phase")$p_value))`.
 In addition, N400 amplitudes differed as a function of the condition (semantically informed or naive), averaged across the three phases of the experiment, $F$(`r print_dof(filter(anova_table, component == "N400" & effect == "condition")$NumDF)`, `r print_dof(filter(anova_table, component == "N400" & effect == "condition")$DenDF)`) = `r filter(anova_table, component == "N400" & effect == "condition")$f_value`, $p$ `r print_p(filter(anova_table, component == "N400" & effect == "condition")$p_value)`.
 Crucially, the phase × condition interaction was significant for all three ERP components, all $F$s > `r min(filter(anova_table, effect == "phase:condition")$f_value)`, all $p$s < `r print_p(max(filter(anova_table, effect == "phase:condition")$p_value))`.
-To answer our main research question, we decomposed these interactions into simple effects of the semantically informed condition versus the naive condition within each of the three phases of the experiment.
+To answer our main research question, we decomposed these interactions into pairwise comparisons of the semantically informed condition versus the naive condition within each of the three phases of the experiment.
 
 In the pre-insight phase, when objects were unfamiliar to participants and presented without keywords, no differences emerged between the semantically informed condition and the naive condition in any of the the ERP components, all $|t|$s < `r max(abs(filter(contrast_table, phase == "Pre-insight")$t_value))`, all $p$s `r print_p(min(filter(contrast_table, phase == "Pre-insight")$p_value))` (Figure 1B--D).
 This was expected given that the critical keywords (leading either to semantically informed perception or to naive perception) had not yet been presented, and given that the assignment of objects to conditions was counterbalanced across participants as to control for low-level visual differences.
@@ -714,15 +713,15 @@ map(models_control, function(mod) as_tibble(mod$contrasts)) %>%
   rename(t_value = `t.ratio`, p_value = `p.value`) -> contrast_table_control
 ```
 
-There are at least two important alternative explanations for our finding that semantic information instantly affects early ERP responses.
+There are at least two alternative explanations for our finding that semantic information instantly affects early ERP responses.
 First, differences in the P1 and/or N170 components might be driven by low-level visual differences between object images rather than by our experimental manipulation (matching versus non-matching keywords in the insight phase).
-We ruled out this alternative explanation by counter-balancing the assignment of objects to conditions across participants, meaning that the same visual object entered the analysis in both conditions on an approximately equal number of trials, barring differences in participants' classification of the object and differences in the number of rejected EEG trials (see Materials and Methods).
+We ruled this out by counterbalancing the assignment of objects to conditions across participants, meaning that the same visual object entered the analysis in both conditions on an approximately equal number of trials, barring differences in participants' classification of the object and differences in the number of rejected EEG trials (see Materials and Methods).
 Furthermore, we did not detect reliable differences between the two conditions in the pre-insight phase, that is, before any keywords had been presented.
 It therefore seems unlikely that low-level differences could account for the effects of semantic information reported above.
 
 Second, there is an alternative explanation specifically for the effects observed in the insight phase, when the objects were presented together with matching or non-matching keywords.
 The N170 modulation might in fact not be due to semantic information changing the processing of objects in the semantically informed condition (as we had hypothesized), but rather a mismatch response to the objects in the naive condition.
-The non-matching keywords might have primed participants to expect a certain set of visual features that did actually not come true once the object was displayed, potentially provoking a fast and strong brain response within the first 200 ms.
+The non-matching keywords might have primed participants to expect a certain set of visual features that did not actually come true once the object was displayed, potentially provoking a fast and strong brain response within the first 200 ms.
 However, in a control analysis for this alternative explanation, we could show that the N170 effect in the insight phase does not depend on the naive condition.
 For this control analysis, we contrasted the semantically informed condition (i.e., matching key words and participants indicating in their response that they knew what the object was or had an assumption) against a different control condition, namely, those objects that were presented with matching keywords (as in the semantically informed condition), but for which participants failed to capitalize on the keywords and instead indicated that they still did not know what kind of object they were viewing (a kind of "failed insight").
 This was the case for an average of `r mean(objects_per_condition$Exclude_informed)` objects per participant (= `r percent(mean(objects_per_condition$Exclude_informed) / 60, accuracy = 0.1)` of objects presented with matching keywords).
@@ -733,7 +732,7 @@ This adds credibility to the notion that these effects are specific to those obj
 Finally, we had wondered if the reduction in alpha/beta power might merely reflect differences in the timing of motor preparation between conditions, given the well-established link between motor processes and beta power over sensorimotor cortex [@kilavik2013].
 To rule this out, we extracted single trial percent signal change based on the distribution of clusters from the permutation tests (time window 600–1,200 ms, frequency range 8–20 Hz, electrodes P3, P4, Pz, PO3, PO4, and POz; see Figures 3 and 4).
 We then subjected these to a linear-mixed effects model that controlled for log-transformed reaction time as a covariate of no interest.
-This confirmed the significant reduction in alpha/beta power for the semantically informed condition as compared to the naive condition in the insight phase, $b$ = `r filter(contrast_table_control, component == "alpha_beta" & phase == "Insight")$estimate`%, $t$(`r print_dof(filter(contrast_table_control, component == "alpha_beta" & phase == "Insight")$df)`) = `r filter(contrast_table_control, component == "alpha_beta" & phase == "Insight")$t_value`, $p_\text{corr}$ `r print_p(filter(contrast_table_control, component == "alpha_beta" & phase == "Insight")$p_value)`, as well as in the post-insight phase, $b$ = `r filter(contrast_table_control, component == "alpha_beta" & phase == "Post-insight")$estimate`%, $t$(`r print_dof(filter(contrast_table_control, component == "alpha_beta" & phase == "Post-insight")$df)`) = `r filter(contrast_table_control, component == "alpha_beta" & phase == "Post-insight")$t_value`, $p_\text{corr}$ `r print_p(filter(contrast_table_control, component == "alpha_beta" & phase == "Post-insight")$p_value)`.
+This confirmed the significant reduction in alpha/beta power for the semantically informed condition as compared to the naive condition in the insight phase, $b$ = `r filter(contrast_table_control, component == "alpha_beta" & phase == "Insight")$estimate`%, $t$(`r print_dof(filter(contrast_table_control, component == "alpha_beta" & phase == "Insight")$df)`) = `r filter(contrast_table_control, component == "alpha_beta" & phase == "Insight")$t_value`, $p_\text{cluster}$ `r print_p(filter(contrast_table_control, component == "alpha_beta" & phase == "Insight")$p_value)`, as well as in the post-insight phase, $b$ = `r filter(contrast_table_control, component == "alpha_beta" & phase == "Post-insight")$estimate`%, $t$(`r print_dof(filter(contrast_table_control, component == "alpha_beta" & phase == "Post-insight")$df)`) = `r filter(contrast_table_control, component == "alpha_beta" & phase == "Post-insight")$t_value`, $p_\text{cluster}$ `r print_p(filter(contrast_table_control, component == "alpha_beta" & phase == "Post-insight")$p_value)`.
 
 # Discussion
 
@@ -742,7 +741,7 @@ When the same objects were presented once more (without the semantic information
 Finally, an exploratory time-frequency analysis revealed that semantically informed perception was accompanied by a late reduction in event-related power in the alpha and lower beta ranges.
 
 The N400 effect during semantically informed perception indicates that acquiring an understanding of the objects lessened participants' demand for effortful semantic processing [@kutas2011].
-It replicates previous work showing that N400 amplitudes are larger in response to pictures when they are either difficult to understand in and of themselves [e.g., @abdelrahman2008; @supp2005] or difficult to integrate into the preceding context [e.g., @barrett1990; @ganis1996; @hirschfeld2011].
+It replicates previous work showing that N400 amplitudes are larger in response to pictures when they are either difficult to understand in and of themselves [e.g., @abdelrahman2008\; @supp2005] or difficult to integrate into the preceding context [e.g., @barrett1990; @ganis1996; @hirschfeld2011].
 The latency of this effect and the computational role of the N400 [@lau2008; @rabovsky2018; @bornkessel-schlesewsky2019] suggest a post-perceptual locus in the semantic system.
 
 Our exploratory time-frequency analysis revealed a late (> 600 ms) reduction in post-stimulus power in the alpha and lower beta ranges (approx. 8--20 Hz).
@@ -759,7 +758,7 @@ Together with the present study, these findings suggest an online impact of mean
 The P1 component, unlike the N400 and N170 components, was modulated by semantic information only one trial after this information had been obtained.
 This is consistent with previous studies showing modulations of the P1 when participants had learned meaningful information about previously unfamiliar objects [@abdelrahman2008; @maier2018; @maier2019; @samaha2018; @weller2019].
 What the present study adds is that the P1 effect does not take an extensive learning history to develop.
-Instead, it can be observed as soon as one trial after semantic insight has happened.
+Instead, it can be observed as soon as one trial after semantic insight had happened.
 Because the P1 is typically associated with lower-level sensory processing [@johannes1995; @pratt2011; @luck2014], we take its susceptibility to semantic information as an indicator that knowledge about the function of an object can change how we perceive its low-level features.
 
 Both the N170 and the P1 components therefore seem to be sensitive to the semantic meaningfulness of visual objects.
@@ -768,32 +767,32 @@ The time course of the N170 is consistent with a top-down influence of (non-visu
 Here we could show that the former pathway seems to be able to convey semantic information instantaneously (i.e., within the same trial), whereas the latter pathway seems to take at least one additional encounter with the visual object to emerge.
 While the limited spatial resolution of the EEG precludes precise localization, there is converging fMRI evidence showing that semantic information can feed back into higher-level areas in the lateral occipital cortex (LOC) and early retinotopic cortex [areas V1, V2, and V3\; @hsieh2010], consistent with the neural generators of the N170 and P1 components in the ERP.
 
-The top-down modulation of visual ERPs by semantic information challenges a modular view of visual perception [@fodor1983; @pylyshyn1999; but see @clarke2020].
+The top-down modulation of visual ERPs by semantic information challenges a modular view of visual perception [@fodor1983; @pylyshyn1999; but see @clarke2021].
 Proponents of this view have pointed out important shortcomings of previous studies that had claimed to demonstrate top-down effects of cognition on perception [@firestone2016; @machery2015].
 We addressed as many of these shortcomings as possible:
 First, no difference between conditions had been present before any semantic information was presented.
 Second, we used ERPs as an objective and time-resolved measure to disentangle perceptual and post-perceptual effects.
-Third, we reduced response and demand biases by keeping the manipulation (i.e., matching or non-matching keywords) obscure to the participants and by including well-known objects as filler stimuli.
+Third, we reduced response and demand biases by keeping the manipulation (i.e., matching or non-matching keywords) obscure to participants and by including well-known objects as filler stimuli.
 Fourth, we precluded low-level visual differences between conditions by counterbalancing the assignment of objects to conditions across participants.
 Fifth, we reduced priming and attentional effects by presenting all objects in a randomized order.
 Sixth, we reduced memory effects by using only unfamiliar objects and by measuring online ERPs rather than delayed behavioral responses.
 We hope that these measures were effective in ruling out many alternative explanations, thus making a compelling case against the "cognitively impenetrability" of visual perception.
 
 A theoretical framework that would explicitly predict the observed P1 and N170 effects in our study is lacking at present.
-The effects are consistent, however, with the reverse hierarchy theory [@ahissar2004], which posits that objects first enter our visual consciousness at an abstract, conceptual level. Once this initial "vision at a glance" has taken place, feedback connections to earlier layers of the visual system are being accessed to extract the relevant lower-level features ("vision with scrutiny").
+However, the effects are consistent with the reverse hierarchy theory [@ahissar2004], which posits that objects first enter visual consciousness at an abstract, conceptual level. Once this initial "vision at a glance" has taken place, feedback connections to earlier layers of the visual system are being accessed to extract the relevant lower-level features ("vision with scrutiny").
 This reverse trajectory down the visual hierarchy may explain (a) the semantically induced changes to the fMRI signal in LOC and retinotopic cortex [@hsieh2010] as well as (b) the modulations of early visual ERP components observed in the present study and others [e.g., @abdelrahman2008; @maier2014; @samaha2018].
-An important role of top-down mechanisms for object recognition is also posited by theories of predictive coding and Bayesian inference [e.g., @clark2013; @lupyan2015; @panichello2013; @xu2007; @yuille2006].
+An important role of top-down mechanisms for object recognition is also posited by theories of predictive coding and Bayesian inference [e.g., @clark2013\; @lupyan2015; @panichello2013; @xu2007; @yuille2006].
 Despite the theoretical advances, detailed descriptions of these top-down effects at the algorithmic and implementational levels remain a challenge for future work.
 
-An interactive view of visual object processing with an abundance of top-down feedback also challenges the predominantly feed-forward models in computer vision [e.g., @krizhevsky2012; @marr1982; @serre2007; for review, see @lindsay2020].
+An interactive view of visual object processing with an abundance of top-down feedback also challenges the predominantly feed-forward models in computer vision [e.g., @krizhevsky2012\; @marr1982; @serre2007; for review, see @lindsay2021].
 The lack of semantic knowledge that dynamically interacts with the processing of visual features may be one key reason why even state-of-the-art deep-learning algorithms need orders of magnitude more training examples to achieve human-level performance in object recognition.
 For these models, single-trial learning seems to be out of reach until the models overcome this "barrier of meaning" [@mitchell2020].
 Drawing inspiration from neurocognitive data may help to make these models more biologically plausible and, at the same time, more data efficient [@maier2022].
 
 Taken together, the present study provides preliminary evidence that whenever we receive meaningful semantic information about a previously unfamiliar object, this information has an immediate influence on our visual processing of this object.
 The immediacy of this influence is remarkable in at least two different ways:
-First, it does not require extensive training but can instead be observed within the same trial in which the information has been presented and/or a single trial later.
-Second, the time course of this influence suggests that it manifests itself not only at later, post-perceptual stages (≥ 400 ms), typically associated with semantic processing, but also at much earlier stages within the first 200 ms, associated with visual perception itself.
+First, it does not require an extensive learning history but can instead be observed within the same trial in which the information has been presented and/or a single trial later.
+Second, the time course of this influence suggests that it manifests itself not only at later, post-perceptual stages (> 400 ms), typically associated with semantic processing, but also at much earlier stages within the first 200 ms, associated with visual perception itself.
 
 # References
 
@@ -864,7 +863,7 @@ print_model_outputs <- function(model_object) {
   print(model_object$summary)
   cat("\n")
   print(model_object$anova)
-  cat("\nFollow-Up Contrasts (Simple Effects)\n")
+  cat("\nPairwise Contrasts (Simple Effects)\n")
   print(model_object$contrasts)
   cat("\n\n")
 }
@@ -932,45 +931,3 @@ plot_tfr_topos(
 (ref:figs2-caption) Time-frequency results for the control analysis.
 Each topographic plot shows the difference in event-related power (in units of percent signal change) between the semantically informed condition and the "failed insight" condition (see Results: Control Analysis in the main text), grand-averaged across participants.
 Black dots highlight EEG channels that were part of a cluster for which this difference was statistically significant ($p_\text{cluster}$ = `r print_p(unique(filter(tfr_clusters, contrast == "Insight/Informed - Insight/Exclude_informed" & p_val < p_cluster)$p_val))`).
-
-\newpage
-
-```{r, figclusters, fig.height=8, include=FALSE}
-# Plot thresholded cluster images
-clusters %>%
-  filter(p_val < .05) %>%
-  ggplot(aes(x = time, y = channel, fill = cluster)) +
-  facet_grid(~contrast, drop = FALSE) +
-  geom_raster() +
-  theme(legend.position = "top")
-```
-
-```{r, figtfrclusters, fig.height=12, include=FALSE}
-# Plot thresholded cluster images for the insight phase
-tfr_clusters %>%
-  filter(contrast == "Insight/Informed - Insight/Naive" & p_val < .05) %>%
-  ggplot(aes(x = time, y = freq, fill = cluster)) +
-  facet_wrap(~channel) +
-  geom_raster() +
-  theme(legend.position = "top")
-
-# Plot thresholded cluster images for the post-insight phase
-tfr_clusters %>%
-  filter(
-    contrast == "Post-insight/Informed - Post-insight/Naive" & p_val < .05
-  ) %>%
-  ggplot(aes(x = time, y = freq, fill = cluster)) +
-  facet_wrap(~channel) +
-  geom_raster() +
-  theme(legend.position = "top")
-
-# Plot thresholded cluster images for the control analysis
-tfr_clusters %>%
-  filter(
-    contrast == "Insight/Informed - Insight/Exclude_informed" & p_val < .05
-  ) %>%
-  ggplot(aes(x = time, y = freq, fill = cluster)) +
-  facet_wrap(~channel) +
-  geom_raster() +
-  theme(legend.position = "top")
-```
