@@ -924,7 +924,8 @@ plot_tfr_topos(
   ),
   p_cluster = p_cluster,
   condition_plus = "Informed",
-  condition_minus = "Exclude_informed"
+  condition_minus = "Exclude_informed",
+  title_conditions = "Informed - failed"
 )
 ```
 

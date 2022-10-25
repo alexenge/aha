@@ -486,6 +486,7 @@ plot_tfr_topos <- function(tfr_grand_ave,
                            p_cluster,
                            condition_plus = "Informed",
                            condition_minus = "Naive",
+                           title_conditions = "Informed - naive",
                            tmin = -0.4,
                            tmax = 1.4,
                            tstep = 0.2,
@@ -503,11 +504,11 @@ plot_tfr_topos <- function(tfr_grand_ave,
 
   # Compute difference in power between conditions
   channels <- unique(tfr_clusters$channel)
-  tfr_grand_ave_informed <- filter(tfr_grand_ave, condition == "Informed")
-  tfr_grand_ave_naive <- filter(tfr_grand_ave, condition == "Naive")
-  tfr_grand_ave_diff <- mutate(tfr_grand_ave_naive, condition = "Difference")
-  tfr_grand_ave_diff[channels] <- tfr_grand_ave_informed[channels] -
-    tfr_grand_ave_naive[channels]
+  tfr_grand_ave_plus <- filter(tfr_grand_ave, condition == condition_plus)
+  tfr_grand_ave_minus <- filter(tfr_grand_ave, condition == condition_minus)
+  tfr_grand_ave_diff <- mutate(tfr_grand_ave_plus, condition = "Difference")
+  tfr_grand_ave_diff[channels] <- tfr_grand_ave_plus[channels] -
+    tfr_grand_ave_minus[channels]
 
   # Plot each time bin as a column of topographies
   map(tmins, function(tmin) {
@@ -554,7 +555,10 @@ plot_tfr_topos <- function(tfr_grand_ave,
             fill = guide_colorbar(
               title.hjust = 0.5,
               title.vjust = 0.6,
-              title = "Informed - naive\npower\n(% signal change)",
+              title = paste(
+                title_conditions, "power", "(% signal change)",
+                sep = "\n"
+              ),
               title.position = "left",
               barheight = 1.5,
               barwidth = 8.0,
