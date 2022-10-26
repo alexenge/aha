@@ -120,7 +120,7 @@ r_refs(here(files_dir, "r-references.bib"), append = FALSE)
 # Abstract
 
 Does our perception of an object change once we discover what function it serves?
-We showed human participants (*n* = 48) pictures of unfamiliar objects either together with words matching their function, leading to semantically informed perception, or together with non-matching words, resulting in naive perception.
+We showed human participants (*n* = 48) pictures of unfamiliar objects either together with keywords matching their function, leading to semantically informed perception, or together with non-matching keywords, resulting in naive perception.
 We measured event-related potentials (ERPs) to investigate at which stages in the visual processing hierarchy these two types of object perception differed from one another.
 We found that semantically informed as compared to naive perception was associated with larger amplitudes in the N170 component (150--200 ms), reduced amplitudes in the N400 component (400--700 ms), and a late decrease in alpha/beta band power.
 When the same objects were presented once more without any information, the N400 and event-related power effects persisted, and we also observed enlarged amplitudes in the P1 component (100--150 ms) in response to objects for which semantically informed perception had taken place.
@@ -161,7 +161,7 @@ The early peak of this component and its source in the occipital cortex [@abdelr
 It is less clear, however, if this tentative top-down effect of semantic cognition on perception acts in an online fashion (i.e., directly modulating perceptual processing), or more indirectly, by altering stored visual representations over the course of learning, which would then get reactivated once the object is reencountered later on.
 
 To answer this question, we measured ERPs in response to unfamiliar objects directly while participants gained a semantic understanding of their function.
-We presented half of the objects together with matching keywords, thus allowing participants to understand what kind of object they were viewing, or together with non-matching keywords, thus keeping the perception of the object semantically naive.
+We presented half of the objects together with matching keywords, thus allowing participants to understand what kind of object they were viewing, and the other half together with non-matching keywords, thus keeping the perception of the object semantically naive.
 We then presented the same objects again to test for downstream effects of semantic information.
 We examined the influence of semantic information on ERPs associated with lower-level visual perception (P1 component), higher-level visual perception (N170 component), and semantic processing (N400 component).
 We hypothesized that semantic information would have instant effects on visual perception, by which we mean (a) that these effects can already be observed on the same trial as the semantic information is being presented for the first time, and (b) that these effects are found not only in later, higher-level cognition-related ERP components (i.e., N400), but also in earlier, perception-related ERP components (i.e., P1 and/or N170).
@@ -557,16 +557,16 @@ First, the data were downsampled to `r config$downsample_sfreq` Hz and re-refere
 Next, artifacts resulting from blinks and eye movements were removed via independent component analysis (ICA) on a low-pass filtered copy of the data (cutoff = 1 Hz).
 A variable number of components per participant were extracted from an initial principal component analysis (PCA) so that they explained at least `r percent(config$ica_n_components)` of the variance in the data (mean = `r mean(unlist(config$auto_ica_n_components))` components, range `r min(unlist(config$auto_ica_n_components))`--`r max(unlist(config$auto_ica_n_components))`).
 Then the ICA was fitted based on these components using the FastICA algorithm [@hyvarinen1999].
-Any independent components showing significant correlations with either of two virtual EOG channels (VEOG: IO1 - Fp1, HEOG: F9 - F10) were removed automatically using the MNE-Python's `find_bads_eog` method.
+Any independent components showing significant correlations with either of two virtual EOG channels (VEOG: IO1 - Fp1, HEOG: F9 - F10) were removed automatically using MNE-Python's *find_bads_eog* method.
 This was the case for an average of `r mean(lengths(config$auto_ica_bad_components))` components per participant (range = `r min(lengths(config$auto_ica_bad_components))`--`r max(lengths(config$auto_ica_bad_components))` components).
 
-For the analysis of ERP amplitudes, a zero-phase, non-causal FIR filter with a lower pass-band edge at `r config$highpass_freq` Hz (transition bandwidth: 0.1 Hz) and an upper pass-band edge at `r config$lowpass_freq` Hz (transition bandwidth: 7.5 Hz) was applied.
+For the analysis of ERP amplitudes, a zero-phase, non-causal FIR filter with a lower pass-band edge at `r format(config$highpass_freq, digits = 1)` Hz (transition bandwidth: 0.1 Hz) and an upper pass-band edge at `r config$lowpass_freq` Hz (transition bandwidth: 7.5 Hz) was applied.
 Next, the continuous EEG was segmented into epochs ranging from -500 ms to 1,500 ms relative to the onset of the presentation of each unfamiliar object.
 These epochs were baseline-corrected by subtracting the average voltage during the interval of -200 ms to 0 ms relative to stimulus onset.
 Epochs containing artifacts despite ICA, defined as peak-to-peak amplitudes exceeding `r config$reject_peak_to_peak` µV, were removed from further analysis.
 This led to the exclusion of an average of `r mean(rejected_epochs)` trials per participant (= `r percent(mean(rejected_epochs) / 360, accuracy = 0.1)`; range `r min(rejected_epochs)`--`r max(rejected_epochs)` trials).
 Single-trial event-related potentials were computed as the mean amplitude across time windows and regions of interests (ROIs) defined a priori, namely 100--150 ms at channels PO3, PO4, POz, O1, O2, and Oz and for the P1 component, 150--200 ms at channels P7, P8, PO7, PO8, PO9, and PO10 for the N170 component, and 400--700 ms at channels C1, C2, Cz, CP1, CP2, and CPz for the N400 component.
-We chose a later time window for the N400 component than what is typically used in experiments with verbal materials (e.g., 300--500 ms), in accordance with a previously published data set that showed the 400--700 ms time window to be most robustly associated with the semantic processing of visual objects [@kovalenko2012].
+We chose a later time window for the N400 component than what is typically used in experiments with verbal materials (e.g., 300--500 ms), in accordance with a previously published data set which showed that the 400--700 ms time window is most robustly associated with the semantic processing of visual objects [@kovalenko2012].
 
 ## Statistical Analysis
 
@@ -586,7 +586,7 @@ All *p* values were computed by approximating the relevant denominator degrees o
 
 For our exploratory analysis of event-related power, we first created new epochs from the ICA-corrected but unfiltered raw data.
 Epochs that were marked as bad for the ERP analysis (i.e., with peak-to-peak amplitudes exceeding `r config$reject_peak_to_peak` µV) were also removed from the time-frequency analysis.
-The remaining epochs were convolved with a family of Morlet wavelets, increasing linearly in their frequency from `r min(config$tfr_freqs)` Hz to `r max(config$tfr_freqs)` Hz in steps of `r config$tfr_freqs[2] - config$tfr_freqs[1]` Hz and in their width from `r min(config$tfr_cycles)` cycles to `r max(config$tfr_cycles)` cycles in steps of `r round(config$tfr_cycles[2] - config$tfr_cycles[1], 1)` cycles.
+The remaining epochs were convolved with a family of Morlet wavelets, increasing linearly in their frequency from `r min(config$tfr_freqs)` Hz to `r max(config$tfr_freqs)` Hz in steps of `r config$tfr_freqs[2] - config$tfr_freqs[1]` Hz and in their width from `r min(config$tfr_cycles)` cycles to `r max(config$tfr_cycles)` cycles in steps of `r format(config$tfr_cycles[2] - config$tfr_cycles[1], digits = 1)` cycles.
 To adjust for the typical $1/f$ shape of the EEG, the power values were transformed into percent signal change by first subtracting and then dividing by the average power at each frequency over the entire epoch [@grandchamp2011].
 We then performed baseline correction by subtracting the average power during the pre-stimulus interval from -450 ms to -50 ms s relative to object onset.
 
@@ -600,7 +600,7 @@ Clusters were considered to be statistically significant if their mass exceeded 
 ## Data and Code Accessibility
 
 The EEG data are available upon reasonable request from the corresponding author because we had not asked participants for their consent to make the data publicly available.
-The materials and code for data analysis are available at [https://osf.io/uksbc/](https://osf.io/uksbc/).
+The code for data analysis is available at [https://osf.io/uksbc/](https://osf.io/uksbc/).
 
 In addition to the software mentioned above, our code relies on the tidyverse set of R packages [Version `r as.character(packageVersion("tidyverse"))`\; @R-tidyverse] for data wrangling, the ggplot2 [Version `r as.character(packageVersion("ggplot2"))`\; @R-ggplot2], cowplot [Version `r as.character(packageVersion("cowplot"))`\; @R-cowplot], and eegUtils [Version `r as.character(packageVersion("eegUtils"))`\; @R-eegUtils] packages for visualization, and the papaja package [Version `r as.character(packageVersion("papaja"))`\; @R-papaja] for statistical reporting.
 We followed the workflow developed by @peikert2021 to ensure the long-term reproducibility of our analysis pipeline.
@@ -741,7 +741,7 @@ When the same objects were presented once more (without the semantic information
 Finally, an exploratory time-frequency analysis revealed that semantically informed perception was accompanied by a late reduction in event-related power in the alpha and lower beta ranges.
 
 The N400 effect during semantically informed perception indicates that acquiring an understanding of the objects lessened participants' demand for effortful semantic processing [@kutas2011].
-It replicates previous work showing that N400 amplitudes are larger in response to pictures when they are either difficult to understand in and of themselves [e.g., @abdelrahman2008\; @supp2005] or difficult to integrate into the preceding context [e.g., @barrett1990; @ganis1996; @hirschfeld2011].
+It replicates previous work showing that N400 amplitudes are larger in response to pictures when they are either difficult to understand in and of themselves [e.g., @supp2005; @abdelrahman2008] or difficult to integrate into the preceding context [e.g., @barrett1990; @ganis1996; @hirschfeld2011].
 The latency of this effect and the computational role of the N400 [@lau2008; @rabovsky2018; @bornkessel-schlesewsky2019] suggest a post-perceptual locus in the semantic system.
 
 Our exploratory time-frequency analysis revealed a late (> 600 ms) reduction in post-stimulus power in the alpha and lower beta ranges (approx. 8--20 Hz).
@@ -776,15 +776,15 @@ Third, we reduced response and demand biases by keeping the manipulation (i.e., 
 Fourth, we precluded low-level visual differences between conditions by counterbalancing the assignment of objects to conditions across participants.
 Fifth, we reduced priming and attentional effects by presenting all objects in a randomized order.
 Sixth, we reduced memory effects by using only unfamiliar objects and by measuring online ERPs rather than delayed behavioral responses.
-We hope that these measures were effective in ruling out many alternative explanations, thus making a compelling case against the "cognitively impenetrability" of visual perception.
+We hope that these measures were effective in ruling out many alternative explanations, thus making a compelling case against the "cognitive impenetrability" of visual perception.
 
 A theoretical framework that would explicitly predict the observed P1 and N170 effects in our study is lacking at present.
 However, the effects are consistent with the reverse hierarchy theory [@ahissar2004], which posits that objects first enter visual consciousness at an abstract, conceptual level. Once this initial "vision at a glance" has taken place, feedback connections to earlier layers of the visual system are being accessed to extract the relevant lower-level features ("vision with scrutiny").
 This reverse trajectory down the visual hierarchy may explain (a) the semantically induced changes to the fMRI signal in LOC and retinotopic cortex [@hsieh2010] as well as (b) the modulations of early visual ERP components observed in the present study and others [e.g., @abdelrahman2008; @maier2014; @samaha2018].
-An important role of top-down mechanisms for object recognition is also posited by theories of predictive coding and Bayesian inference [e.g., @clark2013\; @lupyan2015; @panichello2013; @xu2007; @yuille2006].
+An important role of top-down mechanisms for object recognition is also posited by theories of predictive coding and Bayesian inference [e.g., @yuille2006; @xu2007; @clark2013; @panichello2013; @lupyan2015].
 Despite the theoretical advances, detailed descriptions of these top-down effects at the algorithmic and implementational levels remain a challenge for future work.
 
-An interactive view of visual object processing with an abundance of top-down feedback also challenges the predominantly feed-forward models in computer vision [e.g., @krizhevsky2012\; @marr1982; @serre2007; for review, see @lindsay2021].
+An interactive view of visual object processing with an abundance of top-down feedback also challenges the predominantly feed-forward models in computer vision [e.g., @marr1982; @serre2007; @krizhevsky2012; for review, see @lindsay2021].
 The lack of semantic knowledge that dynamically interacts with the processing of visual features may be one key reason why even state-of-the-art deep-learning algorithms need orders of magnitude more training examples to achieve human-level performance in object recognition.
 For these models, single-trial learning seems to be out of reach until the models overcome this "barrier of meaning" [@mitchell2020].
 Drawing inspiration from neurocognitive data may help to make these models more biologically plausible and, at the same time, more data efficient [@maier2022].
