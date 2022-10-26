@@ -25,7 +25,7 @@ authornote: |
 
   Number of figures: 3
 
-  Number of words: 215 (abstract), 632 (introduction), 1,443 (discussion)
+  Number of words: 212 (abstract), 647 (introduction), 1,486 (discussion)
 
   We would like to thank Nele Langosch for assistance with the preparation of materials and data collection, Olaf Dimigen and the Abdel Rahman Lab for Neurocognitive Psychology at Humboldt-Universität zu Berlin for insightful discussions, as well as Guido Kiecker for technical support.
   This work was supported by the Deutsche Forschungsgemeinschaft (DFG, German Research Foundation) under Germany’s Excellence Strategy (EXC 2002/1 "Science of Intelligence") project number 390523135 as well as grants AB277-5 and AB277-6 to R.A.R.
