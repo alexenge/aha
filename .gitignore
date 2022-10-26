@@ -12,6 +12,7 @@ slurm-*
 __pycache__/
 figure-docx/
 figure-latex/
+/.devcontainer/
 /analysis_old/
 /data/
 /docs/
