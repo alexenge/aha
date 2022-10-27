@@ -1,6 +1,6 @@
 ---
-title             : "Instant effects of semantic information on visual perception"
-shorttitle        : "Semantically informed perception"
+title             : "Instant Effects of Semantic Information on Visual Perception"
+shorttitle        : "Semantically Informed Perception"
 
 author: 
   - name          : "Alexander Enge"
@@ -11,14 +11,16 @@ author:
   - name          : "Franziska Süß"
     affiliation   : "3"
   - name          : "Rasha Abdel Rahman"
-    affiliation   : "1"
+    affiliation   : "1,4"
 affiliation:
   - id            : "1"
-    institution   : "Department of Psychology, Humboldt-Universität zu Berlin"
+    institution   : "Department of Psychology, Humboldt-Universität zu Berlin, Germany"
   - id            : "2"
-    institution   : "Research Group Learning in Early Childhood, Max Planck Institute for Human Cognitive and Brain Sciences, Leipzig"
+    institution   : "Research Group Learning in Early Childhood, Max Planck Institute for Human Cognitive and Brain Sciences, Leipzig, Germany"
   - id            : "3"
-    institution   : "Fachhochschule des Mittelstands, Bamberg"
+    institution   : "Fachhochschule des Mittelstands, Bamberg, Germany"
+  - id            : "4"
+    institution   : "Cluster of Excellence \"Science of Intelligence\", Berlin, Germany"
 
 authornote: |  
   Number of pages: 22
