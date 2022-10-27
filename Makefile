@@ -1,5 +1,6 @@
 # User-defined variables
-MAIN_CMD        := Rscript -e "rmarkdown::render(input = 'manuscript.Rmd', output_format = 'all')"
+KNIT_CMD        := Rscript -e "rmarkdown::render(input = 'manuscript.Rmd', output_format = 'all')"
+LATEX_CMD       := xelatex manuscript.tex
 IMAGE_USER      := alexenge
 IMAGE_NAME      := r_eeg
 IMAGE_TAG       := 4.2.1
@@ -14,14 +15,23 @@ REMOTE_DIR      := /home/rstudio/project
 REMOTE_HOME     := /home/rstudio
 SHELL           := bash
 
-# Main command
+# Main (knit) command
 all:
-	$(MAIN_CMD)
+	$(KNIT_CMD)
 
-# Main command with Docker
+# LaTeX command
+latex:
+	$(LATEX_CMD)
+
+# Knit command with Docker
 docker:
 	docker run --rm --volume $(PROJECT_DIR):$(REMOTE_DIR) $(IMAGE) \
-	$(MAIN_CMD)
+	$(KNIT_CMD)
+
+# LaTeX command with Docker
+latex-docker:
+	docker run --rm --volume $(PROJECT_DIR):$(REMOTE_DIR) $(IMAGE) \
+	$(LATEX_CMD)
 
 # Main command via SLURM and Singularity on an HPC cluster
 sbatch:
@@ -47,5 +57,5 @@ pull:
 	docker pull $(IMAGE)
 
 # Pull the container with Singularity
-pull_singularity:
+pull-singularity:
 	singularity pull --disable-cache --force $(IMAGE_URL)

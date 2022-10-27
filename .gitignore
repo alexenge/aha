@@ -4,7 +4,9 @@
 *.docx
 *.fdb_latexmk
 *.fif
+*.fls
 *.log
+*.out
 *.pdf
 *.sif
 *.tex
