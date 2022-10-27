@@ -27,7 +27,7 @@ authornote: |
 
   Number of figures: 3
 
-  Number of words: 212 (abstract), 647 (introduction), 1,486 (discussion)
+  Number of words: 215 (abstract), 641 (introduction), 1,490 (discussion)
 
   We would like to thank Nele Langosch for assistance with the preparation of materials and data collection, Olaf Dimigen and the Abdel Rahman Lab for Neurocognitive Psychology at Humboldt-Universität zu Berlin for insightful discussions, as well as Guido Kiecker for technical support.
   This work was supported by the Deutsche Forschungsgemeinschaft (DFG, German Research Foundation) under Germany’s Excellence Strategy (EXC 2002/1 "Science of Intelligence") project number 390523135 as well as grants AB277-5 and AB277-6 to R.A.R.
@@ -150,12 +150,12 @@ This question speaks to the long-standing debate about the cognitive (im)penetra
 According to one view, these cognitive capacities kick in only after the retinal input has been processed by a specialized module for visual perception [@firestone2016; @fodor1983].
 This module is encapsulated from higher-level inputs and processes visual information in a purely feed-forward fashion, progressing from lower areas with small receptive field sizes to areas representing increasingly complex shapes and, eventually, whole objects [@dicarlo2012].
 
-The cognitive impenetrability hypothesis is challenged by the alternative view that perception dynamically interacts with different cognitive aspects from early on [@ahissar2004; @churchland1994; @clark2013; @lupyan2015; @lupyan2020; @yuille2006].
-On the behavioral level, this is supported by psychological studies that found differences in ratings, detection rates, or reaction times for visual stimuli depending on their emotional [e.g., @phelps2016], motivational [e.g., @balcetis2010], linguistic [e.g., @boutonnet2015] or semantic [e.g., @gauthier2003] content.
+The cognitive impenetrability hypothesis is challenged by the alternative view that perception dynamically interacts with different cognitive aspects from early on [@ahissar2004; @churchland1994; @clark2013; @lupyan2015; @lupyan2020; @thierry2016; @yuille2006].
+On the behavioral level, this is supported by psychological studies that found differences in ratings, detection rates, or reaction times for visual stimuli depending on their emotional [e.g., @phelps2016], motivational [e.g., @balcetis2010], linguistic [e.g., @slivac2021] or semantic [e.g., @gauthier2003] content.
 However, some studies have received legitimate criticism for confounding tentative high-level effects with low-level differences between conditions, as well as for not being able to discern perceptual from post-perceptual (e.g., memory-related) effects [@firestone2016].
 
 On the physiological level, event-related potentials (ERPs) measured from the human EEG can mitigate most of these concerns:
-Their excellent temporal resolution makes it possible to probe how early one can detect influences of high-level (e.g., semantic) information.
+Their excellent temporal resolution makes it possible to probe how early one can detect influences of high-level (e.g., semantic) information [@athanasopoulos2020].
 To this end, participants in previous studies by our lab and others learned to associate visual objects with different amounts of semantic information.
 After learning, an orthogonal task was used to compare ERPs in response to objects learned with versus without semantic information.
 This revealed differences not only in late ERP components associated with semantic processing (i.e., the N400 component) but also in the visual P1 component [@abdelrahman2008; @maier2019; @samaha2018; @weller2019].
@@ -767,7 +767,7 @@ Both the N170 and the P1 components therefore seem to be sensitive to the semant
 The finding that these two components were modulated in different phases of our experimental design suggests that they reflect different aspects of top-down processing with different time courses and neuroanatomical implementations.
 The time course of the N170 is consistent with a top-down influence of (non-visual) areas in the prefrontal and temporal-parietal cortices on visual areas, whereas modulations of the P1 component seem to reflect recurrent processing within the visual system [@wyatte2014].
 Here we could show that the former pathway seems to be able to convey semantic information instantaneously (i.e., within the same trial), whereas the latter pathway seems to take at least one additional encounter with the visual object to emerge.
-While the limited spatial resolution of the EEG precludes precise localization, there is converging fMRI evidence showing that semantic information can feed back into higher-level areas in the lateral occipital cortex (LOC) and early retinotopic cortex [areas V1, V2, and V3\; @hsieh2010], consistent with the neural generators of the N170 and P1 components in the ERP.
+While the limited spatial resolution of the EEG precludes precise localization, there is converging fMRI and psychophysical evidence that semantic information can feed back into higher-level areas in the lateral occipital cortex (LOC) as well as early retinotopic cortex [areas V1, V2, and V3\; @hsieh2010; @clarke2016; @teufel2018], consistent with the neural generators of the N170 and P1 components in the ERP.
 
 The top-down modulation of visual ERPs by semantic information challenges a modular view of visual perception [@fodor1983; @pylyshyn1999; but see @clarke2021].
 Proponents of this view have pointed out important shortcomings of previous studies that had claimed to demonstrate top-down effects of cognition on perception [@firestone2016; @machery2015].
@@ -782,7 +782,7 @@ We hope that these measures were effective in ruling out many alternative explan
 
 A theoretical framework that would explicitly predict the observed P1 and N170 effects in our study is lacking at present.
 However, the effects are consistent with the reverse hierarchy theory [@ahissar2004], which posits that objects first enter visual consciousness at an abstract, conceptual level. Once this initial "vision at a glance" has taken place, feedback connections to earlier layers of the visual system are being accessed to extract the relevant lower-level features ("vision with scrutiny").
-This reverse trajectory down the visual hierarchy may explain (a) the semantically induced changes to the fMRI signal in LOC and retinotopic cortex [@hsieh2010] as well as (b) the modulations of early visual ERP components observed in the present study and others [e.g., @abdelrahman2008; @maier2014; @samaha2018].
+This reverse trajectory down the visual hierarchy may explain (a) the semantically induced changes to the fMRI signal in LOC and retinotopic cortex [e.g., @hsieh2010] as well as (b) the modulations of early visual ERP components observed in the present study and others [e.g., @abdelrahman2008; @maier2014; @samaha2018].
 An important role of top-down mechanisms for object recognition is also posited by theories of predictive coding and Bayesian inference [e.g., @yuille2006; @xu2007; @clark2013; @panichello2013; @lupyan2015].
 Despite the theoretical advances, detailed descriptions of these top-down effects at the algorithmic and implementational levels remain a challenge for future work.
 
