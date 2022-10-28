@@ -27,7 +27,7 @@ authornote: |
 
   Number of figures: 3
 
-  Number of words: 215 (abstract), 641 (introduction), 1,490 (discussion)
+  Number of words: 215 (abstract), 645 (introduction), 1,490 (discussion)
 
   We would like to thank Nele Langosch for assistance with the preparation of materials and data collection, Olaf Dimigen and the Abdel Rahman Lab for Neurocognitive Psychology at Humboldt-Universität zu Berlin for insightful discussions, as well as Guido Kiecker for technical support.
   This work was supported by the Deutsche Forschungsgemeinschaft (DFG, German Research Foundation) under Germany’s Excellence Strategy (EXC 2002/1 "Science of Intelligence") project number 390523135 as well as grants AB277-5 and AB277-6 to R.A.R.
@@ -150,7 +150,7 @@ This question speaks to the long-standing debate about the cognitive (im)penetra
 According to one view, these cognitive capacities kick in only after the retinal input has been processed by a specialized module for visual perception [@firestone2016; @fodor1983].
 This module is encapsulated from higher-level inputs and processes visual information in a purely feed-forward fashion, progressing from lower areas with small receptive field sizes to areas representing increasingly complex shapes and, eventually, whole objects [@dicarlo2012].
 
-The cognitive impenetrability hypothesis is challenged by the alternative view that perception dynamically interacts with different cognitive aspects from early on [@ahissar2004; @churchland1994; @clark2013; @lupyan2015; @lupyan2020; @thierry2016; @yuille2006].
+The cognitive impenetrability hypothesis is challenged by the alternative view that perception dynamically interacts with different cognitive aspects from early on [@churchland1994; @ahissar2004; @yuille2006; @clark2013; @lupyan2015; @thierry2016; @teufel2017; @lupyan2020].
 On the behavioral level, this is supported by psychological studies that found differences in ratings, detection rates, or reaction times for visual stimuli depending on their emotional [e.g., @phelps2016], motivational [e.g., @balcetis2010], linguistic [e.g., @slivac2021] or semantic [e.g., @gauthier2003] content.
 However, some studies have received legitimate criticism for confounding tentative high-level effects with low-level differences between conditions, as well as for not being able to discern perceptual from post-perceptual (e.g., memory-related) effects [@firestone2016].
 
