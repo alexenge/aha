@@ -602,7 +602,7 @@ Clusters were considered to be statistically significant if their mass exceeded 
 ## Data and Code Accessibility
 
 The EEG data are available upon reasonable request from the corresponding author because we had not asked participants for their consent to make the data publicly available.
-The code for data analysis is available at [https://osf.io/uksbc/](https://osf.io/uksbc/).
+The code for data analysis is available at [https://doi.org/10.17605/osf.io/uksbc](https://doi.org/10.17605/osf.io/uksbc).
 
 In addition to the software mentioned above, our code relies on the tidyverse set of R packages [Version `r as.character(packageVersion("tidyverse"))`\; @R-tidyverse] for data wrangling, the ggplot2 [Version `r as.character(packageVersion("ggplot2"))`\; @R-ggplot2], cowplot [Version `r as.character(packageVersion("cowplot"))`\; @R-cowplot], and eegUtils [Version `r as.character(packageVersion("eegUtils"))`\; @R-eegUtils] packages for visualization, and the papaja package [Version `r as.character(packageVersion("papaja"))`\; @R-papaja] for statistical reporting.
 We followed the workflow developed by @peikert2021 to ensure the long-term reproducibility of our analysis pipeline.
