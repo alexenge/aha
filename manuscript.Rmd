@@ -42,7 +42,7 @@ linenumbers       : yes
 mask              : no
 draft             : no
 
-bibliography      : ["manuscript_files/references.bib", "manuscript_files/r-references.bib"]
+bibliography      : "manuscript_files/references.bib"
 csl               : "manuscript_files/citation_style.csl"
 
 documentclass     : "apa6"
