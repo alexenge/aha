@@ -27,7 +27,7 @@ authornote: |
 
   Number of figures: 3
 
-  Number of words: 215 (abstract), 645 (introduction), 1,490 (discussion)
+  Number of words: 215 (abstract), 645 (introduction), 1,494 (discussion)
 
   We would like to thank Nele Langosch for assistance with the preparation of materials and data collection, Olaf Dimigen and the Abdel Rahman Lab for Neurocognitive Psychology at Humboldt-Universität zu Berlin for insightful discussions, as well as Guido Kiecker for technical support.
   This work was supported by the Deutsche Forschungsgemeinschaft (DFG, German Research Foundation) under Germany’s Excellence Strategy (EXC 2002/1 "Science of Intelligence") project number 390523135 as well as grants AB277-5 and AB277-6 to R.A.R.
@@ -127,7 +127,7 @@ We measured event-related potentials (ERPs) to investigate at which stages in th
 We found that semantically informed as compared to naive perception was associated with larger amplitudes in the N170 component (150--200 ms), reduced amplitudes in the N400 component (400--700 ms), and a late decrease in alpha/beta band power.
 When the same objects were presented once more without any information, the N400 and event-related power effects persisted, and we also observed enlarged amplitudes in the P1 component (100--150 ms) in response to objects for which semantically informed perception had taken place.
 Consistent with previous work, this suggests that obtaining semantic information about previously unfamiliar objects alters aspects of their lower-level visual perception (P1 component), higher-level visual perception (N170 component), and semantic processing (N400 component, event-related power).
-Our study is the first to show that these effects are instantaneous, that is, observable within zero to one trial after any semantic information has been presented.
+Our study is the first to show that these effects are instantaneous, that is, observable within zero to one trials after any semantic information has been presented.
 
 *Key words*: objects; semantic knowledge; visual perception; event-related potentials
 
@@ -761,7 +761,7 @@ The P1 component, unlike the N400 and N170 components, was modulated by semantic
 This is consistent with previous studies showing modulations of the P1 when participants had learned meaningful information about previously unfamiliar objects [@abdelrahman2008; @maier2018; @maier2019; @samaha2018; @weller2019].
 What the present study adds is that the P1 effect does not take an extensive learning history to develop.
 Instead, it can be observed as soon as one trial after semantic insight had happened.
-Because the P1 is typically associated with lower-level sensory processing [@johannes1995; @pratt2011; @luck2014], we take its susceptibility to semantic information as an indicator that knowledge about the function of an object can change how we perceive its low-level features.
+Because the P1 is typically associated with lower-level sensory processing [@johannes1995; @pratt2011; @luck2014], we take its susceptibility to semantic information as an indicator that knowledge about the function of an object can change how we perceive its low-level features [@athanasopoulos2020].
 
 Both the N170 and the P1 components therefore seem to be sensitive to the semantic meaningfulness of visual objects.
 The finding that these two components were modulated in different phases of our experimental design suggests that they reflect different aspects of top-down processing with different time courses and neuroanatomical implementations.
