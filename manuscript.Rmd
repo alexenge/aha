@@ -55,7 +55,6 @@ editor_options:
 output:
   papaja::apa6_pdf:
     latex_engine: xelatex
-  papaja::apa6_docx: default
 
 header-includes:
   - \geometry{a4paper}
@@ -69,6 +68,8 @@ header-includes:
   - \usepackage[export]{adjustbox}
   - \usepackage{makecell}
   - \usepackage{setspace}
+  - \usepackage{xcolor}
+  - \definecolor{pantone}{HTML}{26629d}
 ---
 
 ```{r, setup, include=FALSE}
@@ -183,11 +184,11 @@ They provided written informed consent before starting the experiment and receiv
 Stimuli consisted of 240 grayscale photographs of real-world objects.
 Of these, 120 stimuli were well-known everyday objects (e.g., a bicycle, a toothbrush).
 These served as filler stimuli of no interest.
-The other 120 stimuli were rare objects presumed to be unfamiliar to the majority of participants (e.g., a galvanometer, an udu drum; see Supplementary Table 1 for example images).
+The other 120 stimuli were rare objects presumed to be unfamiliar to the majority of participants (e.g., a galvanometer, an udu drum; **\textcolor{pantone}{see Supplementary Table 1}**).
 All stimuli were presented on a light blue background with a size of 207 × 207 pixels on a 19-inch LCD monitor with a resolution of 1,280 × 1,024 pixels and a refresh rate of 75 Hz.
 At a standardized viewing distance of 90 cm, the images subtended approximately 3.9 degrees of participants' horizontal and vertical visual angle.
 
-For each unfamiliar object, a pair of German keywords (a noun and a verb) was selected, describing the typical function or use of the object in a way that could be related to its visual features and their configuration (e.g., *Stromstärke, messen* [electric current, measuring]; *Tonpott, trommeln* [clay pot, drumming]; see Supplementary Table 1 for more examples).
+For each unfamiliar object, a pair of German keywords (a noun and a verb) was selected, describing the typical function or use of the object in a way that could be related to its visual features and their configuration (e.g., *Stromstärke, messen* [electric current, measuring]; *Tonpott, trommeln* [clay pot, drumming]; **\textcolor{pantone}{see Supplementary Table 1}**).
 As our central experimental manipulation, half of the objects were presented together with keywords that correctly matched their respective function, whereas the other half of the objects were presented together with non-matching keywords belonging to one of the other objects.
 The matching keywords were expected to induce semantically informed perception, that is, participants suddenly understanding what kind of object they were viewing.
 The non-matching keywords were expected to prevent such an understanding and keep the perception of the object semantically naive.
@@ -602,7 +603,7 @@ Clusters were considered to be statistically significant if their mass exceeded 
 ## Data and Code Accessibility
 
 The EEG data are available upon reasonable request from the corresponding author because we had not asked participants for their consent to make the data publicly available.
-The code for data analysis is available at [https://doi.org/10.17605/osf.io/uksbc](https://doi.org/10.17605/osf.io/uksbc).
+**\textcolor{pantone}{The experimental stimuli (object images and keywords) and}** the code for data analysis are available at [https://doi.org/10.17605/osf.io/uksbc](https://doi.org/10.17605/osf.io/uksbc).
 
 In addition to the software mentioned above, our code relies on the tidyverse set of R packages [Version `r as.character(packageVersion("tidyverse"))`\; @R-tidyverse] for data wrangling, the ggplot2 [Version `r as.character(packageVersion("ggplot2"))`\; @R-ggplot2], cowplot [Version `r as.character(packageVersion("cowplot"))`\; @R-cowplot], and eegUtils [Version `r as.character(packageVersion("eegUtils"))`\; @R-eegUtils] packages for visualization, and the papaja package [Version `r as.character(packageVersion("papaja"))`\; @R-papaja] for statistical reporting.
 We followed the workflow developed by @peikert2021 to ensure the long-term reproducibility of our analysis pipeline.
@@ -616,7 +617,7 @@ In addition, N400 amplitudes differed as a function of the condition (semantical
 Crucially, the phase × condition interaction was significant for all three ERP components, all $F$s > `r min(filter(anova_table, effect == "phase:condition")$f_value)`, all $p$s < `r print_p(max(filter(anova_table, effect == "phase:condition")$p_value))`.
 To answer our main research question, we decomposed these interactions into pairwise comparisons of the semantically informed condition versus the naive condition within each of the three phases of the experiment.
 
-In the pre-insight phase, when objects were unfamiliar to participants and presented without keywords, no differences emerged between the semantically informed condition and the naive condition in any of the the ERP components, all $|t|$s < `r max(abs(filter(contrast_table, phase == "Pre-insight")$t_value))`, all $p$s `r print_p(min(filter(contrast_table, phase == "Pre-insight")$p_value))` (Figure 1B--D).
+In the pre-insight phase, when objects were unfamiliar to participants and presented without keywords, no differences emerged between the semantically informed condition and the naive condition in any of the the ERP components, all $|t|$s < `r max(abs(filter(contrast_table, phase == "Pre-insight")$t_value))`, all $p$s `r print_p(min(filter(contrast_table, phase == "Pre-insight")$p_value))` (see Figure 1B--D).
 This was expected given that the critical keywords (leading either to semantically informed perception or to naive perception) had not yet been presented, and given that the assignment of objects to conditions was counterbalanced across participants as to control for low-level visual differences.
 
 In the insight phase, half of the unfamiliar objects were presented with matching keywords, leading to semantically informed perception, and the other half were presented with non-matching keywords, keeping the perception of the objects semantically naive.
@@ -815,23 +816,20 @@ Second, the time course of this influence suggests that it manifests itself not 
 
 ```{r tabs1, results="asis"}
 # Print table of materials
-read_csv(here("example_stimuli", "stimuli.csv")) %>%
+read_csv(here("materials", "keywords.csv"), col_types = cols()) %>%
   mutate(
-    match_ger = paste0(
-      "\\textit{", match_noun_ger, "}, \\textit{", match_verb_ger, "}"
-    ),
+    match_ger = paste0(match_noun_ger, ", ", match_verb_ger),
     match_en = paste0("{[", match_noun_en, ", ", match_verb_en, "]}"),
-    nonmatch_ger = paste0(
-      "\\textit{", nonmatch_noun_ger, "}, \\textit{", nonmatch_verb_ger, "}"
-    ),
+    nonmatch_ger = paste0(nonmatch_noun_ger, ", ", nonmatch_verb_ger),
     nonmatch_en = paste0("{[", nonmatch_noun_en, ", ", nonmatch_verb_en, "]}"),
   ) %>%
   transmute(
     img = paste0(
-      "\\includegraphics[valign=c,scale=0.25]{example_stimuli/",
-      item_id,
-      ".png}"
+      "\\includegraphics[valign=c,width=18mm]{materials/unfamiliar_objects/",
+      filename,
+      "}"
     ),
+    item_id = as.character(item_id),
     match = paste(match_ger, match_en, sep = "\n") %>%
       kableExtra::linebreak(align = "l", linebreaker = "\n"),
     nonmatch = paste(nonmatch_ger, nonmatch_en, sep = "\n") %>%
@@ -840,11 +838,11 @@ read_csv(here("example_stimuli", "stimuli.csv")) %>%
   apa_table(
     booktabs = TRUE,
     col.names = c(
-      "Object", "Matching keywords", "Non-matching keywords"
+      "Stimulus", "ID", "Matching keywords", "Non-matching keywords"
     ),
     escape = FALSE,
     longtable = TRUE,
-    caption = "Example stimuli\\smallskip",
+    caption = "Unfamiliar Object Stimuli\\smallskip",
     font_size = "footnotesize"
   )
 ```

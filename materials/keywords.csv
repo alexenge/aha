@@ -1,0 +1,121 @@
+item_id,filename,match_noun_ger,match_verb_ger,match_noun_en,match_verb_en,nonmatch_noun_ger,nonmatch_verb_ger,nonmatch_noun_en,nonmatch_verb_en
+1,galvanometer.png,elektrische Spannung,prüfen,electric current,measuring,Makkaroni,formen,macaroni,forming
+2,nudelmaschine.png,Makkaroni,formen,macaroni,forming,Kuh,vom Zaun abhalten,cow,keeping away from the fence
+3,Knochensaege.png,Knochen,sägen,bones,sawing,Streckenmaß,Sonnenlicht nutzen,distance measure,using sunrays
+4,Unkraut-Jaetzange.png,Unkraut,jäten,weed,removing,Uhr,mit Wärme betreiben,clock,operating with heat
+5,mausefalle.png,Mausefalle,zuschnappen,mousetrap,snap-shutting,Brillenglas,zuschneiden,eyeglass lens,cutting
+6,Goldmuenzen-Waage.png,Goldmünzen,wiegen,gold coin,weighing,Farbe,vom Fenster abschleifen,paint,scraping off the window
+7,Knie-Schraubstock.png,Knie,fixieren,knee,fixating,Buchstaben,tippen,letter,typing
+8,Eierkarton-Presse.png,Eierkarton,pressen,egg carton,pressing,Tabak,zermahlen,tobacco,pulverize
+9,Baum-Klettereisen.png,Baum,erklettern,tree,climbing,Rotation,Ladung erzeugen,rotation,creating electric charge
+10,schreibmaschine.png,Buchstaben,tippen,letter,typing,Pferdehuf,Halt geben,horse hoof,giving grip
+11,Elektro-Akkordeon.png,Akkordeon,spielen,accordion,playing,Seil,schneiden,rope,cutting
+12,trimmdichgeraet.png,Körper,trainieren,body,training,Buch,offen halten,book,binding
+13,paint_scraper.png,Farbe,vom Fenster abschleifen,paint,scraping off the window,von Hand,zentrifugieren,by hand,centrifugating
+14,heizpilz.png,Außenbereich,heizen,outdoor area,heating,Rasierklinge,schärfen,razor blade,sharpening
+15,mikroskop.png,Pflanzenteile,vergrößern,plant parts,magnifying,Katzenklo,sich selbst reinigen,litter box,self-cleaning
+16,krawattenaufhaenger.png,Krawatten,aufhängen,necktie,hanging up,Zeichnungen,vermessen,drawings,measuring
+17,grammophonnadel.png,Schallplatte,abtasten,vinyl record,reading,Ball,katapultieren,ball,catapulting
+18,glasschneider.png,Glas,schneiden,glass,cutting,Eier,wiegen,eggs,weighing
+19,Brikettpresse.png,Briketts,pressen,briquette,pressing,Narkosemittel,abgeben,anesthetic,administering
+20,orgelpfeife.png,Orgelton,erzeugen,organ sound,making,Bandage,rollen,bandage,rolling
+21,spannungsgeraet.png,Spannung,erzeugen,electric current,making,Fußstütze,reiten,footrest,horseback riding
+22,anesthesia_inhaler.png,Narkosemittel,abgeben,anesthetic,administering,Nüsse,aufbrechen,nuts,cracking
+23,Bandagen-Roller.png,Bandage,rollen,bandage,rolling,Schnee,rodeln,snow,sleighing
+24,weinfassoeffner.png,Weinfass,Loch einschlagen,wine barrel,smashing a hole,Tier,einfangen,animal,trapping
+25,cork_inserter.png,Flaschenkorken,einführen,bottle cork,inserting,Pferd,im Moor laufen,horse,walking in the moor
+26,Huehnereier-Brutautomat.png,Automat,Eier ausbrüten,machine,incubating eggs,Windgeschwindigkeit,messen,wind speed,measuring
+27,Korngarbengreifer.png,Korngarbe,greifen,sheaf,grabbing,Treibhaus,heizen,glass house,heating
+28,Briefwaage.png,Brief,wiegen,letter,weighing,Korngarbe,greifen,sheaf,grabbing
+29,4erbohrer.png,Löcher,bohren,hole,drilling,Sonnenlicht,Intensität messen,sunlight,measure intensity
+30,Grossfisch-Angelkurbel.png,Angelschnur,kurbeln,fishing line,winding,Glaskörper,musizieren,glass body,making music
+31,Kurvenmalgeraet.png,Kurven,malen,curve,drawing,Nussöl,pressen,nut oil,pressing
+32,radiofrequenzeinsteller.png,Radiofrequenz,einstellen,radio frequency,tuning,Erektion,helfen,erection,helping
+33,Zaepfchenpresse.png,Zäpfchen,pressen,suppository,pressing,Unkraut,jäten,weed,removing
+34,dosenoeffner_fuer_faesser.png,Fass,öffnen,barrel,opening,Pflanzenteile,vergrößern,plant parts,magnifying
+35,karbidlampe.png,Bergbaustollen,beleuchten,mining tunnel,lightening,Knie,fixieren,knee,fixating
+36,antizaungurt.png,Kuh,vom Zaun abhalten,cow,keeping away from the fence,Radiofrequenz,einstellen,radio frequency,tuning
+37,Saemaschine.png,Saatgut,gleichmäßig aussäen,seeds,sowing evenly,Fass,öffnen,barrel,opening
+38,Flaschentrockner.png,Flaschen,trocknen,bottles,drying,Bleistift,anspitzen,pencil,sharpening
+39,Thermopneumatische_Uhr.png,Uhr,mit Wärme betreiben,clock,operating with heat,Körper,untersuchen,body,training
+40,kimkim.png,Tonpott,trommeln,clay pot,drumming,Piano,stimmen,piano,tuning
+41,Sprengstoff-Zuender.png,Sprengstoffexplosion,auslösen,dynamite explosion,triggering,Fisch,wiegen,fish,weighing
+42,pferdeueberschuh.png,Pferdehuf,Halt geben,horse hoof,giving grip,Zäpfchen,pressen,suppository,pressing
+43,Bleistiftspitzer.png,Bleistift,anspitzen,pencil,sharpening,Angel,Köder markieren,fishing rod,marking bait
+44,Nussoelpressmaschine.png,Nussöl,pressen,nut oil,pressing,Zeichen,einbrennen,marks,burning in
+45,rasierklingenschaerfer.png,Rasierklinge,schärfen,razor blade,sharpening,Kurven,malen,curve,drawing
+46,plattenheber.png,heiße Platten,anheben,hot plates,lifting,Kleidung,im Eimer waschen,clothes,washing in a bucket
+47,filmrolle.png,Film,aufspulen,film roll,winding,Mund,offen halten,mouth,keeping open
+48,Flammenwerfer-Aufsatz.png,Waffe,entflammen,weapon,inflaming,Uhrzeit,anzeigen,time,displaying
+49,mikrotom.png,Mikroskop-Proben,schneiden,microscopic samples,slicing,heiße Platten,anheben,hot plates,lifting
+50,Glasresonanz-Cello.png,Glaskörper,musizieren,glass body,making music,Kork,flach pressen,cork,pressing flat
+51,dampfzerstaeuber.png,Dampf,zerstäuben,steam,spraying,Buch,binden,book,opening
+52,mandelnentferner.png,Mandeln,operieren,kidneys,operating,Film,aufspulen,film roll,winding
+53,toaster.png,Toastbrot,rösten,toast,roasting,Autobatterie,Spannung testen,car battery,measuring voltage
+54,steigbuegel.png,Fußstütze,reiten,footrest,horseback riding,Stromstärke,messen,current,measuring
+55,feuertuergelenk.png,Türgelenk,Feuer überstehen,door hinge,surviving fires,Botschaft,telegrafieren,message,telegraphing
+56,einkufiger_schlitten.png,Schnee,rodeln,snow,sleighing,Dampf,zerstäuben,steam,spraying
+57,Nussknacker.png,Nüsse,aufbrechen,nuts,cracking,Ziegelsteine,formen,bricks,forming
+58,elektrisches_radiergummi.png,Radiergummi,mit Strom betreiben,eraser,operating with electricity,Münzen,aufbewahren,coins,storing
+59,Treibhausheizgeraet.png,Treibhaus,heizen,glass house,heating,Messer,schleifen,knife,sharpening
+60,Telegraphier-Geraet.png,Botschaft,telegrafieren,message,telegraphing,Toastbrot,rösten,toast,roasting
+61,schwimmer.png,Angel,Köder markieren,fishing rod,marking bait,Baum,erklettern,tree,climbing
+62,Selbstreinigendes_Katzenklo.png,Katzenklo,sich selbst reinigen,litter box,self-cleaning,Tankfüllstand,messen,fuel tank level,gauging
+63,pleximeter.png,Körper,untersuchen,body,examining,Schuhe,auf Eis laufen,shoes,walking on ice
+64,brillenglasschneidemaschine.png,Brillenglas,zuschneiden,eyeglass lens,cutting,Saatgut,gleichmäßig aussäen,seeds,sowing evenly
+65,drahtbieger.png,Draht,wickeln,wire,winding,Bergbaustollen,beleuchten,mining tunnel,lightening
+66,Buecher-Offenhalter.png,Buch,offen halten,book,opening,Sprengstoffexplosion,auslösen,dynamite explosion,triggering
+67,haecksler.png,Feldanbau,häckseln,harvest,chopping,Draht,wickeln,wire,winding
+68,Roemisches_Senklot.png,Schnurlot,absenken,plummet,letting down,Korken,formen,bottle cork,forming
+69,filar_micrometer.png,Sternenbilder,vermessen,stellar constellation,measuring,Schnurlot,absenken,plummet,letting down
+70,Morse-Geraet.png,Nachricht,morsen,message,signaling,Feldanbau,häckseln,harvest,chopping
+71,Stampf-Fiedel.png,Musikgerät,stampfen,musical instrument,stamping,Goldmünzen,wiegen,gold coin,weighing
+72,schneekette.png,Schuhe,auf Eis laufen,shoes,walking on ice,Geschwindigkeit,ermitteln,speed,determining
+73,mechanisches_tachometer.png,Geschwindigkeit,ermitteln,speed,determining,Mausefalle,zuschnappen,mousetrap,snap-shutting
+74,Brenneisen.png,Zeichen,einbrennen,marks,burning in,Luftdruck,messen,air pressure,measuring
+75,Tabakschneider.png,Tabak,zermahlen,tobacco,pulverize,Flaschen,trocknen,bottles,drying
+76,galvanometer_2.png,Stromstärke,messen,current,measuring,Mandeln,operieren,kidneys,operating
+77,tierfalle.png,Tier,einfangen,animal,trapping,Maiskolben,entkörnen,corncob,removing grains
+78,Messerschleifer.png,Messer,schleifen,knife,sharpening,Schritte,vergrößern,steps,extending
+79,tibetischer_leierkasten.png,Leierkasten,klingen,barrel organ,making sounds,Fass,anheben,barrel,lifting
+80,Buchbinder.png,Buch,binden,book,binding,Löcher,bohren,hole,drilling
+81,korkenpresse.png,Kork,flach pressen,cork,pressing flat,Elektroschock,spielen,electric shock,playing
+82,tablettenteiler.png,Tabletten,zerteilen,pill,splitting,Blumentopf,sich selbst wässern,flowerpot,self-watering
+83,hebel_fuer_fassbauer.png,Fass,anheben,barrel,lifting,Mikroskop-Proben,schneiden,microscopic samples,slicing
+84,pferdeschuh.png,Pferd,im Moor laufen,horse,walking in the moor,Luft,abpumpen,air,pumping out
+85,Rituelles_Hackmesser.png,altes Ritual,hacken,ancient ritual,chopping,Spannung,erzeugen,electric current,making
+86,Historische_Waschmaschine.png,Kleidung,im Eimer waschen,clothes,washing in a bucket,Türgelenk,Feuer überstehen,door hinge,surviving fires
+87,Maiskolben-Entkoerner.png,Maiskolben,entkörnen,corncob,removing grains,Brief,wiegen,letter,weighing
+88,Ball-Wurfmaschine.png,Ball,katapultieren,ball,catapulting,Radiergummi,mit Strom betreiben,eraser,operating with electricity
+89,planimeter.png,Zeichnungen,vermessen,drawings,measuring,Brenner,löten,burner,soldering
+90,elektroschockspiel.png,Elektroschock,spielen,electric shock,playing,Weinfass,Loch einschlagen,wine barrel,smashing a hole
+91,zaehlgeraet_fuer_lieferungen.png,Lieferungen,abzählen,deliveries,counting,Außenbereich,heizen,outdoor area,heating
+92,Erzeugt_statische_Ladung.png,Rotation,Ladung erzeugen,rotation,creating electric charge,Musikgerät,stampfen,musical instrument,stamping
+93,Kuenstliches Herz.png,Herz,durch Maschine ersetzen,heart,replacing with machine,Kerzen,löschen,candles,extinguishing
+94,seilschneider.png,Seil,schneiden,rope,cutting,Akkordeon,spielen,accordion,playing
+95,Fischwaage.png,Fisch,wiegen,fish,weighing,Herz,durch Maschine ersetzen,heart,replacing with machine
+96,kerzenloescher.png,Kerzen,löschen,candles,extinguishing,Körper,trainieren,body,examining
+97,Korkenpresse_2.png,Korken,formen,bottle cork,forming,Sternenbilder,vermessen,stellar constellation,measuring
+98,Mechanische_Erektionshilfe.png,Erektion,helfen,erection,helping,Waffe,werfen,weapon,throwing
+99,heliotrop.png,Streckenmaß,Sonnenlicht nutzen,distance measure,using sunrays,Kartoffeln,stampfen,potatoes,mashing
+100,Luftdruckmessgeraete.png,Luftdruck,messen,air pressure,measuring,Knochen,sägen,bones,sawing
+101,pianostimmgeraet.png,Piano,stimmen,piano,tuning,Eierkarton,pressen,egg carton,pressing
+102,Handzentrifuge.png,von Hand,zentrifugieren,by hand,centrifugating,Lieferungen,abzählen,deliveries,counting
+103,Kartoffelstampfer.png,Kartoffeln,stampfen,potatoes,mashing,Nachricht,morsen,message,signaling
+104,ninjasterne.png,Waffe,werfen,weapon,throwing,elektrische Spannung,prüfen,electric current,measuring
+105,dieselstandmessgeraet.png,Tankfüllstand,messen,fuel tank level,gauging,Tonpott,trommeln,clay pot,drumming
+106,uhrwerk.png,Uhrzeit,anzeigen,time,displaying,altes Ritual,hacken,ancient ritual,chopping
+107,Windgeschwindigkeitsmesser.png,Windgeschwindigkeit,messen,wind speed,measuring,Waffe,entflammen,weapon,inflaming
+108,schluesselloch-cutter.png,Schlüsselloch,stanzen,keyhole,punching,Automat,Eier ausbrüten,machine,incubating eggs
+109,ziegelformer.png,Ziegelsteine,formen,bricks,forming,Schallplatte,abtasten,vinyl record,reading
+110,Becher-Grammophon.png,Becher,Schall auffangen,drinking cup,picking up sound,Schlüsselloch,stanzen,keyhole,punching
+111,Vakuumpumpe.png,Luft,abpumpen,air,pumping out,Briketts,pressen,briquette,pressing
+112,mundsperrer.png,Mund,offen halten,mouth,keeping open,Orgelton,erzeugen,organ sound,making
+113,Autobatterie-Spannungstester.png,Autobatterie,Spannung testen,car battery,measuring voltage,Becher,Schall auffangen,drinking cup,picking up sound
+114,Sonnenlichtsintensitaetsmesser.png,Sonnenlicht,Intensität messen,sunlight,measure intensity,Krawatten,aufhängen,necktie,hanging up
+115,wagenradschloss.png,Kutschrad,anschließen,carriage wheel,locking,Angelschnur,kurbeln,fishing line,winding
+116,Eierwaage.png,Eier,wiegen,eggs,weighing,Leierkasten,klingen,barrel organ,making sounds
+117,Selbstwaessernder_Blumentopf.png,Blumentopf,sich selbst wässern,flowerpot,self-watering,Glas,schneiden,glass,cutting
+118,Siebenmeilenstiefel.png,Schritte,vergrößern,steps,extending,Tabletten,zerteilen,pill,splitting
+119,Muenzspender.png,Münzen,aufbewahren,coins,storing,Kutschrad,anschließen,carriage wheel,locking
+120,loetlampe.png,Brenner,löten,burner,soldering,Flaschenkorken einführen,einführen,bottle cork,inserting
