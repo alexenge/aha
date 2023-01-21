@@ -215,32 +215,46 @@ The mapping of the rating scale to the four buttons (left to right or right to l
 read_log <- function(log_file) {
 
   # Read the file
-  read_tsv(
+  log <- read_tsv(
     log_file,
     col_types = cols(),
-    locale = locale(encoding = "latin1")
+    locale = locale(encoding = "latin1"),
+    progress = FALSE
   ) %>%
     # Recode some columns
     transmute(
 
       # Phase of the experiment
-      phase = factor(Wdh,
+      phase = factor(
+        Wdh,
         levels = c(211, 212, 213),
         labels = c("Pre-insight", "Insight", "Post-insight")
       ),
 
-      # Keyword conditions
-      keywords = factor(Bed,
+      # Unfamiliar versus familiar objects
+      familiarity = factor(
+        bek_unbek,
+        levels = c("bekannt", "unbekannt"),
+        labels = c("familiar", "unfamiliar")
+      ),
+
+      # Matching versus non-matching keywords for unfamiliar objects
+      keywords = factor(
+        Bed,
         levels = c("richtig", "falsch"),
         labels = c("Match", "Non-match")
       ),
 
       # Behavioral responses
-      # 201: "I know what this is or have a strong assumption"  -> Recode as 4
-      # 202: "I have an assumption what this is"                -> Recode as 3
-      # 203: "I have rather no assumption what this is"         -> Recode as 2
-      # 204: "I don't know what this is and have no assumption" -> Recode as 1
-      response = 5 - (Tastencode - 200),
+      # Button code 201: "I know what this is or have a strong assumption"
+      # Button code 202: "I have an assumption what this is"
+      # Button code 203: "I have rather no assumption what this is"
+      # Button code 204: "I don't know what this is and have no assumption"
+      # Button code 0: Technical glitch
+      response = recode(
+        Tastencode,
+        `201` = 4, `202` = 3, `203` = 2, `204` = 1, `0` = NA_real_
+      ),
 
       # Reaction times
       rt = RT,
@@ -249,7 +263,7 @@ read_log <- function(log_file) {
       item_id = factor(StimID)
     ) %>%
     # Remove filler items
-    drop_na(keywords) -> log
+    filter(familiarity == "unfamiliar")
 
   # Assign items to conditions based on manipulation (matching vs. non-
   # matching keywords) and the responses of the participants
@@ -277,7 +291,10 @@ read_log <- function(log_file) {
       ],
 
       # Exclude: Positive response *before* any info was presented
-      Exclude_known = item_id[phase == "Pre-insight" & response == 4]
+      Exclude_known = item_id[phase == "Pre-insight" & response == 4],
+
+      # Exclude: Technical glitch
+      Exclude_glitch = item_id[phase == "Insight" & is.na(response)]
     )
   })
 
