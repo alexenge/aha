@@ -246,15 +246,12 @@ read_log <- function(log_file) {
       ),
 
       # Behavioral responses
-      # Button code 201: "I know what this is or have a strong assumption"
-      # Button code 202: "I have an assumption what this is"
-      # Button code 203: "I have rather no assumption what this is"
-      # Button code 204: "I don't know what this is and have no assumption"
-      # Button code 0: Technical glitch
-      response = recode(
-        Tastencode,
-        `201` = 4, `202` = 3, `203` = 2, `204` = 1, `0` = NA_real_
-      ),
+      # Response code 201: "I know what this is or have a strong assumption"
+      # Response code 202: "I have an assumption what this is"
+      # Response code 203: "I have rather no assumption what this is"
+      # Response code 204: "I don't know what this is and have no assumption"
+      # Response code 0: Technical glitch
+      response = Tastencode,
 
       # Reaction times
       rt = RT,
@@ -272,29 +269,29 @@ read_log <- function(log_file) {
 
       # Informed condition: Matching keywords and positive response
       Informed = item_id[
-        phase == "Insight" & keywords == "Match" & response %in% c(3, 4)
+        phase == "Insight" & keywords == "Match" & response %in% c(201, 202)
       ],
 
       # Naive condition: Non-matching keywords and negative response
       Naive = item_id[
-        phase == "Insight" & keywords == "Non-match" & response %in% c(1, 2)
+        phase == "Insight" & keywords == "Non-match" & response %in% c(203, 204)
       ],
 
       # Exclude: Matching keywords and negative response
       Exclude_informed = item_id[
-        phase == "Insight" & keywords == "Match" & response %in% c(1, 2)
+        phase == "Insight" & keywords == "Match" & response %in% c(203, 204)
       ],
 
       # Exclude: Non-matching keywords and positive response
       Exclude_naive = item_id[
-        phase == "Insight" & keywords == "Non-match" & response %in% c(3, 4)
+        phase == "Insight" & keywords == "Non-match" & response %in% c(201, 202)
       ],
 
       # Exclude: Positive response *before* any info was presented
-      Exclude_known = item_id[phase == "Pre-insight" & response == 4],
+      Exclude_known = item_id[phase == "Pre-insight" & response == 201],
 
       # Exclude: Technical glitch
-      Exclude_glitch = item_id[phase == "Insight" & is.na(response)]
+      Exclude_glitch = item_id[phase == "Insight" & response == 0]
     )
   })
 
