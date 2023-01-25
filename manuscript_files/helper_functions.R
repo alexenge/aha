@@ -291,7 +291,7 @@ plot_fig1b <- function(evokeds, config, channel_locations, models) {
 
       # Extract significance from model
       as_tibble(model$contrasts) %>%
-        filter(phase == this_phase) %>%
+        filter(phase == this_phase & contrast == "Informed - Naive") %>%
         pull(p.value) -> p_value
       asterisks <- case_when(
         p_value < 0.001 ~ "***",
