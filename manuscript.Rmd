@@ -386,14 +386,15 @@ if (run$eeg_processing) {
 }
 
 # Read single trial data
-read_csv(here(output_dir, "trials.csv"), col_types = cols(
+trials <- read_csv(here(output_dir, "trials.csv"), col_types = cols(
   participant_id = col_factor(),
   item_id = col_factor(),
-  phase = col_factor(),
-  condition = col_factor()
-)) %>%
-  # Mark unrealistically short RTs
-  mutate(rt = ifelse(rt < 200, NA, rt)) -> trials
+  phase = col_factor(levels = c("Pre-insight", "Insight", "Post-insight")),
+  condition = col_factor(levels = c(
+    "Informed", "Naive", "Exclude_informed",
+    "Exclude_naive", "Exclude_known", "Exclude_glitch"
+  ))
+))
 
 # Compute number of objects per condition for each participant
 with(trials, table(participant_id, condition)) %>%
@@ -432,8 +433,8 @@ p_cluster <- 0.05 / 3 # Bonferroni-corrected for three phases
 ```{r, mixed_models, include=FALSE}
 # Filter relevant conditions for the main analysis
 trials %>%
-  mutate(condition = factor(condition, levels = c("Informed", "Naive"))) %>%
-  drop_na() -> trials_main
+  filter(condition %in% c("Informed", "Naive", "Exclude_informed")) %>%
+  droplevels() -> trials
 
 # Contrast coding for phase
 cbind(
@@ -441,12 +442,15 @@ cbind(
   c(`Pre-insight` = 0, `Insight` = -1, `Post-insight` = 1)
 ) %>%
   t() %>%
-  ginv() -> contrasts(trials_main$phase)
+  ginv() -> contrasts(trials$phase)
 
 # Contrast coding for condition
-cbind(c(`Informed` = 1, `Naive` = -1)) %>%
+cbind(
+  c(`Informed` = 1, `Naive` = -1, `Exclude_informed` = 0),
+  c(`Informed` = 1, `Naive` = 0, `Exclude_informed` = -1)
+) %>%
   t() %>%
-  ginv() -> contrasts(trials_main$condition)
+  ginv() -> contrasts(trials$condition)
 
 # Construct model formula
 form <- ~ phase * condition +
@@ -484,17 +488,20 @@ fit_mixed_models <- function(dep, formula, data) {
 
   # Compute marginal means and contrasts
   emm_options(lmer.df = "Satterthwaite", lmerTest.limit = Inf)
-  means <- emmeans(build@model, specs = c("phase", "condition"))
-  contrasts <- contrast(means, "pairwise", simple = "condition") %>%
-    summary(by = NULL, adjust = "bonferroni")
+  emm_means <- emmeans(build@model, specs = c("phase", "condition"))
+  emm_contrasts <- contrast(
+    emm_means,
+    method = "trt.vs.ctrl", simple = "condition", reverse = TRUE
+  ) %>%
+    summary(by = NULL, adjust = "fdr")
 
   # Create list of returns
   list(
     model = build@model,
     summary = build@summary,
     anova = build@anova,
-    means = means,
-    contrasts = contrasts
+    means = emm_means,
+    contrasts = emm_contrasts
   )
 }
 
@@ -503,7 +510,7 @@ deps <- config$components$name
 if (run$mixed_models) {
 
   # Fit the model for each ERP component
-  map(deps, fit_mixed_models, formula = form, data = trials_main) %>%
+  map(deps, fit_mixed_models, formula = form, data = trials) %>%
     set_names(deps) -> models
 
   # Save models
@@ -629,18 +636,18 @@ We followed the workflow developed by @peikert2021 to ensure the long-term repro
 Averaged across conditions, P1, N170, and N400 amplitudes differed as a function of the phase of the experiment (pre-insight, insight, or post-insight), all $F$s > `r min(filter(anova_table, effect == "phase")$f_value)`, all $p$s `r print_p(max(filter(anova_table, effect == "phase")$p_value))`.
 In addition, N400 amplitudes differed as a function of the condition (semantically informed or naive), averaged across the three phases of the experiment, $F$(`r print_dof(filter(anova_table, component == "N400" & effect == "condition")$NumDF)`, `r print_dof(filter(anova_table, component == "N400" & effect == "condition")$DenDF)`) = `r filter(anova_table, component == "N400" & effect == "condition")$f_value`, $p$ `r print_p(filter(anova_table, component == "N400" & effect == "condition")$p_value)`.
 Crucially, the phase × condition interaction was significant for all three ERP components, all $F$s > `r min(filter(anova_table, effect == "phase:condition")$f_value)`, all $p$s < `r print_p(max(filter(anova_table, effect == "phase:condition")$p_value))`.
-To answer our main research question, we decomposed these interactions into pairwise comparisons of the semantically informed condition versus the naive condition within each of the three phases of the experiment.
+To answer our main research question, we decomposed these interactions into pairwise comparisons between semantic conditions within each of the three phases of the experiment.
 
-In the pre-insight phase, when objects were unfamiliar to participants and presented without keywords, no differences emerged between the semantically informed condition and the naive condition in any of the the ERP components, all $|t|$s < `r max(abs(filter(contrast_table, phase == "Pre-insight")$t_value))`, all $p$s `r print_p(min(filter(contrast_table, phase == "Pre-insight")$p_value))` (see Figure 1B--D).
+In the pre-insight phase, when objects were unfamiliar to participants and presented without keywords, no differences emerged between the semantically informed condition and the naive condition in any of the the ERP components, all $|t|$s < `r max(abs(filter(contrast_table, phase == "Pre-insight" & contrast == "Informed - Naive")$t_value))`, all $p$s `r print_p(min(filter(contrast_table, phase == "Pre-insight" & contrast == "Informed - Naive")$p_value))` (see Figure 1B--D).
 This was expected given that the critical keywords (leading either to semantically informed perception or to naive perception) had not yet been presented, and given that the assignment of objects to conditions was counterbalanced across participants as to control for low-level visual differences.
 
 In the insight phase, half of the unfamiliar objects were presented with matching keywords, leading to semantically informed perception, and the other half were presented with non-matching keywords, keeping the perception of the objects semantically naive.
-Semantically informed perception in this phase was associated with enlarged (i.e., more negative) amplitudes in the N170 component, $b$ = `r filter(contrast_table, component == "N170" & phase == "Insight")$estimate` µV, $t$(`r print_dof(filter(contrast_table, component == "N170" & phase == "Insight")$df)`) = `r filter(contrast_table, component == "N170" & phase == "Insight")$t_value`, $p_\text{corr}$ = `r print_p(filter(contrast_table, component == "N170" & phase == "Insight")$p_value)`, and reduced (i.e., less negative) amplitudes in the N400 component, $b$ = `r filter(contrast_table, component == "N400" & phase == "Insight")$estimate` µV, $t$(`r print_dof(filter(contrast_table, component == "N400" & phase == "Insight")$df)`) = `r filter(contrast_table, component == "N400" & phase == "Insight")$t_value`, $p_\text{corr}$ `r print_p(filter(contrast_table, component == "N400" & phase == "Insight")$p_value)`.
-There was no reliable difference between conditions in the P1 component, $b$ = `r filter(contrast_table, component == "P1" & phase == "Insight")$estimate` µV, $t$(`r print_dof(filter(contrast_table, component == "P1" & phase == "Insight")$df)`) = `r filter(contrast_table, component == "P1" & phase == "Insight")$t_value`, $p_\text{corr}$ = `r print_p(filter(contrast_table, component == "P1" & phase == "Insight")$p_value)`.
+Semantically informed perception in this phase was associated with enlarged (i.e., more negative) amplitudes in the N170 component, $b$ = `r filter(contrast_table, component == "N170" & phase == "Insight" & contrast == "Informed - Naive")$estimate` µV, $t$(`r print_dof(filter(contrast_table, component == "N170" & phase == "Insight" & contrast == "Informed - Naive")$df)`) = `r filter(contrast_table, component == "N170" & phase == "Insight" & contrast == "Informed - Naive")$t_value`, $p_\text{corr}$ = `r print_p(filter(contrast_table, component == "N170" & phase == "Insight" & contrast == "Informed - Naive")$p_value)`, and reduced (i.e., less negative) amplitudes in the N400 component, $b$ = `r filter(contrast_table, component == "N400" & phase == "Insight" & contrast == "Informed - Naive")$estimate` µV, $t$(`r print_dof(filter(contrast_table, component == "N400" & phase == "Insight" & contrast == "Informed - Naive")$df)`) = `r filter(contrast_table, component == "N400" & phase == "Insight" & contrast == "Informed - Naive")$t_value`, $p_\text{corr}$ `r print_p(filter(contrast_table, component == "N400" & phase == "Insight" & contrast == "Informed - Naive")$p_value)`.
+There was no reliable difference between conditions in the P1 component, $b$ = `r filter(contrast_table, component == "P1" & phase == "Insight" & contrast == "Informed - Naive")$estimate` µV, $t$(`r print_dof(filter(contrast_table, component == "P1" & phase == "Insight" & contrast == "Informed - Naive")$df)`) = `r filter(contrast_table, component == "P1" & phase == "Insight" & contrast == "Informed - Naive")$t_value`, $p_\text{corr}$ = `r print_p(filter(contrast_table, component == "P1" & phase == "Insight" & contrast == "Informed - Naive")$p_value)`.
 
 In the post-insight phase, the unfamiliar objects were presented for a third time and without any keywords, mirroring the pre-insight phase.
-As in the insight phase, semantically informed perception was associated with reduced (i.e., less negative) amplitudes in the N400 component, $b$ = `r filter(contrast_table, component == "N400" & phase == "Post-insight")$estimate` µV, $t$(`r print_dof(filter(contrast_table, component == "N400" & phase == "Post-insight")$df)`) = `r filter(contrast_table, component == "N400" & phase == "Post-insight")$t_value`, $p_\text{corr}$ `r print_p(filter(contrast_table, component == "N400" & phase == "Post-insight")$p_value)`, while the effect in the N170 component did not recur, $b$ = `r filter(contrast_table, component == "N170" & phase == "Post-insight")$estimate` µV, $t$(`r print_dof(filter(contrast_table, component == "N170" & phase == "Post-insight")$df)`) = `r filter(contrast_table, component == "N170" & phase == "Post-insight")$t_value`, $p_\text{corr}$ = `r print_p(filter(contrast_table, component == "N170" & phase == "Post-insight")$p_value)`.
-Instead, the P1 component was significantly enlarged (i.e., more positive) in response to objects for which semantically informed perception had taken place, $b$ = `r filter(contrast_table, component == "P1" & phase == "Post-insight")$estimate` µV, $t$(`r print_dof(filter(contrast_table, component == "P1" & phase == "Post-insight")$df)`) = `r filter(contrast_table, component == "P1" & phase == "Post-insight")$t_value`, $p_\text{corr}$ = `r print_p(filter(contrast_table, component == "P1" & phase == "Post-insight")$p_value)`.
+As in the insight phase, semantically informed perception was associated with reduced (i.e., less negative) amplitudes in the N400 component, $b$ = `r filter(contrast_table, component == "N400" & phase == "Post-insight" & contrast == "Informed - Naive")$estimate` µV, $t$(`r print_dof(filter(contrast_table, component == "N400" & phase == "Post-insight" & contrast == "Informed - Naive")$df)`) = `r filter(contrast_table, component == "N400" & phase == "Post-insight" & contrast == "Informed - Naive")$t_value`, $p_\text{corr}$ `r print_p(filter(contrast_table, component == "N400" & phase == "Post-insight" & contrast == "Informed - Naive")$p_value)`, while the effect in the N170 component did not recur, $b$ = `r filter(contrast_table, component == "N170" & phase == "Post-insight" & contrast == "Informed - Naive")$estimate` µV, $t$(`r print_dof(filter(contrast_table, component == "N170" & phase == "Post-insight" & contrast == "Informed - Naive")$df)`) = `r filter(contrast_table, component == "N170" & phase == "Post-insight" & contrast == "Informed - Naive")$t_value`, $p_\text{corr}$ = `r print_p(filter(contrast_table, component == "N170" & phase == "Post-insight" & contrast == "Informed - Naive")$p_value)`.
+Instead, the P1 component was significantly enlarged (i.e., more positive) in response to objects for which semantically informed perception had taken place, $b$ = `r filter(contrast_table, component == "P1" & phase == "Post-insight" & contrast == "Informed - Naive")$estimate` µV, $t$(`r print_dof(filter(contrast_table, component == "P1" & phase == "Post-insight" & contrast == "Informed - Naive")$df)`) = `r filter(contrast_table, component == "P1" & phase == "Post-insight" & contrast == "Informed - Naive")$t_value`, $p_\text{corr}$ = `r print_p(filter(contrast_table, component == "P1" & phase == "Post-insight" & contrast == "Informed - Naive")$p_value)`.
 
 ## Event-Related Power
 
