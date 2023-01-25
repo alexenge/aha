@@ -87,7 +87,6 @@ library(cowplot)
 library(parallel)
 library(reticulate)
 library(tidyverse)
-library(magrittr)
 
 # Set global options
 options(readr.show_col_types = FALSE)
@@ -461,7 +460,7 @@ form <- ~ phase * condition +
 fit_mixed_models <- function(dep, formula, data) {
 
   # Modify the formula such that fixed effects are always retained
-  formula %<>%
+  formula <- formula %>%
     tabulate.formula() %>%
     mutate(block = replace(block, is.na(grouping), "fixed"))
 
