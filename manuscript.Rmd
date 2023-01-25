@@ -397,10 +397,10 @@ trials <- read_csv(here(output_dir, "trials.csv"), col_types = cols(
 ))
 
 # Compute number of objects per condition for each participant
-with(trials, table(participant_id, condition)) %>%
+objects_per_condition <- with(trials, table(participant_id, condition)) %>%
   `/`(3) %>%
   as.data.frame.matrix() %>%
-  rownames_to_column("subject_id") -> objects_per_condition
+  rownames_to_column("subject_id")
 
 # Read by-participant ERP averages and channel locations
 evokeds <- read_csv(here(output_dir, "ave.csv"))
@@ -432,25 +432,25 @@ p_cluster <- 0.05 / 3 # Bonferroni-corrected for three phases
 
 ```{r, mixed_models, include=FALSE}
 # Filter relevant conditions for the main analysis
-trials %>%
+trials <- trials %>%
   filter(condition %in% c("Informed", "Uninformed", "Exclude_informed")) %>%
-  droplevels() -> trials
+  droplevels()
 
 # Contrast coding for phase
-cbind(
+contrasts(trials$phase) <- cbind(
   c(`Pre-insight` = -1, `Insight` = 1, `Post-insight` = 0),
   c(`Pre-insight` = 0, `Insight` = -1, `Post-insight` = 1)
 ) %>%
   t() %>%
-  ginv() -> contrasts(trials$phase)
+  ginv()
 
 # Contrast coding for condition
-cbind(
+contrasts(trials$condition) <- cbind(
   c(`Informed` = 1, `Uninformed` = -1, `Exclude_informed` = 0),
   c(`Informed` = 1, `Uninformed` = 0, `Exclude_informed` = -1)
 ) %>%
   t() %>%
-  ginv() -> contrasts(trials$condition)
+  ginv()
 
 # Construct model formula
 form <- ~ phase * condition +
@@ -510,8 +510,8 @@ deps <- config$components$name
 if (run$mixed_models) {
 
   # Fit the model for each ERP component
-  map(deps, fit_mixed_models, formula = form, data = trials) %>%
-    set_names(deps) -> models
+  models <- map(deps, fit_mixed_models, formula = form, data = trials) %>%
+    set_names(deps)
 
   # Save models
   saveRDS(models, here(output_dir, "models.RDS"))
@@ -522,12 +522,14 @@ if (run$mixed_models) {
 }
 
 # Extract relevant statistics to print in the main text
-map(models, function(model) as_tibble(model$anova, rownames = "effect")) %>%
+anova_table <- models %>%
+  map(function(model) as_tibble(model$anova, rownames = "effect")) %>%
   bind_rows(.id = "component") %>%
-  rename(f_value = `F value`, p_value = `Pr(>F)`) -> anova_table
-map(models, function(model) as_tibble(model$contrasts)) %>%
+  rename(f_value = `F value`, p_value = `Pr(>F)`)
+contrast_table <- models %>%
+  map(function(model) as_tibble(model$contrasts)) %>%
   bind_rows(.id = "component") %>%
-  rename(t_value = `t.ratio`, p_value = `p.value`) -> contrast_table
+  rename(t_value = `t.ratio`, p_value = `p.value`)
 ```
 
 ```{r, fig1, cache=!run$figures, fig.height=12, fig.cap="(ref:fig1-caption)"}
@@ -691,29 +693,32 @@ Black dots highlight EEG channels that were part of a cluster for which this dif
 ```{r, control_analysis, include=FALSE}
 # Filter relevant conditions for the control analysis
 conditions_control <- c("Informed", "Exclude_informed")
-trials %>%
+trials_control <- trials %>%
   mutate(condition = factor(condition, levels = conditions_control)) %>%
-  drop_na() -> trials_control
+  drop_na()
 
 # Contrast coding for phase
-cbind(
+contrasts(trials_control$phase) <- cbind(
   c(`Pre-insight` = -1, `Insight` = 1, `Post-insight` = 0),
   c(`Pre-insight` = 0, `Insight` = -1, `Post-insight` = 1)
 ) %>%
   t() %>%
-  ginv() -> contrasts(trials_control$phase)
+  ginv()
 
 # Contrast coding for condition
-cbind(c(`Informed` = 1, `Exclude_informed` = -1)) %>%
+contrasts(trials_control$condition) <- cbind(
+  c(`Informed` = 1, `Exclude_informed` = -1)
+) %>%
   t() %>%
-  ginv() -> contrasts(trials_control$condition)
+  ginv()
 
 # (Re-)do the actual model fitting if requested
 if (run$control_analysis) {
 
   # Fit the model for each ERP component
-  map(deps, fit_mixed_models, formula = form, data = trials_control) %>%
-    set_names(deps) -> models_control
+  models_control <- deps %>%
+    map(fit_mixed_models, formula = form, data = trials_control) %>%
+    set_names(deps)
 
   # Fit an additional model for event-related power, controlling for RTs
   trials_main$alpha_beta <- trials_main$alpha_beta * 100 # Convert to percent
@@ -732,9 +737,10 @@ if (run$control_analysis) {
 }
 
 # Extract relevant statistics to print in the main text
-map(models_control, function(mod) as_tibble(mod$contrasts)) %>%
+contrast_table_control <- models_control %>%
+  map(function(mod) as_tibble(mod$contrasts)) %>%
   bind_rows(.id = "component") %>%
-  rename(t_value = `t.ratio`, p_value = `p.value`) -> contrast_table_control
+  rename(t_value = `t.ratio`, p_value = `p.value`)
 ```
 
 There are at least two alternative explanations for our finding that semantic information instantly affects early ERP responses.

@@ -274,25 +274,25 @@ plot_fig1b <- function(evokeds, config, channel_locations, models) {
       yticks <- c(-3, 3)
 
       # Select dependent variable, conditions, and time window
-      evokeds %>%
+      evokeds_plot <- evokeds %>%
         filter(phase == this_phase) %>%
         filter(condition %in% c("Informed", "Uninformed")) %>%
-        filter(between(time, xmin, xmax)) -> evokeds_plot
+        filter(between(time, xmin, xmax))
 
       # Create means and SEs across participants for time course
-      evokeds_plot %>%
+      evokeds_tc <- evokeds_plot %>%
         mutate(dep = evokeds_plot[[name]]) %>%
         Rmisc::summarySEwithin(
           measurevar = "dep",
           withinvars = c("time", "phase", "condition"),
           idvar = "participant_id"
         ) %>%
-        mutate(time = as.numeric(levels(time))[time]) -> evokeds_tc
+        mutate(time = as.numeric(levels(time))[time])
 
       # Extract significance from model
-      as_tibble(model$contrasts) %>%
+      p_value <- as_tibble(model$contrasts) %>%
         filter(phase == this_phase & contrast == "Informed - Uninformed") %>%
-        pull(p.value) -> p_value
+        pull(p.value)
       asterisks <- case_when(
         p_value < 0.001 ~ "***",
         p_value < 0.01 ~ "**",
@@ -301,7 +301,7 @@ plot_fig1b <- function(evokeds, config, channel_locations, models) {
       )
 
       # Plot time course
-      ggplot(
+      wave <- ggplot(
         evokeds_tc,
         aes(
           x = time,
@@ -360,7 +360,7 @@ plot_fig1b <- function(evokeds, config, channel_locations, models) {
         ) +
         coord_cartesian(ylim = c(-3, 8), expand = TRUE) +
         theme_void() +
-        theme(legend.position = "none") -> wave
+        theme(legend.position = "none")
 
       # Extract legend
       wave_legend <<- get_legend(
@@ -386,7 +386,7 @@ plot_fig1b <- function(evokeds, config, channel_locations, models) {
       evokeds_diff$condition <- "Difference"
 
       # Plot topography
-      evokeds_diff %>%
+      topo <- evokeds_diff %>%
         filter(between(time, tmin, tmax)) %>%
         pivot_longer(
           all_of(channels),
@@ -405,7 +405,7 @@ plot_fig1b <- function(evokeds, config, channel_locations, models) {
         scale_fill_distiller(
           palette = "RdBu", limits = c(-1, 1), oob = scales::squish
         ) +
-        theme(legend.position = "none") -> topo
+        theme(legend.position = "none")
       # Adjust size of head elements and channel markers
       topo$layers[[3]]$aes_params$size <- 0.5
       topo$layers[[4]]$aes_params$size <- 0.5
@@ -511,22 +511,22 @@ plot_tfr_topos <- function(tfr_grand_ave,
     tfr_grand_ave_minus[channels]
 
   # Plot each time bin as a column of topographies
-  map(tmins, function(tmin) {
+  plotlist <- map(tmins, function(tmin) {
     tmax <- tmin + tstep
 
     # Plot each frequency bin as one topography
-    map(fmins, function(fmin) {
+    plotlist <- map(fmins, function(fmin) {
       fmax <- fmin + fstep
 
       # Extract significant channels from cluster-based permutation tests
-      tfr_clusters %>%
+      significant_channels <- tfr_clusters %>%
         filter(time >= tmin & time < tmax & freq >= fmin & freq < fmax) %>%
         filter(p_val < p_cluster) %>%
         pull(channel) %>%
-        unique() -> significant_channels
+        unique()
 
       # Plot topography based on grand-averaged data
-      tfr_grand_ave_diff %>%
+      topo <- tfr_grand_ave_diff %>%
         filter(time >= tmin & time < tmax & freq >= fmin & freq < fmax) %>%
         pivot_longer(
           cols = all_of(channels), names_to = "electrode",
@@ -548,7 +548,7 @@ plot_tfr_topos <- function(tfr_grand_ave,
         theme(
           plot.margin = unit(rep(-0.2, 4), "cm"),
           legend.position = "none"
-        ) -> topo
+        )
       colorbar <<- get_legend(
         topo +
           guides(
@@ -584,7 +584,7 @@ plot_tfr_topos <- function(tfr_grand_ave,
       topo$layers[[7]]$aes_params$size <- 0.4
       topo$layers[[7]]$aes_params$colour <- "black"
       topo
-    }) -> plotlist
+    })
 
     # Combine all plots for the current time bin
     plotlist <- c(rev(plotlist), list(NULL))
@@ -607,7 +607,7 @@ plot_tfr_topos <- function(tfr_grand_ave,
         rel_heights = rel_heights
       )
     }
-  }) -> plotlist
+  })
 
   # Combine plots from all time bins
   tmins_str <- format(tmins, trim = TRUE, nsmall = 1)
