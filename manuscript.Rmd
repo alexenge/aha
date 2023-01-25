@@ -277,7 +277,7 @@ read_log <- function(log_file) {
       ],
 
       # Exclude: Matching keywords and negative response
-      Exclude_informed = item_id[
+      Unsucessful = item_id[
         phase == "Insight" & keywords == "Match" & response %in% c(203, 204)
       ],
 
@@ -369,7 +369,7 @@ if (run$eeg_processing) {
       c("Pre-insight/Informed", "Pre-insight/Uninformed"),
       c("Insight/Informed", "Insight/Uninformed"),
       c("Post-insight/Informed", "Post-insight/Uninformed"),
-      c("Insight/Informed", "Insight/Exclude_informed")
+      c("Insight/Informed", "Insight/Unsucessful")
     ),
     tfr_components = list(
       name = list("alpha_beta"),
@@ -390,7 +390,7 @@ trials <- read_csv(here(output_dir, "trials.csv"), col_types = cols(
   item_id = col_factor(),
   phase = col_factor(levels = c("Pre-insight", "Insight", "Post-insight")),
   condition = col_factor(levels = c(
-    "Informed", "Uninformed", "Exclude_informed",
+    "Informed", "Uninformed", "Unsucessful",
     "Exclude_uninformed", "Exclude_known", "Exclude_glitch"
   ))
 ))
@@ -432,7 +432,7 @@ p_cluster <- 0.05 / 3 # Bonferroni-corrected for three phases
 ```{r, mixed_models, include=FALSE}
 # Filter relevant conditions for the main analysis
 trials <- trials %>%
-  filter(condition %in% c("Informed", "Uninformed", "Exclude_informed")) %>%
+  filter(condition %in% c("Informed", "Uninformed", "Unsucessful")) %>%
   droplevels()
 
 # Contrast coding for phase
@@ -445,8 +445,8 @@ contrasts(trials$phase) <- cbind(
 
 # Contrast coding for condition
 contrasts(trials$condition) <- cbind(
-  c(`Informed` = 1, `Uninformed` = -1, `Exclude_informed` = 0),
-  c(`Informed` = 1, `Uninformed` = 0, `Exclude_informed` = -1)
+  c(`Informed` = 1, `Uninformed` = -1, `Unsucessful` = 0),
+  c(`Informed` = 1, `Uninformed` = 0, `Unsucessful` = -1)
 ) %>%
   t() %>%
   ginv()
@@ -691,7 +691,7 @@ Black dots highlight EEG channels that were part of a cluster for which this dif
 
 ```{r, control_analysis, include=FALSE}
 # Filter relevant conditions for the control analysis
-conditions_control <- c("Informed", "Exclude_informed")
+conditions_control <- c("Informed", "Unsucessful")
 trials_control <- trials %>%
   mutate(condition = factor(condition, levels = conditions_control)) %>%
   drop_na()
@@ -706,7 +706,7 @@ contrasts(trials_control$phase) <- cbind(
 
 # Contrast coding for condition
 contrasts(trials_control$condition) <- cbind(
-  c(`Informed` = 1, `Exclude_informed` = -1)
+  c(`Informed` = 1, `Unsucessful` = -1)
 ) %>%
   t() %>%
   ginv()
@@ -753,9 +753,9 @@ The N170 modulation might in fact not be due to semantic information changing th
 The non-matching keywords might have primed participants to expect a certain set of visual features that did not actually come true once the object was displayed, potentially provoking a fast and strong brain response within the first 200 ms.
 However, in a control analysis for this alternative explanation, we could show that the N170 effect in the insight phase does not depend on the **\textcolor{pantone}{uninformed}** condition.
 For this control analysis, we contrasted the semantically informed condition (i.e., matching key words and participants indicating in their response that they knew what the object was or had an assumption) against a different control condition, namely, those objects that were presented with matching keywords (as in the semantically informed condition), but for which participants failed to capitalize on the keywords and instead indicated that they still did not know what kind of object they were viewing (a kind of "failed insight").
-This was the case for an average of `r mean(objects_per_condition$Exclude_informed)` objects per participant (= `r percent(mean(objects_per_condition$Exclude_informed) / 60, accuracy = 0.1)` of objects presented with matching keywords).
+This was the case for an average of `r mean(objects_per_condition$Unsucessful)` objects per participant (= `r percent(mean(objects_per_condition$Unsucessful) / 60, accuracy = 0.1)` of objects presented with matching keywords).
 Contrasting the semantically informed condition and the failed insight condition with matching key words, we again observed an enlarged (i.e., more negative) N170 component during semantically informed perception, $b$ = `r filter(contrast_table_control, component == "N170" & phase == "Insight")$estimate` µV, $t$(`r print_dof(filter(contrast_table_control, component == "N170" & phase == "Insight")$df)`) = `r filter(contrast_table_control, component == "N170" & phase == "Insight")$t_value`, $p_\text{corr}$ `r print_p(filter(contrast_table_control, component == "N170" & phase == "Insight")$p_value)`.
-Likewise, the reduction of the N400 was replicated in this control analysis, $b$ = `r filter(contrast_table_control, component == "N400" & phase == "Insight")$estimate` µV, $t$(`r print_dof(filter(contrast_table_control, component == "N400" & phase == "Insight")$df)`) = `r filter(contrast_table_control, component == "N400" & phase == "Insight")$t_value`, $p_\text{corr}$ `r print_p(filter(contrast_table_control, component == "N400" & phase == "Insight")$p_value)`, as was the late reduction in event-related power ($p_\text{cluster}$ = `r print_p(unique(filter(tfr_clusters, contrast == "Insight/Informed - Insight/Exclude_informed" & p_val < p_cluster)$p_val))`; see Supplementary Figure 2).
+Likewise, the reduction of the N400 was replicated in this control analysis, $b$ = `r filter(contrast_table_control, component == "N400" & phase == "Insight")$estimate` µV, $t$(`r print_dof(filter(contrast_table_control, component == "N400" & phase == "Insight")$df)`) = `r filter(contrast_table_control, component == "N400" & phase == "Insight")$t_value`, $p_\text{corr}$ `r print_p(filter(contrast_table_control, component == "N400" & phase == "Insight")$p_value)`, as was the late reduction in event-related power ($p_\text{cluster}$ = `r print_p(unique(filter(tfr_clusters, contrast == "Insight/Informed - Insight/Unsucessful" & p_val < p_cluster)$p_val))`; see Supplementary Figure 2).
 This adds credibility to the notion that these effects are specific to those objects for which participants experienced a moment of insight induced by semantic information.
 
 Finally, we had wondered if the reduction in alpha/beta power might merely reflect differences in the timing of motor preparation between conditions, given the well-established link between motor processes and beta power over sensorimotor cortex [@kilavik2013].
@@ -948,15 +948,15 @@ A cluster-based permutation test indicated no clusters for which this difference
 plot_tfr_topos(
   filter(tfr_grand_ave, phase == "Insight"),
   filter(
-    tfr_clusters, contrast == "Insight/Informed - Insight/Exclude_informed"
+    tfr_clusters, contrast == "Insight/Informed - Insight/Unsucessful"
   ),
   p_cluster = p_cluster,
   condition_plus = "Informed",
-  condition_minus = "Exclude_informed",
+  condition_minus = "Unsucessful",
   title_conditions = "Informed - failed"
 )
 ```
 
 (ref:figs2-caption) Time-frequency results for the control analysis.
 Each topographic plot shows the difference in event-related power (in units of percent signal change) between the semantically informed condition and the "failed insight" condition (see Results: Control Analysis in the main text), grand-averaged across participants.
-Black dots highlight EEG channels that were part of a cluster for which this difference was statistically significant ($p_\text{cluster}$ = `r print_p(unique(filter(tfr_clusters, contrast == "Insight/Informed - Insight/Exclude_informed" & p_val < p_cluster)$p_val))`).
+Black dots highlight EEG channels that were part of a cluster for which this difference was statistically significant ($p_\text{cluster}$ = `r print_p(unique(filter(tfr_clusters, contrast == "Insight/Informed - Insight/Unsucessful" & p_val < p_cluster)$p_val))`).
