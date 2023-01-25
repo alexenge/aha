@@ -148,7 +148,7 @@ plot_fig1a <- function(files_dir) {
       family = "Helvetica", fontface = "bold", color = aha_colors[1]
     ) +
     annotate(
-      geom = "text", x = 22, y = 13, label = "Naive condition",
+      geom = "text", x = 22, y = 13, label = "Uninformed condition",
       family = "Helvetica", fontface = "bold", color = aha_colors[2]
     ) +
     annotate(
@@ -276,7 +276,7 @@ plot_fig1b <- function(evokeds, config, channel_locations, models) {
       # Select dependent variable, conditions, and time window
       evokeds %>%
         filter(phase == this_phase) %>%
-        filter(condition %in% c("Informed", "Naive")) %>%
+        filter(condition %in% c("Informed", "Uninformed")) %>%
         filter(between(time, xmin, xmax)) -> evokeds_plot
 
       # Create means and SEs across participants for time course
@@ -291,7 +291,7 @@ plot_fig1b <- function(evokeds, config, channel_locations, models) {
 
       # Extract significance from model
       as_tibble(model$contrasts) %>%
-        filter(phase == this_phase & contrast == "Informed - Naive") %>%
+        filter(phase == this_phase & contrast == "Informed - Uninformed") %>%
         pull(p.value) -> p_value
       asterisks <- case_when(
         p_value < 0.001 ~ "***",
@@ -355,7 +355,7 @@ plot_fig1b <- function(evokeds, config, channel_locations, models) {
         # Styling
         scale_color_manual(
           values = aha_colors,
-          labels = c("Informed condition", "Naive condition"),
+          labels = c("Informed condition", "Uninformed condition"),
           aesthetics = c("color", "fill")
         ) +
         coord_cartesian(ylim = c(-3, 8), expand = TRUE) +
@@ -379,10 +379,10 @@ plot_fig1b <- function(evokeds, config, channel_locations, models) {
       # Compute difference between conditions for topography
       channels <- channel_locations$channel
       evokeds_informed <- filter(evokeds_plot, condition == "Informed")
-      evokeds_naive <- filter(evokeds_plot, condition == "Naive")
+      evokeds_uninformed <- filter(evokeds_plot, condition == "Uninformed")
       evokeds_diff <- evokeds_informed
       evokeds_diff[channels] <-
-        evokeds_informed[channels] - evokeds_naive[channels]
+        evokeds_informed[channels] - evokeds_uninformed[channels]
       evokeds_diff$condition <- "Difference"
 
       # Plot topography
@@ -420,7 +420,7 @@ plot_fig1b <- function(evokeds, config, channel_locations, models) {
           guides(
             fill = guide_colorbar(
               title.hjust = 0.5,
-              title = "Informed - naive\nampl. (µV)",
+              title = "Informed - uninformed\nampl. (µV)",
               title.position = "left",
               barheight = 6.5,
               ticks = FALSE
@@ -485,8 +485,8 @@ plot_tfr_topos <- function(tfr_grand_ave,
                            tfr_clusters,
                            p_cluster,
                            condition_plus = "Informed",
-                           condition_minus = "Naive",
-                           title_conditions = "Informed - naive",
+                           condition_minus = "Uninformed",
+                           title_conditions = "Informed - uninformed",
                            tmin = -0.4,
                            tmax = 1.4,
                            tstep = 0.2,
