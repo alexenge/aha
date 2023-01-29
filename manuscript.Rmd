@@ -111,7 +111,6 @@ source(here(files_dir, "helper_functions.R"))
 run <- list(
   eeg_processing = FALSE,
   mixed_models = FALSE,
-  control_analysis = FALSE,
   figures = FALSE
 )
 
@@ -451,11 +450,6 @@ contrasts(trials$condition) <- cbind(
   t() %>%
   ginv()
 
-# Construct model formula
-form <- ~ phase * condition +
-  (phase * condition | participant_id) +
-  (phase * condition | item_id)
-
 # Define helper function for fitting linear mixed models and computing contrasts
 fit_mixed_models <- function(dep, formula, data) {
 
@@ -492,7 +486,7 @@ fit_mixed_models <- function(dep, formula, data) {
     emm_means,
     method = "trt.vs.ctrl", simple = "condition", reverse = TRUE
   ) %>%
-    summary(by = NULL, adjust = "fdr")
+    summary(by = "contrast", adjust = "bonferroni")
 
   # Create list of returns
   list(
@@ -509,8 +503,19 @@ deps <- config$components$name
 if (run$mixed_models) {
 
   # Fit the model for each ERP component
-  models <- map(deps, fit_mixed_models, formula = form, data = trials) %>%
+  form_erps <- ~ phase * condition +
+    (phase * condition | participant_id) +
+    (phase * condition | item_id)
+  models <- map(deps, fit_mixed_models, formula = form_erps, data = trials) %>%
     set_names(deps)
+
+  # Fit an additional control analysis model for the alpha/beta power
+  form_alpha_beta <- phase * condition + rt +
+    (phase * condition | participant_id) +
+    (phase * condition | item_id)
+  models$alpha_beta <- fit_mixed_models(
+    dep = "alpha_beta", formula = form_alpha_beta, data = trials
+  )
 
   # Save models
   saveRDS(models, here(output_dir, "models.RDS"))
@@ -686,82 +691,6 @@ plot_tfr_topos(
 (ref:fig3-caption) Time-frequency results for the post-insight phase.
 Each topographic plot shows the difference in event-related power (in units of percent signal change) between the semantically informed condition and the **\textcolor{pantone}{uninformed}** condition, grand-averaged across participants.
 Black dots highlight EEG channels that were part of a cluster for which this difference was statistically significant ($p_\text{cluster}$ = `r print_p(unique(filter(tfr_clusters, contrast == "Post-insight/Informed - Post-insight/Uninformed" & p_val < p_cluster)$p_val))`).
-
-## Control Analysis
-
-```{r, control_analysis, include=FALSE}
-# Filter relevant conditions for the control analysis
-conditions_control <- c("Informed", "Unsucessful")
-trials_control <- trials %>%
-  mutate(condition = factor(condition, levels = conditions_control)) %>%
-  drop_na()
-
-# Contrast coding for phase
-contrasts(trials_control$phase) <- cbind(
-  c(`Pre-insight` = -1, `Insight` = 1, `Post-insight` = 0),
-  c(`Pre-insight` = 0, `Insight` = -1, `Post-insight` = 1)
-) %>%
-  t() %>%
-  ginv()
-
-# Contrast coding for condition
-contrasts(trials_control$condition) <- cbind(
-  c(`Informed` = 1, `Unsucessful` = -1)
-) %>%
-  t() %>%
-  ginv()
-
-# (Re-)do the actual model fitting if requested
-if (run$control_analysis) {
-
-  # Fit the model for each ERP component
-  models_control <- deps %>%
-    map(fit_mixed_models, formula = form, data = trials_control) %>%
-    set_names(deps)
-
-  # Fit an additional model for event-related power, controlling for RTs
-  trials_main$alpha_beta <- trials_main$alpha_beta * 100 # Convert to percent
-  form_rt <- ~ phase * condition + log(rt) +
-    (phase * condition | participant_id) +
-    (phase * condition | item_id)
-  models_control$alpha_beta <-
-    fit_mixed_models(form = form_rt, data = trials_main, dep = "alpha_beta")
-
-  # Save models
-  saveRDS(models_control, here(output_dir, "models_control.RDS"))
-} else {
-
-  # Read fitted models
-  models_control <- readRDS(here(output_dir, "models_control.RDS"))
-}
-
-# Extract relevant statistics to print in the main text
-contrast_table_control <- models_control %>%
-  map(function(mod) as_tibble(mod$contrasts)) %>%
-  bind_rows(.id = "component") %>%
-  rename(t_value = `t.ratio`, p_value = `p.value`)
-```
-
-There are at least two alternative explanations for our finding that semantic information instantly affects early ERP responses.
-First, differences in the P1 and/or N170 components might be driven by low-level visual differences between object images rather than by our experimental manipulation (matching versus non-matching keywords in the insight phase).
-We ruled this out by counterbalancing the assignment of objects to conditions across participants, meaning that the same visual object entered the analysis in both conditions on an approximately equal number of trials, barring differences in participants' classification of the object and differences in the number of rejected EEG trials (see Materials and Methods).
-Furthermore, we did not detect reliable differences between the two conditions in the pre-insight phase, that is, before any keywords had been presented.
-It therefore seems unlikely that low-level differences could account for the effects of semantic information reported above.
-
-Second, there is an alternative explanation specifically for the effects observed in the insight phase, when the objects were presented together with matching or non-matching keywords.
-The N170 modulation might in fact not be due to semantic information changing the processing of objects in the semantically informed condition (as we had hypothesized), but rather a mismatch response to the objects in the **\textcolor{pantone}{uninformed}** condition.
-The non-matching keywords might have primed participants to expect a certain set of visual features that did not actually come true once the object was displayed, potentially provoking a fast and strong brain response within the first 200 ms.
-However, in a control analysis for this alternative explanation, we could show that the N170 effect in the insight phase does not depend on the **\textcolor{pantone}{uninformed}** condition.
-For this control analysis, we contrasted the semantically informed condition (i.e., matching key words and participants indicating in their response that they knew what the object was or had an assumption) against a different control condition, namely, those objects that were presented with matching keywords (as in the semantically informed condition), but for which participants failed to capitalize on the keywords and instead indicated that they still did not know what kind of object they were viewing (a kind of "failed insight").
-This was the case for an average of `r mean(objects_per_condition$Unsucessful)` objects per participant (= `r percent(mean(objects_per_condition$Unsucessful) / 60, accuracy = 0.1)` of objects presented with matching keywords).
-Contrasting the semantically informed condition and the failed insight condition with matching key words, we again observed an enlarged (i.e., more negative) N170 component during semantically informed perception, $b$ = `r filter(contrast_table_control, component == "N170" & phase == "Insight")$estimate` µV, $t$(`r print_dof(filter(contrast_table_control, component == "N170" & phase == "Insight")$df)`) = `r filter(contrast_table_control, component == "N170" & phase == "Insight")$t_value`, $p_\text{corr}$ `r print_p(filter(contrast_table_control, component == "N170" & phase == "Insight")$p_value)`.
-Likewise, the reduction of the N400 was replicated in this control analysis, $b$ = `r filter(contrast_table_control, component == "N400" & phase == "Insight")$estimate` µV, $t$(`r print_dof(filter(contrast_table_control, component == "N400" & phase == "Insight")$df)`) = `r filter(contrast_table_control, component == "N400" & phase == "Insight")$t_value`, $p_\text{corr}$ `r print_p(filter(contrast_table_control, component == "N400" & phase == "Insight")$p_value)`, as was the late reduction in event-related power ($p_\text{cluster}$ = `r print_p(unique(filter(tfr_clusters, contrast == "Insight/Informed - Insight/Unsucessful" & p_val < p_cluster)$p_val))`; see Supplementary Figure 2).
-This adds credibility to the notion that these effects are specific to those objects for which participants experienced a moment of insight induced by semantic information.
-
-Finally, we had wondered if the reduction in alpha/beta power might merely reflect differences in the timing of motor preparation between conditions, given the well-established link between motor processes and beta power over sensorimotor cortex [@kilavik2013].
-To rule this out, we extracted single trial percent signal change based on the distribution of clusters from the permutation tests (time window 600–1,200 ms, frequency range 8–20 Hz, electrodes P3, P4, Pz, PO3, PO4, and POz; see Figures 3 and 4).
-We then subjected these to a linear-mixed effects model that controlled for log-transformed reaction time as a covariate of no interest.
-This confirmed the significant reduction in alpha/beta power for the semantically informed condition as compared to the **\textcolor{pantone}{uninformed}** condition in the insight phase, $b$ = `r filter(contrast_table_control, component == "alpha_beta" & phase == "Insight")$estimate`%, $t$(`r print_dof(filter(contrast_table_control, component == "alpha_beta" & phase == "Insight")$df)`) = `r filter(contrast_table_control, component == "alpha_beta" & phase == "Insight")$t_value`, $p_\text{cluster}$ `r print_p(filter(contrast_table_control, component == "alpha_beta" & phase == "Insight")$p_value)`, as well as in the post-insight phase, $b$ = `r filter(contrast_table_control, component == "alpha_beta" & phase == "Post-insight")$estimate`%, $t$(`r print_dof(filter(contrast_table_control, component == "alpha_beta" & phase == "Post-insight")$df)`) = `r filter(contrast_table_control, component == "alpha_beta" & phase == "Post-insight")$t_value`, $p_\text{cluster}$ `r print_p(filter(contrast_table_control, component == "alpha_beta" & phase == "Post-insight")$p_value)`.
 
 # Discussion
 
