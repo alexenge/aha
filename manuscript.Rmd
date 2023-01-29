@@ -807,6 +807,15 @@ Fifth, we reduced priming and attentional effects by presenting all objects in a
 Sixth, we reduced memory effects by using only unfamiliar objects and by measuring online ERPs rather than delayed behavioral responses.
 We hope that these measures were effective in ruling out many alternative explanations, thus making a compelling case against the "cognitive impenetrability" of visual perception.
 
+**\textcolor{pantone}{One could argue that the effects presented here might be reducible to more basic mechanisms such as semantic priming.
+Indeed, the keywords that were presented before each object in the semantically informed condition were chosen such that they matched the function of the object and often had a direct relationship to certain visual features of the object (see Supplementary Table 1).
+This might have induced semantic priming, which is supported by the reduction in N400 amplitudes in response to ojects in the semantically informed condition, as in previous priming studies [e.g., @bentin1985; @kellenbach2000].
+However, there are at least two arguments why semantic priming cannot account for our main findings, that is, the influence of semantic information on the early P1 and N170 components.
+First, for both of these components, ERP amplitudes were *enlarged* (i.e., more positive for the P1 component and more negative for the N170) during semantically informed perception, whereas an account based on semantic priming would have predicted *reduced* ERP amplitudes.
+Second, these effects were not just observed when comparing semantically informed perception (with matching keywords) and uninformed perception (with non-matching keywords), but also when comparing semantically informed perception with unsucessfully informed perception.
+Whereas priming might have been present in the first comparison, in the second comparison all objects were preceded by keywords that matched the function of the object to a similar degree.
+The fact that P1 and N170 amplitudes still differed between these two conditions makes it unlikely that the semantic effects that we have found are fully reducible to priming.}**
+
 A theoretical framework that would explicitly predict the observed P1 and N170 effects in our study is lacking at present.
 However, the effects are consistent with the reverse hierarchy theory [@ahissar2004], which posits that objects first enter visual consciousness at an abstract, conceptual level. Once this initial "vision at a glance" has taken place, feedback connections to earlier layers of the visual system are being accessed to extract the relevant lower-level features ("vision with scrutiny").
 This reverse trajectory down the visual hierarchy may explain (a) the semantically induced changes to the fMRI signal in LOC and retinotopic cortex [e.g., @hsieh2010] as well as (b) the modulations of early visual ERP components observed in the present study and others [e.g., @abdelrahman2008; @maier2014; @samaha2018].
