@@ -510,7 +510,7 @@ if (run$mixed_models) {
     set_names(deps)
 
   # Fit an additional control analysis model for the alpha/beta power
-  form_alpha_beta <- phase * condition + rt +
+  form_alpha_beta <- ~ phase * condition + rt +
     (phase * condition | participant_id) +
     (phase * condition | item_id)
   models$alpha_beta <- fit_mixed_models(
