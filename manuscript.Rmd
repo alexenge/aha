@@ -382,9 +382,9 @@ if (run$eeg_processing) {
       roi = list(c("P3", "P4", "Pz", "PO3", "PO4", "POz"))
     ),
     perm_tmin = -0.4,
-    perm_tmax = 1.4
-  ),
-  n_jobs = 4
+    perm_tmax = 1.4,
+    n_jobs = 4
+  )
 }
 
 # Read single trial data
