@@ -279,7 +279,7 @@ read_log <- function(log_file) {
       ],
 
       # Exclude: Matching keywords and negative response
-      Unsucessful = item_id[
+      Unsuccessful = item_id[
         phase == "Insight" & keywords == "Match" & response %in% c(203, 204)
       ],
 
@@ -371,7 +371,7 @@ if (run$eeg_processing) {
       c("Pre-insight/Informed", "Pre-insight/Uninformed"),
       c("Insight/Informed", "Insight/Uninformed"),
       c("Post-insight/Informed", "Post-insight/Uninformed"),
-      c("Insight/Informed", "Insight/Unsucessful")
+      c("Insight/Informed", "Insight/Unsuccessful")
     ),
     tfr_components = list(
       name = list("alpha_beta"),
@@ -392,7 +392,7 @@ trials <- read_csv(here(output_dir, "trials.csv"), col_types = cols(
   item_id = col_factor(),
   phase = col_factor(levels = c("Pre-insight", "Insight", "Post-insight")),
   condition = col_factor(levels = c(
-    "Informed", "Uninformed", "Unsucessful",
+    "Informed", "Uninformed", "Unsuccessful",
     "Exclude_uninformed", "Exclude_known", "Exclude_glitch"
   ))
 ))
@@ -434,7 +434,7 @@ p_cluster <- 0.05 / 3 # Bonferroni-corrected for three phases
 ```{r, mixed_models, include=FALSE}
 # Filter relevant conditions for the main analysis
 trials <- trials %>%
-  filter(condition %in% c("Informed", "Uninformed", "Unsucessful")) %>%
+  filter(condition %in% c("Informed", "Uninformed", "Unsuccessful")) %>%
   droplevels()
 
 # Contrast coding for phase
@@ -447,8 +447,8 @@ contrasts(trials$phase) <- cbind(
 
 # Contrast coding for condition
 contrasts(trials$condition) <- cbind(
-  c(`Informed` = 1, `Uninformed` = -1, `Unsucessful` = 0),
-  c(`Informed` = 1, `Uninformed` = 0, `Unsucessful` = -1)
+  c(`Informed` = 1, `Uninformed` = -1, `Unsuccessful` = 0),
+  c(`Informed` = 1, `Uninformed` = 0, `Unsuccessful` = -1)
 ) %>%
   t() %>%
   ginv()
@@ -889,15 +889,15 @@ A cluster-based permutation test indicated no clusters for which this difference
 plot_tfr_topos(
   filter(tfr_grand_ave, phase == "Insight"),
   filter(
-    tfr_clusters, contrast == "Insight/Informed - Insight/Unsucessful"
+    tfr_clusters, contrast == "Insight/Informed - Insight/Unsuccessful"
   ),
   p_cluster = p_cluster,
   condition_plus = "Informed",
-  condition_minus = "Unsucessful",
+  condition_minus = "Unsuccessful",
   title_conditions = "Informed - failed"
 )
 ```
 
 (ref:figs2-caption) Time-frequency results for the control analysis.
 Each topographic plot shows the difference in event-related power (in units of percent signal change) between the semantically informed condition and the "failed insight" condition (see Results: Control Analysis in the main text), grand-averaged across participants.
-Black dots highlight EEG channels that were part of a cluster for which this difference was statistically significant ($p_\text{cluster}$ = `r print_p(unique(filter(tfr_clusters, contrast == "Insight/Informed - Insight/Unsucessful" & p_val < p_cluster)$p_val))`).
+Black dots highlight EEG channels that were part of a cluster for which this difference was statistically significant ($p_\text{cluster}$ = `r print_p(unique(filter(tfr_clusters, contrast == "Insight/Informed - Insight/Unsuccessful" & p_val < p_cluster)$p_val))`).
