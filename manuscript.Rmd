@@ -380,7 +380,8 @@ if (run$eeg_processing) {
     ),
     perm_tmin = -0.4,
     perm_tmax = 1.4
-  )
+  ),
+  n_jobs = 4
 }
 
 # Read single trial data
