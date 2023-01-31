@@ -258,7 +258,7 @@ plot_fig1b <- function(evokeds, config, channel_locations, models) {
 
   # Loop over ERP components of interest
   components <- config$components
-  components$model <- models
+  components$model <- models[components$name]
   pmap(components, function(name, tmin, tmax, roi, model) {
 
     # Loop over phases of the experiment
