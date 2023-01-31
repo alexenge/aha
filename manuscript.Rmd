@@ -579,15 +579,16 @@ Participants took approximately 35 minutes to complete the entire experiment.
 
 ## Behavioral Data Analysis
 
-We first excluded from all further analyses those objects for which the participant had responded with "I know what this is" in the pre-insight phase (i.e., before any keywords were presented).
-This led to the exclusion of an average of `r mean(objects_per_condition$Exclude_known)` objects per participant (= `r percent(mean(objects_per_condition$Exclude_known) / 120, accuracy = 0.1)` of all unfamiliar objects).
-Next, to delineate semantically informed and \textcolor{pantone}{uninformed} perception, the assignment of the remaining objects to one of these two conditions was co-determined by our experimental manipulation (matching versus non-matching keywords) and the behavioral response of the participant in the insight phase (see Figure 1A).
-Objects were assigned to the semantically informed condition if and only if they were presented with matching keywords and the participant responded with knowing what the object was or having an assumption.
-This was the case for an average of `r mean(objects_per_condition$Informed)` objects per participant (= `r percent(mean(objects_per_condition$Informed) / 60, accuracy = 0.1)` of objects presented with matching keywords).
-Complementarily, objects were assigned to the \textcolor{pantone}{uninformed} condition if and only if they were presented with non-matching keywords and the participant responded with not knowing what the object was or having rather no assumption.
-This was the case for an average of `r mean(objects_per_condition$Uninformed)` objects per participant (= `r percent(mean(objects_per_condition$Uninformed) / 60, accuracy = 0.1)` of objects presented with non-matching keywords).
-This same assignment of objects to conditions based on the insight phase was carried over to the pre-insight and post-insight phases for each participant individually.
-This allowed us to test, on the one hand, if the objects from both conditions differed in important aspects even before any keywords were presented (pre-insight phase) and, on the other hand, if the semantic understanding acquired in the insight phase had any down-stream effects on the subsequent perception of the objects (post-insight phase).
+[We used participants' behavioral responses to verify our experimental manipulation and to assign each object to a semantic condition.
+First, we used participants' responses from the pre-insight phase (when objects were presented for the first time and without keywords) to make sure that objects were indeed unfamiliar to them.
+That is, we excluded any objects for which participants responded with "I know what this is" in the pre-insight phase.
+Next, we used participants' responses from the insight phase (when objects were presented for the second time, now preceded by keywords) to assign the remaining objects to different semantic conditions: Semantically informed, uninformed, and unsuccessfully informed.
+The semantically informed condition consisted of objects that were presented with matching keywords and for which the participant responded with knowing what the object was or having an assumption.
+The uninformed condition consisted of objects that were presented with non-matching keywords and for which the participant responded with not knowing what the object was or having rather no assumption.
+The unsuccessfully informed condition consisted of objects that were presented with matching keywords but for which the participant responded with not knowing what the object was or having rather no assumption.
+The few objects that were presented with non-matching keywords but for which participants responded with knowing what the object was or having an assumption (i.e., an unsuccessfully uninformed condition) were dropped from all further analyses.
+This assignment of objects to semantic conditions (informed, uninformed, or unsuccesfully informed) was carried over from the insight phase to the other two phases (pre-insight and post-insight).
+This allowed us to test, on the one hand, if the objects differed in important aspects even before any keywords were presented (pre-insight phase) and, on the other hand, if the semantic information acquired in the insight phase had any down-stream effects on the subsequent perception of the objects (post-insight phase).]{color="blue"}
 
 ## EEG Recording and Preprocessing
 
@@ -650,6 +651,13 @@ In addition to the software mentioned above, our code relies on the tidyverse se
 We followed the workflow developed by @peikert2021 to ensure the long-term reproducibility of our analysis pipeline.
 
 # Results
+
+## Behavioral Data
+
+[We used participants' behavioral data to verify our experimental manipulation and to assign objects to different semantic conditions (see Materials and Methods).
+First we excluded an average of `r mean(objects_per_condition$Exclude_known)` objects per participant for which participants indicated that they knew the objects even before any keywords had been presented (= `r percent(mean(objects_per_condition$Exclude_known) / 120, accuracy = 0.1)` of all objects).
+Next, `r mean(objects_per_condition$Informed)` objects per participant could be assigned to the semantically informed condition (i.e., matching keywords and a positive response; `r percent(mean(objects_per_condition$Informed) / 60, accuracy = 0.1)` of all objects presented with matching keywords) and `r mean(objects_per_condition$Uninformed)` objects per participant could be assigned to the uninformed condition (i.e., non-matching keywords and a negative response; `r percent(mean(objects_per_condition$Uninformed) / 60, accuracy = 0.1)` of all objects presented with non-matching keywords).
+Finally, `r mean(objects_per_condition$Unsuccessful)` objects per participant could be assigned to the unsuccessfully informed condition (i.e., matching keywords but a negative response; `r percent(mean(objects_per_condition$Unsuccessful) / 60, accuracy = 0.1)` of all objects presented with matching keywords).]{color="blue"}
 
 ## Event-Related Potentials
 
