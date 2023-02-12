@@ -193,6 +193,58 @@ All participants saw each unfamiliar object with only one type of keywords (matc
 This assignment of keywords to objects was counterbalanced across participants so that each object was presented with matching keywords (leading to semantically informed perception) and non-matching keywords (leading to [uninformed]{color="blue"} perception) to an equal number of participants.
 The experiment was programmed and displayed using Presentation® software (Neurobehavioral Systems, Inc., Berkeley, CA, www.neurobs.com).
 
+```{r, ratings}
+options(rgl.useNULL = TRUE)
+load(here(data_dir, "ratings", "dewak100k_lsa.rda"))
+
+rating <- read_csv(
+  here(data_dir, "ratings", "rating_data.csv"),
+  col_types = cols(), locale = locale(encoding = "latin1")
+)
+
+rating_n <- nrow(rating)
+
+rating_substantives <- select(rating, S001_01:S242_01)
+rating_verbs <- select(rating, V001_01:V242_01)
+
+keywords <- read_csv(here("materials", "keywords.csv"), col_types = cols()) %>%
+  mutate(
+    match_ger = str_c(match_noun_ger, ", ", match_verb_ger),
+    match_en = str_c("{[", match_noun_en, ", ", match_verb_en, "]}"),
+    nonmatch_ger = str_c(nonmatch_noun_ger, ", ", nonmatch_verb_ger),
+    nonmatch_en = str_c("{[", nonmatch_noun_en, ", ", nonmatch_verb_en, "]}"),
+  )
+
+keywords_for_rating <- keywords %>%
+  arrange(familiarity, filename) %>%
+  select(item_id, filename, match_ger, nonmatch_ger) %>%
+  replicate(rating_n, ., simplify = FALSE) %>%
+  bind_rows()
+
+rating_cosine <-
+  map2_dfc(rating_substantives, rating_verbs, str_c, sep = ", ") %>%
+  mutate(participant_id = rating$CASE) %>%
+  pivot_longer(
+    cols = -participant_id, names_to = "question_id", values_to = "response"
+  ) %>%
+  bind_cols(keywords_for_rating, .) %>%
+  filter(response != "NA NA") %>%
+  rowwise() %>%
+  mutate(
+    across(c(match_ger, nonmatch_ger, response), str_to_lower),
+    cosine_match = LSAfun::costring(match_ger, response, dewak100k_lsa),
+    cosine_nonmatch = LSAfun::costring(nonmatch_ger, response, dewak100k_lsa),
+    cosine_diff = cosine_match - cosine_nonmatch
+  )
+
+write_excel_csv(rating_cosine, here(output_dir, "rating_results.csv"))
+
+# sum(is.na(rating_cosine$cosine_diff))
+# t.test(rating_cosine$cosine_diff)
+
+# model_rating <- lmerTest::lmer(diff_cosine ~ 1 + (1 | participant_id), rating_cosine)
+```
+
 ## Experimental Design
 
 The experiment consisted of three phases (see Figure 1A).
@@ -798,13 +850,7 @@ Second, the time course of this influence suggests that it manifests itself not 
 
 ```{r tabs1, results="asis"}
 # Print table of materials
-read_csv(here("materials", "keywords.csv"), col_types = cols()) %>%
-  mutate(
-    match_ger = paste0(match_noun_ger, ", ", match_verb_ger),
-    match_en = paste0("{[", match_noun_en, ", ", match_verb_en, "]}"),
-    nonmatch_ger = paste0(nonmatch_noun_ger, ", ", nonmatch_verb_ger),
-    nonmatch_en = paste0("{[", nonmatch_noun_en, ", ", nonmatch_verb_en, "]}"),
-  ) %>%
+keywords %>%
   transmute(
     img = paste0(
       "\\includegraphics[valign=c,width=18mm]{materials/unfamiliar_objects/",
