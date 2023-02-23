@@ -627,3 +627,49 @@ plot_tfr_topos <- function(tfr_grand_ave,
 
 # Helper function to create print degrees of freedom
 print_dof <- function(x) format(round(x), big.mark = ",")
+
+# Helper function to load pre-trained word2vec model from deepset
+# See https://www.deepset.ai/german-word-embeddings
+load_word2vec <- function(directory_path) {
+  vectors_file <- here::here(directory_path, "vectors.txt")
+  if (!file.exists(vectors_file)) {
+    options(timeout = 1800)
+    vectors_url <- "https://int-emb-word2vec-de-wiki.s3.eu-central-1.amazonaws.com/vectors.txt"
+    download.file(vectors_url, vectors_file)
+  }
+  word2vec <- as.matrix(read.table(vectors_file, row.names = 1))
+  rownames(word2vec) <- purrr::map_chr(
+    rownames(word2vec),
+    ~stringr::str_sub(unescape_unicode(.x), start = 3, end = -2)
+  )
+  return(word2vec)
+}
+
+# Helper functions to decode unicode characters
+unescape_unicode <- function(x) {
+  stopifnot(is.character(x) && length(x) == 1)
+  m <- gregexpr("(\\\\)+x[0-9a-z]{2}", x, ignore.case = TRUE)
+  if (m[[1]][1] > -1) {
+    p <- vapply(regmatches(x, m)[[1]], function(txt){
+      gsub(
+        "\\", "\\\\", parse(text = paste0('"', txt, '"'))[[1]],
+        fixed = TRUE, useBytes = TRUE
+      )
+    }, character(1), USE.NAMES = FALSE)
+    regmatches(x, m) <- list(p)
+  }
+  x
+}
+
+# Helper function to compute element-wise cosine distance between vectors
+compute_cosine <- function(x, y, tvectors) {
+  require(purrr)
+  options(rgl.useNULL = TRUE)
+  res_list <- map2(x, y, quietly(LSAfun::costring), tvectors)
+  map_dbl(res_list, function(res) {
+    cosine <- res$result
+    warning <- res$output
+    cosine[warning != ""] <- NA
+    cosine
+  })
+}

@@ -99,15 +99,17 @@ opts_chunk$set(
 
 # Specify directory paths
 data_dir <- here("data")
+rating_dir <- here(data_dir, "ratings")
 files_dir <- here("manuscript_files")
 output_dir <- here("output")
-report_dir <- here("output/qc_reports")
+report_dir <- here(output_dir, "qc_reports")
 
 # Load custom helper functions for creating figures and tables
 source(here(files_dir, "helper_functions.R"))
 
 # Re-run steps that take a long time to compute?
 run <- list(
+  rating_semantic_analysis = FALSE,
   eeg_processing = FALSE,
   mixed_models = FALSE,
   figures = FALSE
@@ -185,7 +187,7 @@ The other 120 stimuli were rare objects presumed to be unfamiliar to the majorit
 All stimuli were presented on a light blue background with a size of 207 × 207 pixels on a 19-inch LCD monitor with a resolution of 1,280 × 1,024 pixels and a refresh rate of 75 Hz.
 At a standardized viewing distance of 90 cm, the images subtended approximately 3.9 degrees of participants' horizontal and vertical visual angle.
 
-For each unfamiliar object, a pair of German keywords (a noun and a verb) was selected, describing the typical function or use of the object in a way that could be related to its visual features and their configuration (e.g., *Stromstärke, messen* [electric current, measuring]; *Tonpott, trommeln* [clay pot, drumming]; [see Supplementary Table 1]{color="blue"}).
+For each unfamiliar object, we created a pair of German keywords (a noun and a verb), describing the typical function or use of the object in a way that could be related to its visual features and their configuration (e.g., *Stromstärke, messen* [electric current, measuring]; *Tonpott, trommeln* [clay pot, drumming]; [see Supplementary Table 1]{color="blue"}).
 As our central experimental manipulation, half of the objects were presented together with keywords that correctly matched their respective function, whereas the other half of the objects were presented together with non-matching keywords belonging to one of the other objects.
 The matching keywords were expected to induce semantically informed perception, that is, participants suddenly understanding what kind of object they were viewing.
 The non-matching keywords were expected to prevent such an understanding and keep the perception of the object semantically [uninformed]{color="blue"}.
@@ -194,60 +196,149 @@ This assignment of keywords to objects was counterbalanced across participants s
 The experiment was programmed and displayed using Presentation® software (Neurobehavioral Systems, Inc., Berkeley, CA, www.neurobs.com).
 
 ```{r, ratings}
-options(rgl.useNULL = TRUE)
-load(here(data_dir, "ratings", "dewak100k_lsa.rda"))
-
-rating <- read_csv(
-  here(data_dir, "ratings", "rating_data.csv"),
-  col_types = cols(), locale = locale(encoding = "latin1")
-)
-
-rating_n <- nrow(rating)
-
-rating_substantives <- select(rating, S001_01:S242_01)
-rating_verbs <- select(rating, V001_01:V242_01)
-
-keywords <- read_csv(here("materials", "keywords.csv"), col_types = cols()) %>%
+# Read table of object stimuli + keywords for the main experiment
+keywords <- read_csv(
+  here("materials", "keywords.csv"),
+  col_types = cols(
+    familiarity = col_factor(levels = c("familiar", "unfamiliar")),
+    item_id = col_factor()
+  )
+) %>%
   mutate(
-    match_ger = str_c(match_noun_ger, ", ", match_verb_ger),
+    match = str_c(match_noun, ", ", match_verb),
     match_en = str_c("{[", match_noun_en, ", ", match_verb_en, "]}"),
-    nonmatch_ger = str_c(nonmatch_noun_ger, ", ", nonmatch_verb_ger),
+    nonmatch = str_c(nonmatch_noun, ", ", nonmatch_verb),
     nonmatch_en = str_c("{[", nonmatch_noun_en, ", ", nonmatch_verb_en, "]}"),
   )
 
-keywords_for_rating <- keywords %>%
-  arrange(familiarity, filename) %>%
-  select(item_id, filename, match_ger, nonmatch_ger) %>%
-  replicate(rating_n, ., simplify = FALSE) %>%
-  bind_rows()
+# (Re-)do latent semantic analysis of online rating study data
+rating_file <- here(output_dir, "rating.csv")
+if (run$rating_semantic_analysis) {
+  # Load pre-trained German word2vec embedding
+  word2vec <- load_word2vec(rating_dir)
 
-rating_cosine <-
-  map2_dfc(rating_substantives, rating_verbs, str_c, sep = ", ") %>%
-  mutate(participant_id = rating$CASE) %>%
-  pivot_longer(
-    cols = -participant_id, names_to = "question_id", values_to = "response"
-  ) %>%
-  bind_cols(keywords_for_rating, .) %>%
-  filter(response != "NA NA") %>%
-  rowwise() %>%
+  # Read online rating study data
+  rating_raw <- read_csv(
+    here(data_dir, "ratings", "rating_data.csv"),
+    col_types = cols(), locale = locale(encoding = "latin1")
+  )
+  rating_substantives <- select(rating_raw, S001_01:S242_01)
+  rating_verbs <- select(rating_raw, V001_01:V242_01)
+
+  # Prepare a copy of the keywords to add to the rating study data
+  rating_n <- nrow(rating_raw)
+  keywords_for_rating <- keywords %>%
+    arrange(familiarity, filename) %>%
+    select(item_id, familiarity, filename, match, nonmatch) %>%
+    replicate(rating_n, ., simplify = FALSE) %>%
+    bind_rows()
+
+  # Compute cosine similarities between rating study responses and keywords
+  rating <-
+    map2_dfc(rating_substantives, rating_verbs, str_c, sep = ", ") %>%
+    mutate(participant_id = rating_raw$CASE) %>%
+    pivot_longer(
+      -participant_id,
+      names_to = "question_id", values_to = "response"
+    ) %>%
+    bind_cols(keywords_for_rating, .) %>%
+    pivot_longer(
+      c(match, nonmatch),
+      names_to = "condition", values_to = "keywords"
+    ) %>%
+    mutate(across(c(keywords, response), str_to_lower)) %>%
+    mutate(cosine = compute_cosine(keywords, response, word2vec))
+
+  # Save to file
+  write_csv(rating, rating_file)
+}
+
+# Read the rating study results incl. cosine similarities
+rating <- read_csv(
+  rating_file,
+  col_types = cols(item_id = col_factor(), participant_id = col_factor())
+) %>%
+  filter(!is.na(cosine)) %>%
   mutate(
-    across(c(match_ger, nonmatch_ger, response), str_to_lower),
-    cosine_match = LSAfun::costring(match_ger, response, dewak100k_lsa),
-    cosine_nonmatch = LSAfun::costring(nonmatch_ger, response, dewak100k_lsa),
-    cosine_diff = cosine_match - cosine_nonmatch
+    fam_condition = paste(familiarity, condition) %>%
+      factor(
+        levels = c("familiar match", "unfamiliar match", "unfamiliar nonmatch"),
+        labels = c("familiar", "matching", "nonmatching")
+      )
   )
 
-write_excel_csv(rating_cosine, here(output_dir, "rating_results.csv"))
+# Compare cosine similarities between object conditions
+contrasts(rating$fam_condition) <- contr.sdif(3)
+model_rating <- lmer(
+  cosine ~ fam_condition +
+    (fam_condition | participant_id) +
+    (1 | item_id),
+  data = rating,
+  control = lmerControl(optimizer = "bobyqa", optCtrl = list(maxfun = 1e6))
+)
+(summary_rating <- summary(model_rating))
 
-# sum(is.na(rating_cosine$cosine_diff))
-# t.test(rating_cosine$cosine_diff)
+# Compute condition means and pairwise contrasts
+emm_options(lmer.df = "Satterthwaite", lmerTest.limit = Inf)
+emm_rating <- emmeans(
+  model_rating,
+  specs = consec ~ fam_condition,
+  rev = TRUE,
+  adjust = "bonferroni"
+)
+rating_means <- as.data.frame(emm_rating$emmeans)
+rating_contrasts <- as.data.frame(emm_rating$contrasts) %>%
+  rename(t_value = `t.ratio`, p_value = `p.value`)
 
-# model_rating <- lmerTest::lmer(diff_cosine ~ 1 + (1 | participant_id), rating_cosine)
+# rating_pairwise <- rating$participant_id %>%
+#   unique() %>%
+#   combn(m = 2) %>%
+#   data.frame() %>%
+#   map_dfr(function(pair) {
+#     id_1 <- pair[1]
+#     id_2 <- pair[2]
+#     response_1 <- filter(rating, participant_id == id_1)$response
+#     response_2 <- filter(rating, participant_id == id_2)$response
+#     tibble(
+#       item_id = keywords$item_id,
+#       familiarity = keywords$familiarity,
+#       filename = keywords$filename,
+#       pair_id = str_c(id_1, id_2, sep = "_"),
+#       participant_id_1 = id_1,
+#       participant_id_2 = id_2,
+#       response_1,
+#       response_2,
+#       cosine = compute_cosine(response_1, response_2, word2vec)
+#     )
+#   })
+
+# write_csv(rating_pairwise, here(output_dir, "rating_pairwise.csv"))
+
+# mod_pairwise <- lmer(
+#   cosine ~ familiarity + (familiarity | pair_id) + (1 | filename),
+#   data = rating_pairwise
+# )
+# (summary_pairwise <- summary(mod_pairwise))
+
+# Rmisc::summarySEwithin(
+#   data = rating_pairwise, measurevar = "cosine", withinvars = "familiarity",
+#   idvar = "pair_id", na.rm = TRUE
+# ) %>%
+#   ggplot(aes(x = familiarity, y = cosine, color = familiarity)) +
+#   geom_violin(data = rating_pairwise) +
+#   coord_cartesian(ylim = c(0.0, 1.0)) +
+#   geom_pointrange(aes(ymin = cosine - se, ymax = cosine + se)) +
+#   theme_classic()
 ```
+
+As a manipulation check, we ran an online rating study where we presented 10 German speakers (3 female, 7 male, mean age = 25.3 years, range 20--35 years) with all 240 visual objects in random order and asked them to generate their own keywords that would describe the presumed function of the object.
+We used latent semantic analysis with a word2vec embedding pre-trained on the German Wikipedia (deepset GmbH, Berlin, Germany, www.deepset.ai/german-word-embeddings) to estimate semantic distances between these participant-generated keywords and the keywords used in our experiment (Supplementary Methods; Supplementary Figures 1 and 2).
+In brief, it was substantially easier for participants to come with correct descriptions of familiar objects (mean cosine distance ± SE = `r filter(rating_means, fam_condition == "familiar")$emmean` ± `r filter(rating_means, fam_condition == "familiar")$SE`) than for unfamiliar objects (`r filter(rating_means, fam_condition == "matching")$emmean` ± `r filter(rating_means, fam_condition == "matching")$SE`), $t$(`r print_dof(filter(rating_contrasts, contrast == "familiar - matching")$df)`) = `r filter(rating_contrasts, contrast == "familiar - matching")$t_value`, $p_\text{corr}$ `r print_p(filter(rating_contrasts, contrast == "familiar - matching")$p_value)` (linear mixed-effects model).
+In fact, this similarity between participant-generated keywords for the unfamiliar objects and the object-matching keywords presented in the main experiment was only slightly higher than the similarity between participant-generated keywords and the object-non-matching keywords presented in the main experiment (`r filter(rating_means, fam_condition == "nonmatching")$emmean` ± `r filter(rating_means, fam_condition == "nonmatching")$SE`), $t$(`r print_dof(filter(rating_contrasts, contrast == "matching - nonmatching")$df)`) = `r filter(rating_contrasts, contrast == "matching - nonmatching")$t_value`, $p_\text{corr}$ `r filter(rating_contrasts, contrast == "matching - nonmatching")$p_value` (linear mixed-effects model).
 
 ## Experimental Design
 
-The experiment consisted of three phases (see Figure 1A).
+The main EEG experiment consisted of three phases (see Figure 1A).
 In the *pre-insight* phase, after written informed consent had been obtained and the EEG had been prepared, all 240 familiar and unfamiliar objects were presented once in random order and without any keywords.
 Each trial consisted of a fixation cross presented in the middle of the screen for 0.5 s, followed by the presentation of the object until participants made a response or until a time out after 3 s.
 The inter-trial interval was 0.5 s and participants took a self-timed break after each block of 60 objects.
@@ -929,6 +1020,49 @@ print_model_outputs(models$N400)
 ```
 
 \newpage
+
+```{r, ratingfigs}
+rating %>%
+  filter(!is.na(cosine)) %>%
+  mutate(condition_comb = paste(familiarity, condition)) %>%
+  ggplot(aes(x = condition_comb, y = cosine, color = condition_comb)) +
+  geom_violin() +
+  geom_boxplot(width = 0.2) +
+  scale_color_manual(values = c("#984ea3", "#e41a1c", "#377eb8")) +
+  labs(x = NULL, y = "Cosine distance") +
+  coord_cartesian(ylim = c(0.0, 1.0)) +
+  theme_classic() +
+  theme(legend.position = "none")
+
+rating %>%
+  filter(
+    !is.na(cosine) & familiarity == "unfamiliar" & condition == "match"
+  ) %>%
+  select(item_id, condition, cosine) %>%
+  group_by(item_id, condition) %>%
+  summarize(
+    mean = mean(cosine),
+    sd = sd(cosine),
+    n = n(),
+    se = sd / sqrt(n),
+    .groups = "drop"
+  ) %>%
+  mutate(item_id = fct_reorder(item_id, desc(mean))) %>%
+  # filter(mean > 0.7) %>%
+  ggplot(
+    aes(
+      x = item_id, y = mean, color = condition,
+      ymin = mean - se, ymax = mean + se
+    )
+  ) +
+  geom_pointrange() +
+  labs(x = "Stimulus ID", y = "Cosine distance to keywords") +
+  theme_classic() +
+  theme(
+    axis.text.x = element_text(angle = 90),
+    legend.position = "none"
+  )
+```
 
 ```{r, figs1, cache=!run$figures, fig.height=11, fig.cap="(ref:figs1-caption)"}
 # Create topographic plots for event-related power in the pre-insight phase
