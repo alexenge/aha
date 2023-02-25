@@ -276,7 +276,6 @@ model_rating <- lmer(
   data = rating,
   control = lmerControl(optimizer = "bobyqa", optCtrl = list(maxfun = 1e6))
 )
-(summary_rating <- summary(model_rating))
 
 # Compute condition means and pairwise contrasts
 emm_options(lmer.df = "Satterthwaite", lmerTest.limit = Inf)
@@ -334,7 +333,7 @@ rating_contrasts <- as.data.frame(emm_rating$contrasts) %>%
 As a manipulation check, we ran an online rating study where we presented 10 German speakers (3 female, 7 male, mean age = 25.3 years, range 20--35 years) with all 240 visual objects in random order and asked them to generate their own keywords that would describe the presumed function of the object.
 We used latent semantic analysis with a word2vec embedding pre-trained on the German Wikipedia (deepset GmbH, Berlin, Germany, www.deepset.ai/german-word-embeddings) to estimate semantic distances between these participant-generated keywords and the keywords used in our experiment (Supplementary Methods; Supplementary Figures 1 and 2).
 In brief, it was substantially easier for participants to come with correct descriptions of familiar objects (mean cosine distance ± SE = `r filter(rating_means, fam_condition == "familiar")$emmean` ± `r filter(rating_means, fam_condition == "familiar")$SE`) than for unfamiliar objects (`r filter(rating_means, fam_condition == "matching")$emmean` ± `r filter(rating_means, fam_condition == "matching")$SE`), $t$(`r print_dof(filter(rating_contrasts, contrast == "familiar - matching")$df)`) = `r filter(rating_contrasts, contrast == "familiar - matching")$t_value`, $p_\text{corr}$ `r print_p(filter(rating_contrasts, contrast == "familiar - matching")$p_value)` (linear mixed-effects model).
-In fact, this similarity between participant-generated keywords for the unfamiliar objects and the object-matching keywords presented in the main experiment was only slightly higher than the similarity between participant-generated keywords and the object-non-matching keywords presented in the main experiment (`r filter(rating_means, fam_condition == "nonmatching")$emmean` ± `r filter(rating_means, fam_condition == "nonmatching")$SE`), $t$(`r print_dof(filter(rating_contrasts, contrast == "matching - nonmatching")$df)`) = `r filter(rating_contrasts, contrast == "matching - nonmatching")$t_value`, $p_\text{corr}$ `r filter(rating_contrasts, contrast == "matching - nonmatching")$p_value` (linear mixed-effects model).
+In fact, this similarity between participant-generated keywords for the unfamiliar objects and the object-matching keywords presented in the main experiment was only slightly higher than the similarity between participant-generated keywords and the object-non-matching keywords presented in the main experiment (`r filter(rating_means, fam_condition == "nonmatching")$emmean` ± `r filter(rating_means, fam_condition == "nonmatching")$SE`), $t$(`r print_dof(filter(rating_contrasts, contrast == "matching - nonmatching")$df)`) = `r filter(rating_contrasts, contrast == "matching - nonmatching")$t_value`, $p_\text{corr}$ `r print_p(filter(rating_contrasts, contrast == "matching - nonmatching")$p_value)` (linear mixed-effects model).
 
 ## Experimental Design
 
@@ -942,6 +941,7 @@ Second, the time course of this influence suggests that it manifests itself not 
 ```{r tabs1, results="asis"}
 # Print table of materials
 keywords %>%
+  filter(familiarity == "unfamiliar") %>%
   transmute(
     img = paste0(
       "\\includegraphics[valign=c,width=18mm]{materials/unfamiliar_objects/",
@@ -949,9 +949,9 @@ keywords %>%
       "}"
     ),
     item_id = as.character(item_id),
-    match = paste(match_ger, match_en, sep = "\n") %>%
+    match_translated = paste(match, match_en, sep = "\n") %>%
       kableExtra::linebreak(align = "l", linebreaker = "\n"),
-    nonmatch = paste(nonmatch_ger, nonmatch_en, sep = "\n") %>%
+    nonmatch_translated = paste(nonmatch, nonmatch_en, sep = "\n") %>%
       kableExtra::linebreak(align = "l", linebreaker = "\n")
   ) %>%
   apa_table(
