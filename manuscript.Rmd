@@ -352,7 +352,6 @@ The mapping of the rating scale to the four buttons (left to right or right to l
 ```{r, eeg_processing, include=FALSE}
 # Define function for processing behavioral log files
 read_log <- function(log_file) {
-
   # Read the file
   log <- read_tsv(
     log_file,
@@ -467,7 +466,6 @@ mne_version <- import("mne")$`__version__`
 
 # (Re-)do the actual preprocessing if requested
 if (run$eeg_processing) {
-
   # Process behavioral data
   logs <- map(log_files, read_log)
 
@@ -606,7 +604,6 @@ contrasts(trials$condition) <- cbind(
 
 # Define helper function for fitting linear mixed models and computing contrasts
 fit_mixed_models <- function(dep, formula, data) {
-
   # Modify the formula such that fixed effects are always retained
   formula <- formula %>%
     tabulate.formula() %>%
@@ -655,7 +652,6 @@ fit_mixed_models <- function(dep, formula, data) {
 # (Re-)do the actual model fitting if requested
 deps <- config$components$name
 if (run$mixed_models) {
-
   # Fit the model for each ERP component
   form_erps <- ~ phase * condition +
     (phase * condition | participant_id) +
@@ -674,7 +670,6 @@ if (run$mixed_models) {
   # Save models
   saveRDS(models, here(output_dir, "models.RDS"))
 } else {
-
   # Read fitted models
   models <- readRDS(here(output_dir, "models.RDS"))
 }
