@@ -553,7 +553,8 @@ objects_per_condition <- with(trials, table(participant_id, condition)) %>%
   rownames_to_column("subject_id")
 
 # Read by-participant ERP averages and channel locations
-evokeds <- read_csv(here(output_dir, "ave.csv"))
+evokeds <- read_csv(here(output_dir, "ave.csv")) %>%
+  separate(label, into = c("phase", "condition"), sep = "/")
 
 # Read pipeline configuration
 config <- jsonlite::read_json(
@@ -568,7 +569,8 @@ rejected_epochs <- lengths(config$auto_rejected_epochs)
 channel_locations <- read_csv(here(output_dir, "channel_locations.csv"))
 
 # Read grand-averaged power
-tfr_grand_ave <- read_csv(here(output_dir, "tfr_grand_ave.csv"))
+tfr_grand_ave <- read_csv(here(output_dir, "tfr_grand_ave.csv")) %>%
+  separate(label, into = c("phase", "condition"), sep = "/")
 
 # Read results of cluster-based permutation tests for ERPs
 clusters <- read_csv(here(output_dir, "clusters.csv"))
