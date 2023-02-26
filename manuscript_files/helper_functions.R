@@ -493,7 +493,6 @@ plot_tfr_topos <- function(tfr_grand_ave,
                            fmin = 4,
                            fmax = 40,
                            fstep = 4) {
-
   # Load required packages
   require(dplyr)
   require(cowplot)
@@ -640,7 +639,7 @@ load_word2vec <- function(directory_path) {
   word2vec <- as.matrix(read.table(vectors_file, row.names = 1))
   rownames(word2vec) <- purrr::map_chr(
     rownames(word2vec),
-    ~stringr::str_sub(unescape_unicode(.x), start = 3, end = -2)
+    ~ stringr::str_sub(unescape_unicode(.x), start = 3, end = -2)
   )
   return(word2vec)
 }
@@ -650,7 +649,7 @@ unescape_unicode <- function(x) {
   stopifnot(is.character(x) && length(x) == 1)
   m <- gregexpr("(\\\\)+x[0-9a-z]{2}", x, ignore.case = TRUE)
   if (m[[1]][1] > -1) {
-    p <- vapply(regmatches(x, m)[[1]], function(txt){
+    p <- vapply(regmatches(x, m)[[1]], function(txt) {
       gsub(
         "\\", "\\\\", parse(text = paste0('"', txt, '"'))[[1]],
         fixed = TRUE, useBytes = TRUE
