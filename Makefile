@@ -31,6 +31,9 @@ latex-docker:
 	docker run --rm --volume $(PROJECT_DIR):$(REMOTE_DIR) $(IMAGE) \
 	xelatex manuscript.tex
 
+# Auto-format R code
+style:
+	Rscript -e "styler::style_dir()"
 
 # Knit the manuscript via SLURM and Singularity on an HPC cluster
 sbatch:
