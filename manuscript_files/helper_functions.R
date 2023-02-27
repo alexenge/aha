@@ -1,16 +1,12 @@
-# Define color scheme
-aha_colors <- c("#ca0020", "#0571b0")
-stimulus_bg_color <- "#a9d9ff"
-
-# Helper function to create Figure 1A (trial structure)
-plot_fig1a <- function(files_dir) {
-
+# Helper function to create trial structure plots (Figure 1A)
+plot_fig1a <- function(files_dir, condition_colors) {
   # Make sure that packages are loaded
   require(tidyverse)
   require(cowplot)
 
   # Trial structure
   example_stim <- magick::image_read(here::here("example_stimuli", "103.png"))
+  stim_bg_color <- "#a9d9ff"
   ggplot() +
     coord_cartesian(xlim = c(-100, 100), ylim = c(0, 100), expand = FALSE) +
     theme_void() +
@@ -29,23 +25,23 @@ plot_fig1a <- function(files_dir) {
     # Squares
     annotate(
       geom = "rect", xmin = -37, xmax = -17, ymin = 55, ymax = 75,
-      color = "black", fill = stimulus_bg_color
+      color = "black", fill = stim_bg_color
     ) +
     annotate(
       geom = "rect", xmin = -19, xmax = 1, ymin = 45, ymax = 65,
-      color = aha_colors[2], fill = stimulus_bg_color
+      color = condition_colors[2], fill = stim_bg_color
     ) +
     annotate(
       geom = "rect", xmin = -19, xmax = 1, ymin = 69, ymax = 89,
-      color = aha_colors[1], fill = stimulus_bg_color
+      color = condition_colors[1], fill = stim_bg_color
     ) +
     annotate(
       geom = "rect", xmin = -1, xmax = 19, ymin = 59, ymax = 79,
-      color = "black", fill = stimulus_bg_color
+      color = "black", fill = stim_bg_color
     ) +
     annotate(
       geom = "rect", xmin = 17, xmax = 37, ymin = 61, ymax = 81,
-      color = "black", fill = stimulus_bg_color
+      color = "black", fill = stim_bg_color
     ) +
     annotate(
       geom = "text", x = -27, y = 65.3, label = "+", size = 20 / .pt,
@@ -53,11 +49,11 @@ plot_fig1a <- function(files_dir) {
     ) +
     annotate(
       geom = "text", x = -9, y = 55, label = "message\nsignaling",
-      family = "Helvetica", color = aha_colors[2]
+      family = "Helvetica", color = condition_colors[2]
     ) +
     annotate(
       geom = "text", x = -9, y = 79, label = "potatoes\nmashing",
-      family = "Helvetica", color = aha_colors[1]
+      family = "Helvetica", color = condition_colors[1]
     ) +
     annotate(
       geom = "text", x = 9, y = 67, label = "*", size = 30 / .pt,
@@ -113,53 +109,53 @@ plot_fig1a <- function(files_dir) {
     # Conditions
     annotate(
       geom = "segment", x = -32, y = 17, xend = -32, yend = 22,
-      color = aha_colors[1]
+      color = condition_colors[1]
     ) +
     annotate(
       geom = "segment", x = -12, y = 17, xend = -12, yend = 20,
-      color = aha_colors[1]
+      color = condition_colors[1]
     ) +
     annotate(
       geom = "segment", x = 12, y = 17, xend = 12, yend = 20,
-      color = aha_colors[2]
+      color = condition_colors[2]
     ) +
     annotate(
       geom = "segment", x = 32, y = 17, xend = 32, yend = 20,
-      color = aha_colors[2]
+      color = condition_colors[2]
     ) +
     annotate(
       geom = "segment", x = -32, y = 17, xend = -12, yend = 17,
-      color = aha_colors[1]
+      color = condition_colors[1]
     ) +
     annotate(
       geom = "segment", x = 12, y = 17, xend = 32, yend = 17,
-      color = aha_colors[2]
+      color = condition_colors[2]
     ) +
     annotate(
       geom = "segment", x = -22, y = 15, xend = -22, yend = 17,
-      color = aha_colors[1]
+      color = condition_colors[1]
     ) +
     annotate(
       geom = "segment", x = 22, y = 15, xend = 22, yend = 17,
-      color = aha_colors[2]
+      color = condition_colors[2]
     ) +
     annotate(
       geom = "text", x = -22, y = 13, label = "Informed condition",
-      family = "Helvetica", fontface = "bold", color = aha_colors[1]
+      family = "Helvetica", fontface = "bold", color = condition_colors[1]
     ) +
     annotate(
       geom = "text", x = 22, y = 13, label = "Uninformed condition",
-      family = "Helvetica", fontface = "bold", color = aha_colors[2]
+      family = "Helvetica", fontface = "bold", color = condition_colors[2]
     ) +
     annotate(
       geom = "text", x = -22, y = 7.9,
       label = "Matching keywords\nand response A or B",
-      family = "Helvetica", color = aha_colors[1], lineheight = 1
+      family = "Helvetica", color = condition_colors[1], lineheight = 1
     ) +
     annotate(
       geom = "text", x = 22, y = 7.9,
       label = "Non-matching keywords\nand response C or D",
-      family = "Helvetica", color = aha_colors[2], lineheight = 1
+      family = "Helvetica", color = condition_colors[2], lineheight = 1
     ) +
     ## PRE-INSIGHT PHASE ##
     # Title
@@ -175,11 +171,11 @@ plot_fig1a <- function(files_dir) {
     # Squares
     annotate(
       geom = "rect", xmin = -91, xmax = -71, ymin = 22, ymax = 42,
-      color = "black", fill = stimulus_bg_color
+      color = "black", fill = stim_bg_color
     ) +
     annotate(
       geom = "rect", xmin = -53, xmax = -73, ymin = 24, ymax = 44,
-      color = "black", fill = stimulus_bg_color
+      color = "black", fill = stim_bg_color
     ) +
     annotate(
       geom = "text", x = -81, y = 32.3, label = "+", size = 20 / .pt,
@@ -218,11 +214,11 @@ plot_fig1a <- function(files_dir) {
     # Squares
     annotate(
       geom = "rect", xmin = 53, xmax = 73, ymin = 22, ymax = 42,
-      color = "black", fill = stimulus_bg_color
+      color = "black", fill = stim_bg_color
     ) +
     annotate(
       geom = "rect", xmin = 71, xmax = 91, ymin = 24, ymax = 44,
-      color = "black", fill = stimulus_bg_color
+      color = "black", fill = stim_bg_color
     ) +
     annotate(
       geom = "text", x = 63, y = 32.3, label = "+", size = 20 / .pt,
@@ -249,9 +245,143 @@ plot_fig1a <- function(files_dir) {
     )
 }
 
-# Helper function to create Figure 1B (ERP results)
-plot_fig1b <- function(evokeds, config, channel_locations, models) {
 
+# Helper function to create trial structure plots (Figure 1A)
+plot_fig2a <- function(files_dir, condition_colors) {
+  # Make sure that packages are loaded
+  require(tidyverse)
+  require(cowplot)
+
+  # Plot settings
+  ggplot() +
+    coord_cartesian(xlim = c(-100, 100), ylim = c(0, 42), expand = FALSE) +
+    theme_void() +
+    theme(aspect.ratio = 0.21) +
+    ## INSIGHT PHASE ##
+    # Title
+    annotate(
+      geom = "text", x = 0, y = 40, label = "Insight phase", size = 14 / .pt,
+      family = "Helvetica", fontface = "bold"
+    ) +
+    # Response options
+    annotate(geom = "segment", x = -32, y = 35, xend = 32, yend = 35) +
+    annotate(geom = "segment", x = -32, y = 30.5, xend = -32, yend = 35) +
+    annotate(geom = "segment", x = -12, y = 32, xend = -12, yend = 35) +
+    annotate(geom = "segment", x = 12, y = 32, xend = 12, yend = 35) +
+    annotate(geom = "segment", x = 32, y = 32, xend = 32, yend = 35) +
+    annotate(
+      geom = "text", x = -32, y = 26,
+      label = "A. \"I know\nwhat this is\"",
+      family = "Helvetica", lineheight = 1
+    ) +
+    annotate(
+      geom = "text", x = -12, y = 26,
+      label = "B. \"I rather have\nan assumption\nwhat this is\"",
+      family = "Helvetica", lineheight = 1
+    ) +
+    annotate(
+      geom = "text", x = 12, y = 26,
+      label = "C. \"I rather have\nno assumption\nwhat this is\"",
+      family = "Helvetica", lineheight = 1
+    ) +
+    annotate(
+      geom = "text", x = 32, y = 26,
+      label = "D. \"I don\'t\n know what\nthis is\"",
+      family = "Helvetica", lineheight = 1
+    ) +
+    # Conditions
+    annotate(
+      geom = "segment", x = -32, y = 17, xend = -32, yend = 22,
+      color = condition_colors[1]
+    ) +
+    annotate(
+      geom = "segment", x = -12, y = 17, xend = -12, yend = 20,
+      color = condition_colors[1]
+    ) +
+    annotate(
+      geom = "segment", x = 12, y = 17, xend = 12, yend = 20,
+      color = condition_colors[2]
+    ) +
+    annotate(
+      geom = "segment", x = 32, y = 17, xend = 32, yend = 20,
+      color = condition_colors[2]
+    ) +
+    annotate(
+      geom = "segment", x = -32, y = 17, xend = -12, yend = 17,
+      color = condition_colors[1]
+    ) +
+    annotate(
+      geom = "segment", x = 12, y = 17, xend = 32, yend = 17,
+      color = condition_colors[2]
+    ) +
+    annotate(
+      geom = "segment", x = -22, y = 15, xend = -22, yend = 17,
+      color = condition_colors[1]
+    ) +
+    annotate(
+      geom = "segment", x = 22, y = 15, xend = 22, yend = 17,
+      color = condition_colors[2]
+    ) +
+    annotate(
+      geom = "text", x = -22, y = 13, label = "Informed condition",
+      family = "Helvetica", fontface = "bold", color = condition_colors[1]
+    ) +
+    annotate(
+      geom = "text", x = 22, y = 13, label = "Unsuccessful condition",
+      family = "Helvetica", fontface = "bold", color = condition_colors[2]
+    ) +
+    annotate(
+      geom = "text", x = -22, y = 7.9,
+      label = "Matching keywords\nand response A or B",
+      family = "Helvetica", color = condition_colors[1], lineheight = 1
+    ) +
+    annotate(
+      geom = "text", x = 22, y = 7.9,
+      label = "Matching keywords\nand response C or D",
+      family = "Helvetica", color = condition_colors[2], lineheight = 1
+    ) +
+    ## PRE-INSIGHT PHASE ##
+    # Title
+    annotate(
+      geom = "text", x = -72, y = 15, label = "Pre-insight phase",
+      size = 14 / .pt, family = "Helvetica", fontface = "bold"
+    ) +
+    # Conditions
+    annotate(
+      geom = "text", x = -72, y = 7.9,
+      label = paste(
+        "Objects classified according",
+        "to conditions in the insight phase",
+        sep = "\n"
+      ),
+      family = "Helvetica", lineheight = 1
+    ) +
+    ## POST-INSIGHT PHASE ##
+    # Title
+    annotate(
+      geom = "text", x = 72, y = 15, label = "Post-insight phase",
+      size = 14 / .pt, family = "Helvetica", fontface = "bold"
+    ) +
+    # Conditions
+    annotate(
+      geom = "text", x = 72, y = 7.9,
+      label = paste(
+        "Objects classified according",
+        "to conditions in the insight phase",
+        sep = "\n"
+      ),
+      family = "Helvetica", lineheight = 1
+    )
+}
+
+# Helper function to create ERP time courses and topographies (Figures 1B + 2)
+plot_erps <- function(evokeds,
+                      config,
+                      channel_locations,
+                      models,
+                      conditions,
+                      condition_colors,
+                      topo_palette) {
   # Make sure that packages are loaded
   require(tidyverse)
   require(cowplot)
@@ -260,11 +390,9 @@ plot_fig1b <- function(evokeds, config, channel_locations, models) {
   components <- config$components
   components$model <- models[components$name]
   pmap(components, function(name, tmin, tmax, roi, model) {
-
     # Loop over phases of the experiment
     phases <- c("Pre-insight", "Insight", "Post-insight")
     map(phases, function(this_phase) {
-
       # Define axis limits and labels
       xmin <- -0.2
       xmax <- 0.8
@@ -274,10 +402,12 @@ plot_fig1b <- function(evokeds, config, channel_locations, models) {
       yticks <- c(-3, 3)
 
       # Select dependent variable, conditions, and time window
-      evokeds_plot <- evokeds %>%
-        filter(phase == this_phase) %>%
-        filter(condition %in% c("Informed", "Uninformed")) %>%
-        filter(between(time, xmin, xmax))
+      evokeds_plot <- filter(
+        evokeds,
+        phase == this_phase &
+          condition %in% conditions &
+          between(time, xmin, xmax)
+      )
 
       # Create means and SEs across participants for time course
       evokeds_tc <- evokeds_plot %>%
@@ -290,8 +420,9 @@ plot_fig1b <- function(evokeds, config, channel_locations, models) {
         mutate(time = as.numeric(levels(time))[time])
 
       # Extract significance from model
+      contrast_conditions <- str_c(conditions, collapse = " - ")
       p_value <- as_tibble(model$contrasts) %>%
-        filter(phase == this_phase & contrast == "Informed - Uninformed") %>%
+        filter(phase == this_phase & contrast == contrast_conditions) %>%
         pull(p.value)
       asterisks <- case_when(
         p_value < 0.001 ~ "***",
@@ -354,8 +485,8 @@ plot_fig1b <- function(evokeds, config, channel_locations, models) {
         geom_line(size = 0.8) +
         # Styling
         scale_color_manual(
-          values = aha_colors,
-          labels = c("Informed condition", "Uninformed condition"),
+          values = condition_colors,
+          labels = str_c(conditions, "condition", sep = " "),
           aesthetics = c("color", "fill")
         ) +
         coord_cartesian(ylim = c(-3, 8), expand = TRUE) +
@@ -378,11 +509,11 @@ plot_fig1b <- function(evokeds, config, channel_locations, models) {
 
       # Compute difference between conditions for topography
       channels <- channel_locations$channel
-      evokeds_informed <- filter(evokeds_plot, condition == "Informed")
-      evokeds_uninformed <- filter(evokeds_plot, condition == "Uninformed")
-      evokeds_diff <- evokeds_informed
+      evokeds_plus <- filter(evokeds_plot, condition == conditions[1])
+      evokeds_minus <- filter(evokeds_plot, condition == conditions[2])
+      evokeds_diff <- evokeds_plus
       evokeds_diff[channels] <-
-        evokeds_informed[channels] - evokeds_uninformed[channels]
+        evokeds_plus[channels] - evokeds_minus[channels]
       evokeds_diff$condition <- "Difference"
 
       # Plot topography
@@ -403,8 +534,19 @@ plot_fig1b <- function(evokeds, config, channel_locations, models) {
           scaling = 0.9
         ) +
         scale_fill_distiller(
-          palette = "RdBu", limits = c(-1, 1), oob = scales::squish
+          palette = topo_palette,
+          limits = c(-1.0, 1.0),
+          oob = scales::squish
         ) +
+        # scale_fill_gradient2(
+        #   low = condition_colors[2], high = condition_colors[1],
+        #   limits = c(-1.0, 1.0), oob = scales::squish
+        # ) +
+        # scico::scale_fill_scico(
+        #   palette = topo_palette,
+        #   limits = c(-1.0, 1.0),
+        #   oob = scales::squish
+        # ) +
         theme(legend.position = "none")
       # Adjust size of head elements and channel markers
       topo$layers[[3]]$aes_params$size <- 0.5
@@ -415,12 +557,15 @@ plot_fig1b <- function(evokeds, config, channel_locations, models) {
       topo$layers[[7]]$aes_params$colour <- "black"
 
       # Extract colorbar
+      colorbar_title <- str_c(
+        conditions[1], " -\n", str_to_lower(conditions[2]), "\nampl. (µV)"
+      )
       colorbar <<- get_legend(
         topo +
           guides(
             fill = guide_colorbar(
               title.hjust = 0.5,
-              title = "Informed - uninformed\nampl. (µV)",
+              title = colorbar_title,
               title.position = "left",
               barheight = 6.5,
               ticks = FALSE
@@ -436,13 +581,9 @@ plot_fig1b <- function(evokeds, config, channel_locations, models) {
       )
 
       # Combine time course and topography
-      if (p_value < 0.05) {
-        wave + draw_plot(
-          plot = topo, x = tmin - 0.46, y = 2.7, width = 0.6, height = 6.0
-        )
-      } else {
-        wave
-      }
+      wave + draw_plot(
+        plot = topo, x = tmin - 0.47, y = 2.7, width = 0.6, height = 6.0
+      )
     }) %>%
       # Combine plots for the current ERP component and all three phases
       plot_grid(plotlist = ., nrow = 1)
@@ -455,22 +596,36 @@ plot_fig1b <- function(evokeds, config, channel_locations, models) {
 }
 
 # Helper function to create Figure 1 (trial structure + ERP results)
-plot_fig1 <- function(files_dir, evokeds, config, channel_locations, models) {
-
+plot_fig1 <- function(files_dir,
+                      evokeds,
+                      config,
+                      channel_locations,
+                      models,
+                      conditions = c("Informed", "Uninformed"),
+                      condition_colors = c("#ca0020", "#0571b0"),
+                      topo_palette = "RdBu") {
   # Make sure that packages are loaded
   require(tidyverse)
   require(cowplot)
 
   # Plot 2 main panels
   plot_grid(
-    plot_fig1a(files_dir),
-    plot_fig1b(evokeds, config, channel_locations, models),
+    plot_fig1a(files_dir, condition_colors),
+    plot_erps(
+      evokeds,
+      config,
+      channel_locations,
+      models,
+      conditions,
+      condition_colors,
+      topo_palette
+    ),
     ncol = 1, labels = c("A", NULL), label_size = 14,
     label_fontfamily = "Helvetica"
   ) +
     # Add legend and colorbar
-    draw_plot(wave_legend, x = 0.330, y = 0.434) +
-    draw_plot(colorbar, x = 0.454, y = 0.434) +
+    draw_plot(wave_legend, x = 0.323, y = 0.434) +
+    draw_plot(colorbar, x = 0.45, y = 0.434) +
     # Add some lines to separate the three experimental parts
     annotate("segment", x = 0.331, xend = 0.331, y = -Inf, yend = 0.48) +
     annotate("segment", x = 0.665, xend = 0.665, y = -Inf, yend = 0.48) +
@@ -480,13 +635,53 @@ plot_fig1 <- function(files_dir, evokeds, config, channel_locations, models) {
     annotate("segment", x = 0.726, xend = 0.726, y = 0.55, yend = Inf)
 }
 
+# Helper function to create Figure 2 (trial structure + ERP results)
+plot_fig2 <- function(files_dir,
+                      evokeds,
+                      config,
+                      channel_locations,
+                      models,
+                      conditions = c("Informed", "Unsuccessful"),
+                      condition_colors = c("#ca0020", "#0571b0"),
+                      topo_palette = "RdBu") {
+  # Make sure that packages are loaded
+  require(tidyverse)
+  require(cowplot)
+
+  # Plot 2 main panels
+  plot_grid(
+    plot_fig2a(files_dir, condition_colors),
+    plot_erps(
+      evokeds,
+      config,
+      channel_locations,
+      models,
+      conditions,
+      condition_colors,
+      topo_palette
+    ),
+    ncol = 1, rel_heights = c(0.42, 1.0), labels = c("A", NULL),
+    label_size = 14, label_fontfamily = "Helvetica"
+  ) +
+    # Add legend and colorbar
+    draw_plot(wave_legend, x = 0.323, y = 0.41) +
+    draw_plot(colorbar, x = 0.45, y = 0.41) +
+    # Add some lines to separate the three experimental parts
+    annotate("segment", x = 0.331, xend = 0.331, y = -Inf, yend = 0.68) +
+    annotate("segment", x = 0.665, xend = 0.665, y = -Inf, yend = 0.68) +
+    annotate("segment", x = 0.331, xend = 0.274, y = 0.68, yend = 0.75) +
+    annotate("segment", x = 0.665, xend = 0.726, y = 0.68, yend = 0.75) +
+    annotate("segment", x = 0.274, xend = 0.274, y = 0.75, yend = Inf) +
+    annotate("segment", x = 0.726, xend = 0.726, y = 0.75, yend = Inf)
+}
+
 # Helper function to plot time-frequency results
 plot_tfr_topos <- function(tfr_grand_ave,
                            tfr_clusters,
                            p_cluster,
-                           condition_plus = "Informed",
-                           condition_minus = "Uninformed",
-                           title_conditions = "Informed - uninformed",
+                           conditions = c("Informed", "Uninformed"),
+                           condition_colors = c("#ca0020", "#0571b0"),
+                           topo_palette = "RdBu",
                            tmin = -0.4,
                            tmax = 1.4,
                            tstep = 0.2,
@@ -503,8 +698,8 @@ plot_tfr_topos <- function(tfr_grand_ave,
 
   # Compute difference in power between conditions
   channels <- unique(tfr_clusters$channel)
-  tfr_grand_ave_plus <- filter(tfr_grand_ave, condition == condition_plus)
-  tfr_grand_ave_minus <- filter(tfr_grand_ave, condition == condition_minus)
+  tfr_grand_ave_plus <- filter(tfr_grand_ave, condition == conditions[1])
+  tfr_grand_ave_minus <- filter(tfr_grand_ave, condition == conditions[2])
   tfr_grand_ave_diff <- mutate(tfr_grand_ave_plus, condition = "Difference")
   tfr_grand_ave_diff[channels] <- tfr_grand_ave_plus[channels] -
     tfr_grand_ave_minus[channels]
@@ -543,7 +738,11 @@ plot_tfr_topos <- function(tfr_grand_ave,
           highlights = significant_channels,
           scaling = 1.1
         ) +
-        scale_fill_distiller(limits = c(-25, 25), palette = "RdBu") +
+        scale_fill_distiller(limits = c(-25.0, 25.0), palette = topo_palette) +
+        # scale_fill_gradient2(
+        #   low = condition_colors[2], high = condition_colors[1],
+        #   limits = c(-25.0, 25.0),
+        # ) +
         theme(
           plot.margin = unit(rep(-0.2, 4), "cm"),
           legend.position = "none"
@@ -555,7 +754,9 @@ plot_tfr_topos <- function(tfr_grand_ave,
               title.hjust = 0.5,
               title.vjust = 0.6,
               title = paste(
-                title_conditions, "power", "(% signal change)",
+                paste(conditions[1], "-", str_to_lower(conditions[2])),
+                "power",
+                "(% signal change)",
                 sep = "\n"
               ),
               title.position = "left",
@@ -565,10 +766,8 @@ plot_tfr_topos <- function(tfr_grand_ave,
             )
           ) +
           theme(
-            legend.box.background = element_rect(
-              fill = "white", color = NA
-            ),
-            legend.box.margin = margin(20, 30, 20, 30),
+            legend.box.background = element_rect(fill = "white", color = NA),
+            legend.box.margin = margin(20, 18, 20, 18),
             legend.position = "top",
             legend.title = element_text(size = 10, family = "Helvetica"),
             legend.text = element_text(size = 10, family = "Helvetica"),
@@ -621,7 +820,7 @@ plot_tfr_topos <- function(tfr_grand_ave,
     label_fontface = "plain", label_x = 0.5, label_y = 0.01, vjust = 0.5,
     hjust = 0.5
   ) +
-    draw_plot(colorbar, x = -0.28, y = 0.445)
+    draw_plot(colorbar, x = -0.23, y = 0.445, width = 0.9)
 }
 
 # Helper function to create print degrees of freedom
