@@ -497,15 +497,24 @@ if (run$eeg_processing) {
       )
     ),
     average_by = list(
-      pre_informed = "phase == 'Pre-insight' & condition == 'Informed' & rt > 200",
-      pre_uninformed = "phase == 'Pre-insight' & condition == 'Uninformed' & rt > 200",
-      pre_unsuccessful = "phase == 'Pre-insight' & condition == 'Unsuccessful' & rt > 200",
-      ins_informed = "phase == 'Insight' & condition == 'Informed' & rt > 200",
-      ins_uninformed = "phase == 'Insight' & condition == 'Uninformed' & rt > 200",
-      ins_unsuccessful = "phase == 'Insight' & condition == 'Unsuccessful' & rt > 200",
-      post_informed = "phase == 'Post-insight' & condition == 'Informed' & rt > 200",
-      post_uninformed = "phase == 'Post-insight' & condition == 'Uninformed' & rt > 200",
-      post_unsuccessful = "phase == 'Post-insight' & condition == 'Unsuccessful' & rt > 200"
+      pre_informed =
+        "phase == 'Pre-insight' & condition == 'Informed' & rt > 200",
+      pre_uninformed =
+        "phase == 'Pre-insight' & condition == 'Uninformed' & rt > 200",
+      pre_unsuccessful =
+        "phase == 'Pre-insight' & condition == 'Unsuccessful' & rt > 200",
+      ins_informed =
+        "phase == 'Insight' & condition == 'Informed' & rt > 200",
+      ins_uninformed =
+        "phase == 'Insight' & condition == 'Uninformed' & rt > 200",
+      ins_unsuccessful =
+        "phase == 'Insight' & condition == 'Unsuccessful' & rt > 200",
+      post_informed =
+        "phase == 'Post-insight' & condition == 'Informed' & rt > 200",
+      post_uninformed =
+        "phase == 'Post-insight' & condition == 'Uninformed' & rt > 200",
+      post_unsuccessful =
+        "phase == 'Post-insight' & condition == 'Unsuccessful' & rt > 200"
     ),
     perform_tfr = TRUE,
     tfr_subtract_evoked = FALSE,
