@@ -357,15 +357,24 @@ if (run$eeg_processing) {
       )
     ),
     average_by = list(
-      pre_informed = "phase == 'Pre-insight' & condition == 'Informed' & rt > 200",
-      pre_uninformed = "phase == 'Pre-insight' & condition == 'Uninformed' & rt > 200",
-      pre_unsuccessful = "phase == 'Pre-insight' & condition == 'Unsuccessful' & rt > 200",
-      ins_informed = "phase == 'Insight' & condition == 'Informed' & rt > 200",
-      ins_uninformed = "phase == 'Insight' & condition == 'Uninformed' & rt > 200",
-      ins_unsuccessful = "phase == 'Insight' & condition == 'Unsuccessful' & rt > 200",
-      post_informed = "phase == 'Post-insight' & condition == 'Informed' & rt > 200",
-      post_uninformed = "phase == 'Post-insight' & condition == 'Uninformed' & rt > 200",
-      post_unsuccessful = "phase == 'Post-insight' & condition == 'Unsuccessful' & rt > 200"
+      `Pre-insight/Informed` =
+        "phase == 'Pre-insight' & condition == 'Informed' & rt > 200",
+      `Pre-insight/Uninformed` =
+        "phase == 'Pre-insight' & condition == 'Uninformed' & rt > 200",
+      `Pre-insight/Unsuccessful` =
+        "phase == 'Pre-insight' & condition == 'Unsuccessful' & rt > 200",
+      `Insight/Informed` =
+        "phase == 'Insight' & condition == 'Informed' & rt > 200",
+      `Insight/Uninformed` =
+        "phase == 'Insight' & condition == 'Uninformed' & rt > 200",
+      `Insight/Unsuccessful` =
+        "phase == 'Insight' & condition == 'Unsuccessful' & rt > 200",
+      `Post-insight/Informed` =
+        "phase == 'Post-insight' & condition == 'Informed' & rt > 200",
+      `Post-insight/Uninformed` =
+        "phase == 'Post-insight' & condition == 'Uninformed' & rt > 200",
+      `Post-insight/Unsuccessful` =
+        "phase == 'Post-insight' & condition == 'Unsuccessful' & rt > 200"
     ),
     perform_tfr = TRUE,
     tfr_subtract_evoked = FALSE,
@@ -375,9 +384,11 @@ if (run$eeg_processing) {
     tfr_baseline = c(-0.45, -0.05),
     perm_contrasts = list(
       c("Pre-insight/Informed", "Pre-insight/Uninformed"),
+      c("Pre-insight/Informed", "Pre-insight/Unsuccessful"),
       c("Insight/Informed", "Insight/Uninformed"),
+      c("Insight/Informed", "Insight/Unsuccessful"),
       c("Post-insight/Informed", "Post-insight/Uninformed"),
-      c("Insight/Informed", "Insight/Unsuccessful")
+      c("Post-insight/Informed", "Post-insight/Unsuccessful")
     ),
     tfr_components = list(
       name = list("alpha_beta"),
@@ -389,7 +400,7 @@ if (run$eeg_processing) {
     ),
     perm_tmin = -0.4,
     perm_tmax = 1.4,
-    n_jobs = 4
+    n_jobs = 8
   )
 }
 
