@@ -1,6 +1,4 @@
 # User-defined variables
-KNIT_CMD        := Rscript -e "rmarkdown::render(input = 'manuscript.Rmd', output_format = 'all')"
-LATEX_CMD       := xelatex manuscript.tex
 IMAGE_USER      := alexenge
 IMAGE_NAME      := aha
 IMAGE_TAG       := latest
@@ -15,25 +13,29 @@ REMOTE_DIR      := /home/rstudio/project
 REMOTE_HOME     := /home/rstudio
 SHELL           := bash
 
-# Main (knit) command
+# Knit the manuscript
 all:
-	$(KNIT_CMD)
+	Rscript -e "rmarkdown::render(input = 'manuscript.Rmd', output_format = 'all')"
 
-# LaTeX command
-latex:
-	$(LATEX_CMD)
-
-# Knit command with Docker
+# Knit the manuscript with Docker
 docker:
 	docker run --rm --volume $(PROJECT_DIR):$(REMOTE_DIR) $(IMAGE) \
-	$(KNIT_CMD)
+	Rscript -e "rmarkdown::render(input = 'manuscript.Rmd', output_format = 'all')"
 
-# LaTeX command with Docker
+# Render LaTeX
+latex:
+	xelatex manuscript.tex
+
+# Render LaTeX command Docker
 latex-docker:
 	docker run --rm --volume $(PROJECT_DIR):$(REMOTE_DIR) $(IMAGE) \
-	$(LATEX_CMD)
+	xelatex manuscript.tex
 
-# Main command via SLURM and Singularity on an HPC cluster
+# Auto-format R code
+style:
+	Rscript -e "styler::style_dir()"
+
+# Knit the manuscript via SLURM and Singularity on an HPC cluster
 sbatch:
 	sbatch --chdir $(PROJECT_DIR) --cpus-per-task 40 \
 	--mem 180G --nodes 1 --ntasks 1 --time 24:00:00 \

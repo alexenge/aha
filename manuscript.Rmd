@@ -99,15 +99,17 @@ opts_chunk$set(
 
 # Specify directory paths
 data_dir <- here("data")
+rating_dir <- here(data_dir, "ratings")
 files_dir <- here("manuscript_files")
 output_dir <- here("output")
-report_dir <- here("output/qc_reports")
+report_dir <- here(output_dir, "qc_reports")
 
 # Load custom helper functions for creating figures and tables
 source(here(files_dir, "helper_functions.R"))
 
 # Re-run steps that take a long time to compute?
 run <- list(
+  rating_semantic_analysis = FALSE,
   eeg_processing = FALSE,
   mixed_models = FALSE,
   figures = FALSE
@@ -185,7 +187,7 @@ The other 120 stimuli were rare objects presumed to be unfamiliar to the majorit
 All stimuli were presented on a light blue background with a size of 207 × 207 pixels on a 19-inch LCD monitor with a resolution of 1,280 × 1,024 pixels and a refresh rate of 75 Hz.
 At a standardized viewing distance of 90 cm, the images subtended approximately 3.9 degrees of participants' horizontal and vertical visual angle.
 
-For each unfamiliar object, a pair of German keywords (a noun and a verb) was selected, describing the typical function or use of the object in a way that could be related to its visual features and their configuration (e.g., *Stromstärke, messen* [electric current, measuring]; *Tonpott, trommeln* [clay pot, drumming]; [see Supplementary Table 1]{color="blue"}).
+For each unfamiliar object, we created a pair of German keywords (a noun and a verb), describing the typical function or use of the object in a way that could be related to its visual features and their configuration (e.g., *Stromstärke, messen* [electric current, measuring]; *Tonpott, trommeln* [clay pot, drumming]; [see Supplementary Table 1]{color="blue"}).
 As our central experimental manipulation, half of the objects were presented together with keywords that correctly matched their respective function, whereas the other half of the objects were presented together with non-matching keywords belonging to one of the other objects.
 The matching keywords were expected to induce semantically informed perception, that is, participants suddenly understanding what kind of object they were viewing.
 The non-matching keywords were expected to prevent such an understanding and keep the perception of the object semantically [uninformed]{color="blue"}.
@@ -193,9 +195,381 @@ All participants saw each unfamiliar object with only one type of keywords (matc
 This assignment of keywords to objects was counterbalanced across participants so that each object was presented with matching keywords (leading to semantically informed perception) and non-matching keywords (leading to [uninformed]{color="blue"} perception) to an equal number of participants.
 The experiment was programmed and displayed using Presentation® software (Neurobehavioral Systems, Inc., Berkeley, CA, www.neurobs.com).
 
+```{r, ratings}
+# Read table of object stimuli + keywords for the main experiment
+keywords <- read_csv(
+  here("materials", "keywords.csv"),
+  col_types = cols(
+    familiarity = col_factor(levels = c("familiar", "unfamiliar")),
+    item_id = col_factor()
+  )
+) %>%
+  mutate(
+    match = str_c(match_noun, ", ", match_verb),
+    match_en = str_c("{[", match_noun_en, ", ", match_verb_en, "]}"),
+    nonmatch = str_c(nonmatch_noun, ", ", nonmatch_verb),
+    nonmatch_en = str_c("{[", nonmatch_noun_en, ", ", nonmatch_verb_en, "]}"),
+  )
+
+# (Re-)do latent semantic analysis of online rating study data
+rating_file <- here(output_dir, "rating.csv")
+if (run$rating_semantic_analysis) {
+  # Load pre-trained German word2vec embedding
+  word2vec <- load_word2vec(rating_dir)
+
+  # Read online rating study data
+  rating_raw <- read_csv(
+    here(data_dir, "ratings", "rating_data.csv"),
+    col_types = cols(), locale = locale(encoding = "latin1")
+  )
+  rating_substantives <- select(rating_raw, S001_01:S242_01)
+  rating_verbs <- select(rating_raw, V001_01:V242_01)
+
+  # Prepare a copy of the keywords to add to the rating study data
+  rating_n <- nrow(rating_raw)
+  keywords_for_rating <- keywords %>%
+    arrange(familiarity, filename) %>%
+    select(item_id, familiarity, filename, match, nonmatch) %>%
+    replicate(rating_n, ., simplify = FALSE) %>%
+    bind_rows()
+
+  # Compute cosine similarities between rating study responses and keywords
+  rating <-
+    map2_dfc(rating_substantives, rating_verbs, str_c, sep = ", ") %>%
+    mutate(participant_id = rating_raw$CASE) %>%
+    pivot_longer(
+      -participant_id,
+      names_to = "question_id", values_to = "response"
+    ) %>%
+    bind_cols(keywords_for_rating, .) %>%
+    pivot_longer(
+      c(match, nonmatch),
+      names_to = "condition", values_to = "keywords"
+    ) %>%
+    mutate(
+      across(c(keywords, response), str_to_lower),
+      keywords = str_replace_all(
+        keywords, c(
+          aufstemmen = "aufbrechen",
+          tierkäfig = "käfig",
+          wegkehren = "kehren",
+          verühren = "rühren",
+          schraubenschlüssel = "werkzeug",
+          verquirlen = "rühren",
+          tackern = "tacker",
+          sprengstoffexplosion = "explosion",
+          tankfüllstand = "füllstand",
+          tonpott = "tongefäß",
+          eierkarton = "eier verpackung",
+          musikgerät = "musikinstrument",
+          türgelenk = "scharnier",
+          telegrafieren = "telegraf",
+          sternenbilder = "sternbild",
+          aufspulen = "aufwickeln",
+          häckseln = "zerkleinern",
+          `mikroskop-proben` = "mikroskop proben",
+          streckenmaß = "maß",
+          windgeschwindigkeit = "windstärke",
+          nussöl = "nuss öl",
+          entkörnen = "entkernen",
+          katzenklo = "katze klo",
+          kutschrad = "kutsche rad"
+        )
+      ),
+      response = str_replace_all(
+        response, c(
+          aufhebeln = "aufbrechen",
+          föhnen = "föhn",
+          kasette = "kassette",
+          aufkehren = "kehren",
+          tackern = "tacker",
+          sprayapparat = "spray apparat",
+          anästhesieren = "betäuben",
+          reaktionsspiel = "reaktion spiel",
+          mulchgerät = "mulch gerät",
+          makierung = "markierung",
+          wissenschaftlich = "wissenschaft",
+          spannwerkzeug = "werkzeug",
+          wärmestab = "wärme stab",
+          ampfel = "ampel",
+          scheere = "schere",
+          pflägen = "pflügen",
+          knetten = "kneten",
+          pfandkuchen = "pfannkuchen",
+          anmacher = "anmachen",
+          injezieren = "injizieren",
+          telfon = "telefon",
+          beschrifter = "beschriften",
+          aufbewaren = "aufbewahren",
+          spähne = "späne",
+          separator = "trennen",
+          stämpfer = "stampfen",
+          fliente = "flinte",
+          tromphete = "trompete",
+          makieren = "markieren",
+          stöbseln = "stöpsel",
+          hiernwellen = "gehirnwellen",
+          kartofeln = "kartoffeln",
+          vaccum = "vakuum",
+          saubermachen = "putzen",
+          ankeln = "anker",
+          schuessel = "schüssel",
+          `zangen\\\\` = "zange",
+          kleiderbuegel = "kleiderbügel",
+          buerste = "bürste",
+          buersten = "bürsten",
+          druecken = "drücken",
+          obstscheider = "obst schneiden",
+          àumachen = "ausmachen",
+          bieroeffner = "flaschenöffner",
+          oeffnen = "öffnen",
+          giesskanne = "gießkanne",
+          gluehbirne = "glühbirne",
+          schettem = "manschetten",
+          kurzhantel = "kurzhanteln",
+          tierekiste = "tiere kiste",
+          kaffekocher = "kaffeemaschine",
+          kinderwaagen = "kinderwagen",
+          klobürste = "toilette bürste",
+          orangenpresser = "orangen presse",
+          foodmixer = "essen mixer",
+          schuessel = "schüssel",
+          naehen = "nähen",
+          teigwalze = "nudelholz",
+          pffefern = "pfeffer",
+          maehen = "mähen",
+          gesichtsbürste = "gesicht bürste",
+          regenchirm = "regenschirm",
+          kaesegratin = "käse gratin",
+          slotsmaschine = "slot maschine",
+          piggybank = "sparschwein",
+          stampen = "kleben",
+          arztwekzeug = "arzt werkzeug",
+          gradskala = "grad skala",
+          trichten = "trichter",
+          spulsmaschine = "spülmaschine",
+          zahnbrueste = "zahnbürste",
+          bruesten = "bürsten",
+          foltermaschine = "folter maschine",
+          bieröffner = "flaschenöffner",
+          oeffnen = "öffnen",
+          pizzacutter = "pizza schneider",
+          kerzestande = "kerzenständer",
+          naehen = "nähen",
+          geruest = "gerüst",
+          nagelschneider = "nagel schere",
+          burste = "bürste",
+          bursten = "bürsten",
+          loefel = "löffel",
+          hamsterspielzeug = "hamster spielzeug",
+          breadboard = "schneide brett",
+          druceken = "drücken",
+          nussknacnker = "nussknacker",
+          ueberwachen = "überwachen",
+          trainingsmaschine = "training maschine",
+          padeln = "paddeln",
+          schäumer = "aufschäumen",
+          aufhanger = "aufhänger",
+          hangt = "hängen",
+          `eier-guillotine` = "eier messer",
+          ruhrgerat = "rührgerät",
+          katzentrager = "katzen träger",
+          hinzufugen = "hinzufügen",
+          kuchenform = "backform",
+          nagelfeile = "nagel feile",
+          fondues = "fondue",
+          zuhoren = "zuhören",
+          rasenmaher = "rasenmäher",
+          geschlitzter = "schlitz",
+          breifmarke = "briefmarke",
+          bimmeln = "läuten",
+          rasma = "",
+          kassete = "kassette",
+          nudelmaschine = "nudel maschine",
+          ruhrer = "rührer",
+          feuerloscher = "feuerlöscher",
+          entfernungsmesser = "entfernung messer",
+          heißluftpistole = "heißluft pistole",
+          schuhlöffel = "schuhe anziehen",
+          uben = "üben",
+          naturlich = "natürlich",
+          schißen = "schießen",
+          rührgerät = "mixer",
+          aufkehren = "kehren",
+          rausziehen = "herausziehen",
+          `mini-meißel` = "mini meißel",
+          kaffeemischer = "kaffee mischer",
+          nachttischlampe = "nachttisch lampe",
+          arbeitsschlüssel = "arbeit schlüssel",
+          `boom-box` = "lautsprecher",
+          feststampfen = "fest stampfen",
+          `casino-maschine` = "casino maschine",
+          `herzfrequenz-test` = "herzfrequenz test",
+          zaichnen = "zeichnen",
+          schneidin = "schneiden",
+          vergleichsmaschine = "vergleich maschine",
+          rosenabzeichen = "rosen abzeichen",
+          `dummy-stecker` = "dummy stecker",
+          `post-punk-sanduhr` = "post punk sanduhr",
+          schneidemaschine = "schneiden maschine",
+          fusszeile = "fußzeile",
+          gartenlampe = "garten lampe",
+          trenneimer = "trennen eimer",
+          fußabstreifer = "fußmatte",
+          wichten = "gewicht",
+          perlenständer = "perlen ständer",
+          briefmarker = "briefmarke",
+          `elektronische-schaltung` = "elektronische schaltung",
+          fläschchenheizung = "flächen heizung",
+          elektrodrucker = "elektro drucker",
+          metalllinse = "metall linse",
+          kugelheizung = "kugel heizung",
+          abschrauber = "abschrauben",
+          `mini-korb` = "mini korb",
+          elektronenrechner = "elektronen rechner",
+          spießfaum = "spieß",
+          tierträger = "tier träger",
+          rührgerät = "rührgerät",
+          kuchenform = "backform",
+          friteuse = "fritteuse",
+          `ein-` = "ein",
+          greigfen = "greifen",
+          zerknittern = "falten bekommen",
+          salatzange = "salat zange",
+          wwrm = "wurm",
+          duschwasser = "dusche wasser",
+          verbreitene = "verbreiten",
+          aufpieksen = "anstechen",
+          restriktieren = "einschränken",
+          rückgeld = "wechselgeld",
+          aufkehren = "zusammenkehren",
+          bratgut = "grillgut",
+          bepinseln = "bestreichen",
+          verquirlen = "vermischen",
+          temparatur = "temperatur",
+          aufspulen = "aufwickeln",
+          elekronik = "elektronik",
+          festnieten = "fest nieten",
+          festspannen = "fest spannen",
+          hebelkräfte = "hebelkraft",
+          meiseln = "meißeln",
+          betäüben = "betäuben",
+          verschraüben = "verschrauben",
+          schraüben = "schrauben",
+          seperator = "trennen",
+          schraübendreher = "schraubendreher",
+          gegewicht = "gewicht"
+        )
+      ),
+      cosine = compute_cosine(keywords, response, word2vec)
+    )
+
+  # Save to file
+  write_csv(rating, rating_file)
+}
+
+# # Test if all keywords and responses are in the embedding
+# for (keywords in c(unique(rating$keywords), unique(rating$response))) {
+#   if (!is.na(keywords)) {
+#     for (word in (str_split(keywords, pattern = " |, ")[[1]])) {
+#       if (!(word %in% rownames(word2vec))) {
+#         cat(paste0(word, ' = "",\n'))
+#       }
+#     }
+#   }
+# }
+
+# Read the rating study results incl. cosine similarities
+rating <- read_csv(
+  rating_file,
+  col_types = cols(item_id = col_factor(), participant_id = col_factor())
+) %>%
+  filter(!is.na(cosine)) %>%
+  mutate(
+    fam_condition = paste(familiarity, condition) %>%
+      factor(
+        levels = c("familiar match", "unfamiliar match", "unfamiliar nonmatch"),
+        labels = c("familiar", "matching", "nonmatching")
+      )
+  )
+
+# Compare cosine similarities between object conditions
+contrasts(rating$fam_condition) <- contr.sdif(3)
+model_rating <- lmer(
+  cosine ~ fam_condition +
+    (fam_condition | participant_id) +
+    (1 | item_id),
+  data = rating,
+  control = lmerControl(optimizer = "bobyqa", optCtrl = list(maxfun = 1e6))
+)
+
+# Compute condition means and pairwise contrasts
+emm_options(lmer.df = "Satterthwaite", lmerTest.limit = Inf)
+emm_rating <- emmeans(
+  model_rating,
+  specs = consec ~ fam_condition,
+  rev = TRUE,
+  adjust = "bonferroni"
+)
+rating_means <- as.data.frame(emm_rating$emmeans)
+rating_contrasts <- as.data.frame(emm_rating$contrasts) %>%
+  rename(t_value = `t.ratio`, p_value = `p.value`)
+
+# Compute each item's average cosine distance across participants
+cosines <- rating %>%
+  group_by(item_id) %>%
+  summarize(cosine = mean(cosine)) %>%
+  mutate(cosine = scale(cosine))
+
+# rating_pairwise <- rating$participant_id %>%
+#   unique() %>%
+#   combn(m = 2) %>%
+#   data.frame() %>%
+#   map_dfr(function(pair) {
+#     id_1 <- pair[1]
+#     id_2 <- pair[2]
+#     response_1 <- filter(rating, participant_id == id_1)$response
+#     response_2 <- filter(rating, participant_id == id_2)$response
+#     tibble(
+#       item_id = keywords$item_id,
+#       familiarity = keywords$familiarity,
+#       filename = keywords$filename,
+#       pair_id = str_c(id_1, id_2, sep = "_"),
+#       participant_id_1 = id_1,
+#       participant_id_2 = id_2,
+#       response_1,
+#       response_2,
+#       cosine = compute_cosine(response_1, response_2, word2vec)
+#     )
+#   })
+
+# write_csv(rating_pairwise, here(output_dir, "rating_pairwise.csv"))
+
+# mod_pairwise <- lmer(
+#   cosine ~ familiarity + (familiarity | pair_id) + (1 | filename),
+#   data = rating_pairwise
+# )
+# (summary_pairwise <- summary(mod_pairwise))
+
+# Rmisc::summarySEwithin(
+#   data = rating_pairwise, measurevar = "cosine", withinvars = "familiarity",
+#   idvar = "pair_id", na.rm = TRUE
+# ) %>%
+#   ggplot(aes(x = familiarity, y = cosine, color = familiarity)) +
+#   geom_violin(data = rating_pairwise) +
+#   coord_cartesian(ylim = c(0.0, 1.0)) +
+#   geom_pointrange(aes(ymin = cosine - se, ymax = cosine + se)) +
+#   theme_classic()
+```
+
+As a manipulation check, we ran an online rating study where we presented 10 German speakers (3 female, 7 male, mean age = 25.3 years, range 20--35 years) with all 240 visual objects in random order and asked them to generate their own keywords that would describe the presumed function of the object.
+We used latent semantic analysis with a word2vec embedding pre-trained on the German Wikipedia (deepset GmbH, Berlin, Germany, www.deepset.ai/german-word-embeddings) to estimate semantic distances between these participant-generated keywords and the keywords used in our experiment (Supplementary Methods; Supplementary Figures 1 and 2).
+In brief, it was substantially easier for participants to come with correct descriptions of familiar objects (mean cosine distance ± SE = `r filter(rating_means, fam_condition == "familiar")$emmean` ± `r filter(rating_means, fam_condition == "familiar")$SE`) than for unfamiliar objects (`r filter(rating_means, fam_condition == "matching")$emmean` ± `r filter(rating_means, fam_condition == "matching")$SE`), $t$(`r print_dof(filter(rating_contrasts, contrast == "familiar - matching")$df)`) = `r filter(rating_contrasts, contrast == "familiar - matching")$t_value`, $p_\text{corr}$ `r print_p(filter(rating_contrasts, contrast == "familiar - matching")$p_value)` (linear mixed-effects model).
+In fact, this similarity between participant-generated keywords for the unfamiliar objects and the object-matching keywords presented in the main experiment was only slightly higher than the similarity between participant-generated keywords and the object-non-matching keywords presented in the main experiment (`r filter(rating_means, fam_condition == "nonmatching")$emmean` ± `r filter(rating_means, fam_condition == "nonmatching")$SE`), $t$(`r print_dof(filter(rating_contrasts, contrast == "matching - nonmatching")$df)`) = `r filter(rating_contrasts, contrast == "matching - nonmatching")$t_value`, $p_\text{corr}$ `r print_p(filter(rating_contrasts, contrast == "matching - nonmatching")$p_value)` (linear mixed-effects model).
+
 ## Experimental Design
 
-The experiment consisted of three phases (see Figure 1A).
+The main EEG experiment consisted of three phases (see Figure 1A).
 In the *pre-insight* phase, after written informed consent had been obtained and the EEG had been prepared, all 240 familiar and unfamiliar objects were presented once in random order and without any keywords.
 Each trial consisted of a fixation cross presented in the middle of the screen for 0.5 s, followed by the presentation of the object until participants made a response or until a time out after 3 s.
 The inter-trial interval was 0.5 s and participants took a self-timed break after each block of 60 objects.
@@ -210,7 +584,6 @@ The mapping of the rating scale to the four buttons (left to right or right to l
 ```{r, eeg_processing, include=FALSE}
 # Define function for processing behavioral log files
 read_log <- function(log_file) {
-
   # Read the file
   log <- read_tsv(
     log_file,
@@ -325,7 +698,6 @@ mne_version <- import("mne")$`__version__`
 
 # (Re-)do the actual preprocessing if requested
 if (run$eeg_processing) {
-
   # Process behavioral data
   logs <- map(log_files, read_log)
 
@@ -413,7 +785,9 @@ trials <- read_csv(here(output_dir, "trials.csv"), col_types = cols(
     "Informed", "Uninformed", "Unsuccessful",
     "Exclude_uninformed", "Exclude_known", "Exclude_glitch"
   ))
-))
+)) %>%
+  # Add cosine similarities (i.e., predictability of keywords) from rating study
+  left_join(cosines, by = "item_id")
 
 # Compute number of objects per condition for each participant
 objects_per_condition <- with(trials, table(participant_id, condition)) %>%
@@ -422,7 +796,8 @@ objects_per_condition <- with(trials, table(participant_id, condition)) %>%
   rownames_to_column("subject_id")
 
 # Read by-participant ERP averages and channel locations
-evokeds <- read_csv(here(output_dir, "ave.csv"))
+evokeds <- read_csv(here(output_dir, "ave.csv")) %>%
+  separate(label, into = c("phase", "condition"), sep = "/")
 
 # Read pipeline configuration
 config <- jsonlite::read_json(
@@ -437,7 +812,8 @@ rejected_epochs <- lengths(config$auto_rejected_epochs)
 channel_locations <- read_csv(here(output_dir, "channel_locations.csv"))
 
 # Read grand-averaged power
-tfr_grand_ave <- read_csv(here(output_dir, "tfr_grand_ave.csv"))
+tfr_grand_ave <- read_csv(here(output_dir, "tfr_grand_ave.csv")) %>%
+  separate(label, into = c("phase", "condition"), sep = "/")
 
 # Read results of cluster-based permutation tests for ERPs
 clusters <- read_csv(here(output_dir, "clusters.csv"))
@@ -473,7 +849,6 @@ contrasts(trials$condition) <- cbind(
 
 # Define helper function for fitting linear mixed models and computing contrasts
 fit_mixed_models <- function(dep, formula, data) {
-
   # Modify the formula such that fixed effects are always retained
   formula <- formula %>%
     tabulate.formula() %>%
@@ -522,16 +897,15 @@ fit_mixed_models <- function(dep, formula, data) {
 # (Re-)do the actual model fitting if requested
 deps <- config$components$name
 if (run$mixed_models) {
-
   # Fit the model for each ERP component
-  form_erps <- ~ phase * condition +
+  form_erps <- ~ phase * condition + cosine +
     (phase * condition | participant_id) +
     (phase * condition | item_id)
   models <- map(deps, fit_mixed_models, formula = form_erps, data = trials) %>%
     set_names(deps)
 
   # Fit an additional control analysis model for the alpha/beta power
-  form_alpha_beta <- ~ phase * condition + rt +
+  form_alpha_beta <- ~ phase * condition + rt + cosine +
     (phase * condition | participant_id) +
     (phase * condition | item_id)
   models$alpha_beta <- fit_mixed_models(
@@ -541,7 +915,6 @@ if (run$mixed_models) {
   # Save models
   saveRDS(models, here(output_dir, "models.RDS"))
 } else {
-
   # Read fitted models
   models <- readRDS(here(output_dir, "models.RDS"))
 }
@@ -562,7 +935,7 @@ contrast_table <- models %>%
 plot_fig1(files_dir, evokeds, config, channel_locations, models)
 ```
 
-(ref:fig1-caption) Experimental design and ERP results.
+(ref:fig1-caption) Experimental design and ERP results contrasting semantically informed perception and uninformed perception.
 ***A***, In the pre-insight phase, participants were presented with 120 unfamiliar objects and indicated if they knew what kind of object they were viewing.
 In the insight phase, half of these objects were presented with matching keywords (in red color for illustration), leading to semantically informed perception, and the other half with non-matching keywords (in blue color for illustration), leading to [uninformed]{color="blue"} perception.
 In the post-insight phase, the same objects were presented again without keywords.
@@ -606,7 +979,7 @@ An online band-pass filter with a high-pass time-constant of 10 s (0.016 Hz) and
 
 The data were preprocessed offline using custom functions (available at [https://github.com/alexenge/hu-neuro-pipeline/tree/v0.6.1](https://github.com/alexenge/hu-neuro-pipeline/tree/v0.6.1)) based on the MNE-Python software [Version `r mne_version`\; @gramfort2013] in Python [Version `r py_version()`\; @vanrossum2009].
 First, the data were downsampled to `r config$downsample_sfreq` Hz and re-referenced to the common average of all scalp channels.
-Next, artifacts resulting from blinks and eye movements were removed via independent component analysis (ICA) on a low-pass filtered copy of the data (cutoff = 1 Hz).
+Next, artifacts resulting from blinks and eye movements were removed via independent component analysis (ICA) on a high-pass filtered copy of the data (cutoff = 1 Hz).
 A variable number of components per participant were extracted from an initial principal component analysis (PCA) so that they explained at least `r percent(config$ica_n_components)` of the variance in the data (mean = `r mean(unlist(config$auto_ica_n_components))` components, range `r min(unlist(config$auto_ica_n_components))`--`r max(unlist(config$auto_ica_n_components))`).
 Then the ICA was fitted based on these components using the FastICA algorithm [@hyvarinen1999].
 Any independent components showing significant correlations with either of two virtual EOG channels (VEOG: IO1 - Fp1, HEOG: F9 - F10) were removed automatically using MNE-Python's *find_bads_eog* method.
@@ -676,6 +1049,20 @@ To answer our main research question, we decomposed these interactions into pair
 In the pre-insight phase, when objects were unfamiliar to participants and presented without keywords, no differences emerged between the semantically informed condition and the [uninformed]{color="blue"} condition in any of the the ERP components, all $|t|$s < `r max(abs(filter(contrast_table, phase == "Pre-insight" & contrast == "Informed - Uninformed")$t_value))`, all $p$s `r print_p(min(filter(contrast_table, phase == "Pre-insight" & contrast == "Informed - Uninformed")$p_value))` (see Figure 1B--D).
 This was expected given that the critical keywords (leading either to semantically informed perception or [uninformed]{color="blue"} perception) had not yet been presented, and given that the assignment of objects to conditions was counterbalanced across participants as to control for low-level visual differences.
 
+```{r, fig2, cache=!run$figures, fig.height=8.6, fig.cap="(ref:fig2-caption)"}
+# Create Figure 2
+plot_fig2(files_dir, evokeds, config, channel_locations, models)
+```
+
+(ref:fig2-caption) [ERP results contrasting semantically informed perception and unsuccessfully informed perception.
+***A***, Assignment of objects to conditions based on participants' response in the insight phase of the experiment to unfamiliar objects presented with matching keywords.
+***B***, ***C***, ***D***, ERP waveforms and scalp topographies for the P1 component (100--150 ms, ***B***), for the N170 component (150--200 ms, ***C***), and for the N400 component (400--700 ms, ***D***) for objects with semantically informed perception versus perception within the three different phases.
+Semantically informed perception was associated with more negative amplitudes in the N170 component and less negative amplitudes in the N400 component during the insight phase.
+The time windows and channels for quantifying the ERP components are highlighted by the gray areas in the ERP waveforms and by the black markers on the scalp topographies, respectively.
+Colored ribbons around the ERP waveforms show ± 1 standard error of the mean across participants.
+Ampl. = amplitude.\newline
+\*\*\* $p_\text{corr} < .001$.]{color="blue"}
+
 In the insight phase, half of the unfamiliar objects were presented with matching keywords, leading to semantically informed perception, and the other half were presented with non-matching keywords, keeping the perception of the objects semantically [uninformed]{color="blue"}.
 Semantically informed perception in this phase was associated with enlarged (i.e., more negative) amplitudes in the N170 component, $b$ = `r filter(contrast_table, component == "N170" & phase == "Insight" & contrast == "Informed - Uninformed")$estimate` µV, $t$(`r print_dof(filter(contrast_table, component == "N170" & phase == "Insight" & contrast == "Informed - Uninformed")$df)`) = `r filter(contrast_table, component == "N170" & phase == "Insight" & contrast == "Informed - Uninformed")$t_value`, $p_\text{corr}$ = `r print_p(filter(contrast_table, component == "N170" & phase == "Insight" & contrast == "Informed - Uninformed")$p_value)`, and reduced (i.e., less negative) amplitudes in the N400 component, $b$ = `r filter(contrast_table, component == "N400" & phase == "Insight" & contrast == "Informed - Uninformed")$estimate` µV, $t$(`r print_dof(filter(contrast_table, component == "N400" & phase == "Insight" & contrast == "Informed - Uninformed")$df)`) = `r filter(contrast_table, component == "N400" & phase == "Insight" & contrast == "Informed - Uninformed")$t_value`, $p_\text{corr}$ `r print_p(filter(contrast_table, component == "N400" & phase == "Insight" & contrast == "Informed - Uninformed")$p_value)`.
 There was no reliable difference between conditions in the P1 component, $b$ = `r filter(contrast_table, component == "P1" & phase == "Insight" & contrast == "Informed - Uninformed")$estimate` µV, $t$(`r print_dof(filter(contrast_table, component == "P1" & phase == "Insight" & contrast == "Informed - Uninformed")$df)`) = `r filter(contrast_table, component == "P1" & phase == "Insight" & contrast == "Informed - Uninformed")$t_value`, $p_\text{corr}$ = `r print_p(filter(contrast_table, component == "P1" & phase == "Insight" & contrast == "Informed - Uninformed")$p_value)`.
@@ -687,13 +1074,13 @@ Instead, the P1 component was significantly enlarged (i.e., more positive) in r
 ## Event-Related Power
 
 In an exploratory time-frequency analysis, we checked for differences in event-related power between semantically informed perception and [uninformed]{color="blue"} perception within each of the three phases of the experiment.
-Cluster-based permutation tests [@maris2007] revealed no significant clusters in the pre-insight phase (see Supplementary Figure 1), all $p$s > `r print_p(min(filter(tfr_clusters, contrast == "Pre-insight/Informed - Pre-insight/Uninformed")$p_val))`, but one significant cluster in the insight phase (see Figure 2), $p_\text{cluster}$ = `r print_p(unique(filter(tfr_clusters, contrast == "Insight/Informed - Insight/Uninformed" & p_val < p_cluster)$p_val))`, and one significant cluster in the post-insight phase (see Figure 3), $p_\text{cluster}$ = `r print_p(unique(filter(tfr_clusters, contrast == "Post-insight/Informed - Post-insight/Uninformed" & p_val < p_cluster)$p_val))`.
+Cluster-based permutation tests [@maris2007] revealed no significant clusters in the pre-insight phase (see Supplementary Figure 1), all $p$s > `r print_p(min(filter(tfr_clusters, contrast == "Pre-insight/Informed - Pre-insight/Uninformed")$p_val))`, but one significant cluster in the insight phase (see Figure 3), $p_\text{cluster}$ = `r print_p(unique(filter(tfr_clusters, contrast == "Insight/Informed - Insight/Uninformed" & p_val < p_cluster)$p_val))`, and one significant cluster in the post-insight phase (see Figure 4), $p_\text{cluster}$ = `r print_p(unique(filter(tfr_clusters, contrast == "Post-insight/Informed - Post-insight/Uninformed" & p_val < p_cluster)$p_val))`.
 These two significant clusters in the insight and post-insight phases were similar in their direction, latency, frequency range, and topographic distribution.
 Both clusters had a negative sign, started around 600 ms after object onset [but see @sassenhagen2019] and continued all the way until the end of the analyzed period at 1,400 ms.
 They spanned a broad range of frequencies in the alpha and lower beta range as well as a broad set of channels, but appeared to be most focal at around 15 Hz and parietal channels.
 Thus, semantically informed perception seems to alter not only early, evoked activity (see Event-Related Potentials above) but also later, induced activity, in the form of a reduction of post-stimulus power at parietal channels in the range of alpha and lower beta frequencies.
 
-```{r, fig2, cache=!run$figures, fig.height=11, fig.cap="(ref:fig2-caption)"}
+```{r, fig3, cache=!run$figures, fig.height=11, fig.cap="(ref:fig3-caption)"}
 # Create topographic plots for event-related power in the insight phase
 plot_tfr_topos(
   filter(tfr_grand_ave, phase == "Insight"),
@@ -702,11 +1089,11 @@ plot_tfr_topos(
 )
 ```
 
-(ref:fig2-caption) Time-frequency results for the insight phase.
+(ref:fig3-caption) Time-frequency results for the insight phase.
 Each topographic plot shows the difference in event-related power (in units of percent signal change) between the semantically informed condition and the [uninformed]{color="blue"} condition, grand-averaged across participants.
 Black dots highlight EEG channels that were part of a cluster for which this difference was statistically significant ($p_\text{cluster}$ = `r print_p(unique(filter(tfr_clusters, contrast == "Insight/Informed - Insight/Uninformed" & p_val < p_cluster)$p_val))`).
 
-```{r, fig3, cache=!run$figures, fig.height=11, fig.cap="(ref:fig3-caption)"}
+```{r, fig4, cache=!run$figures, fig.height=11, fig.cap="(ref:fig4-caption)"}
 # Create topographic plots for event-related power in the post-insight phase
 plot_tfr_topos(
   filter(tfr_grand_ave, phase == "Post-insight"),
@@ -717,7 +1104,7 @@ plot_tfr_topos(
 )
 ```
 
-(ref:fig3-caption) Time-frequency results for the post-insight phase.
+(ref:fig4-caption) Time-frequency results for the post-insight phase.
 Each topographic plot shows the difference in event-related power (in units of percent signal change) between the semantically informed condition and the [uninformed]{color="blue"} condition, grand-averaged across participants.
 Black dots highlight EEG channels that were part of a cluster for which this difference was statistically significant ($p_\text{cluster}$ = `r print_p(unique(filter(tfr_clusters, contrast == "Post-insight/Informed - Post-insight/Uninformed" & p_val < p_cluster)$p_val))`).
 
@@ -809,13 +1196,8 @@ Second, the time course of this influence suggests that it manifests itself not 
 
 ```{r tabs1, results="asis"}
 # Print table of materials
-read_csv(here("materials", "keywords.csv"), col_types = cols()) %>%
-  mutate(
-    match_ger = paste0(match_noun_ger, ", ", match_verb_ger),
-    match_en = paste0("{[", match_noun_en, ", ", match_verb_en, "]}"),
-    nonmatch_ger = paste0(nonmatch_noun_ger, ", ", nonmatch_verb_ger),
-    nonmatch_en = paste0("{[", nonmatch_noun_en, ", ", nonmatch_verb_en, "]}"),
-  ) %>%
+keywords %>%
+  filter(familiarity == "unfamiliar") %>%
   transmute(
     img = paste0(
       "\\includegraphics[valign=c,width=18mm]{materials/unfamiliar_objects/",
@@ -823,9 +1205,9 @@ read_csv(here("materials", "keywords.csv"), col_types = cols()) %>%
       "}"
     ),
     item_id = as.character(item_id),
-    match = paste(match_ger, match_en, sep = "\n") %>%
+    match_translated = paste(match, match_en, sep = "\n") %>%
       kableExtra::linebreak(align = "l", linebreaker = "\n"),
-    nonmatch = paste(nonmatch_ger, nonmatch_en, sep = "\n") %>%
+    nonmatch_translated = paste(nonmatch, nonmatch_en, sep = "\n") %>%
       kableExtra::linebreak(align = "l", linebreaker = "\n")
   ) %>%
   apa_table(
@@ -895,6 +1277,49 @@ print_model_outputs(models$N400)
 
 \newpage
 
+```{r, ratingfigs}
+rating %>%
+  filter(!is.na(cosine)) %>%
+  mutate(condition_comb = paste(familiarity, condition)) %>%
+  ggplot(aes(x = condition_comb, y = cosine, color = condition_comb)) +
+  geom_violin() +
+  geom_boxplot(width = 0.2) +
+  scale_color_manual(values = c("#984ea3", "#e41a1c", "#377eb8")) +
+  labs(x = NULL, y = "Cosine distance") +
+  coord_cartesian(ylim = c(0.0, 1.0)) +
+  theme_classic() +
+  theme(legend.position = "none")
+
+rating %>%
+  filter(
+    !is.na(cosine) & familiarity == "unfamiliar" & condition == "match"
+  ) %>%
+  select(item_id, condition, cosine) %>%
+  group_by(item_id, condition) %>%
+  summarize(
+    mean = mean(cosine),
+    sd = sd(cosine),
+    n = n(),
+    se = sd / sqrt(n),
+    .groups = "drop"
+  ) %>%
+  mutate(item_id = fct_reorder(item_id, desc(mean))) %>%
+  # filter(mean > 0.7) %>%
+  ggplot(
+    aes(
+      x = item_id, y = mean, color = condition,
+      ymin = mean - se, ymax = mean + se
+    )
+  ) +
+  geom_pointrange() +
+  labs(x = "Stimulus ID", y = "Cosine distance to keywords") +
+  theme_classic() +
+  theme(
+    axis.text.x = element_text(angle = 90),
+    legend.position = "none"
+  )
+```
+
 ```{r, figs1, cache=!run$figures, fig.height=11, fig.cap="(ref:figs1-caption)"}
 # Create topographic plots for event-related power in the pre-insight phase
 plot_tfr_topos(
@@ -918,9 +1343,7 @@ plot_tfr_topos(
     tfr_clusters, contrast == "Insight/Informed - Insight/Unsuccessful"
   ),
   p_cluster = p_cluster,
-  condition_plus = "Informed",
-  condition_minus = "Unsuccessful",
-  title_conditions = "Informed - failed"
+  conditions = c("Informed", "Unsuccessful")
 )
 ```
 
