@@ -515,6 +515,12 @@ rating_means <- as.data.frame(emm_rating$emmeans)
 rating_contrasts <- as.data.frame(emm_rating$contrasts) %>%
   rename(t_value = `t.ratio`, p_value = `p.value`)
 
+# Compute each item's average cosine distance across participants
+cosines <- rating %>%
+  group_by(item_id) %>%
+  summarize(cosine = mean(cosine)) %>%
+  mutate(cosine = scale(cosine))
+
 # rating_pairwise <- rating$participant_id %>%
 #   unique() %>%
 #   combn(m = 2) %>%
@@ -777,7 +783,9 @@ trials <- read_csv(here(output_dir, "trials.csv"), col_types = cols(
     "Informed", "Uninformed", "Unsuccessful",
     "Exclude_uninformed", "Exclude_known", "Exclude_glitch"
   ))
-))
+)) %>%
+  # Add cosine similarities (i.e., predictability of keywords) from rating study
+  left_join(cosines, by = "item_id")
 
 # Compute number of objects per condition for each participant
 objects_per_condition <- with(trials, table(participant_id, condition)) %>%
@@ -888,14 +896,14 @@ fit_mixed_models <- function(dep, formula, data) {
 deps <- config$components$name
 if (run$mixed_models) {
   # Fit the model for each ERP component
-  form_erps <- ~ phase * condition +
+  form_erps <- ~ phase * condition + cosine +
     (phase * condition | participant_id) +
     (phase * condition | item_id)
   models <- map(deps, fit_mixed_models, formula = form_erps, data = trials) %>%
     set_names(deps)
 
   # Fit an additional control analysis model for the alpha/beta power
-  form_alpha_beta <- ~ phase * condition + rt +
+  form_alpha_beta <- ~ phase * condition + rt + cosine +
     (phase * condition | participant_id) +
     (phase * condition | item_id)
   models$alpha_beta <- fit_mixed_models(
