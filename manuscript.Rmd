@@ -29,7 +29,7 @@ authornote: |
 
   Number of words: 215 (abstract), 645 (introduction), 1,494 (discussion)
 
-  We would like to thank Nele Langosch for assistance with the preparation of materials and data collection, Olaf Dimigen and the Abdel Rahman Lab for Neurocognitive Psychology at Humboldt-Universität zu Berlin for insightful discussions, as well as Guido Kiecker for technical support.
+  We would like to thank Nele Langosch for assistance with the preparation of materials and data collection, Olaf Dimigen and the Abdel Rahman Lab for Neurocognitive Psychology for insightful discussions, Guido Kiecker for technical support, as well as Guillaume Thierry and one anonymous reviewer for their comments on previous versions of the paper.
   This work was supported by the Deutsche Forschungsgemeinschaft (DFG, German Research Foundation) under Germany’s Excellence Strategy (EXC 2002/1 "Science of Intelligence") project number 390523135 as well as grants AB277-5 and AB277-6 to R.A.R.
 
   The authors declare no competing financial interests.
@@ -127,7 +127,7 @@ We measured event-related potentials (ERPs) to investigate at which stages in th
 We found that semantically informed as compared to [uninformed]{color="blue"} perception was associated with larger amplitudes in the N170 component (150--200 ms), reduced amplitudes in the N400 component (400--700 ms), and a late decrease in alpha/beta band power.
 When the same objects were presented once more without any information, the N400 and event-related power effects persisted, and we also observed enlarged amplitudes in the P1 component (100--150 ms) in response to objects for which semantically informed perception had taken place.
 Consistent with previous work, this suggests that obtaining semantic information about previously unfamiliar objects alters aspects of their lower-level visual perception (P1 component), higher-level visual perception (N170 component), and semantic processing (N400 component, event-related power).
-Our study is the first to show that these effects are instantaneous, that is, observable within zero to one trials after any semantic information has been presented.
+Our study is the first to show that these effects [do not require an extensive learning history but are rather observed immediately after semantic information has been provided for the first time.]{color="blue"}
 
 *Key words*: objects; semantic knowledge; visual perception; event-related potentials
 
@@ -174,7 +174,7 @@ We furthermore conducted an exploratory time-frequency analysis to test for effe
 ## Participants
 
 Participants were 48 German native speakers (31 female, 17 male) with a mean age of 23.5 years (range 18--32 years) and no history of psychological disorder or treatment.
-No a priori power analysis was carried out and the sample size was chosen in line with previous EEG studies on object processing in our lab.
+No a priori power analysis was carried out.
 All participants were right-handed according to the Edinburgh inventory [@oldfield1971] and reported normal or corrected-to-normal vision.
 They provided written informed consent before starting the experiment and received a monetary compensation of €8 per hour for participating.
 
@@ -188,7 +188,7 @@ All stimuli were presented on a light blue background with a size of 207 × 207 
 At a standardized viewing distance of 90 cm, the images subtended approximately 3.9 degrees of participants' horizontal and vertical visual angle.
 
 For each unfamiliar object, we created a pair of German keywords (a noun and a verb), describing the typical function or use of the object in a way that could be related to its visual features and their configuration (e.g., *Stromstärke, messen* [electric current, measuring]; *Tonpott, trommeln* [clay pot, drumming]; [see Supplementary Table 1]{color="blue"}).
-As our central experimental manipulation, half of the objects were presented together with keywords that correctly matched their respective function, whereas the other half of the objects were presented together with non-matching keywords belonging to one of the other objects.
+As our central experimental manipulation, half of the objects were presented together with keywords that matched their respective function, whereas the other half of the objects were presented together with non-matching keywords [that would have matched another object]{color="blue"}.
 The matching keywords were expected to induce semantically informed perception, that is, participants suddenly understanding what kind of object they were viewing.
 The non-matching keywords were expected to prevent such an understanding and keep the perception of the object semantically [uninformed]{color="blue"}.
 All participants saw each unfamiliar object with only one type of keywords (matching or non-matching).
@@ -562,10 +562,10 @@ cosines <- rating %>%
 #   theme_classic()
 ```
 
-As a manipulation check, we ran an online rating study where we presented 10 German speakers (3 female, 7 male, mean age = 25.3 years, range 20--35 years) with all 240 visual objects in random order and asked them to generate their own keywords that would describe the presumed function of the object.
-We used latent semantic analysis with a word2vec embedding pre-trained on the German Wikipedia (deepset GmbH, Berlin, Germany, www.deepset.ai/german-word-embeddings) to estimate semantic distances between these participant-generated keywords and the keywords used in our experiment (Supplementary Methods; Supplementary Figures 1 and 2).
+[As a manipulation check, we ran an online rating study where we presented 10 German speakers (3 female, 7 male, mean age = 25.3 years, range 20--35 years) with all 240 visual objects in random order and asked them to generate their own keywords that would describe the presumed function of the object.
+We used latent semantic analysis with a word2vec embedding (deepset GmbH, Berlin, Germany, www.deepset.ai/german-word-embeddings) pre-trained on the German Wikipedia to estimate semantic distances between these participant-generated keywords and the keywords used in our main EEG experiment (Supplementary Methods; Supplementary Figures 1 and 2).
 In brief, it was substantially easier for participants to come with correct descriptions of familiar objects (mean cosine distance ± SE = `r filter(rating_means, fam_condition == "familiar")$emmean` ± `r filter(rating_means, fam_condition == "familiar")$SE`) than for unfamiliar objects (`r filter(rating_means, fam_condition == "matching")$emmean` ± `r filter(rating_means, fam_condition == "matching")$SE`), $t$(`r print_dof(filter(rating_contrasts, contrast == "familiar - matching")$df)`) = `r filter(rating_contrasts, contrast == "familiar - matching")$t_value`, $p_\text{corr}$ `r print_p(filter(rating_contrasts, contrast == "familiar - matching")$p_value)` (linear mixed-effects model).
-In fact, this similarity between participant-generated keywords for the unfamiliar objects and the object-matching keywords presented in the main experiment was only slightly higher than the similarity between participant-generated keywords and the object-non-matching keywords presented in the main experiment (`r filter(rating_means, fam_condition == "nonmatching")$emmean` ± `r filter(rating_means, fam_condition == "nonmatching")$SE`), $t$(`r print_dof(filter(rating_contrasts, contrast == "matching - nonmatching")$df)`) = `r filter(rating_contrasts, contrast == "matching - nonmatching")$t_value`, $p_\text{corr}$ `r print_p(filter(rating_contrasts, contrast == "matching - nonmatching")$p_value)` (linear mixed-effects model).
+In fact, this similarity between participant-generated keywords for the unfamiliar objects and the object-matching keywords presented in the main experiment was only slightly higher than the similarity between participant-generated keywords and the object-non-matching keywords presented in the main experiment (`r filter(rating_means, fam_condition == "nonmatching")$emmean` ± `r filter(rating_means, fam_condition == "nonmatching")$SE`), $t$(`r print_dof(filter(rating_contrasts, contrast == "matching - nonmatching")$df)`) = `r filter(rating_contrasts, contrast == "matching - nonmatching")$t_value`, $p_\text{corr}$ `r print_p(filter(rating_contrasts, contrast == "matching - nonmatching")$p_value)` (linear mixed-effects model), indicating that it was difficult for participants to know or guess the correct function of the unfamiliar objects.]{color="blue"}
 
 ## Experimental Design
 
@@ -933,15 +933,16 @@ contrast_table <- models %>%
 plot_fig1(files_dir, evokeds, config, channel_locations, models)
 ```
 
-(ref:fig1-caption) Experimental design and ERP results contrasting semantically informed perception and uninformed perception.
+(ref:fig1-caption) Experimental design and ERP results [contrasting semantically informed perception and uninformed perception]{color="blue"}.
 ***A***, In the pre-insight phase, participants were presented with 120 unfamiliar objects and indicated if they knew what kind of object they were viewing.
 In the insight phase, half of these objects were presented with matching keywords (in red color for illustration), leading to semantically informed perception, and the other half with non-matching keywords (in blue color for illustration), leading to [uninformed]{color="blue"} perception.
 In the post-insight phase, the same objects were presented again without keywords.
-***B***, ***C***, ***D***, ERP waveforms and scalp topographies for the P1 component (100--150 ms, ***B***), for the N170 component (150--200 ms, ***C***), and for the N400 component (400--700 ms, ***D***) for objects with semantically informed perception versus [uninformed]{color="blue"} perception within the three different phases.
+***B***, ***C***, ***D***, ERP waveforms and scalp topographies for the P1 component (***B***), for the N170 component (***C***), and for the N400 component (***D***) for objects with semantically informed perception versus [uninformed]{color="blue"} perception within the three different phases.
 Semantically informed perception was associated with more negative amplitudes in the N170 component during the insight phase, less negative amplitudes in the N400 component during the insight and post-insight phases, and more positive amplitudes in the P1 component during the post-insight phase.
-The time windows and channels for quantifying the ERP components are highlighted by the gray areas in the ERP waveforms and by the black markers on the scalp topographies, respectively.
+[Waveform plots show the ERP amplitudes averaged across channels in the regions of interest (P1: PO3, PO4, POz, O1, O2, Oz; N170: P7, P8, PO7, PO8, PO9, PO10; N400: C1, C2, Cz, CP1, CP2, CPz; see black dots in the scalp topographies).]{color="blue"}
 Colored ribbons around the ERP waveforms show ± 1 standard error of the mean across participants.
-Ampl. = amplitude.\newline
+[Topographies show the difference in ERP amplitudes at all channels on the scalp, averaged across the time windows of interest (P1: 100--150 ms, N170: 150--200 ms, N400: 400--700 ms; see gray areas in the ERP waveforms).]{color="blue"}
+Ampl. = amplitude.
 \* $p_\text{corr} < .05$. \*\* $p_\text{corr} < .01$. \*\*\* $p_\text{corr} < .001$.
 
 In the *insight* phase, the 120 unfamiliar objects were presented for a second time, now preceded either by matching keywords (leading to semantically informed perception) or by non-matching keywords (leading to [uninformed]{color="blue"} perception).
@@ -958,9 +959,9 @@ Participants took approximately 35 minutes to complete the entire experiment.
 ## Behavioral Data Analysis
 
 [We used participants' behavioral responses to verify our experimental manipulation and to assign each object to a semantic condition.
-First, we used participants' responses from the pre-insight phase (when objects were presented for the first time and without keywords) to make sure that objects were indeed unfamiliar to them.
+First, we used participants' responses from the pre-insight phase (when objects were presented for the first time, without keywords) to make sure that objects were indeed unfamiliar to them.
 That is, we excluded any objects for which participants responded with "I know what this is" in the pre-insight phase.
-Next, we used participants' responses from the insight phase (when objects were presented for the second time, now preceded by keywords) to assign the remaining objects to different semantic conditions: Semantically informed, uninformed, and unsuccessfully informed.
+Next, we used participants' responses from the insight phase (when objects were presented for the second time, preceded by keywords) to assign the remaining objects to different semantic conditions: Semantically informed, uninformed, and unsuccessfully informed.
 The semantically informed condition consisted of objects that were presented with matching keywords and for which the participant responded with knowing what the object was or having an assumption.
 The uninformed condition consisted of objects that were presented with non-matching keywords and for which the participant responded with not knowing what the object was or having rather no assumption.
 The unsuccessfully informed condition consisted of objects that were presented with matching keywords but for which the participant responded with not knowing what the object was or having rather no assumption.
@@ -1032,20 +1033,20 @@ We followed the workflow developed by @peikert2021 to ensure the long-term repro
 
 ## Behavioral Data
 
-[We used participants' behavioral data to verify our experimental manipulation and to assign objects to different semantic conditions (see Materials and Methods).
-First we excluded an average of `r mean(objects_per_condition$Exclude_known)` objects per participant for which participants indicated that they knew the objects even before any keywords had been presented (= `r percent(mean(objects_per_condition$Exclude_known) / 120, accuracy = 0.1)` of all objects).
-Next, `r mean(objects_per_condition$Informed)` objects per participant could be assigned to the semantically informed condition (i.e., matching keywords and a positive response; `r percent(mean(objects_per_condition$Informed) / 60, accuracy = 0.1)` of all objects presented with matching keywords) and `r mean(objects_per_condition$Uninformed)` objects per participant could be assigned to the uninformed condition (i.e., non-matching keywords and a negative response; `r percent(mean(objects_per_condition$Uninformed) / 60, accuracy = 0.1)` of all objects presented with non-matching keywords).
-Finally, `r mean(objects_per_condition$Unsuccessful)` objects per participant could be assigned to the unsuccessfully informed condition (i.e., matching keywords but a negative response; `r percent(mean(objects_per_condition$Unsuccessful) / 60, accuracy = 0.1)` of all objects presented with matching keywords).]{color="blue"}
+[Based on the experimental manipulation (matching or non-matching keywords) and each individual participant's behavioral response (positive or negative regarding knowing what the object was), we assigned `r mean(objects_per_condition$Informed)` ± `r sd(objects_per_condition$Informed)` (mean ± standard deviation) objects to the semantically informed condition (i.e., matching keywords and positive response), `r mean(objects_per_condition$Uninformed)` ± `r sd(objects_per_condition$Uninformed)` objects to the uninformed condition (i.e., non-matching keywords and negative response), and `r mean(objects_per_condition$Unsuccessful)` ± `r sd(objects_per_condition$Unsuccessful)` objects to the unsuccessfully informed condition (i.e., matching keywords but negative response).
+This assignment of objects to conditions was based solely on the insight phase of the experiment, when objects were presented with keywords for the first time, and carried over unchanged to analyze the data from the pre-insight and post-insight phases as well.
+The remaining objects were excluded due to an implausible response pattern (i.e., non-matching keywords but positive response; `r mean(objects_per_condition$Exclude_uninformed)` ± `r sd(objects_per_condition$Exclude_uninformed)` objects), due to being known to the participant in the pre-insight phase (i.e., before any keywords had been presented; `r mean(objects_per_condition$Exclude_known)` ± `r sd(objects_per_condition$Exclude_known)` objects), or because of technical errors (i.e., reaction times of 0 ms recorded by the presentation software, `r mean(objects_per_condition$Exclude_glitch)` ± `r sd(objects_per_condition$Exclude_glitch)` objects).]{color="blue"}
 
 ## Event-Related Potentials
 
 Averaged across conditions, P1, N170, and N400 amplitudes differed as a function of the phase of the experiment (pre-insight, insight, or post-insight), all $F$s > `r min(filter(anova_table, effect == "phase")$f_value)`, all $p$s `r print_p(max(filter(anova_table, effect == "phase")$p_value))`.
-In addition, N400 amplitudes differed as a function of the condition (semantically informed or [uninformed]{color="blue"}), averaged across the three phases of the experiment, $F$(`r print_dof(filter(anova_table, component == "N400" & effect == "condition")$NumDF)`, `r print_dof(filter(anova_table, component == "N400" & effect == "condition")$DenDF)`) = `r filter(anova_table, component == "N400" & effect == "condition")$f_value`, $p$ `r print_p(filter(anova_table, component == "N400" & effect == "condition")$p_value)`.
+In addition, N400 amplitudes differed as a function of the condition (semantically informed[, uninformed, or unsuccessfully informed]{color="blue"}), averaged across the three phases of the experiment, $F$(`r print_dof(filter(anova_table, component == "N400" & effect == "condition")$NumDF)`, `r print_dof(filter(anova_table, component == "N400" & effect == "condition")$DenDF)`) = `r filter(anova_table, component == "N400" & effect == "condition")$f_value`, $p$ `r print_p(filter(anova_table, component == "N400" & effect == "condition")$p_value)`.
 Crucially, the phase × condition interaction was significant for all three ERP components, all $F$s > `r min(filter(anova_table, effect == "phase:condition")$f_value)`, all $p$s < `r print_p(max(filter(anova_table, effect == "phase:condition")$p_value))`.
 To answer our main research question, we decomposed these interactions into pairwise comparisons between semantic conditions within each of the three phases of the experiment.
 
 In the pre-insight phase, when objects were unfamiliar to participants and presented without keywords, no differences emerged between the semantically informed condition and the [uninformed]{color="blue"} condition in any of the the ERP components, all $|t|$s < `r max(abs(filter(contrast_table, phase == "Pre-insight" & contrast == "Informed - Uninformed")$t_value))`, all $p$s `r print_p(min(filter(contrast_table, phase == "Pre-insight" & contrast == "Informed - Uninformed")$p_value))` (see Figure 1B--D).
-This was expected given that the critical keywords (leading either to semantically informed perception or [uninformed]{color="blue"} perception) had not yet been presented, and given that the assignment of objects to conditions was counterbalanced across participants as to control for low-level visual differences.
+[Likewise, there were no differences between the semantically informed condition and the unsuccessfully informed condition in any of the the ERP components, all $|t|$s < `r max(abs(filter(contrast_table, phase == "Pre-insight" & contrast == "Informed - Unsuccessful")$t_value))`, all $p$s `r print_p(min(filter(contrast_table, phase == "Pre-insight" & contrast == "Informed - Unsuccessful")$p_value))` (see Figure 2B--D).]{color="blue"}
+This was expected given that the keywords that would [provide additional semantic information]{color="blue"} had not yet been presented, and given that the assignment of objects to conditions was counterbalanced across participants as to control for low-level visual differences.
 
 ```{r, fig2, cache=!run$figures, fig.height=8.6, fig.cap="(ref:fig2-caption)"}
 # Create Figure 2
@@ -1054,20 +1055,24 @@ plot_fig2(files_dir, evokeds, config, channel_locations, models)
 
 (ref:fig2-caption) [ERP results contrasting semantically informed perception and unsuccessfully informed perception.
 ***A***, Assignment of objects to conditions based on participants' response in the insight phase of the experiment to unfamiliar objects presented with matching keywords.
-***B***, ***C***, ***D***, ERP waveforms and scalp topographies for the P1 component (100--150 ms, ***B***), for the N170 component (150--200 ms, ***C***), and for the N400 component (400--700 ms, ***D***) for objects with semantically informed perception versus perception within the three different phases.
+***B***, ***C***, ***D***, ERP waveforms and scalp topographies for the P1 component (***B***), for the N170 component (***C***), and for the N400 component (***D***) for objects with semantically informed perception versus perception within the three different phases.
 Semantically informed perception was associated with more negative amplitudes in the N170 component and less negative amplitudes in the N400 component during the insight phase.
-The time windows and channels for quantifying the ERP components are highlighted by the gray areas in the ERP waveforms and by the black markers on the scalp topographies, respectively.
+Waveform plots show the ERP amplitudes averaged across channels in the regions of interest (P1: PO3, PO4, POz, O1, O2, Oz; N170: P7, P8, PO7, PO8, PO9, PO10; N400: C1, C2, Cz, CP1, CP2, CPz; see black dots in the scalp topographies).
 Colored ribbons around the ERP waveforms show ± 1 standard error of the mean across participants.
-Ampl. = amplitude.\newline
+Topographies show the difference in ERP amplitudes at all channels on the scalp, averaged across the time windows of interest (P1: 100--150 ms, N170: 150--200 ms, N400: 400--700 ms; see gray areas in the ERP waveforms).
+Ampl. = amplitude.
 \*\*\* $p_\text{corr} < .001$.]{color="blue"}
 
 In the insight phase, half of the unfamiliar objects were presented with matching keywords, leading to semantically informed perception, and the other half were presented with non-matching keywords, keeping the perception of the objects semantically [uninformed]{color="blue"}.
 Semantically informed perception in this phase was associated with enlarged (i.e., more negative) amplitudes in the N170 component, $b$ = `r filter(contrast_table, component == "N170" & phase == "Insight" & contrast == "Informed - Uninformed")$estimate` µV, $t$(`r print_dof(filter(contrast_table, component == "N170" & phase == "Insight" & contrast == "Informed - Uninformed")$df)`) = `r filter(contrast_table, component == "N170" & phase == "Insight" & contrast == "Informed - Uninformed")$t_value`, $p_\text{corr}$ = `r print_p(filter(contrast_table, component == "N170" & phase == "Insight" & contrast == "Informed - Uninformed")$p_value)`, and reduced (i.e., less negative) amplitudes in the N400 component, $b$ = `r filter(contrast_table, component == "N400" & phase == "Insight" & contrast == "Informed - Uninformed")$estimate` µV, $t$(`r print_dof(filter(contrast_table, component == "N400" & phase == "Insight" & contrast == "Informed - Uninformed")$df)`) = `r filter(contrast_table, component == "N400" & phase == "Insight" & contrast == "Informed - Uninformed")$t_value`, $p_\text{corr}$ `r print_p(filter(contrast_table, component == "N400" & phase == "Insight" & contrast == "Informed - Uninformed")$p_value)`.
 There was no reliable difference between conditions in the P1 component, $b$ = `r filter(contrast_table, component == "P1" & phase == "Insight" & contrast == "Informed - Uninformed")$estimate` µV, $t$(`r print_dof(filter(contrast_table, component == "P1" & phase == "Insight" & contrast == "Informed - Uninformed")$df)`) = `r filter(contrast_table, component == "P1" & phase == "Insight" & contrast == "Informed - Uninformed")$t_value`, $p_\text{corr}$ = `r print_p(filter(contrast_table, component == "P1" & phase == "Insight" & contrast == "Informed - Uninformed")$p_value)`.
+[The same effects where found when comparing objects with semantically informed perception to those objects that were also presented with matching keywords but for which participants still indicated not knowing what the object was (i.e., the unsuccessfully informed condition).
+Compared to these objects, semantically informed perception was associated with enlarged (i.e., more negative) amplitudes in the N170 component, $b$ = `r filter(contrast_table, component == "N170" & phase == "Insight" & contrast == "Informed - Unsuccessful")$estimate` µV, $t$(`r print_dof(filter(contrast_table, component == "N170" & phase == "Insight" & contrast == "Informed - Unsuccessful")$df)`) = `r filter(contrast_table, component == "N170" & phase == "Insight" & contrast == "Informed - Unsuccessful")$t_value`, $p_\text{corr}$ = `r print_p(filter(contrast_table, component == "N170" & phase == "Insight" & contrast == "Informed - Unsuccessful")$p_value)`, and reduced (i.e., less negative) amplitudes in the N400 component, $b$ = `r filter(contrast_table, component == "N400" & phase == "Insight" & contrast == "Informed - Unsuccessful")$estimate` µV, $t$(`r print_dof(filter(contrast_table, component == "N400" & phase == "Insight" & contrast == "Informed - Unsuccessful")$df)`) = `r filter(contrast_table, component == "N400" & phase == "Insight" & contrast == "Informed - Unsuccessful")$t_value`, $p_\text{corr}$ `r print_p(filter(contrast_table, component == "N400" & phase == "Insight" & contrast == "Informed - Unsuccessful")$p_value)`, while there was no reliable difference in the P1 component, $b$ = `r filter(contrast_table, component == "P1" & phase == "Insight" & contrast == "Informed - Unsuccessful")$estimate` µV, $t$(`r print_dof(filter(contrast_table, component == "P1" & phase == "Insight" & contrast == "Informed - Unsuccessful")$df)`) = `r filter(contrast_table, component == "P1" & phase == "Insight" & contrast == "Informed - Unsuccessful")$t_value`, $p_\text{corr}$ = `r print_p(filter(contrast_table, component == "P1" & phase == "Insight" & contrast == "Informed - Unsuccessful")$p_value)`.]{color="blue"}
 
 In the post-insight phase, the unfamiliar objects were presented for a third time and without any keywords, mirroring the pre-insight phase.
 As in the insight phase, semantically informed perception was associated with reduced (i.e., less negative) amplitudes in the N400 component, $b$ = `r filter(contrast_table, component == "N400" & phase == "Post-insight" & contrast == "Informed - Uninformed")$estimate` µV, $t$(`r print_dof(filter(contrast_table, component == "N400" & phase == "Post-insight" & contrast == "Informed - Uninformed")$df)`) = `r filter(contrast_table, component == "N400" & phase == "Post-insight" & contrast == "Informed - Uninformed")$t_value`, $p_\text{corr}$ `r print_p(filter(contrast_table, component == "N400" & phase == "Post-insight" & contrast == "Informed - Uninformed")$p_value)`, while the effect in the N170 component did not recur, $b$ = `r filter(contrast_table, component == "N170" & phase == "Post-insight" & contrast == "Informed - Uninformed")$estimate` µV, $t$(`r print_dof(filter(contrast_table, component == "N170" & phase == "Post-insight" & contrast == "Informed - Uninformed")$df)`) = `r filter(contrast_table, component == "N170" & phase == "Post-insight" & contrast == "Informed - Uninformed")$t_value`, $p_\text{corr}$ = `r print_p(filter(contrast_table, component == "N170" & phase == "Post-insight" & contrast == "Informed - Uninformed")$p_value)`.
 Instead, the P1 component was significantly enlarged (i.e., more positive) in response to objects for which semantically informed perception had taken place, $b$ = `r filter(contrast_table, component == "P1" & phase == "Post-insight" & contrast == "Informed - Uninformed")$estimate` µV, $t$(`r print_dof(filter(contrast_table, component == "P1" & phase == "Post-insight" & contrast == "Informed - Uninformed")$df)`) = `r filter(contrast_table, component == "P1" & phase == "Post-insight" & contrast == "Informed - Uninformed")$t_value`, $p_\text{corr}$ = `r print_p(filter(contrast_table, component == "P1" & phase == "Post-insight" & contrast == "Informed - Uninformed")$p_value)`.
+[These effects did not replicate when comparing the semantically informed condition to the unsuccessfully informed condition, with no reliable differences in the P1, N170, or N400 components, all $|t|$s < `r max(abs(filter(contrast_table, phase == "Post-insight" & contrast == "Informed - Unsuccessful")$t_value))`, all $p$s > `r print_p(min(filter(contrast_table, phase == "Post-insight" & contrast == "Informed - Unsuccessful")$p_value))`.]{color="blue"}
 
 ## Event-Related Power
 
@@ -1106,6 +1111,10 @@ plot_tfr_topos(
 Each topographic plot shows the difference in event-related power (in units of percent signal change) between the semantically informed condition and the [uninformed]{color="blue"} condition, grand-averaged across participants.
 Black dots highlight EEG channels that were part of a cluster for which this difference was statistically significant ($p_\text{cluster}$ = `r print_p(unique(filter(tfr_clusters, contrast == "Post-insight/Informed - Post-insight/Uninformed" & p_val < p_cluster)$p_val))`).
 
+[We repeated this analysis to look for differences between semantically informed perception and unsuccessfully informed perception within each of the three phases of the experiment.
+There were no significant clusters in the pre- or post-insight phases (see Supplementary Figures 2 and 4), all $p$s > `r print_p(min(filter(tfr_clusters, contrast %in% c("Pre-insight/Informed - Pre-insight/Unsuccessful", "Post-insight/Informed - Post-insight/Unsuccessful"))$p_val))` but one significant cluster in the insight phase (see Supplementary Figure 3), $p_\text{cluster}$ = `r print_p(unique(filter(tfr_clusters, contrast == "Insight/Informed - Insight/Uninformed" & p_val < p_cluster)$p_val))`.
+This cluster was similar to the ones described above in its latency, frequency range, and topographic distribution.]{color="blue"}
+
 # Discussion
 
 We found that providing participants with semantic information about previously unfamiliar objects instantly led to enlarged (i.e., more negative) ERP amplitudes in the N170 component and reduced (i.e., less negative) ERP amplitudes in the N400 component.
@@ -1117,12 +1126,13 @@ It replicates previous work showing that N400 amplitudes are larger in response 
 The latency of this effect and the computational role of the N400 [@lau2008; @rabovsky2018; @bornkessel-schlesewsky2019] suggest a post-perceptual locus in the semantic system.
 
 Our exploratory time-frequency analysis revealed a late (> 600 ms) reduction in post-stimulus power in the alpha and lower beta ranges (approx. 8--20 Hz).
-While not predicted in advance, this is consistent with the finding that the dampening of oscillations in this range is associated with a facilitation in representing stimulus-specific information [@griffiths2019] and with successfully forming new semantic memories [@hanslmayr2009].
-Like the N400 effect in the ERP, this reduction in power occurred as soon as participants had received the relevant semantic information and recurred once the same objects were re-encountered without any semantic information.
+Like the N400 effect in the ERP, this change in event-related power occurred as soon as participants had received the relevant semantic information and recurred once the same objects were re-encountered without any semantic information.
+[Reductions in alpha/beta power have been shown to correlate with clearer representations of stimulus specific information, as measured using representational similarity analysis [@griffiths2019], and with successfully forming new semantic memories [@hanslmayr2009].
+This may be due to a dampening of alpha/beta oscillations which creates favourable conditions for high-level cortical information processing and encoding.]{color="blue"}
 
 In contrast to the N400 and event-related power, the N170 component was modulated only on those initial trials on which the relevant semantic information was presented directly before the object.
 It therefore constitutes an online marker of semantic insight, that is, of participants suddenly understanding the visual objects in the light of the information provided by the keywords.
-The N170 is typically associated with the holistic perception of faces [@sagiv2001; @eimer2011] and other stimuli of visual expertise [@tanaka2001; @rossion2002].
+The N170 is typically associated with the holistic perception of faces [@sagiv2001; @eimer2011] and other stimuli of visual expertise [@tanaka2001; @rossion2002][, that is, it is sensitive to factors that go beyond structural encoding and categorical perception [@thierry2007; @thierry2007a; @dering2011\; but see also @rossion2008].]{color="blue"}.
 It being enlarged during semantically informed perception may reflect that the semantic information made participants experience the configuration of the visual features of the objects in a new and meaningful way.
 This interpretation is supported by previous findings of enlarged N170 amplitudes for scrambled (schematic) face stimuli after participants had been shown the original version of the face [@bentin2002], as well as for line drawings of meaningful objects as compared to non-objects [@beaucousin2011]. 
 Together with the present study, these findings suggest an online impact of meaningfulness on the higher-level perception of visual objects, integrating across their visual features.
@@ -1220,8 +1230,6 @@ keywords %>%
   )
 ```
 
-\newpage
-
 ## Results S1. *Linear Mixed-Effects Models*
 
 ## *P1 Component (100--150 ms)*
@@ -1245,7 +1253,6 @@ print_model_outputs <- function(model_object) {
 print_model_outputs(models$P1)
 ```
 
-\newpage
 \normalsize
 \doublespacing
 
@@ -1259,7 +1266,6 @@ print_model_outputs(models$P1)
 print_model_outputs(models$N170)
 ```
 
-\newpage
 \normalsize
 \doublespacing
 
@@ -1336,6 +1342,22 @@ A cluster-based permutation test indicated no clusters for which this difference
 ```{r, figs2, cache=!run$figures, fig.height=11, fig.cap="(ref:figs2-caption)"}
 # Create topographic plots for control analysis of event-related power
 plot_tfr_topos(
+  filter(tfr_grand_ave, phase == "Pre-insight"),
+  filter(
+    tfr_clusters, contrast == "Pre-insight/Informed - Pre-insight/Unsuccessful"
+  ),
+  p_cluster = p_cluster,
+  conditions = c("Informed", "Unsuccessful")
+)
+```
+
+(ref:figs2-caption) [Time-frequency results for the pre-insight phase (informed minus unsuccessful).
+Each topographic plot shows the difference in event-related power (in units of percent signal change) between the semantically informed condition and the unsuccessfully informed condition, grand-averaged across participants.
+A cluster-based permutation test indicated no clusters for which this difference was statistically significant (all $p$s > `r print_p(min(filter(tfr_clusters, contrast == "Pre-insight/Informed - Pre-insight/Unsuccessful")$p_val))`).]{color="blue"}
+
+```{r, figs3, cache=!run$figures, fig.height=11, fig.cap="(ref:figs3-caption)"}
+# Create topographic plots for control analysis of event-related power
+plot_tfr_topos(
   filter(tfr_grand_ave, phase == "Insight"),
   filter(
     tfr_clusters, contrast == "Insight/Informed - Insight/Unsuccessful"
@@ -1345,6 +1367,23 @@ plot_tfr_topos(
 )
 ```
 
-(ref:figs2-caption) Time-frequency results for the control analysis.
-Each topographic plot shows the difference in event-related power (in units of percent signal change) between the semantically informed condition and the "failed insight" condition (see Results: Control Analysis in the main text), grand-averaged across participants.
-Black dots highlight EEG channels that were part of a cluster for which this difference was statistically significant ($p_\text{cluster}$ = `r print_p(unique(filter(tfr_clusters, contrast == "Insight/Informed - Insight/Unsuccessful" & p_val < p_cluster)$p_val))`).
+(ref:figs3-caption) [Time-frequency results for the insight phase (informed minus unsuccessful).
+Each topographic plot shows the difference in event-related power (in units of percent signal change) between the semantically informed condition and the unsuccessfully informed condition, grand-averaged across participants.
+Black dots highlight EEG channels that were part of a cluster for which this difference was statistically significant ($p_\text{cluster}$ = `r print_p(unique(filter(tfr_clusters, contrast == "Insight/Informed - Insight/Unsuccessful" & p_val < p_cluster)$p_val))`).]{color="blue"}
+
+```{r, figs4, cache=!run$figures, fig.height=11, fig.cap="(ref:figs4-caption)"}
+# Create topographic plots for control analysis of event-related power
+plot_tfr_topos(
+  filter(tfr_grand_ave, phase == "Post-insight"),
+  filter(
+    tfr_clusters,
+    contrast == "Post-insight/Informed - Post-insight/Unsuccessful"
+  ),
+  p_cluster = p_cluster,
+  conditions = c("Informed", "Unsuccessful")
+)
+```
+
+(ref:figs4-caption) [Time-frequency results for the post-insight phase (informed minus unsuccessful).
+Each topographic plot shows the difference in event-related power (in units of percent signal change) between the semantically informed condition and the unsuccessfully informed condition, grand-averaged across participants.
+A cluster-based permutation test indicated no clusters for which this difference was statistically significant (all $p$s > `r print_p(min(filter(tfr_clusters, contrast == "Post-insight/Informed - Post-insight/Unsuccessful")$p_val))`).]{color="blue"}
