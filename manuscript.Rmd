@@ -42,8 +42,8 @@ linenumbers       : yes
 mask              : no
 draft             : no
 
-bibliography      : "manuscript_files/references.bib"
-csl               : "manuscript_files/citation_style.csl"
+bibliography      : "misc/references.bib"
+csl               : "misc/citation_style.csl"
 
 documentclass     : "apa6"
 classoption       : "man,donotrepeattitle"
@@ -55,7 +55,7 @@ editor_options:
 output:
   papaja::apa6_pdf:
     latex_engine: xelatex
-    pandoc_args: ["--lua-filter=manuscript_files/color_text.lua"]
+    pandoc_args: ["--lua-filter=misc/color_text.lua"]
 
 header-includes:
   - \geometry{a4paper}
@@ -72,7 +72,7 @@ header-includes:
 ---
 
 ```{r, setup, include=FALSE}
-# Load R packages
+# Load packages
 library(buildmer)
 library(emmeans)
 library(here)
@@ -87,8 +87,12 @@ library(parallel)
 library(reticulate)
 library(tidyverse)
 
-# Set global options
+# Load custom helper functions
+walk(list.files(here("src"), full.names = TRUE), source)
+
+# Set options
 options(readr.show_col_types = FALSE)
+emm_options(lmer.df = "Satterthwaite", lmerTest.limit = Inf)
 opts_chunk$set(
   fig.pos = "tp",
   fig.width = 12,
@@ -97,26 +101,23 @@ opts_chunk$set(
   warning = FALSE
 )
 
-# Specify directory paths
+# Directory paths
 data_dir <- here("data")
-rating_dir <- here(data_dir, "ratings")
-files_dir <- here("manuscript_files")
+materials_dir <- here("materials")
+misc_dir <- here("misc")
 output_dir <- here("output")
 report_dir <- here(output_dir, "qc_reports")
 
-# Load custom helper functions for creating figures and tables
-source(here(files_dir, "helper_functions.R"))
+# Write R package references
+r_refs(here(misc_dir, "r-references.bib"), append = FALSE)
 
-# Re-run steps that take a long time to compute?
+# Re-run steps that take a long time?
 run <- list(
-  rating_semantic_analysis = FALSE,
+  rating_lsa = FALSE,
   eeg_processing = FALSE,
   mixed_models = FALSE,
-  figures = FALSE
+  figures = TRUE
 )
-
-# Write R packages to bibliography
-r_refs(here(files_dir, "r-references.bib"), append = FALSE)
 ```
 
 # Abstract
@@ -201,379 +202,42 @@ This assignment of keywords to objects was counterbalanced across participants s
 The experiment was programmed and displayed using Presentation® software (Neurobehavioral Systems, Inc., Berkeley, CA, www.neurobs.com).
 
 ```{r, ratings}
-# Read table of object stimuli + keywords for the main experiment
+# Load rating study data and keywords
+rating_raw <- read_csv(
+  here(data_dir, "rating", "rating_data.csv"),
+  col_types = cols(), locale = locale(encoding = "latin1")
+)
 keywords <- read_csv(
-  here("materials", "keywords.csv"),
+  here(materials_dir, "keywords.csv"),
   col_types = cols(
     familiarity = col_factor(levels = c("familiar", "unfamiliar")),
     item_id = col_factor()
   )
-) %>%
-  mutate(
-    match = str_c(match_noun, ", ", match_verb),
-    match_en = str_c("{[", match_noun_en, ", ", match_verb_en, "]}"),
-    nonmatch = str_c(nonmatch_noun, ", ", nonmatch_verb),
-    nonmatch_en = str_c("{[", nonmatch_noun_en, ", ", nonmatch_verb_en, "]}"),
+)
+
+# Compute or load latent semantic analysis (LSA) results
+if (run$rating_lsa) {
+  word2vec_file <- here::here(data_dir, "rating", "vectors.txt")
+  word2vec <- load_word2vec(word2vec_file)
+  rating <- compute_lsa(rating_raw, keywords, word2vec)
+} else {
+  rating <- read_csv(
+    here(output_dir, "rating.csv"),
+    col_types = cols(item_id = col_factor(), participant_id = col_factor())
   )
-
-# (Re-)do latent semantic analysis of online rating study data
-rating_file <- here(output_dir, "rating.csv")
-if (run$rating_semantic_analysis) {
-  # Load pre-trained German word2vec embedding
-  word2vec <- load_word2vec(rating_dir)
-
-  # Read online rating study data
-  rating_raw <- read_csv(
-    here(data_dir, "ratings", "rating_data.csv"),
-    col_types = cols(), locale = locale(encoding = "latin1")
-  )
-  rating_substantives <- select(rating_raw, S001_01:S242_01)
-  rating_verbs <- select(rating_raw, V001_01:V242_01)
-
-  # Prepare a copy of the keywords to add to the rating study data
-  rating_n <- nrow(rating_raw)
-  keywords_for_rating <- keywords %>%
-    arrange(familiarity, filename) %>%
-    select(item_id, familiarity, filename, match, nonmatch) %>%
-    replicate(rating_n, ., simplify = FALSE) %>%
-    bind_rows()
-
-  # Compute cosine similarities between rating study responses and keywords
-  rating <-
-    map2_dfc(rating_substantives, rating_verbs, str_c, sep = ", ") %>%
-    mutate(participant_id = rating_raw$CASE) %>%
-    pivot_longer(
-      -participant_id,
-      names_to = "question_id", values_to = "response"
-    ) %>%
-    bind_cols(keywords_for_rating, .) %>%
-    pivot_longer(
-      c(match, nonmatch),
-      names_to = "condition", values_to = "keywords"
-    ) %>%
-    mutate(
-      condition = ifelse(condition == "match", "matching", "non-matching"),
-      across(c(keywords, response), str_to_lower),
-      keywords = str_replace_all(
-        keywords, c(
-          aufstemmen = "aufbrechen",
-          tierkäfig = "käfig",
-          wegkehren = "kehren",
-          verühren = "rühren",
-          schraubenschlüssel = "werkzeug",
-          verquirlen = "rühren",
-          tackern = "tacker",
-          sprengstoffexplosion = "explosion",
-          tankfüllstand = "füllstand",
-          tonpott = "tongefäß",
-          eierkarton = "eier verpackung",
-          musikgerät = "musikinstrument",
-          türgelenk = "scharnier",
-          telegrafieren = "telegraf",
-          sternenbilder = "sternbild",
-          aufspulen = "aufwickeln",
-          häckseln = "zerkleinern",
-          `mikroskop-proben` = "mikroskop proben",
-          streckenmaß = "maß",
-          windgeschwindigkeit = "windstärke",
-          nussöl = "nuss öl",
-          entkörnen = "entkernen",
-          katzenklo = "katze klo",
-          kutschrad = "kutsche rad"
-        )
-      ),
-      response = str_replace_all(
-        response, c(
-          aufhebeln = "aufbrechen",
-          föhnen = "föhn",
-          kasette = "kassette",
-          aufkehren = "kehren",
-          tackern = "tacker",
-          sprayapparat = "spray apparat",
-          anästhesieren = "betäuben",
-          reaktionsspiel = "reaktion spiel",
-          mulchgerät = "mulch gerät",
-          makierung = "markierung",
-          wissenschaftlich = "wissenschaft",
-          spannwerkzeug = "werkzeug",
-          wärmestab = "wärme stab",
-          ampfel = "ampel",
-          scheere = "schere",
-          pflägen = "pflügen",
-          knetten = "kneten",
-          pfandkuchen = "pfannkuchen",
-          anmacher = "anmachen",
-          injezieren = "injizieren",
-          telfon = "telefon",
-          beschrifter = "beschriften",
-          aufbewaren = "aufbewahren",
-          spähne = "späne",
-          separator = "trennen",
-          stämpfer = "stampfen",
-          fliente = "flinte",
-          tromphete = "trompete",
-          makieren = "markieren",
-          stöbseln = "stöpsel",
-          hiernwellen = "gehirnwellen",
-          kartofeln = "kartoffeln",
-          vaccum = "vakuum",
-          saubermachen = "putzen",
-          ankeln = "anker",
-          schuessel = "schüssel",
-          `zangen\\\\` = "zange",
-          kleiderbuegel = "kleiderbügel",
-          buerste = "bürste",
-          buersten = "bürsten",
-          druecken = "drücken",
-          obstscheider = "obst schneiden",
-          àumachen = "ausmachen",
-          bieroeffner = "flaschenöffner",
-          oeffnen = "öffnen",
-          giesskanne = "gießkanne",
-          gluehbirne = "glühbirne",
-          schettem = "manschetten",
-          kurzhantel = "kurzhanteln",
-          tierekiste = "tiere kiste",
-          kaffekocher = "kaffeemaschine",
-          kinderwaagen = "kinderwagen",
-          klobürste = "toilette bürste",
-          orangenpresser = "orangen presse",
-          foodmixer = "essen mixer",
-          schuessel = "schüssel",
-          naehen = "nähen",
-          teigwalze = "nudelholz",
-          pffefern = "pfeffer",
-          maehen = "mähen",
-          gesichtsbürste = "gesicht bürste",
-          regenchirm = "regenschirm",
-          kaesegratin = "käse gratin",
-          slotsmaschine = "slot maschine",
-          piggybank = "sparschwein",
-          stampen = "kleben",
-          arztwekzeug = "arzt werkzeug",
-          gradskala = "grad skala",
-          trichten = "trichter",
-          spulsmaschine = "spülmaschine",
-          zahnbrueste = "zahnbürste",
-          bruesten = "bürsten",
-          foltermaschine = "folter maschine",
-          bieröffner = "flaschenöffner",
-          oeffnen = "öffnen",
-          pizzacutter = "pizza schneider",
-          kerzestande = "kerzenständer",
-          naehen = "nähen",
-          geruest = "gerüst",
-          nagelschneider = "nagel schere",
-          burste = "bürste",
-          bursten = "bürsten",
-          loefel = "löffel",
-          hamsterspielzeug = "hamster spielzeug",
-          breadboard = "schneide brett",
-          druceken = "drücken",
-          nussknacnker = "nussknacker",
-          ueberwachen = "überwachen",
-          trainingsmaschine = "training maschine",
-          padeln = "paddeln",
-          schäumer = "aufschäumen",
-          aufhanger = "aufhänger",
-          hangt = "hängen",
-          `eier-guillotine` = "eier messer",
-          ruhrgerat = "rührgerät",
-          katzentrager = "katzen träger",
-          hinzufugen = "hinzufügen",
-          kuchenform = "backform",
-          nagelfeile = "nagel feile",
-          fondues = "fondue",
-          zuhoren = "zuhören",
-          rasenmaher = "rasenmäher",
-          geschlitzter = "schlitz",
-          breifmarke = "briefmarke",
-          bimmeln = "läuten",
-          rasma = "",
-          kassete = "kassette",
-          nudelmaschine = "nudel maschine",
-          ruhrer = "rührer",
-          feuerloscher = "feuerlöscher",
-          entfernungsmesser = "entfernung messer",
-          heißluftpistole = "heißluft pistole",
-          schuhlöffel = "schuhe anziehen",
-          uben = "üben",
-          naturlich = "natürlich",
-          schißen = "schießen",
-          rührgerät = "mixer",
-          aufkehren = "kehren",
-          rausziehen = "herausziehen",
-          `mini-meißel` = "mini meißel",
-          kaffeemischer = "kaffee mischer",
-          nachttischlampe = "nachttisch lampe",
-          arbeitsschlüssel = "arbeit schlüssel",
-          `boom-box` = "lautsprecher",
-          feststampfen = "fest stampfen",
-          `casino-maschine` = "casino maschine",
-          `herzfrequenz-test` = "herzfrequenz test",
-          zaichnen = "zeichnen",
-          schneidin = "schneiden",
-          vergleichsmaschine = "vergleich maschine",
-          rosenabzeichen = "rosen abzeichen",
-          `dummy-stecker` = "dummy stecker",
-          `post-punk-sanduhr` = "post punk sanduhr",
-          schneidemaschine = "schneiden maschine",
-          fusszeile = "fußzeile",
-          gartenlampe = "garten lampe",
-          trenneimer = "trennen eimer",
-          fußabstreifer = "fußmatte",
-          wichten = "gewicht",
-          perlenständer = "perlen ständer",
-          briefmarker = "briefmarke",
-          `elektronische-schaltung` = "elektronische schaltung",
-          fläschchenheizung = "flächen heizung",
-          elektrodrucker = "elektro drucker",
-          metalllinse = "metall linse",
-          kugelheizung = "kugel heizung",
-          abschrauber = "abschrauben",
-          `mini-korb` = "mini korb",
-          elektronenrechner = "elektronen rechner",
-          spießfaum = "spieß",
-          tierträger = "tier träger",
-          rührgerät = "rührgerät",
-          kuchenform = "backform",
-          friteuse = "fritteuse",
-          `ein-` = "ein",
-          greigfen = "greifen",
-          zerknittern = "falten bekommen",
-          salatzange = "salat zange",
-          wwrm = "wurm",
-          duschwasser = "dusche wasser",
-          verbreitene = "verbreiten",
-          aufpieksen = "anstechen",
-          restriktieren = "einschränken",
-          rückgeld = "wechselgeld",
-          aufkehren = "zusammenkehren",
-          bratgut = "grillgut",
-          bepinseln = "bestreichen",
-          verquirlen = "vermischen",
-          temparatur = "temperatur",
-          aufspulen = "aufwickeln",
-          elekronik = "elektronik",
-          festnieten = "fest nieten",
-          festspannen = "fest spannen",
-          hebelkräfte = "hebelkraft",
-          meiseln = "meißeln",
-          betäüben = "betäuben",
-          verschraüben = "verschrauben",
-          schraüben = "schrauben",
-          seperator = "trennen",
-          schraübendreher = "schraubendreher",
-          gegewicht = "gewicht"
-        )
-      ),
-      cosine = compute_cosine(keywords, response, word2vec)
-    )
-
-  # Save to file
-  write_csv(rating, rating_file)
 }
 
-# # Test if all keywords and responses are in the embedding
-# for (keywords in c(unique(rating$keywords), unique(rating$response))) {
-#   if (!is.na(keywords)) {
-#     for (word in (str_split(keywords, pattern = " |, ")[[1]])) {
-#       if (!(word %in% rownames(word2vec))) {
-#         cat(paste0(word, ' = "",\n'))
-#       }
-#     }
-#   }
-# }
+# Compare cosine similarities between conditions
+rating_stats <- compute_rating_stats(rating)
 
-# Read the rating study results incl. cosine similarities
-rating <- read_csv(
-  rating_file,
-  col_types = cols(item_id = col_factor(), participant_id = col_factor())
-) %>%
-  filter(!is.na(cosine)) %>%
-  mutate(
-    fam_condition = paste(familiarity, condition) %>%
-      factor(
-        levels = c(
-          "familiar matching", "unfamiliar matching", "unfamiliar non-matching"
-        ),
-        labels = c("familiar", "matching", "nonmatching")
-      )
-  )
-
-# Compare cosine similarities between object conditions
-contrasts(rating$fam_condition) <- contr.sdif(3)
-model_rating <- lmer(
-  cosine ~ fam_condition +
-    (fam_condition | participant_id) +
-    (1 | item_id),
-  data = rating,
-  control = lmerControl(optimizer = "bobyqa", optCtrl = list(maxfun = 1e6))
-)
-
-# Compute condition means and pairwise contrasts
-emm_options(lmer.df = "Satterthwaite", lmerTest.limit = Inf)
-emm_rating <- emmeans(
-  model_rating,
-  specs = consec ~ fam_condition,
-  rev = TRUE,
-  adjust = "bonferroni"
-)
-rating_means <- as.data.frame(emm_rating$emmeans)
-rating_contrasts <- as.data.frame(emm_rating$contrasts) %>%
-  rename(t_value = `t.ratio`, p_value = `p.value`)
-
-# Compute each item's average cosine distance across participants
-cosines <- rating %>%
-  group_by(item_id) %>%
-  summarize(cosine = mean(cosine)) %>%
-  mutate(cosine = scale(cosine))
-
-# rating_pairwise <- rating$participant_id %>%
-#   unique() %>%
-#   combn(m = 2) %>%
-#   data.frame() %>%
-#   map_dfr(function(pair) {
-#     id_1 <- pair[1]
-#     id_2 <- pair[2]
-#     response_1 <- filter(rating, participant_id == id_1)$response
-#     response_2 <- filter(rating, participant_id == id_2)$response
-#     tibble(
-#       item_id = keywords$item_id,
-#       familiarity = keywords$familiarity,
-#       filename = keywords$filename,
-#       pair_id = str_c(id_1, id_2, sep = "_"),
-#       participant_id_1 = id_1,
-#       participant_id_2 = id_2,
-#       response_1,
-#       response_2,
-#       cosine = compute_cosine(response_1, response_2, word2vec)
-#     )
-#   })
-
-# write_csv(rating_pairwise, here(output_dir, "rating_pairwise.csv"))
-
-# mod_pairwise <- lmer(
-#   cosine ~ familiarity + (familiarity | pair_id) + (1 | filename),
-#   data = rating_pairwise
-# )
-# (summary_pairwise <- summary(mod_pairwise))
-
-# Rmisc::summarySEwithin(
-#   data = rating_pairwise, measurevar = "cosine", withinvars = "familiarity",
-#   idvar = "pair_id", na.rm = TRUE
-# ) %>%
-#   ggplot(aes(x = familiarity, y = cosine, color = familiarity)) +
-#   geom_violin(data = rating_pairwise) +
-#   coord_cartesian(ylim = c(0.0, 1.0)) +
-#   geom_pointrange(aes(ymin = cosine - se, ymax = cosine + se)) +
-#   theme_classic()
+# Compute average cosine similarity for each item
+cosines <- compute_average_cosines(rating)
 ```
 
 [As a manipulation check, we ran an online rating study where we presented 10 German speakers (3 female, 7 male, mean age = 25.3 years, range 20--35 years) with all 240 visual objects in random order and asked them to generate their own keywords that would describe the presumed function of the object.
 We used latent semantic analysis with a word2vec embedding (deepset GmbH, Berlin, Germany, www.deepset.ai/german-word-embeddings) pre-trained on the German Wikipedia to estimate semantic distances between these participant-generated keywords and the keywords used in our main EEG experiment (Supplementary Figures 1 and 2).
-In brief, it was substantially easier for participants to come with correct descriptions of familiar objects (mean cosine distance ± standard error = `r filter(rating_means, fam_condition == "familiar")$emmean` ± `r filter(rating_means, fam_condition == "familiar")$SE`) than for unfamiliar objects (`r filter(rating_means, fam_condition == "matching")$emmean` ± `r filter(rating_means, fam_condition == "matching")$SE`), $t$(`r print_dof(filter(rating_contrasts, contrast == "familiar - matching")$df)`) = `r filter(rating_contrasts, contrast == "familiar - matching")$t_value`, $p_\text{corr}$ `r print_p(filter(rating_contrasts, contrast == "familiar - matching")$p_value)` (linear mixed-effects model).
-In fact, this similarity between participant-generated keywords for the unfamiliar objects and the object-matching keywords presented in the main experiment was only slightly higher than the similarity between participant-generated keywords and the object-non-matching keywords presented in the main experiment (`r filter(rating_means, fam_condition == "nonmatching")$emmean` ± `r filter(rating_means, fam_condition == "nonmatching")$SE`), $t$(`r print_dof(filter(rating_contrasts, contrast == "matching - nonmatching")$df)`) = `r filter(rating_contrasts, contrast == "matching - nonmatching")$t_value`, $p_\text{corr}$ `r print_p(filter(rating_contrasts, contrast == "matching - nonmatching")$p_value)` (linear mixed-effects model), indicating that it was difficult for participants to know or guess the correct function of the unfamiliar objects.]{color="blue"}
+In brief, it was substantially easier for participants to come with correct descriptions of familiar objects (mean cosine distance ± standard error = `r filter(rating_stats$means, fam_condition == "familiar")$emmean` ± `r filter(rating_stats$means, fam_condition == "familiar")$SE`) than for unfamiliar objects (`r filter(rating_stats$means, fam_condition == "matching")$emmean` ± `r filter(rating_stats$means, fam_condition == "matching")$SE`), $t$(`r print_dof(filter(rating_stats$contrasts, contrast == "familiar - matching")$df)`) = `r filter(rating_stats$contrasts, contrast == "familiar - matching")$t_value`, $p_\text{corr}$ `r print_p(filter(rating_stats$contrasts, contrast == "familiar - matching")$p_value)` (linear mixed-effects model).
+In fact, this similarity between participant-generated keywords for the unfamiliar objects and the object-matching keywords presented in the main experiment was only slightly higher than the similarity between participant-generated keywords and the object-non-matching keywords presented in the main experiment (`r filter(rating_stats$means, fam_condition == "non-matching")$emmean` ± `r filter(rating_stats$means, fam_condition == "non-matching")$SE`), $t$(`r print_dof(filter(rating_stats$contrasts, contrast == "matching - non-matching")$df)`) = `r filter(rating_stats$contrasts, contrast == "matching - non-matching")$t_value`, $p_\text{corr}$ `r print_p(filter(rating_stats$contrasts, contrast == "matching - non-matching")$p_value)` (linear mixed-effects model), indicating that it was difficult for participants to know or guess the correct function of the unfamiliar objects.]{color="blue"}
 
 ## Experimental Design
 
@@ -938,7 +602,7 @@ contrast_table <- models %>%
 
 ```{r, fig1, cache=!run$figures, fig.height=12, fig.cap="(ref:fig1-caption)"}
 # Create Figure 1
-plot_fig1(files_dir, evokeds, config, channel_locations, models)
+plot_fig1(misc_dir, evokeds, config, channel_locations, models)
 ```
 
 (ref:fig1-caption) Experimental design and ERP results [contrasting semantically informed perception and uninformed perception]{color="blue"}.
@@ -1061,7 +725,7 @@ This was expected given that the keywords that would [provide additional semanti
 
 ```{r, fig2, cache=!run$figures, fig.height=8.6, fig.cap="(ref:fig2-caption)"}
 # Create Figure 2
-plot_fig2(files_dir, evokeds, config, channel_locations, models)
+plot_fig2(misc_dir, evokeds, config, channel_locations, models)
 ```
 
 (ref:fig2-caption) [ERP results contrasting semantically informed perception and unsuccessfully informed perception.

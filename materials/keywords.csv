@@ -1,241 +1,241 @@
-item_id,familiarity,filename,match_noun,match_verb,match_noun_en,match_verb_en,nonmatch_noun,nonmatch_verb,nonmatch_noun_en,nonmatch_verb_en
-121,familiar,ampel.png,Verkehr,leiten,NA,NA,NA,NA,NA,NA
-122,familiar,angel.png,Fisch,angeln,NA,NA,NA,NA,NA,NA
-123,familiar,anker.png,Boot,verankern,NA,NA,NA,NA,NA,NA
-124,familiar,aschenbecher.png,Zigarette,ablegen,NA,NA,NA,NA,NA,NA
-125,familiar,astschere.png,Äste,schneiden,NA,NA,NA,NA,NA,NA
-126,familiar,axt.png,Bäume,fällen,NA,NA,NA,NA,NA,NA
-127,familiar,besen.png,Fußboden,kehren,NA,NA,NA,NA,NA,NA
-128,familiar,bohrmaschine.png,Loch,bohren,NA,NA,NA,NA,NA,NA
-129,familiar,brecheisen.png,Tür,aufbrechen,NA,NA,NA,NA,NA,NA
-130,familiar,brille.png,Sehschwäche,korrigieren,NA,NA,NA,NA,NA,NA
-131,familiar,buegel.png,Kleidung,aufhängen,NA,NA,NA,NA,NA,NA
-132,familiar,buegeleisen.png,Hemden,bügeln,NA,NA,NA,NA,NA,NA
-133,familiar,buerostuhl.png,Büro,sitzen,NA,NA,NA,NA,NA,NA
-134,familiar,buerste.png,Haare,bürsten,NA,NA,NA,NA,NA,NA
-135,familiar,diabolo.png,Diabolo,spielen,NA,NA,NA,NA,NA,NA
-136,familiar,dosenoeffner.png,Dose,öffnen,NA,NA,NA,NA,NA,NA
-137,familiar,drucker.png,Papier,drucken,NA,NA,NA,NA,NA,NA
-138,familiar,dusche.png,Körper,duschen,NA,NA,NA,NA,NA,NA
-139,familiar,eierschneider.png,Eier,schneiden,NA,NA,NA,NA,NA,NA
-140,familiar,fahrrad.png,Fahrrad,fahren,NA,NA,NA,NA,NA,NA
-141,familiar,fernglas.png,Dinge,vergrößern,NA,NA,NA,NA,NA,NA
-142,familiar,fernseher.png,Fernsehen,schauen,NA,NA,NA,NA,NA,NA
-143,familiar,feuerzeug.png,Feuer,machen,NA,NA,NA,NA,NA,NA
-144,familiar,flaschenoeffner.png,Bierflasche,öffnen,NA,NA,NA,NA,NA,NA
-145,familiar,foehn.png,Haare,trocknen,NA,NA,NA,NA,NA,NA
-146,familiar,fueller.png,Handschrift,schreiben,NA,NA,NA,NA,NA,NA
-147,familiar,gabel.png,Gabel,essen,NA,NA,NA,NA,NA,NA
-148,familiar,gewehr.png,Gewehr,schießen,NA,NA,NA,NA,NA,NA
-149,familiar,giesskanne.png,Gießkanne,gießen,NA,NA,NA,NA,NA,NA
-150,familiar,gitarre.png,Gitarre,spielen,NA,NA,NA,NA,NA,NA
-151,familiar,gluehbirne.png,Licht,machen,NA,NA,NA,NA,NA,NA
-152,familiar,grill.png,Fleisch,grillen,NA,NA,NA,NA,NA,NA
-153,familiar,hacke.png,Unkraut,jäten,NA,NA,NA,NA,NA,NA
-154,familiar,hammer.png,Nägel,einschlagen,NA,NA,NA,NA,NA,NA
-155,familiar,handruehrgeraet.png,Teig,rühren,NA,NA,NA,NA,NA,NA
-156,familiar,handschellen.png,Handschellen,anlegen,NA,NA,NA,NA,NA,NA
-157,familiar,handy.png,Telefon,anrufen,NA,NA,NA,NA,NA,NA
-158,familiar,hanteln.png,Gewichte,stemmen,NA,NA,NA,NA,NA,NA
-159,familiar,herd.png,Essen,kochen,NA,NA,NA,NA,NA,NA
-160,familiar,kaefig.png,Haustiere,transportieren,NA,NA,NA,NA,NA,NA
-161,familiar,kaffeemaschine.png,Kaffee,kochen,NA,NA,NA,NA,NA,NA
-162,familiar,kamera.png,Fotos,schießen,NA,NA,NA,NA,NA,NA
-163,familiar,kamm.png,Haare,kämmen,NA,NA,NA,NA,NA,NA
-164,familiar,kasse.png,Geld,aufbewahren,NA,NA,NA,NA,NA,NA
-165,familiar,kassette.png,Musik,abspielen,NA,NA,NA,NA,NA,NA
-166,familiar,kehrschaufel.png,Dreck,wegkehren,NA,NA,NA,NA,NA,NA
-167,familiar,kinderwagen.png,Kleinkind,fahren,NA,NA,NA,NA,NA,NA
-168,familiar,klavier.png,Klavier,spielen,NA,NA,NA,NA,NA,NA
-169,familiar,klobuerste.png,Toilette,putzen,NA,NA,NA,NA,NA,NA
-170,familiar,koffer.png,Reisegepäck,transportieren,NA,NA,NA,NA,NA,NA
-171,familiar,kompass.png,Himmelsrichtung,bestimmen,NA,NA,NA,NA,NA,NA
-172,familiar,kopfhoerer.png,Musik,hören,NA,NA,NA,NA,NA,NA
-173,familiar,korkenzieher.png,Weinflasche,öffnen,NA,NA,NA,NA,NA,NA
-174,familiar,kuchenform.png,Kuchen,backen,NA,NA,NA,NA,NA,NA
-175,familiar,kuechenmaschine.png,Zutaten,rühren,NA,NA,NA,NA,NA,NA
-176,familiar,lampe.png,Licht,machen,NA,NA,NA,NA,NA,NA
-177,familiar,leiter.png,Leiter,steigen,NA,NA,NA,NA,NA,NA
-178,familiar,lineal.png,Abstand,messen,NA,NA,NA,NA,NA,NA
-179,familiar,locher.png,Papier,lochen,NA,NA,NA,NA,NA,NA
-180,familiar,maulschluessel.png,Schrauben,festziehen,NA,NA,NA,NA,NA,NA
-181,familiar,mikrofon.png,Stimme,verstärken,NA,NA,NA,NA,NA,NA
-182,familiar,mikrowelle.png,Fertiggerichte,erhitzen,NA,NA,NA,NA,NA,NA
-183,familiar,milchschaeumer.png,Milch,aufschäumen,NA,NA,NA,NA,NA,NA
-184,familiar,naehmaschine.png,Kleidung,nähen,NA,NA,NA,NA,NA,NA
-185,familiar,nagelfeile.png,Nägel,feilen,NA,NA,NA,NA,NA,NA
-186,familiar,nudelholz.png,Teig,ausrollen,NA,NA,NA,NA,NA,NA
-187,familiar,pfanne.png,Essen,braten,NA,NA,NA,NA,NA,NA
-188,familiar,pfannenwender.png,Pfannkuchen,wenden,NA,NA,NA,NA,NA,NA
-189,familiar,pfeffermuehle.png,Pfeffer,mahlen,NA,NA,NA,NA,NA,NA
-190,familiar,pfeife.png,Tabak,rauchen,NA,NA,NA,NA,NA,NA
-191,familiar,pinzette.png,Schiefer,entfernen,NA,NA,NA,NA,NA,NA
-192,familiar,puerierstab.png,Essen,zerkleinern,NA,NA,NA,NA,NA,NA
-193,familiar,raclette-grill.png,Raclette,essen,NA,NA,NA,NA,NA,NA
-194,familiar,radiergummi.png,Bleistift,radieren,NA,NA,NA,NA,NA,NA
-195,familiar,radio.png,Radio,hören,NA,NA,NA,NA,NA,NA
-196,familiar,rasenmaeher.png,Rasen,mähen,NA,NA,NA,NA,NA,NA
-197,familiar,rasierpinsel.png,Makeup,auftragen,NA,NA,NA,NA,NA,NA
-198,familiar,rechen.png,Laub,rechen,NA,NA,NA,NA,NA,NA
-199,familiar,regenschirm.png,Regen,abhalten,NA,NA,NA,NA,NA,NA
-200,familiar,reibe.png,Käse,reiben,NA,NA,NA,NA,NA,NA
-201,familiar,saege.png,Holz,sägen,NA,NA,NA,NA,NA,NA
-202,familiar,salzstreuer.png,Salz,würzen,NA,NA,NA,NA,NA,NA
-203,familiar,sattel.png,Pferd,satteln,NA,NA,NA,NA,NA,NA
-204,familiar,schalter.png,Licht,anschalten,NA,NA,NA,NA,NA,NA
-205,familiar,schaufel.png,Löcher,graben,NA,NA,NA,NA,NA,NA
-206,familiar,schaumloeffel.png,Essen,servieren,NA,NA,NA,NA,NA,NA
-207,familiar,schere.png,Papier,schneiden,NA,NA,NA,NA,NA,NA
-208,familiar,schluessel.png,Tür,aufschließen,NA,NA,NA,NA,NA,NA
-209,familiar,schneebesen.png,Teig,rühren,NA,NA,NA,NA,NA,NA
-210,familiar,schraubenzieher.png,Schrauben,drehen,NA,NA,NA,NA,NA,NA
-211,familiar,sichel.png,Gras,schneiden,NA,NA,NA,NA,NA,NA
-212,familiar,sieb.png,Nudeln,abgießen,NA,NA,NA,NA,NA,NA
-213,familiar,slotmachine.png,Glücksspiel,spielen,NA,NA,NA,NA,NA,NA
-214,familiar,sparschwein.png,Geld,sparen,NA,NA,NA,NA,NA,NA
-215,familiar,spritze.png,Medikamente,spritzen,NA,NA,NA,NA,NA,NA
-216,familiar,steckdose.png,Strom,anschließen,NA,NA,NA,NA,NA,NA
-217,familiar,stempel.png,Siegel,stempeln,NA,NA,NA,NA,NA,NA
-218,familiar,stethoskop.png,Herzfrequenz,hören,NA,NA,NA,NA,NA,NA
-219,familiar,tacker.png,Papiere,zusammen heften,NA,NA,NA,NA,NA,NA
-220,familiar,taschenmesser.png,Taschenmesser,benutzen,NA,NA,NA,NA,NA,NA
-221,familiar,telefon.png,Telefon,anrufen,NA,NA,NA,NA,NA,NA
-222,familiar,tesaroller.png,Klebeband,abrollen,NA,NA,NA,NA,NA,NA
-223,familiar,thermometer.png,Temperatur,anzeigen,NA,NA,NA,NA,NA,NA
-224,familiar,tischtennisschlaeger.png,Tischtennis,spielen,NA,NA,NA,NA,NA,NA
-225,familiar,trichter.png,Flüssigkeit,einfüllen,NA,NA,NA,NA,NA,NA
-226,familiar,trillerpfeife.png,Töne,pfeifen,NA,NA,NA,NA,NA,NA
-227,familiar,trommel.png,Töne,trommeln,NA,NA,NA,NA,NA,NA
-228,familiar,trompete.png,Trompete,spielen,NA,NA,NA,NA,NA,NA
-229,familiar,uhr.png,Zeit,anzeigen,NA,NA,NA,NA,NA,NA
-230,familiar,ventilator.png,Luft,kühlen,NA,NA,NA,NA,NA,NA
-231,familiar,videokassette.png,Video,abspielen,NA,NA,NA,NA,NA,NA
-232,familiar,waage.png,Gewicht,wiegen,NA,NA,NA,NA,NA,NA
-233,familiar,waschbecken.png,Hände,waschen,NA,NA,NA,NA,NA,NA
-234,familiar,waschmaschine.png,Kleidung,waschen,NA,NA,NA,NA,NA,NA
-235,familiar,wasserkocher.png,Wasser,kochen,NA,NA,NA,NA,NA,NA
-236,familiar,wecker.png,Wecker,klingeln,NA,NA,NA,NA,NA,NA
-237,familiar,zahnbuerste.png,Zähne,putzen,NA,NA,NA,NA,NA,NA
-238,familiar,zange.png,Draht,biegen,NA,NA,NA,NA,NA,NA
-239,familiar,zirkel.png,Kreise,zeichnen,NA,NA,NA,NA,NA,NA
-240,familiar,zollstock.png,Abstand,messen,NA,NA,NA,NA,NA,NA
-1,unfamiliar,galvanometer.png,elektrische Spannung,prüfen,electric current,measuring,Makkaroni,formen,macaroni,forming
-2,unfamiliar,nudelmaschine.png,Makkaroni,formen,macaroni,forming,Kuh,vom Zaun abhalten,cow,keeping away from the fence
-3,unfamiliar,Knochensaege.png,Knochen,sägen,bones,sawing,Streckenmaß,Sonnenlicht nutzen,distance measure,using sunrays
-4,unfamiliar,Unkraut-Jaetzange.png,Unkraut,jäten,weed,removing,Uhr,mit Wärme betreiben,clock,operating with heat
-5,unfamiliar,mausefalle.png,Mausefalle,zuschnappen,mousetrap,snap-shutting,Brillenglas,zuschneiden,eyeglass lens,cutting
-6,unfamiliar,Goldmuenzen-Waage.png,Goldmünzen,wiegen,gold coin,weighing,Farbe,vom Fenster abschleifen,paint,scraping off the window
-7,unfamiliar,Knie-Schraubstock.png,Knie,fixieren,knee,fixating,Buchstaben,tippen,letter,typing
-8,unfamiliar,Eierkarton-Presse.png,Eierkarton,pressen,egg carton,pressing,Tabak,zermahlen,tobacco,pulverize
-9,unfamiliar,Baum-Klettereisen.png,Baum,erklettern,tree,climbing,Rotation,Ladung erzeugen,rotation,creating electric charge
-10,unfamiliar,schreibmaschine.png,Buchstaben,tippen,letter,typing,Pferdehuf,Halt geben,horse hoof,giving grip
-11,unfamiliar,Elektro-Akkordeon.png,Akkordeon,spielen,accordion,playing,Seil,schneiden,rope,cutting
-12,unfamiliar,trimmdichgeraet.png,Körper,trainieren,body,training,Buch,offen halten,book,binding
-13,unfamiliar,paint_scraper.png,Farbe,vom Fenster abschleifen,paint,scraping off the window,von Hand,zentrifugieren,by hand,centrifugating
-14,unfamiliar,heizpilz.png,Außenbereich,heizen,outdoor area,heating,Rasierklinge,schärfen,razor blade,sharpening
-15,unfamiliar,mikroskop.png,Pflanzenteile,vergrößern,plant parts,magnifying,Katzenklo,sich selbst reinigen,litter box,self-cleaning
-16,unfamiliar,krawattenaufhaenger.png,Krawatten,aufhängen,necktie,hanging up,Zeichnungen,vermessen,drawings,measuring
-17,unfamiliar,grammophonnadel.png,Schallplatte,abtasten,vinyl record,reading,Ball,katapultieren,ball,catapulting
-18,unfamiliar,glasschneider.png,Glas,schneiden,glass,cutting,Eier,wiegen,eggs,weighing
-19,unfamiliar,Brikettpresse.png,Briketts,pressen,briquette,pressing,Narkosemittel,abgeben,anesthetic,administering
-20,unfamiliar,orgelpfeife.png,Orgelton,erzeugen,organ sound,making,Bandage,rollen,bandage,rolling
-21,unfamiliar,spannungsgeraet.png,Spannung,erzeugen,electric current,making,Fußstütze,reiten,footrest,horseback riding
-22,unfamiliar,anesthesia_inhaler.png,Narkosemittel,abgeben,anesthetic,administering,Nüsse,aufbrechen,nuts,cracking
-23,unfamiliar,Bandagen-Roller.png,Bandage,rollen,bandage,rolling,Schnee,rodeln,snow,sleighing
-24,unfamiliar,weinfassoeffner.png,Weinfass,Loch einschlagen,wine barrel,smashing a hole,Tier,einfangen,animal,trapping
-25,unfamiliar,cork_inserter.png,Flaschenkorken,einführen,bottle cork,inserting,Pferd,im Moor laufen,horse,walking in the moor
-26,unfamiliar,Huehnereier-Brutautomat.png,Automat,Eier ausbrüten,machine,incubating eggs,Windgeschwindigkeit,messen,wind speed,measuring
-27,unfamiliar,Korngarbengreifer.png,Korngarbe,greifen,sheaf,grabbing,Treibhaus,heizen,glass house,heating
-28,unfamiliar,Briefwaage.png,Brief,wiegen,letter,weighing,Korngarbe,greifen,sheaf,grabbing
-29,unfamiliar,4erbohrer.png,Löcher,bohren,hole,drilling,Sonnenlicht,Intensität messen,sunlight,measure intensity
-30,unfamiliar,Grossfisch-Angelkurbel.png,Angelschnur,kurbeln,fishing line,winding,Glaskörper,musizieren,glass body,making music
-31,unfamiliar,Kurvenmalgeraet.png,Kurven,malen,curve,drawing,Nussöl,pressen,nut oil,pressing
-32,unfamiliar,radiofrequenzeinsteller.png,Radiofrequenz,einstellen,radio frequency,tuning,Erektion,helfen,erection,helping
-33,unfamiliar,Zaepfchenpresse.png,Zäpfchen,pressen,suppository,pressing,Unkraut,jäten,weed,removing
-34,unfamiliar,dosenoeffner_fuer_faesser.png,Fass,öffnen,barrel,opening,Pflanzenteile,vergrößern,plant parts,magnifying
-35,unfamiliar,karbidlampe.png,Bergbaustollen,beleuchten,mining tunnel,lightening,Knie,fixieren,knee,fixating
-36,unfamiliar,antizaungurt.png,Kuh,vom Zaun abhalten,cow,keeping away from the fence,Radiofrequenz,einstellen,radio frequency,tuning
-37,unfamiliar,Saemaschine.png,Saatgut,gleichmäßig aussäen,seeds,sowing evenly,Fass,öffnen,barrel,opening
-38,unfamiliar,Flaschentrockner.png,Flaschen,trocknen,bottles,drying,Bleistift,anspitzen,pencil,sharpening
-39,unfamiliar,Thermopneumatische_Uhr.png,Uhr,mit Wärme betreiben,clock,operating with heat,Körper,untersuchen,body,training
-40,unfamiliar,kimkim.png,Tonpott,trommeln,clay pot,drumming,Piano,stimmen,piano,tuning
-41,unfamiliar,Sprengstoff-Zuender.png,Sprengstoffexplosion,auslösen,dynamite explosion,triggering,Fisch,wiegen,fish,weighing
-42,unfamiliar,pferdeueberschuh.png,Pferdehuf,Halt geben,horse hoof,giving grip,Zäpfchen,pressen,suppository,pressing
-43,unfamiliar,Bleistiftspitzer.png,Bleistift,anspitzen,pencil,sharpening,Angel,Köder markieren,fishing rod,marking bait
-44,unfamiliar,Nussoelpressmaschine.png,Nussöl,pressen,nut oil,pressing,Zeichen,einbrennen,marks,burning in
-45,unfamiliar,rasierklingenschaerfer.png,Rasierklinge,schärfen,razor blade,sharpening,Kurven,malen,curve,drawing
-46,unfamiliar,plattenheber.png,heiße Platten,anheben,hot plates,lifting,Kleidung,im Eimer waschen,clothes,washing in a bucket
-47,unfamiliar,filmrolle.png,Film,aufspulen,film roll,winding,Mund,offen halten,mouth,keeping open
-48,unfamiliar,Flammenwerfer-Aufsatz.png,Waffe,entflammen,weapon,inflaming,Uhrzeit,anzeigen,time,displaying
-49,unfamiliar,mikrotom.png,Mikroskop-Proben,schneiden,microscopic samples,slicing,heiße Platten,anheben,hot plates,lifting
-50,unfamiliar,Glasresonanz-Cello.png,Glaskörper,musizieren,glass body,making music,Kork,flach pressen,cork,pressing flat
-51,unfamiliar,dampfzerstaeuber.png,Dampf,zerstäuben,steam,spraying,Buch,binden,book,opening
-52,unfamiliar,mandelnentferner.png,Mandeln,operieren,kidneys,operating,Film,aufspulen,film roll,winding
-53,unfamiliar,toaster.png,Toastbrot,rösten,toast,roasting,Autobatterie,Spannung testen,car battery,measuring voltage
-54,unfamiliar,steigbuegel.png,Fußstütze,reiten,footrest,horseback riding,Stromstärke,messen,current,measuring
-55,unfamiliar,feuertuergelenk.png,Türgelenk,Feuer überstehen,door hinge,surviving fires,Botschaft,telegrafieren,message,telegraphing
-56,unfamiliar,einkufiger_schlitten.png,Schnee,rodeln,snow,sleighing,Dampf,zerstäuben,steam,spraying
-57,unfamiliar,Nussknacker.png,Nüsse,aufbrechen,nuts,cracking,Ziegelsteine,formen,bricks,forming
-58,unfamiliar,elektrisches_radiergummi.png,Radiergummi,mit Strom betreiben,eraser,operating with electricity,Münzen,aufbewahren,coins,storing
-59,unfamiliar,Treibhausheizgeraet.png,Treibhaus,heizen,glass house,heating,Messer,schleifen,knife,sharpening
-60,unfamiliar,Telegraphier-Geraet.png,Botschaft,telegrafieren,message,telegraphing,Toastbrot,rösten,toast,roasting
-61,unfamiliar,schwimmer.png,Angel,Köder markieren,fishing rod,marking bait,Baum,erklettern,tree,climbing
-62,unfamiliar,Selbstreinigendes_Katzenklo.png,Katzenklo,sich selbst reinigen,litter box,self-cleaning,Tankfüllstand,messen,fuel tank level,gauging
-63,unfamiliar,pleximeter.png,Körper,untersuchen,body,examining,Schuhe,auf Eis laufen,shoes,walking on ice
-64,unfamiliar,brillenglasschneidemaschine.png,Brillenglas,zuschneiden,eyeglass lens,cutting,Saatgut,gleichmäßig aussäen,seeds,sowing evenly
-65,unfamiliar,drahtbieger.png,Draht,wickeln,wire,winding,Bergbaustollen,beleuchten,mining tunnel,lightening
-66,unfamiliar,Buecher-Offenhalter.png,Buch,offen halten,book,opening,Sprengstoffexplosion,auslösen,dynamite explosion,triggering
-67,unfamiliar,haecksler.png,Feldanbau,häckseln,harvest,chopping,Draht,wickeln,wire,winding
-68,unfamiliar,Roemisches_Senklot.png,Schnurlot,absenken,plummet,letting down,Korken,formen,bottle cork,forming
-69,unfamiliar,filar_micrometer.png,Sternenbilder,vermessen,stellar constellation,measuring,Schnurlot,absenken,plummet,letting down
-70,unfamiliar,Morse-Geraet.png,Nachricht,morsen,message,signaling,Feldanbau,häckseln,harvest,chopping
-71,unfamiliar,Stampf-Fiedel.png,Musikgerät,stampfen,musical instrument,stamping,Goldmünzen,wiegen,gold coin,weighing
-72,unfamiliar,schneekette.png,Schuhe,auf Eis laufen,shoes,walking on ice,Geschwindigkeit,ermitteln,speed,determining
-73,unfamiliar,mechanisches_tachometer.png,Geschwindigkeit,ermitteln,speed,determining,Mausefalle,zuschnappen,mousetrap,snap-shutting
-74,unfamiliar,Brenneisen.png,Zeichen,einbrennen,marks,burning in,Luftdruck,messen,air pressure,measuring
-75,unfamiliar,Tabakschneider.png,Tabak,zermahlen,tobacco,pulverize,Flaschen,trocknen,bottles,drying
-76,unfamiliar,galvanometer_2.png,Stromstärke,messen,current,measuring,Mandeln,operieren,kidneys,operating
-77,unfamiliar,tierfalle.png,Tier,einfangen,animal,trapping,Maiskolben,entkörnen,corncob,removing grains
-78,unfamiliar,Messerschleifer.png,Messer,schleifen,knife,sharpening,Schritte,vergrößern,steps,extending
-79,unfamiliar,tibetischer_leierkasten.png,Leierkasten,klingen,barrel organ,making sounds,Fass,anheben,barrel,lifting
-80,unfamiliar,Buchbinder.png,Buch,binden,book,binding,Löcher,bohren,hole,drilling
-81,unfamiliar,korkenpresse.png,Kork,flach pressen,cork,pressing flat,Elektroschock,spielen,electric shock,playing
-82,unfamiliar,tablettenteiler.png,Tabletten,zerteilen,pill,splitting,Blumentopf,sich selbst wässern,flowerpot,self-watering
-83,unfamiliar,hebel_fuer_fassbauer.png,Fass,anheben,barrel,lifting,Mikroskop-Proben,schneiden,microscopic samples,slicing
-84,unfamiliar,pferdeschuh.png,Pferd,im Moor laufen,horse,walking in the moor,Luft,abpumpen,air,pumping out
-85,unfamiliar,Rituelles_Hackmesser.png,altes Ritual,hacken,ancient ritual,chopping,Spannung,erzeugen,electric current,making
-86,unfamiliar,Historische_Waschmaschine.png,Kleidung,im Eimer waschen,clothes,washing in a bucket,Türgelenk,Feuer überstehen,door hinge,surviving fires
-87,unfamiliar,Maiskolben-Entkoerner.png,Maiskolben,entkörnen,corncob,removing grains,Brief,wiegen,letter,weighing
-88,unfamiliar,Ball-Wurfmaschine.png,Ball,katapultieren,ball,catapulting,Radiergummi,mit Strom betreiben,eraser,operating with electricity
-89,unfamiliar,planimeter.png,Zeichnungen,vermessen,drawings,measuring,Brenner,löten,burner,soldering
-90,unfamiliar,elektroschockspiel.png,Elektroschock,spielen,electric shock,playing,Weinfass,Loch einschlagen,wine barrel,smashing a hole
-91,unfamiliar,zaehlgeraet_fuer_lieferungen.png,Lieferungen,abzählen,deliveries,counting,Außenbereich,heizen,outdoor area,heating
-92,unfamiliar,Erzeugt_statische_Ladung.png,Rotation,Ladung erzeugen,rotation,creating electric charge,Musikgerät,stampfen,musical instrument,stamping
-93,unfamiliar,Kuenstliches Herz.png,Herz,durch Maschine ersetzen,heart,replacing with machine,Kerzen,löschen,candles,extinguishing
-94,unfamiliar,seilschneider.png,Seil,schneiden,rope,cutting,Akkordeon,spielen,accordion,playing
-95,unfamiliar,Fischwaage.png,Fisch,wiegen,fish,weighing,Herz,durch Maschine ersetzen,heart,replacing with machine
-96,unfamiliar,kerzenloescher.png,Kerzen,löschen,candles,extinguishing,Körper,trainieren,body,examining
-97,unfamiliar,Korkenpresse_2.png,Korken,formen,bottle cork,forming,Sternenbilder,vermessen,stellar constellation,measuring
-98,unfamiliar,Mechanische_Erektionshilfe.png,Erektion,helfen,erection,helping,Waffe,werfen,weapon,throwing
-99,unfamiliar,heliotrop.png,Streckenmaß,Sonnenlicht nutzen,distance measure,using sunrays,Kartoffeln,stampfen,potatoes,mashing
-100,unfamiliar,Luftdruckmessgeraete.png,Luftdruck,messen,air pressure,measuring,Knochen,sägen,bones,sawing
-101,unfamiliar,pianostimmgeraet.png,Piano,stimmen,piano,tuning,Eierkarton,pressen,egg carton,pressing
-102,unfamiliar,Handzentrifuge.png,von Hand,zentrifugieren,by hand,centrifugating,Lieferungen,abzählen,deliveries,counting
-103,unfamiliar,Kartoffelstampfer.png,Kartoffeln,stampfen,potatoes,mashing,Nachricht,morsen,message,signaling
-104,unfamiliar,ninjasterne.png,Waffe,werfen,weapon,throwing,elektrische Spannung,prüfen,electric current,measuring
-105,unfamiliar,dieselstandmessgeraet.png,Tankfüllstand,messen,fuel tank level,gauging,Tonpott,trommeln,clay pot,drumming
-106,unfamiliar,uhrwerk.png,Uhrzeit,anzeigen,time,displaying,altes Ritual,hacken,ancient ritual,chopping
-107,unfamiliar,Windgeschwindigkeitsmesser.png,Windgeschwindigkeit,messen,wind speed,measuring,Waffe,entflammen,weapon,inflaming
-108,unfamiliar,schluesselloch-cutter.png,Schlüsselloch,stanzen,keyhole,punching,Automat,Eier ausbrüten,machine,incubating eggs
-109,unfamiliar,ziegelformer.png,Ziegelsteine,formen,bricks,forming,Schallplatte,abtasten,vinyl record,reading
-110,unfamiliar,Becher-Grammophon.png,Becher,Schall auffangen,drinking cup,picking up sound,Schlüsselloch,stanzen,keyhole,punching
-111,unfamiliar,Vakuumpumpe.png,Luft,abpumpen,air,pumping out,Briketts,pressen,briquette,pressing
-112,unfamiliar,mundsperrer.png,Mund,offen halten,mouth,keeping open,Orgelton,erzeugen,organ sound,making
-113,unfamiliar,Autobatterie-Spannungstester.png,Autobatterie,Spannung testen,car battery,measuring voltage,Becher,Schall auffangen,drinking cup,picking up sound
-114,unfamiliar,Sonnenlichtsintensitaetsmesser.png,Sonnenlicht,Intensität messen,sunlight,measure intensity,Krawatten,aufhängen,necktie,hanging up
-115,unfamiliar,wagenradschloss.png,Kutschrad,anschließen,carriage wheel,locking,Angelschnur,kurbeln,fishing line,winding
-116,unfamiliar,Eierwaage.png,Eier,wiegen,eggs,weighing,Leierkasten,klingen,barrel organ,making sounds
-117,unfamiliar,Selbstwaessernder_Blumentopf.png,Blumentopf,sich selbst wässern,flowerpot,self-watering,Glas,schneiden,glass,cutting
-118,unfamiliar,Siebenmeilenstiefel.png,Schritte,vergrößern,steps,extending,Tabletten,zerteilen,pill,splitting
-119,unfamiliar,Muenzspender.png,Münzen,aufbewahren,coins,storing,Kutschrad,anschließen,carriage wheel,locking
-120,unfamiliar,loetlampe.png,Brenner,löten,burner,soldering,Flaschenkorken einführen,einführen,bottle cork,inserting
+item_id,familiarity,filename,match,match_en,nonmatch,nonmatch_en
+121,familiar,ampel.png,"Verkehr, leiten",NA,NA,NA
+122,familiar,angel.png,"Fisch, angeln",NA,NA,NA
+123,familiar,anker.png,"Boot, verankern",NA,NA,NA
+124,familiar,aschenbecher.png,"Zigarette, ablegen",NA,NA,NA
+125,familiar,astschere.png,"Äste, schneiden",NA,NA,NA
+126,familiar,axt.png,"Bäume, fällen",NA,NA,NA
+127,familiar,besen.png,"Fußboden, kehren",NA,NA,NA
+128,familiar,bohrmaschine.png,"Loch, bohren",NA,NA,NA
+129,familiar,brecheisen.png,"Tür, aufbrechen",NA,NA,NA
+130,familiar,brille.png,"Sehschwäche, korrigieren",NA,NA,NA
+131,familiar,buegel.png,"Kleidung, aufhängen",NA,NA,NA
+132,familiar,buegeleisen.png,"Hemden, bügeln",NA,NA,NA
+133,familiar,buerostuhl.png,"Büro, sitzen",NA,NA,NA
+134,familiar,buerste.png,"Haare, bürsten",NA,NA,NA
+135,familiar,diabolo.png,"Diabolo, spielen",NA,NA,NA
+136,familiar,dosenoeffner.png,"Dose, öffnen",NA,NA,NA
+137,familiar,drucker.png,"Papier, drucken",NA,NA,NA
+138,familiar,dusche.png,"Körper, duschen",NA,NA,NA
+139,familiar,eierschneider.png,"Eier, schneiden",NA,NA,NA
+140,familiar,fahrrad.png,"Fahrrad, fahren",NA,NA,NA
+141,familiar,fernglas.png,"Dinge, vergrößern",NA,NA,NA
+142,familiar,fernseher.png,"Fernsehen, schauen",NA,NA,NA
+143,familiar,feuerzeug.png,"Feuer, machen",NA,NA,NA
+144,familiar,flaschenoeffner.png,"Bierflasche, öffnen",NA,NA,NA
+145,familiar,foehn.png,"Haare, trocknen",NA,NA,NA
+146,familiar,fueller.png,"Handschrift, schreiben",NA,NA,NA
+147,familiar,gabel.png,"Gabel, essen",NA,NA,NA
+148,familiar,gewehr.png,"Gewehr, schießen",NA,NA,NA
+149,familiar,giesskanne.png,"Gießkanne, gießen",NA,NA,NA
+150,familiar,gitarre.png,"Gitarre, spielen",NA,NA,NA
+151,familiar,gluehbirne.png,"Licht, machen",NA,NA,NA
+152,familiar,grill.png,"Fleisch, grillen",NA,NA,NA
+153,familiar,hacke.png,"Unkraut, jäten",NA,NA,NA
+154,familiar,hammer.png,"Nägel, einschlagen",NA,NA,NA
+155,familiar,handruehrgeraet.png,"Teig, rühren",NA,NA,NA
+156,familiar,handschellen.png,"Handschellen, anlegen",NA,NA,NA
+157,familiar,handy.png,"Telefon, anrufen",NA,NA,NA
+158,familiar,hanteln.png,"Gewichte, stemmen",NA,NA,NA
+159,familiar,herd.png,"Essen, kochen",NA,NA,NA
+160,familiar,kaefig.png,"Haustiere, transportieren",NA,NA,NA
+161,familiar,kaffeemaschine.png,"Kaffee, kochen",NA,NA,NA
+162,familiar,kamera.png,"Fotos, schießen",NA,NA,NA
+163,familiar,kamm.png,"Haare, kämmen",NA,NA,NA
+164,familiar,kasse.png,"Geld, aufbewahren",NA,NA,NA
+165,familiar,kassette.png,"Musik, abspielen",NA,NA,NA
+166,familiar,kehrschaufel.png,"Dreck, wegkehren",NA,NA,NA
+167,familiar,kinderwagen.png,"Kleinkind, fahren",NA,NA,NA
+168,familiar,klavier.png,"Klavier, spielen",NA,NA,NA
+169,familiar,klobuerste.png,"Toilette, putzen",NA,NA,NA
+170,familiar,koffer.png,"Reisegepäck, transportieren",NA,NA,NA
+171,familiar,kompass.png,"Himmelsrichtung, bestimmen",NA,NA,NA
+172,familiar,kopfhoerer.png,"Musik, hören",NA,NA,NA
+173,familiar,korkenzieher.png,"Weinflasche, öffnen",NA,NA,NA
+174,familiar,kuchenform.png,"Kuchen, backen",NA,NA,NA
+175,familiar,kuechenmaschine.png,"Zutaten, rühren",NA,NA,NA
+176,familiar,lampe.png,"Licht, machen",NA,NA,NA
+177,familiar,leiter.png,"Leiter, steigen",NA,NA,NA
+178,familiar,lineal.png,"Abstand, messen",NA,NA,NA
+179,familiar,locher.png,"Papier, lochen",NA,NA,NA
+180,familiar,maulschluessel.png,"Schrauben, festziehen",NA,NA,NA
+181,familiar,mikrofon.png,"Stimme, verstärken",NA,NA,NA
+182,familiar,mikrowelle.png,"Fertiggerichte, erhitzen",NA,NA,NA
+183,familiar,milchschaeumer.png,"Milch, aufschäumen",NA,NA,NA
+184,familiar,naehmaschine.png,"Kleidung, nähen",NA,NA,NA
+185,familiar,nagelfeile.png,"Nägel, feilen",NA,NA,NA
+186,familiar,nudelholz.png,"Teig, ausrollen",NA,NA,NA
+187,familiar,pfanne.png,"Essen, braten",NA,NA,NA
+188,familiar,pfannenwender.png,"Pfannkuchen, wenden",NA,NA,NA
+189,familiar,pfeffermuehle.png,"Pfeffer, mahlen",NA,NA,NA
+190,familiar,pfeife.png,"Tabak, rauchen",NA,NA,NA
+191,familiar,pinzette.png,"Schiefer, entfernen",NA,NA,NA
+192,familiar,puerierstab.png,"Essen, zerkleinern",NA,NA,NA
+193,familiar,raclette-grill.png,"Raclette, essen",NA,NA,NA
+194,familiar,radiergummi.png,"Bleistift, radieren",NA,NA,NA
+195,familiar,radio.png,"Radio, hören",NA,NA,NA
+196,familiar,rasenmaeher.png,"Rasen, mähen",NA,NA,NA
+197,familiar,rasierpinsel.png,"Makeup, auftragen",NA,NA,NA
+198,familiar,rechen.png,"Laub, rechen",NA,NA,NA
+199,familiar,regenschirm.png,"Regen, abhalten",NA,NA,NA
+200,familiar,reibe.png,"Käse, reiben",NA,NA,NA
+201,familiar,saege.png,"Holz, sägen",NA,NA,NA
+202,familiar,salzstreuer.png,"Salz, würzen",NA,NA,NA
+203,familiar,sattel.png,"Pferd, satteln",NA,NA,NA
+204,familiar,schalter.png,"Licht, anschalten",NA,NA,NA
+205,familiar,schaufel.png,"Löcher, graben",NA,NA,NA
+206,familiar,schaumloeffel.png,"Essen, servieren",NA,NA,NA
+207,familiar,schere.png,"Papier, schneiden",NA,NA,NA
+208,familiar,schluessel.png,"Tür, aufschließen",NA,NA,NA
+209,familiar,schneebesen.png,"Teig, rühren",NA,NA,NA
+210,familiar,schraubenzieher.png,"Schrauben, drehen",NA,NA,NA
+211,familiar,sichel.png,"Gras, schneiden",NA,NA,NA
+212,familiar,sieb.png,"Nudeln, abgießen",NA,NA,NA
+213,familiar,slotmachine.png,"Glücksspiel, spielen",NA,NA,NA
+214,familiar,sparschwein.png,"Geld, sparen",NA,NA,NA
+215,familiar,spritze.png,"Medikamente, spritzen",NA,NA,NA
+216,familiar,steckdose.png,"Strom, anschließen",NA,NA,NA
+217,familiar,stempel.png,"Siegel, stempeln",NA,NA,NA
+218,familiar,stethoskop.png,"Herzfrequenz, hören",NA,NA,NA
+219,familiar,tacker.png,"Papiere, zusammen heften",NA,NA,NA
+220,familiar,taschenmesser.png,"Taschenmesser, benutzen",NA,NA,NA
+221,familiar,telefon.png,"Telefon, anrufen",NA,NA,NA
+222,familiar,tesaroller.png,"Klebeband, abrollen",NA,NA,NA
+223,familiar,thermometer.png,"Temperatur, anzeigen",NA,NA,NA
+224,familiar,tischtennisschlaeger.png,"Tischtennis, spielen",NA,NA,NA
+225,familiar,trichter.png,"Flüssigkeit, einfüllen",NA,NA,NA
+226,familiar,trillerpfeife.png,"Töne, pfeifen",NA,NA,NA
+227,familiar,trommel.png,"Töne, trommeln",NA,NA,NA
+228,familiar,trompete.png,"Trompete, spielen",NA,NA,NA
+229,familiar,uhr.png,"Zeit, anzeigen",NA,NA,NA
+230,familiar,ventilator.png,"Luft, kühlen",NA,NA,NA
+231,familiar,videokassette.png,"Video, abspielen",NA,NA,NA
+232,familiar,waage.png,"Gewicht, wiegen",NA,NA,NA
+233,familiar,waschbecken.png,"Hände, waschen",NA,NA,NA
+234,familiar,waschmaschine.png,"Kleidung, waschen",NA,NA,NA
+235,familiar,wasserkocher.png,"Wasser, kochen",NA,NA,NA
+236,familiar,wecker.png,"Wecker, klingeln",NA,NA,NA
+237,familiar,zahnbuerste.png,"Zähne, putzen",NA,NA,NA
+238,familiar,zange.png,"Draht, biegen",NA,NA,NA
+239,familiar,zirkel.png,"Kreise, zeichnen",NA,NA,NA
+240,familiar,zollstock.png,"Abstand, messen",NA,NA,NA
+1,unfamiliar,galvanometer.png,"elektrische Spannung, prüfen","{[electric current, measuring]}","Makkaroni, formen","{[macaroni, forming]}"
+2,unfamiliar,nudelmaschine.png,"Makkaroni, formen","{[macaroni, forming]}","Kuh, vom Zaun abhalten","{[cow, keeping away from the fence]}"
+3,unfamiliar,Knochensaege.png,"Knochen, sägen","{[bones, sawing]}","Streckenmaß, Sonnenlicht nutzen","{[distance measure, using sunrays]}"
+4,unfamiliar,Unkraut-Jaetzange.png,"Unkraut, jäten","{[weed, removing]}","Uhr, mit Wärme betreiben","{[clock, operating with heat]}"
+5,unfamiliar,mausefalle.png,"Mausefalle, zuschnappen","{[mousetrap, snap-shutting]}","Brillenglas, zuschneiden","{[eyeglass lens, cutting]}"
+6,unfamiliar,Goldmuenzen-Waage.png,"Goldmünzen, wiegen","{[gold coin, weighing]}","Farbe, vom Fenster abschleifen","{[paint, scraping off the window]}"
+7,unfamiliar,Knie-Schraubstock.png,"Knie, fixieren","{[knee, fixating]}","Buchstaben, tippen","{[letter, typing]}"
+8,unfamiliar,Eierkarton-Presse.png,"Eierkarton, pressen","{[egg carton, pressing]}","Tabak, zermahlen","{[tobacco, pulverize]}"
+9,unfamiliar,Baum-Klettereisen.png,"Baum, erklettern","{[tree, climbing]}","Rotation, Ladung erzeugen","{[rotation, creating electric charge]}"
+10,unfamiliar,schreibmaschine.png,"Buchstaben, tippen","{[letter, typing]}","Pferdehuf, Halt geben","{[horse hoof, giving grip]}"
+11,unfamiliar,Elektro-Akkordeon.png,"Akkordeon, spielen","{[accordion, playing]}","Seil, schneiden","{[rope, cutting]}"
+12,unfamiliar,trimmdichgeraet.png,"Körper, trainieren","{[body, training]}","Buch, offen halten","{[book, binding]}"
+13,unfamiliar,paint_scraper.png,"Farbe, vom Fenster abschleifen","{[paint, scraping off the window]}","von Hand, zentrifugieren","{[by hand, centrifugating]}"
+14,unfamiliar,heizpilz.png,"Außenbereich, heizen","{[outdoor area, heating]}","Rasierklinge, schärfen","{[razor blade, sharpening]}"
+15,unfamiliar,mikroskop.png,"Pflanzenteile, vergrößern","{[plant parts, magnifying]}","Katzenklo, sich selbst reinigen","{[litter box, self-cleaning]}"
+16,unfamiliar,krawattenaufhaenger.png,"Krawatten, aufhängen","{[necktie, hanging up]}","Zeichnungen, vermessen","{[drawings, measuring]}"
+17,unfamiliar,grammophonnadel.png,"Schallplatte, abtasten","{[vinyl record, reading]}","Ball, katapultieren","{[ball, catapulting]}"
+18,unfamiliar,glasschneider.png,"Glas, schneiden","{[glass, cutting]}","Eier, wiegen","{[eggs, weighing]}"
+19,unfamiliar,Brikettpresse.png,"Briketts, pressen","{[briquette, pressing]}","Narkosemittel, abgeben","{[anesthetic, administering]}"
+20,unfamiliar,orgelpfeife.png,"Orgelton, erzeugen","{[organ sound, making]}","Bandage, rollen","{[bandage, rolling]}"
+21,unfamiliar,spannungsgeraet.png,"Spannung, erzeugen","{[electric current, making]}","Fußstütze, reiten","{[footrest, horseback riding]}"
+22,unfamiliar,anesthesia_inhaler.png,"Narkosemittel, abgeben","{[anesthetic, administering]}","Nüsse, aufbrechen","{[nuts, cracking]}"
+23,unfamiliar,Bandagen-Roller.png,"Bandage, rollen","{[bandage, rolling]}","Schnee, rodeln","{[snow, sleighing]}"
+24,unfamiliar,weinfassoeffner.png,"Weinfass, Loch einschlagen","{[wine barrel, smashing a hole]}","Tier, einfangen","{[animal, trapping]}"
+25,unfamiliar,cork_inserter.png,"Flaschenkorken, einführen","{[bottle cork, inserting]}","Pferd, im Moor laufen","{[horse, walking in the moor]}"
+26,unfamiliar,Huehnereier-Brutautomat.png,"Automat, Eier ausbrüten","{[machine, incubating eggs]}","Windgeschwindigkeit, messen","{[wind speed, measuring]}"
+27,unfamiliar,Korngarbengreifer.png,"Korngarbe, greifen","{[sheaf, grabbing]}","Treibhaus, heizen","{[glass house, heating]}"
+28,unfamiliar,Briefwaage.png,"Brief, wiegen","{[letter, weighing]}","Korngarbe, greifen","{[sheaf, grabbing]}"
+29,unfamiliar,4erbohrer.png,"Löcher, bohren","{[hole, drilling]}","Sonnenlicht, Intensität messen","{[sunlight, measure intensity]}"
+30,unfamiliar,Grossfisch-Angelkurbel.png,"Angelschnur, kurbeln","{[fishing line, winding]}","Glaskörper, musizieren","{[glass body, making music]}"
+31,unfamiliar,Kurvenmalgeraet.png,"Kurven, malen","{[curve, drawing]}","Nussöl, pressen","{[nut oil, pressing]}"
+32,unfamiliar,radiofrequenzeinsteller.png,"Radiofrequenz, einstellen","{[radio frequency, tuning]}","Erektion, helfen","{[erection, helping]}"
+33,unfamiliar,Zaepfchenpresse.png,"Zäpfchen, pressen","{[suppository, pressing]}","Unkraut, jäten","{[weed, removing]}"
+34,unfamiliar,dosenoeffner_fuer_faesser.png,"Fass, öffnen","{[barrel, opening]}","Pflanzenteile, vergrößern","{[plant parts, magnifying]}"
+35,unfamiliar,karbidlampe.png,"Bergbaustollen, beleuchten","{[mining tunnel, lightening]}","Knie, fixieren","{[knee, fixating]}"
+36,unfamiliar,antizaungurt.png,"Kuh, vom Zaun abhalten","{[cow, keeping away from the fence]}","Radiofrequenz, einstellen","{[radio frequency, tuning]}"
+37,unfamiliar,Saemaschine.png,"Saatgut, gleichmäßig aussäen","{[seeds, sowing evenly]}","Fass, öffnen","{[barrel, opening]}"
+38,unfamiliar,Flaschentrockner.png,"Flaschen, trocknen","{[bottles, drying]}","Bleistift, anspitzen","{[pencil, sharpening]}"
+39,unfamiliar,Thermopneumatische_Uhr.png,"Uhr, mit Wärme betreiben","{[clock, operating with heat]}","Körper, untersuchen","{[body, training]}"
+40,unfamiliar,kimkim.png,"Tonpott, trommeln","{[clay pot, drumming]}","Piano, stimmen","{[piano, tuning]}"
+41,unfamiliar,Sprengstoff-Zuender.png,"Sprengstoffexplosion, auslösen","{[dynamite explosion, triggering]}","Fisch, wiegen","{[fish, weighing]}"
+42,unfamiliar,pferdeueberschuh.png,"Pferdehuf, Halt geben","{[horse hoof, giving grip]}","Zäpfchen, pressen","{[suppository, pressing]}"
+43,unfamiliar,Bleistiftspitzer.png,"Bleistift, anspitzen","{[pencil, sharpening]}","Angel, Köder markieren","{[fishing rod, marking bait]}"
+44,unfamiliar,Nussoelpressmaschine.png,"Nussöl, pressen","{[nut oil, pressing]}","Zeichen, einbrennen","{[marks, burning in]}"
+45,unfamiliar,rasierklingenschaerfer.png,"Rasierklinge, schärfen","{[razor blade, sharpening]}","Kurven, malen","{[curve, drawing]}"
+46,unfamiliar,plattenheber.png,"heiße Platten, anheben","{[hot plates, lifting]}","Kleidung, im Eimer waschen","{[clothes, washing in a bucket]}"
+47,unfamiliar,filmrolle.png,"Film, aufspulen","{[film roll, winding]}","Mund, offen halten","{[mouth, keeping open]}"
+48,unfamiliar,Flammenwerfer-Aufsatz.png,"Waffe, entflammen","{[weapon, inflaming]}","Uhrzeit, anzeigen","{[time, displaying]}"
+49,unfamiliar,mikrotom.png,"Mikroskop-Proben, schneiden","{[microscopic samples, slicing]}","heiße Platten, anheben","{[hot plates, lifting]}"
+50,unfamiliar,Glasresonanz-Cello.png,"Glaskörper, musizieren","{[glass body, making music]}","Kork, flach pressen","{[cork, pressing flat]}"
+51,unfamiliar,dampfzerstaeuber.png,"Dampf, zerstäuben","{[steam, spraying]}","Buch, binden","{[book, opening]}"
+52,unfamiliar,mandelnentferner.png,"Mandeln, operieren","{[kidneys, operating]}","Film, aufspulen","{[film roll, winding]}"
+53,unfamiliar,toaster.png,"Toastbrot, rösten","{[toast, roasting]}","Autobatterie, Spannung testen","{[car battery, measuring voltage]}"
+54,unfamiliar,steigbuegel.png,"Fußstütze, reiten","{[footrest, horseback riding]}","Stromstärke, messen","{[current, measuring]}"
+55,unfamiliar,feuertuergelenk.png,"Türgelenk, Feuer überstehen","{[door hinge, surviving fires]}","Botschaft, telegrafieren","{[message, telegraphing]}"
+56,unfamiliar,einkufiger_schlitten.png,"Schnee, rodeln","{[snow, sleighing]}","Dampf, zerstäuben","{[steam, spraying]}"
+57,unfamiliar,Nussknacker.png,"Nüsse, aufbrechen","{[nuts, cracking]}","Ziegelsteine, formen","{[bricks, forming]}"
+58,unfamiliar,elektrisches_radiergummi.png,"Radiergummi, mit Strom betreiben","{[eraser, operating with electricity]}","Münzen, aufbewahren","{[coins, storing]}"
+59,unfamiliar,Treibhausheizgeraet.png,"Treibhaus, heizen","{[glass house, heating]}","Messer, schleifen","{[knife, sharpening]}"
+60,unfamiliar,Telegraphier-Geraet.png,"Botschaft, telegrafieren","{[message, telegraphing]}","Toastbrot, rösten","{[toast, roasting]}"
+61,unfamiliar,schwimmer.png,"Angel, Köder markieren","{[fishing rod, marking bait]}","Baum, erklettern","{[tree, climbing]}"
+62,unfamiliar,Selbstreinigendes_Katzenklo.png,"Katzenklo, sich selbst reinigen","{[litter box, self-cleaning]}","Tankfüllstand, messen","{[fuel tank level, gauging]}"
+63,unfamiliar,pleximeter.png,"Körper, untersuchen","{[body, examining]}","Schuhe, auf Eis laufen","{[shoes, walking on ice]}"
+64,unfamiliar,brillenglasschneidemaschine.png,"Brillenglas, zuschneiden","{[eyeglass lens, cutting]}","Saatgut, gleichmäßig aussäen","{[seeds, sowing evenly]}"
+65,unfamiliar,drahtbieger.png,"Draht, wickeln","{[wire, winding]}","Bergbaustollen, beleuchten","{[mining tunnel, lightening]}"
+66,unfamiliar,Buecher-Offenhalter.png,"Buch, offen halten","{[book, opening]}","Sprengstoffexplosion, auslösen","{[dynamite explosion, triggering]}"
+67,unfamiliar,haecksler.png,"Feldanbau, häckseln","{[harvest, chopping]}","Draht, wickeln","{[wire, winding]}"
+68,unfamiliar,Roemisches_Senklot.png,"Schnurlot, absenken","{[plummet, letting down]}","Korken, formen","{[bottle cork, forming]}"
+69,unfamiliar,filar_micrometer.png,"Sternenbilder, vermessen","{[stellar constellation, measuring]}","Schnurlot, absenken","{[plummet, letting down]}"
+70,unfamiliar,Morse-Geraet.png,"Nachricht, morsen","{[message, signaling]}","Feldanbau, häckseln","{[harvest, chopping]}"
+71,unfamiliar,Stampf-Fiedel.png,"Musikgerät, stampfen","{[musical instrument, stamping]}","Goldmünzen, wiegen","{[gold coin, weighing]}"
+72,unfamiliar,schneekette.png,"Schuhe, auf Eis laufen","{[shoes, walking on ice]}","Geschwindigkeit, ermitteln","{[speed, determining]}"
+73,unfamiliar,mechanisches_tachometer.png,"Geschwindigkeit, ermitteln","{[speed, determining]}","Mausefalle, zuschnappen","{[mousetrap, snap-shutting]}"
+74,unfamiliar,Brenneisen.png,"Zeichen, einbrennen","{[marks, burning in]}","Luftdruck, messen","{[air pressure, measuring]}"
+75,unfamiliar,Tabakschneider.png,"Tabak, zermahlen","{[tobacco, pulverize]}","Flaschen, trocknen","{[bottles, drying]}"
+76,unfamiliar,galvanometer_2.png,"Stromstärke, messen","{[current, measuring]}","Mandeln, operieren","{[kidneys, operating]}"
+77,unfamiliar,tierfalle.png,"Tier, einfangen","{[animal, trapping]}","Maiskolben, entkörnen","{[corncob, removing grains]}"
+78,unfamiliar,Messerschleifer.png,"Messer, schleifen","{[knife, sharpening]}","Schritte, vergrößern","{[steps, extending]}"
+79,unfamiliar,tibetischer_leierkasten.png,"Leierkasten, klingen","{[barrel organ, making sounds]}","Fass, anheben","{[barrel, lifting]}"
+80,unfamiliar,Buchbinder.png,"Buch, binden","{[book, binding]}","Löcher, bohren","{[hole, drilling]}"
+81,unfamiliar,korkenpresse.png,"Kork, flach pressen","{[cork, pressing flat]}","Elektroschock, spielen","{[electric shock, playing]}"
+82,unfamiliar,tablettenteiler.png,"Tabletten, zerteilen","{[pill, splitting]}","Blumentopf, sich selbst wässern","{[flowerpot, self-watering]}"
+83,unfamiliar,hebel_fuer_fassbauer.png,"Fass, anheben","{[barrel, lifting]}","Mikroskop-Proben, schneiden","{[microscopic samples, slicing]}"
+84,unfamiliar,pferdeschuh.png,"Pferd, im Moor laufen","{[horse, walking in the moor]}","Luft, abpumpen","{[air, pumping out]}"
+85,unfamiliar,Rituelles_Hackmesser.png,"altes Ritual, hacken","{[ancient ritual, chopping]}","Spannung, erzeugen","{[electric current, making]}"
+86,unfamiliar,Historische_Waschmaschine.png,"Kleidung, im Eimer waschen","{[clothes, washing in a bucket]}","Türgelenk, Feuer überstehen","{[door hinge, surviving fires]}"
+87,unfamiliar,Maiskolben-Entkoerner.png,"Maiskolben, entkörnen","{[corncob, removing grains]}","Brief, wiegen","{[letter, weighing]}"
+88,unfamiliar,Ball-Wurfmaschine.png,"Ball, katapultieren","{[ball, catapulting]}","Radiergummi, mit Strom betreiben","{[eraser, operating with electricity]}"
+89,unfamiliar,planimeter.png,"Zeichnungen, vermessen","{[drawings, measuring]}","Brenner, löten","{[burner, soldering]}"
+90,unfamiliar,elektroschockspiel.png,"Elektroschock, spielen","{[electric shock, playing]}","Weinfass, Loch einschlagen","{[wine barrel, smashing a hole]}"
+91,unfamiliar,zaehlgeraet_fuer_lieferungen.png,"Lieferungen, abzählen","{[deliveries, counting]}","Außenbereich, heizen","{[outdoor area, heating]}"
+92,unfamiliar,Erzeugt_statische_Ladung.png,"Rotation, Ladung erzeugen","{[rotation, creating electric charge]}","Musikgerät, stampfen","{[musical instrument, stamping]}"
+93,unfamiliar,Kuenstliches Herz.png,"Herz, durch Maschine ersetzen","{[heart, replacing with machine]}","Kerzen, löschen","{[candles, extinguishing]}"
+94,unfamiliar,seilschneider.png,"Seil, schneiden","{[rope, cutting]}","Akkordeon, spielen","{[accordion, playing]}"
+95,unfamiliar,Fischwaage.png,"Fisch, wiegen","{[fish, weighing]}","Herz, durch Maschine ersetzen","{[heart, replacing with machine]}"
+96,unfamiliar,kerzenloescher.png,"Kerzen, löschen","{[candles, extinguishing]}","Körper, trainieren","{[body, examining]}"
+97,unfamiliar,Korkenpresse_2.png,"Korken, formen","{[bottle cork, forming]}","Sternenbilder, vermessen","{[stellar constellation, measuring]}"
+98,unfamiliar,Mechanische_Erektionshilfe.png,"Erektion, helfen","{[erection, helping]}","Waffe, werfen","{[weapon, throwing]}"
+99,unfamiliar,heliotrop.png,"Streckenmaß, Sonnenlicht nutzen","{[distance measure, using sunrays]}","Kartoffeln, stampfen","{[potatoes, mashing]}"
+100,unfamiliar,Luftdruckmessgeraete.png,"Luftdruck, messen","{[air pressure, measuring]}","Knochen, sägen","{[bones, sawing]}"
+101,unfamiliar,pianostimmgeraet.png,"Piano, stimmen","{[piano, tuning]}","Eierkarton, pressen","{[egg carton, pressing]}"
+102,unfamiliar,Handzentrifuge.png,"von Hand, zentrifugieren","{[by hand, centrifugating]}","Lieferungen, abzählen","{[deliveries, counting]}"
+103,unfamiliar,Kartoffelstampfer.png,"Kartoffeln, stampfen","{[potatoes, mashing]}","Nachricht, morsen","{[message, signaling]}"
+104,unfamiliar,ninjasterne.png,"Waffe, werfen","{[weapon, throwing]}","elektrische Spannung, prüfen","{[electric current, measuring]}"
+105,unfamiliar,dieselstandmessgeraet.png,"Tankfüllstand, messen","{[fuel tank level, gauging]}","Tonpott, trommeln","{[clay pot, drumming]}"
+106,unfamiliar,uhrwerk.png,"Uhrzeit, anzeigen","{[time, displaying]}","altes Ritual, hacken","{[ancient ritual, chopping]}"
+107,unfamiliar,Windgeschwindigkeitsmesser.png,"Windgeschwindigkeit, messen","{[wind speed, measuring]}","Waffe, entflammen","{[weapon, inflaming]}"
+108,unfamiliar,schluesselloch-cutter.png,"Schlüsselloch, stanzen","{[keyhole, punching]}","Automat, Eier ausbrüten","{[machine, incubating eggs]}"
+109,unfamiliar,ziegelformer.png,"Ziegelsteine, formen","{[bricks, forming]}","Schallplatte, abtasten","{[vinyl record, reading]}"
+110,unfamiliar,Becher-Grammophon.png,"Becher, Schall auffangen","{[drinking cup, picking up sound]}","Schlüsselloch, stanzen","{[keyhole, punching]}"
+111,unfamiliar,Vakuumpumpe.png,"Luft, abpumpen","{[air, pumping out]}","Briketts, pressen","{[briquette, pressing]}"
+112,unfamiliar,mundsperrer.png,"Mund, offen halten","{[mouth, keeping open]}","Orgelton, erzeugen","{[organ sound, making]}"
+113,unfamiliar,Autobatterie-Spannungstester.png,"Autobatterie, Spannung testen","{[car battery, measuring voltage]}","Becher, Schall auffangen","{[drinking cup, picking up sound]}"
+114,unfamiliar,Sonnenlichtsintensitaetsmesser.png,"Sonnenlicht, Intensität messen","{[sunlight, measure intensity]}","Krawatten, aufhängen","{[necktie, hanging up]}"
+115,unfamiliar,wagenradschloss.png,"Kutschrad, anschließen","{[carriage wheel, locking]}","Angelschnur, kurbeln","{[fishing line, winding]}"
+116,unfamiliar,Eierwaage.png,"Eier, wiegen","{[eggs, weighing]}","Leierkasten, klingen","{[barrel organ, making sounds]}"
+117,unfamiliar,Selbstwaessernder_Blumentopf.png,"Blumentopf, sich selbst wässern","{[flowerpot, self-watering]}","Glas, schneiden","{[glass, cutting]}"
+118,unfamiliar,Siebenmeilenstiefel.png,"Schritte, vergrößern","{[steps, extending]}","Tabletten, zerteilen","{[pill, splitting]}"
+119,unfamiliar,Muenzspender.png,"Münzen, aufbewahren","{[coins, storing]}","Kutschrad, anschließen","{[carriage wheel, locking]}"
+120,unfamiliar,loetlampe.png,"Brenner, löten","{[burner, soldering]}","Flaschenkorken einführen, einführen","{[bottle cork, inserting]}"
