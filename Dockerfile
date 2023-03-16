@@ -11,7 +11,9 @@ USER root
 
 RUN \
     # Install latest version of the EEG pipeline
-    pip install --upgrade git+https://github.com/alexenge/hu-neuro-pipeline.git@a318bf0 \
+    pip install --upgrade git+https://github.com/alexenge/hu-neuro-pipeline.git@breaking/average-by-query \
+    # Install R packages
+    && install2.r --error --skipinstalled LSAfun \
     # Add default user permissions
     && chown -R "$NB_USER" "$HOME"
 
