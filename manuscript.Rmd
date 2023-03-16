@@ -116,7 +116,7 @@ run <- list(
   rating_lsa = FALSE,
   eeg_processing = FALSE,
   mixed_models = FALSE,
-  figures = TRUE
+  figures = FALSE
 )
 ```
 
@@ -128,7 +128,7 @@ We measured event-related potentials (ERPs) to investigate at which stages in th
 We found that semantically informed as compared to [uninformed]{color="blue"} perception was associated with larger amplitudes in the N170 component (150--200 ms), reduced amplitudes in the N400 component (400--700 ms), and a late decrease in alpha/beta band power.
 When the same objects were presented once more without any information, the N400 and event-related power effects persisted, and we also observed enlarged amplitudes in the P1 component (100--150 ms) in response to objects for which semantically informed perception had taken place.
 Consistent with previous work, this suggests that obtaining semantic information about previously unfamiliar objects alters aspects of their lower-level visual perception (P1 component), higher-level visual perception (N170 component), and semantic processing (N400 component, event-related power).
-Our study is the first to show that such effects [do not require an extensive learning history but are rather observed immediately after semantic information has been provided for the first time.]{color="blue"}
+Our study is the first to show that such effects [occur instantly after semantic information has been provided for the first time, without requiring  extensive learning.]{color="blue"}
 
 *Key words*: objects; semantic knowledge; visual perception; event-related potentials
 
@@ -164,7 +164,7 @@ After learning, an orthogonal task was used to compare ERPs in response to objec
 This revealed differences not only in late ERP components associated with semantic processing (i.e., the N400 component) but also in the visual P1 component [@abdelrahman2008; @maier2019; @samaha2018; @weller2019].
 The early peak of this component and its source in the occipital cortex [@abdelrahman2008] point to an immediate effect of semantic knowledge on visual perception.
 It is less clear, however, if this tentative top-down effect of semantic cognition on perception acts in an online fashion (i.e., directly modulating perceptual processing), or more indirectly, by altering stored visual [memory]{color="blue"} representations over the course of learning, which would then get reactivated once the object is reencountered later on.
-[The first account (i.e., an online top-down effect) would be in accordance with predictive processing theories that posit that higher-level areas influence ongoing perceptual processing by sending predictions down to lower-level areas [e.g., @rao1999; @friston2009; @clark2013; @lupyan2015].
+[The first account (i.e., an online top-down effect) would be in accordance with predictive coding theories that posit that higher-level areas influence ongoing perceptual processing by sending predictions down to lower-level areas [e.g., @rao1999; @friston2009; @clark2013; @lupyan2015].
 The second account (i.e., re-activation of stored memory representations) would argue against such online effects, positing that differences in ERPs emerge merely due to comparisons with visual memory representations or prototypes that have been built up over the course of learning [e.g., @palmeri2008].]{color="blue"}
 
 To answer this question, we measured ERPs in response to unfamiliar objects directly while participants gained a semantic understanding of their function.
@@ -234,8 +234,8 @@ rating_stats <- compute_rating_stats(rating)
 cosines <- compute_average_cosines(rating)
 ```
 
-[As a manipulation check, we ran an online rating study where we presented 10 German speakers (3 female, 7 male, mean age = 25.3 years, range 20--35 years) with all 240 visual objects in random order and asked them to generate their own keywords that would describe the presumed function of the object.
-We used latent semantic analysis with a word2vec embedding (deepset GmbH, Berlin, Germany, www.deepset.ai/german-word-embeddings) pre-trained on the German Wikipedia to estimate semantic distances between these participant-generated keywords and the keywords used in our main EEG experiment (Supplementary Figures 1 and 2).
+[As a manipulation check, we ran an online rating study where we presented 10 German speakers (3 female, 7 male, mean age = 25.3 years, range 20--35 years; none took part in the main study) with all 240 visual objects in random order and asked them to generate their own keywords that would describe the presumed function of the object.
+We used latent semantic analysis [@gunther2019] with a word2vec embedding (deepset GmbH, Berlin, Germany, www.deepset.ai/german-word-embeddings) pre-trained on the German Wikipedia to estimate semantic distances between these participant-generated keywords and the keywords used in our main EEG experiment (Supplementary Figures 1 and 2).
 In brief, it was substantially easier for participants to come with correct descriptions of familiar objects (mean cosine distance ± standard error = `r filter(rating_stats$means, fam_condition == "familiar")$emmean` ± `r filter(rating_stats$means, fam_condition == "familiar")$SE`) than for unfamiliar objects (`r filter(rating_stats$means, fam_condition == "matching")$emmean` ± `r filter(rating_stats$means, fam_condition == "matching")$SE`), $t$(`r print_dof(filter(rating_stats$contrasts, contrast == "familiar - matching")$df)`) = `r filter(rating_stats$contrasts, contrast == "familiar - matching")$t_value`, $p_\text{corr}$ `r print_p(filter(rating_stats$contrasts, contrast == "familiar - matching")$p_value)` (linear mixed-effects model).
 In fact, this similarity between participant-generated keywords for the unfamiliar objects and the object-matching keywords presented in the main experiment was only slightly higher than the similarity between participant-generated keywords and the object-non-matching keywords presented in the main experiment (`r filter(rating_stats$means, fam_condition == "non-matching")$emmean` ± `r filter(rating_stats$means, fam_condition == "non-matching")$SE`), $t$(`r print_dof(filter(rating_stats$contrasts, contrast == "matching - non-matching")$df)`) = `r filter(rating_stats$contrasts, contrast == "matching - non-matching")$t_value`, $p_\text{corr}$ `r print_p(filter(rating_stats$contrasts, contrast == "matching - non-matching")$p_value)` (linear mixed-effects model), indicating that it was difficult for participants to know or guess the correct function of the unfamiliar objects.]{color="blue"}
 
@@ -701,7 +701,7 @@ Clusters were considered to be statistically significant if their mass exceeded 
 The EEG data are available upon reasonable request from the corresponding author because we had not asked participants for their consent to make the data publicly available.
 [The experimental stimuli (object images and keywords) and]{color="blue"} the code for data analysis are available at [https://doi.org/10.17605/osf.io/uksbc](https://doi.org/10.17605/osf.io/uksbc).
 
-In addition to the software mentioned above, our code relies on the tidyverse set of R packages [Version `r as.character(packageVersion("tidyverse"))`\; @R-tidyverse] for data wrangling, the ggplot2 [Version `r as.character(packageVersion("ggplot2"))`\; @R-ggplot2], cowplot [Version `r as.character(packageVersion("cowplot"))`\; @R-cowplot], and eegUtils [Version `r as.character(packageVersion("eegUtils"))`\; @R-eegUtils] packages for visualization, and the papaja package [Version `r as.character(packageVersion("papaja"))`\; @R-papaja] for statistical reporting.
+In addition to the software mentioned above, our code relies on the tidyverse set of R packages [Version `r as.character(packageVersion("tidyverse"))`\; @R-tidyverse] for data wrangling, the ggplot2 [Version `r as.character(packageVersion("ggplot2"))`\; @R-ggplot2], cowplot [Version `r as.character(packageVersion("cowplot"))`\; @R-cowplot], and eegUtils [Version `r as.character(packageVersion("eegUtils"))`\; @R-eegUtils] packages for visualization, the papaja package [Version `r as.character(packageVersion("papaja"))`\; @R-papaja] for statistical reporting, [and the LSAfun package [Version `r as.character(packageVersion("LSAfun"))`\; @gunther2015] for the latent semantic analysis of the online rating study data]{color="blue"}.
 We used the workflow developed by @peikert2021 to ensure the long-term reproducibility of our analysis pipeline.
 
 # Results
@@ -841,8 +841,8 @@ This might have induced semantic priming, which is supported by the reduction in
 However, there are at least two arguments why semantic priming cannot account for our main findings, that is, the influence of semantic information on the early P1 and N170 components.
 First, for both of these components, ERP amplitudes were *enlarged* (i.e., more positive for the P1 component and more negative for the N170) during semantically informed perception, whereas an account based on semantic priming would have predicted *reduced* ERP amplitudes.
 Second, these effects were not just observed when comparing semantically informed perception (with matching keywords) and uninformed perception (with non-matching keywords), but also when comparing semantically informed perception with unsuccessfully informed perception.
-Whereas priming might have been present in the first comparison, in the second comparison all objects were preceded by keywords that matched the function of the object to a similar degree.
-The fact that P1 and N170 amplitudes still differed between these two conditions makes it unlikely that the semantic effects that we have found are fully reducible to priming.]{color="blue"}
+Whereas priming might have been present in the first comparison, in the second comparison all objects were preceded by keywords that matched the function of the object to a similar degree, making semantic priming less likely.
+Third, the results from an online rating study (see Materials and Methods; Supplementary Figure 1) indicated that people by and large did not spontaneously associate the unfamiliar objects with a particular function, and also allowed us to statistically control for the closeness of peoples’ guesses and the true function of each object.]{color="blue"}
 
 A theoretical framework that would explicitly predict the observed P1 and N170 effects in our study is lacking at present.
 However, the effects are consistent with the reverse hierarchy theory [@ahissar2004], which posits that objects first enter visual consciousness at an abstract, conceptual level. Once this initial "vision at a glance" has taken place, feedback connections to earlier layers of the visual system are being accessed to extract the relevant lower-level features ("vision with scrutiny").
