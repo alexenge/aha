@@ -254,126 +254,23 @@ Participants were asked to respond as quickly and as accurately as possible by p
 The mapping of the rating scale to the four buttons (left to right or right to left) was counterbalanced across participants.
 
 ```{r, eeg_processing, include=FALSE}
-# Define function for processing behavioral log files
-read_log <- function(log_file) {
-  # Read the file
-  log <- read_tsv(
-    log_file,
-    col_types = cols(),
-    locale = locale(encoding = "latin1"),
-    progress = FALSE
-  ) %>%
-    # Recode some columns
-    transmute(
-
-      # Phase of the experiment
-      phase = factor(
-        Wdh,
-        levels = c(211, 212, 213),
-        labels = c("Pre-insight", "Insight", "Post-insight")
-      ),
-
-      # Unfamiliar versus familiar objects
-      familiarity = factor(
-        bek_unbek,
-        levels = c("bekannt", "unbekannt"),
-        labels = c("familiar", "unfamiliar")
-      ),
-
-      # Matching versus non-matching keywords for unfamiliar objects
-      keywords = factor(
-        Bed,
-        levels = c("richtig", "falsch"),
-        labels = c("Match", "Non-match")
-      ),
-
-      # Behavioral responses
-      # Response code 201: "I know what this is or have a strong assumption"
-      # Response code 202: "I have an assumption what this is"
-      # Response code 203: "I have rather no assumption what this is"
-      # Response code 204: "I don't know what this is and have no assumption"
-      # Response code 0: Technical glitch
-      response = Tastencode,
-
-      # Reaction times
-      rt = RT,
-
-      # Item IDs
-      item_id = factor(StimID)
-    ) %>%
-    # Remove filler items
-    filter(familiarity == "unfamiliar")
-
-  # Assign items to conditions based on manipulation (matching vs. non-
-  # matching keywords) and the responses of the participants
-  items_per_condition <- with(log, {
-    list(
-
-      # Informed condition: Matching keywords and positive response
-      Informed = item_id[
-        phase == "Insight" & keywords == "Match" & response %in% c(201, 202)
-      ],
-
-      # Uninformed condition: Non-matching keywords and negative response
-      Uninformed = item_id[
-        phase == "Insight" & keywords == "Non-match" & response %in% c(203, 204)
-      ],
-
-      # Exclude: Matching keywords and negative response
-      Unsuccessful = item_id[
-        phase == "Insight" & keywords == "Match" & response %in% c(203, 204)
-      ],
-
-      # Exclude: Non-matching keywords and positive response
-      Exclude_uninformed = item_id[
-        phase == "Insight" & keywords == "Non-match" & response %in% c(201, 202)
-      ],
-
-      # Exclude: Positive response *before* any info was presented
-      Exclude_known = item_id[phase == "Pre-insight" & response == 201],
-
-      # Exclude: Technical glitch
-      Exclude_glitch = item_id[phase == "Insight" & response == 0]
-    )
-  })
-
-  # Assign these conditions to the trials of all three phases
-  log$condition <- NA
-  for (condition in names(items_per_condition)) {
-    item_id <- items_per_condition[[condition]]
-    log$condition[log$item_id %in% item_id] <- condition
-  }
-
-  # Sort columns
-  log %>%
-    select(item_id, phase, condition, response, rt)
-}
-
-# Get list of behavioral log files
-log_files <- c(
-  list.files(here(data_dir, "rt/exp1"), "*.txt", full.names = TRUE),
-  list.files(here(data_dir, "rt/exp2"), "*.txt", full.names = TRUE)
-)
-
-# Get list of BrainVision EEG header files
-vhdr_files <- c(
-  list.files(here(data_dir, "eeg/exp1"), "*.vhdr", full.names = TRUE),
-  list.files(here(data_dir, "eeg/exp2"), "*.vhdr", full.names = TRUE)
-)
-
-# Import EEG pipeline from Python
-pipeline <- import("pipeline")
-
-# Extract versions of Python packages
-pipeline_version <- pipeline$`__version__`
-mne_version <- import("mne")$`__version__`
-
-# (Re-)do the actual preprocessing if requested
+# (Re-)do the EEG preprocessing if requested
 if (run$eeg_processing) {
+  # List behavioral log files and raw EEG files
+  log_files <- c(
+    list.files(here(data_dir, "rt/exp1"), "*.txt", full.names = TRUE),
+    list.files(here(data_dir, "rt/exp2"), "*.txt", full.names = TRUE)
+  )
+  vhdr_files <- c(
+    list.files(here(data_dir, "eeg/exp1"), "*.vhdr", full.names = TRUE),
+    list.files(here(data_dir, "eeg/exp2"), "*.vhdr", full.names = TRUE)
+  )
+
   # Process behavioral data
   logs <- map(log_files, read_log)
 
   # Process EEG data
+  pipeline <- import("pipeline")
   res <- pipeline$group_pipeline(
     vhdr_files = vhdr_files,
     log_files = logs,
@@ -462,12 +359,12 @@ trials <- read_csv(here(output_dir, "trials.csv"), col_types = cols(
   left_join(cosines, by = "item_id")
 
 # Compute number of objects per condition for each participant
-objects_per_condition <- with(trials, table(participant_id, condition)) %>%
-  `/`(3) %>%
+objects_per_condition <- table(trials$participant_id, trials$condition) %>%
+  `/`(3) %>% # Each object is shown three times
   as.data.frame.matrix() %>%
   rownames_to_column("subject_id")
 
-# Read by-participant ERP averages and channel locations
+# Read by-participant ERP averages
 evokeds <- read_csv(here(output_dir, "ave.csv")) %>%
   separate(label, into = c("phase", "condition"), sep = "/")
 
@@ -519,70 +416,21 @@ contrasts(trials$condition) <- cbind(
   t() %>%
   ginv()
 
-# Define helper function for fitting linear mixed models and computing contrasts
-fit_mixed_models <- function(dep, formula, data) {
-  # Modify the formula such that fixed effects are always retained
-  formula <- formula %>%
-    tabulate.formula() %>%
-    mutate(block = replace(block, is.na(grouping), "fixed"))
-
-  # Start a CPU cluster so that multiple models can be fitted in parallel
-  n_cores <- detectCores()
-  cl <- makeCluster(n_cores)
-
-  # Find the best fitting model (see Matuschek et al., 2017, *JML*)
-  build <- buildmer(
-    buildmerControl = buildmerControl(
-      formula, data,
-      args = list(control = lme4::lmerControl(
-        optimizer = "bobyqa", optCtrl = list(maxfun = 1e6)
-      )),
-      direction = c("backward", "backward"),
-      cl = cl,
-      elim = LRTalpha(.20),
-      calc.anova = TRUE,
-      ddf = "Satterthwaite",
-      dep = dep
-    )
-  )
-  stopCluster(cl)
-
-  # Compute marginal means and contrasts
-  emm_options(lmer.df = "Satterthwaite", lmerTest.limit = Inf)
-  emm_means <- emmeans(build@model, specs = c("phase", "condition"))
-  emm_contrasts <- contrast(
-    emm_means,
-    method = "trt.vs.ctrl", simple = "condition", reverse = TRUE
-  ) %>%
-    summary(by = "contrast", adjust = "bonferroni")
-
-  # Create list of returns
-  list(
-    model = build@model,
-    summary = build@summary,
-    anova = build@anova,
-    means = emm_means,
-    contrasts = emm_contrasts
-  )
-}
-
-# (Re-)do the actual model fitting if requested
-deps <- config$components$name
+# (Re-)fit linear mixed models if requested
 if (run$mixed_models) {
   # Fit the model for each ERP component
-  form_erps <- ~ phase * condition + cosine +
+  deps <- config$components$name
+  formula_erps <- ~ phase * condition + cosine +
     (phase * condition | participant_id) +
     (phase * condition | item_id)
-  models <- map(deps, fit_mixed_models, formula = form_erps, data = trials) %>%
+  models <- map(deps, fit_mixed_model, formula_erps, trials) %>%
     set_names(deps)
 
   # Fit an additional control analysis model for the alpha/beta power
-  form_alpha_beta <- ~ phase * condition + rt + cosine +
+  formula_tfr <- ~ phase * condition + rt + cosine +
     (phase * condition | participant_id) +
     (phase * condition | item_id)
-  models$alpha_beta <- fit_mixed_models(
-    dep = "alpha_beta", formula = form_alpha_beta, data = trials
-  )
+  models$alpha_beta <- fit_mixed_model("alpha_beta", formula_tfr, trials)
 
   # Save models
   saveRDS(models, here(output_dir, "models.RDS"))
@@ -592,14 +440,8 @@ if (run$mixed_models) {
 }
 
 # Extract relevant statistics to print in the main text
-anova_table <- models %>%
-  map(function(model) as_tibble(model$anova, rownames = "effect")) %>%
-  bind_rows(.id = "component") %>%
-  rename(f_value = `F value`, p_value = `Pr(>F)`)
-contrast_table <- models %>%
-  map(function(model) as_tibble(model$contrasts)) %>%
-  bind_rows(.id = "component") %>%
-  rename(t_value = `t.ratio`, p_value = `p.value`)
+anova_table <- extract_anova_table(models)
+contrast_table <- extract_contrast_table(models)
 ```
 
 ```{r, fig1, cache=!run$figures, fig.height=12, fig.cap="(ref:fig1-caption)"}
@@ -650,7 +492,7 @@ Two additional external electrodes were placed on the right mastoid (M2) and bel
 Electrode impedances were kept below 5 kΩ.
 An online band-pass filter with a high-pass time-constant of 10 s (0.016 Hz) and a low-pass cutoff frequency of 1000 Hz was applied before digitizing the signal at a sampling rate of 500 Hz.
 
-The data were preprocessed offline using custom functions (available at [https://github.com/alexenge/hu-neuro-pipeline/tree/v0.6.4](https://github.com/alexenge/hu-neuro-pipeline/tree/v0.6.4)) based on the MNE-Python software [Version `r mne_version`\; @gramfort2013] in Python [Version `r py_version()`\; @vanrossum2009].
+The data were preprocessed offline using custom functions (available at [https://github.com/alexenge/hu-neuro-pipeline/tree/v0.6.4](https://github.com/alexenge/hu-neuro-pipeline/tree/v0.6.4)) based on the MNE-Python software [Version `r config$package_versions$mne`\; @gramfort2013] in Python [Version `r config$package_versions$python`\; @vanrossum2009].
 First, the data were downsampled to `r config$downsample_sfreq` Hz and re-referenced to the common average of all scalp channels.
 Next, artifacts resulting from blinks and eye movements were removed via independent component analysis (ICA) on a high-pass filtered copy of the data (cutoff = 1 Hz).
 A variable number of components per participant were extracted from an initial principal component analysis (PCA) so that they explained at least `r percent(config$ica_n_components)` of the variance in the data (mean = `r mean(unlist(config$auto_ica_n_components))` components, range `r min(unlist(config$auto_ica_n_components))`--`r max(unlist(config$auto_ica_n_components))`).
@@ -777,9 +619,7 @@ Black dots highlight EEG channels that were part of a cluster for which this dif
 # Create topographic plots for event-related power in the post-insight phase
 plot_tfr_topos(
   filter(tfr_grand_ave, phase == "Post-insight"),
-  filter(
-    tfr_clusters, contrast == "Post-insight/Informed - Post-insight/Uninformed"
-  ),
+  filter(tfr_clusters, contrast == "Post-insight/Informed - Post-insight/Uninformed"),
   p_cluster = p_cluster
 )
 ```
@@ -881,30 +721,7 @@ Second, the time course of this influence suggests that it manifests itself not 
 
 ```{r tabs1, results="asis"}
 # Print table of materials
-keywords %>%
-  filter(familiarity == "unfamiliar") %>%
-  transmute(
-    img = paste0(
-      "\\includegraphics[valign=c,width=18mm]{materials/unfamiliar_objects/",
-      filename,
-      "}"
-    ),
-    item_id = as.character(item_id),
-    match_translated = paste(match, match_en, sep = "\n") %>%
-      kableExtra::linebreak(align = "l", linebreaker = "\n"),
-    nonmatch_translated = paste(nonmatch, nonmatch_en, sep = "\n") %>%
-      kableExtra::linebreak(align = "l", linebreaker = "\n")
-  ) %>%
-  apa_table(
-    booktabs = TRUE,
-    col.names = c(
-      "Stimulus", "ID", "Matching keywords", "Non-matching keywords"
-    ),
-    escape = FALSE,
-    longtable = TRUE,
-    caption = "Unfamiliar Object Stimuli\\smallskip",
-    font_size = "footnotesize"
-  )
+print_materials_table(keywords)
 ```
 
 ## Results S1. *Linear Mixed-Effects Models*
@@ -915,18 +732,7 @@ keywords %>%
 \singlespacing
 
 ```{r, ress1a}
-# Helper function for printing model summary, ANOVA (F tests), and contrasts
-print_model_outputs <- function(model_object) {
-  model_object$summary$call$data <- NULL # Prevents cluttering the output
-  print(model_object$summary)
-  cat("\n")
-  print(model_object$anova)
-  cat("\nPairwise Contrasts (Simple Effects)\n")
-  print(model_object$contrasts)
-  cat("\n\n")
-}
-
-# Print model outputs
+# Print model outputs for P1
 print_model_outputs(models$P1)
 ```
 
@@ -939,7 +745,7 @@ print_model_outputs(models$P1)
 \singlespacing
 
 ```{r, ress1b}
-# Print model outputs
+# Print model outputs for N170
 print_model_outputs(models$N170)
 ```
 
@@ -952,31 +758,15 @@ print_model_outputs(models$N170)
 \singlespacing
 
 ```{r, ress1c}
-# Print model outputs
+# Print model outputs for N400
 print_model_outputs(models$N400)
 ```
 
 \newpage
 
 ```{r, figs1, cache=FALSE, fig.height=5, fig.width=6, out.width="50%", fig.cap="(ref:figs1-caption)"}
-rating %>%
-  filter(!is.na(cosine)) %>%
-  mutate(condition_comb = str_to_sentence(paste(familiarity, condition))) %>%
-  ggplot(aes(x = condition_comb, y = cosine, color = condition_comb)) +
-  geom_violin(fill = NA) +
-  geom_boxplot(width = 0.2) +
-  scale_y_continuous(limits = c(0.0, 1.0), breaks = seq(0.0, 1.0, by = 0.2)) +
-  scale_color_manual(values = c("#5e3c99", "#ca0020", "#0571b0")) +
-  labs(x = NULL, y = "Cosine distance to keywords") +
-  coord_cartesian(ylim = c(0.0, 1.0)) +
-  theme_classic() +
-  theme(
-    axis.title = element_text(color = "black", size = 10.9),
-    axis.text = element_text(color = "black", size = 10.9),
-    legend.position = "none",
-    panel.grid.major.y = element_line(),
-    panel.grid.minor.y = element_line()
-  )
+# Plot rating study results
+plot_figs1(rating)
 ```
 
 (ref:figs1-caption) [Online pre-rating study results.
@@ -988,40 +778,8 @@ Semantic similarities were computed as the cosine similarity between the sums of
 Boxplots show the median (thick line), 25th and 75th percentiles (hinges), 1.5 times the interquartile range above and below the hinges (whiskers), and any outlier data points that fall outside of the whiskers (dots).]{color="blue"}
 
 ```{r, figs2, cache=FALSE, fig.height=5.5, fig.cap="(ref:figs2-caption)"}
-rating %>%
-  filter(!is.na(cosine) & condition == "matching") %>%
-  mutate(condition_comb = str_to_sentence(paste(familiarity, condition))) %>%
-  select(item_id, condition_comb, cosine) %>%
-  group_by(item_id, condition_comb) %>%
-  summarize(
-    mean = mean(cosine),
-    sd = sd(cosine),
-    n = n(),
-    se = sd / sqrt(n),
-    .groups = "drop"
-  ) %>%
-  mutate(item_id = fct_reorder(item_id, desc(mean))) %>%
-  ggplot(
-    aes(
-      x = item_id, y = mean, color = condition_comb, group = 1,
-      ymin = mean - se, ymax = mean + se
-    )
-  ) +
-  geom_linerange(show.legend = FALSE) +
-  geom_line() +
-  labs(x = "Stimulus ID", y = "Cosine distance to keywords", color = NULL) +
-  scale_x_discrete(guide = guide_axis(angle = 90, n.dodge = 3)) +
-  scale_y_continuous(limits = c(0.0, 1.0), breaks = seq(0.0, 1.0, by = 0.2)) +
-  scale_color_manual(values = c("#5e3c99", "#ca0020")) +
-  theme_classic() +
-  theme(
-    axis.title = element_text(color = "black", size = 10.9),
-    axis.text = element_text(color = "black", size = 10.9),
-    legend.position = c(0.93, 0.92),
-    panel.grid.major.x = element_line(),
-    panel.grid.major.y = element_line(),
-    panel.grid.minor.y = element_line()
-  )
+# Plot rating study result on the item level
+plot_figs2(rating)
 ```
 
 (ref:figs2-caption) [Online pre-rating study results on the level of individual object stimuli.
@@ -1033,9 +791,7 @@ This mean cosine similarity for each object (i.e., a measure of the difficulty o
 # Create topographic plots for event-related power in the pre-insight phase
 plot_tfr_topos(
   filter(tfr_grand_ave, phase == "Pre-insight"),
-  filter(
-    tfr_clusters, contrast == "Pre-insight/Informed - Pre-insight/Uninformed"
-  ),
+  filter(tfr_clusters, contrast == "Pre-insight/Informed - Pre-insight/Uninformed"),
   p_cluster = p_cluster
 )
 ```
@@ -1048,9 +804,7 @@ A cluster-based permutation test indicated no clusters for which this difference
 # Create topographic plots for control analysis of event-related power
 plot_tfr_topos(
   filter(tfr_grand_ave, phase == "Pre-insight"),
-  filter(
-    tfr_clusters, contrast == "Pre-insight/Informed - Pre-insight/Unsuccessful"
-  ),
+  filter(tfr_clusters, contrast == "Pre-insight/Informed - Pre-insight/Unsuccessful"),
   p_cluster = p_cluster,
   conditions = c("Informed", "Unsuccessful")
 )
@@ -1064,9 +818,7 @@ A cluster-based permutation test indicated no clusters for which this difference
 # Create topographic plots for control analysis of event-related power
 plot_tfr_topos(
   filter(tfr_grand_ave, phase == "Insight"),
-  filter(
-    tfr_clusters, contrast == "Insight/Informed - Insight/Unsuccessful"
-  ),
+  filter(tfr_clusters, contrast == "Insight/Informed - Insight/Unsuccessful"),
   p_cluster = p_cluster,
   conditions = c("Informed", "Unsuccessful")
 )
@@ -1080,10 +832,7 @@ Black dots highlight EEG channels that were part of a cluster for which this dif
 # Create topographic plots for control analysis of event-related power
 plot_tfr_topos(
   filter(tfr_grand_ave, phase == "Post-insight"),
-  filter(
-    tfr_clusters,
-    contrast == "Post-insight/Informed - Post-insight/Unsuccessful"
-  ),
+  filter(tfr_clusters, contrast == "Post-insight/Informed - Post-insight/Unsuccessful"),
   p_cluster = p_cluster,
   conditions = c("Informed", "Unsuccessful")
 )
