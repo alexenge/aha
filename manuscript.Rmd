@@ -607,6 +607,7 @@ Thus, semantically informed perception seems to alter not only early, evoked act
 plot_tfr_topos(
   filter(tfr_grand_ave, phase == "Insight"),
   filter(tfr_clusters, contrast == "Insight/Informed - Insight/Uninformed"),
+  channel_locations = channel_locations,
   p_cluster = p_cluster
 )
 ```
@@ -620,6 +621,7 @@ Black dots highlight EEG channels that were part of a cluster for which this dif
 plot_tfr_topos(
   filter(tfr_grand_ave, phase == "Post-insight"),
   filter(tfr_clusters, contrast == "Post-insight/Informed - Post-insight/Uninformed"),
+  channel_locations = channel_locations,
   p_cluster = p_cluster
 )
 ```
@@ -792,6 +794,7 @@ This mean cosine similarity for each object (i.e., a measure of the difficulty o
 plot_tfr_topos(
   filter(tfr_grand_ave, phase == "Pre-insight"),
   filter(tfr_clusters, contrast == "Pre-insight/Informed - Pre-insight/Uninformed"),
+  channel_locations = channel_locations,
   p_cluster = p_cluster
 )
 ```
@@ -805,6 +808,7 @@ A cluster-based permutation test indicated no clusters for which this difference
 plot_tfr_topos(
   filter(tfr_grand_ave, phase == "Pre-insight"),
   filter(tfr_clusters, contrast == "Pre-insight/Informed - Pre-insight/Unsuccessful"),
+  channel_locations = channel_locations,
   p_cluster = p_cluster,
   conditions = c("Informed", "Unsuccessful")
 )
@@ -819,6 +823,7 @@ A cluster-based permutation test indicated no clusters for which this difference
 plot_tfr_topos(
   filter(tfr_grand_ave, phase == "Insight"),
   filter(tfr_clusters, contrast == "Insight/Informed - Insight/Unsuccessful"),
+  channel_locations = channel_locations,
   p_cluster = p_cluster,
   conditions = c("Informed", "Unsuccessful")
 )
@@ -833,6 +838,7 @@ Black dots highlight EEG channels that were part of a cluster for which this dif
 plot_tfr_topos(
   filter(tfr_grand_ave, phase == "Post-insight"),
   filter(tfr_clusters, contrast == "Post-insight/Informed - Post-insight/Unsuccessful"),
+  channel_locations = channel_locations,
   p_cluster = p_cluster,
   conditions = c("Informed", "Unsuccessful")
 )

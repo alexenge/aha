@@ -1,9 +1,8 @@
 plot_tfr_topos <- function(tfr_grand_ave,
                            tfr_clusters,
-                           p_cluster,
+                           channel_locations,
+                           p_cluster = 0.05,
                            conditions = c("Informed", "Uninformed"),
-                           condition_colors = c("#ca0020", "#0571b0"),
-                           topo_palette = "RdBu",
                            tmin = -0.4,
                            tmax = 1.4,
                            tstep = 0.2,
@@ -13,12 +12,16 @@ plot_tfr_topos <- function(tfr_grand_ave,
   #' Plots a grid of topographies for all time windows and frequency bins
 
   require(dplyr)
+  require(tidyr)
+  require(purrr)
+  require(stringr)
+  require(ggplot2)
   require(cowplot)
 
   tmins <- seq(tmin, tmax - tstep, tstep)
   fmins <- seq(fmin, fmax - fstep, fstep)
 
-  channels <- unique(tfr_clusters$channel)
+  channels <- unique(channel_locations$channel)
   tfr_grand_ave_plus <- filter(tfr_grand_ave, condition == conditions[1])
   tfr_grand_ave_minus <- filter(tfr_grand_ave, condition == conditions[2])
   tfr_grand_ave_diff <- mutate(tfr_grand_ave_plus, condition = "Difference")
@@ -40,8 +43,7 @@ plot_tfr_topos <- function(tfr_grand_ave,
       topo <- tfr_grand_ave_diff %>%
         filter(time >= tmin & time < tmax & freq >= fmin & freq < fmax) %>%
         pivot_longer(
-          cols = all_of(channels), names_to = "electrode",
-          values_to = "power"
+          cols = all_of(channels), names_to = "electrode", values_to = "power"
         ) %>%
         mutate(power = power * 100) %>% # Convert from decimal to percent
         left_join(channel_locations, by = c("electrode" = "channel")) %>%
@@ -55,12 +57,10 @@ plot_tfr_topos <- function(tfr_grand_ave,
           highlights = significant_channels,
           scaling = 1.1
         ) +
-        scale_fill_distiller(limits = c(-25.0, 25.0), palette = topo_palette) +
-        theme(
-          plot.margin = unit(rep(-0.2, 4), "cm"),
-          legend.position = "none"
-        )
-      colorbar <<- get_legend(
+        scale_fill_distiller(limits = c(-25.0, 25.0), palette = "RdBu") +
+        theme(plot.margin = unit(rep(-0.2, 4), "cm"), legend.position = "none")
+
+      cbar <<- get_legend(
         topo +
           guides(
             fill = guide_colorbar(
@@ -87,7 +87,7 @@ plot_tfr_topos <- function(tfr_grand_ave,
           )
       )
 
-      topo$layers[[3]]$aes_params$size <- 0.7
+      topo$layers[[3]]$aes_params$size <- 0.7 # Adjusts head and marker size
       topo$layers[[4]]$aes_params$size <- 0.7
       topo$layers[[5]]$aes_params$size <- 0.7
       topo$layers[[6]]$aes_params$colour <- NA
@@ -129,5 +129,5 @@ plot_tfr_topos <- function(tfr_grand_ave,
     label_fontface = "plain", label_x = 0.5, label_y = 0.01, vjust = 0.5,
     hjust = 0.5
   ) +
-    draw_plot(colorbar, x = -0.23, y = 0.445, width = 0.9)
+    draw_plot(cbar, x = -0.23, y = 0.445, width = 0.9)
 }
