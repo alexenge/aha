@@ -1,10 +1,12 @@
-plot_fig1a <- function(files_dir, condition_colors) {
+plot_fig1a <- function(materials_dir, condition_colors) {
   #' Creates a plot showing the trial structure of the EEG experiment
 
   require(tidyverse)
   require(cowplot)
 
-  example_stim <- magick::image_read(here::here("example_stimuli", "103.png"))
+  example_stim <- magick::image_read(
+    here::here(materials_dir, "unfamiliar_objects", "Kartoffelstampfer.png")
+  )
   stim_bg_color <- "#a9d9ff"
   ggplot() +
     coord_cartesian(xlim = c(-100, 100), ylim = c(0, 100), expand = FALSE) +
@@ -563,7 +565,7 @@ plot_erps <- function(evokeds,
     )
 }
 
-plot_fig1 <- function(files_dir,
+plot_fig1 <- function(materials_dir,
                       evokeds,
                       config,
                       channel_locations,
@@ -577,7 +579,7 @@ plot_fig1 <- function(files_dir,
   require(cowplot)
 
   plot_grid(
-    plot_fig1a(files_dir, condition_colors),
+    plot_fig1a(materials_dir, condition_colors),
     plot_erps(
       evokeds,
       config,
@@ -600,7 +602,7 @@ plot_fig1 <- function(files_dir,
     annotate("segment", x = 0.726, xend = 0.726, y = 0.55, yend = Inf)
 }
 
-plot_fig2 <- function(files_dir,
+plot_fig2 <- function(materials_dir,
                       evokeds,
                       config,
                       channel_locations,
@@ -614,7 +616,7 @@ plot_fig2 <- function(files_dir,
   require(cowplot)
 
   plot_grid(
-    plot_fig2a(files_dir, condition_colors),
+    plot_fig2a(materials_dir, condition_colors),
     plot_erps(
       evokeds,
       config,
