@@ -25,7 +25,7 @@ affiliation:
 authornote: |  
   Alexander Enge \orcidlink{0000-0003-0100-2297} [0000-0003-0100-2297](https://orcid.org/0000-0003-0100-2297), Rasha Abdel Rahman \orcidlink{0000-0002-8438-1570} [0000-0002-8438-1570](https://orcid.org/0000-0002-8438-1570).
   
-  We would like to thank Nele Langosch for assistance with the preparation of materials and data collection, Olaf Dimigen and the Abdel Rahman Lab for Neurocognitive Psychology for insightful discussions, Guido Kiecker for technical support, as well as Guillaume Thierry and one anonymous reviewer for their comments on a previous version of the paper.
+  We would like to thank Nele Langosch for assistance with the preparation of materials and data collection, Olaf Dimigen and the Abdel Rahman Lab for Neurocognitive Psychology for insightful discussions, Guido Kiecker for technical support, as well as two reviewers for their comments on a previous version of the paper.
   This work was supported by the Deutsche Forschungsgemeinschaft (DFG, German Research Foundation) under Germany's Excellence Strategy (EXC 2002/1 "Science of Intelligence") project number 390523135 as well as grants AB277-5 and AB277-6 to R.A.R.
   The authors declare no competing financial interests.
 
@@ -50,7 +50,6 @@ editor_options:
 output:
   papaja::apa6_pdf:
     latex_engine: xelatex
-    pandoc_args: ["--lua-filter=misc/color_text.lua"]
 
 header-includes:
   - \geometry{a4paper}
@@ -105,9 +104,6 @@ misc_dir <- here("misc")
 output_dir <- here("output")
 report_dir <- here(output_dir, "qc_reports")
 
-# Write R package references
-r_refs(here(misc_dir, "r-references.bib"), append = FALSE)
-
 # Re-run steps that take a long time?
 run <- list(
   rating_lsa = FALSE,
@@ -121,7 +117,7 @@ run <- list(
 
 \smallskip\begin{center}\parbox{12.7cm}{
 Does our perception of an object change once we discover what function it serves?
-We showed human participants (\textit{n} = 48, 31 females and 17 males) pictures of unfamiliar objects either together with keywords matching their function, leading to semantically informed perception, or together with non-matching keywords, resulting in uninformed perception.
+We showed human participants (\textit{n} = 48, 31 female, 17 male) pictures of unfamiliar objects either together with keywords matching their function, leading to semantically informed perception, or together with non-matching keywords, resulting in uninformed perception.
 We measured event-related potentials (ERPs) to investigate at which stages in the visual processing hierarchy these two types of object perception differed from one another.
 We found that semantically informed as compared to uninformed perception was associated with larger amplitudes in the N170 component (150--200 ms), reduced amplitudes in the N400 component (400--700 ms), and a late decrease in alpha/beta band power.
 When the same objects were presented once more without any information, the N400 and event-related power effects persisted, and we also observed enlarged amplitudes in the P1 component (100--150 ms) in response to objects for which semantically informed perception had taken place.
@@ -165,7 +161,7 @@ We furthermore conducted an exploratory time-frequency analysis to test for effe
 
 ## Participants
 
-Participants were 48 German native speakers (31 females and 17 males) with a mean age of 23.5 years (range 18--32 years) and no history of psychological disorder or treatment.
+Participants were 48 German native speakers (31 female, 17 male) with a mean age of 23.5 years (range 18--32 years) and no history of psychological disorder or treatment.
 No a priori power analysis was carried out.
 All participants were right-handed according to the Edinburgh inventory [@oldfield1971] and reported normal or corrected-to-normal vision.
 They provided written informed consent before starting the experiment and received a monetary compensation of €8 per hour for participating.
@@ -220,7 +216,7 @@ cosines <- compute_average_cosines(rating)
 As a manipulation check, we ran an online rating study where we presented 10 German speakers (3 female, 7 male, mean age = 25.3 years, range 20--35 years; none took part in the main study) with all 240 visual objects in random order and asked them to generate their own keywords that would describe the presumed function of the object.
 We used latent semantic analysis [@gunther2019] with a word2vec embedding (deepset GmbH, Berlin, Germany, [www.deepset.ai/german-word-embeddings](www.deepset.ai/german-word-embeddings)) pre-trained on the German Wikipedia to estimate semantic distances between these participant-generated keywords and the keywords used in our main EEG experiment (see Online Figures 1 and 2).
 In brief, it was substantially easier for participants to come with correct descriptions of familiar objects (mean cosine distance ± standard error = `r filter(rating_stats$means, fam_condition == "familiar")$emmean` ± `r filter(rating_stats$means, fam_condition == "familiar")$SE`) than for unfamiliar objects (`r filter(rating_stats$means, fam_condition == "matching")$emmean` ± `r filter(rating_stats$means, fam_condition == "matching")$SE`), $t$(`r print_dof(filter(rating_stats$contrasts, contrast == "familiar - matching")$df)`) = `r filter(rating_stats$contrasts, contrast == "familiar - matching")$t_value`, $p_\text{corr}$ `r print_p(filter(rating_stats$contrasts, contrast == "familiar - matching")$p_value)` (linear mixed-effects model).
-In fact, this similarity between participant-generated keywords for the unfamiliar objects and the object-matching keywords presented in the main experiment was only slightly higher than the similarity between participant-generated keywords and the object-non-matching keywords presented in the main experiment (`r filter(rating_stats$means, fam_condition == "non-matching")$emmean` ± `r filter(rating_stats$means, fam_condition == "non-matching")$SE`), $t$(`r print_dof(filter(rating_stats$contrasts, contrast == "matching - non-matching")$df)`) = `r filter(rating_stats$contrasts, contrast == "matching - non-matching")$t_value`, $p_\text{corr}$ `r print_p(filter(rating_stats$contrasts, contrast == "matching - non-matching")$p_value)` (linear mixed-effects model), indicating that it was difficult for participants to know or guess the correct function of the unfamiliar objects.
+In fact, this similarity between participant-generated keywords for the unfamiliar objects and the object-matching keywords presented in the main experiment was only slightly higher than the similarity between participant-generated keywords and the object-non-matching keywords presented in the main experiment (`r filter(rating_stats$means, fam_condition == "non-matching")$emmean` ± `r filter(rating_stats$means, fam_condition == "non-matching")$SE`), $t$(`r print_dof(filter(rating_stats$contrasts, contrast == "matching - (non-matching)")$df)`) = `r filter(rating_stats$contrasts, contrast == "matching - (non-matching)")$t_value`, $p_\text{corr}$ `r print_p(filter(rating_stats$contrasts, contrast == "matching - (non-matching)")$p_value)` (linear mixed-effects model), indicating that it was difficult for participants to know or guess the correct function of the unfamiliar objects.
 
 ## Experimental Design
 
@@ -525,7 +521,7 @@ Clusters were considered to be statistically significant if their mass exceeded 
 ## Data and Code Accessibility
 
 The EEG data are available upon reasonable request from the corresponding author because we had not asked participants for their consent to make the data publicly available.
-The experimental stimuli (object images and keywords) the code for data analysis are available at [https://doi.org/10.17605/osf.io/uksbc](https://doi.org/10.17605/osf.io/uksbc).
+The experimental stimuli (object images and keywords) and the code for data analysis are available at [https://doi.org/10.17605/osf.io/uksbc](https://doi.org/10.17605/osf.io/uksbc).
 
 In addition to the software mentioned above, our code relies on the tidyverse set of R packages [Version `r as.character(packageVersion("tidyverse"))`\; @R-tidyverse] for data wrangling, the ggplot2 [Version `r as.character(packageVersion("ggplot2"))`\; @R-ggplot2], cowplot [Version `r as.character(packageVersion("cowplot"))`\; @R-cowplot], and eegUtils [Version `r as.character(packageVersion("eegUtils"))`\; @R-eegUtils] packages for visualization, the papaja package [Version `r as.character(packageVersion("papaja"))`\; @R-papaja] for statistical reporting, and the LSAfun package [Version `r as.character(packageVersion("LSAfun"))`\; @gunther2015] for the latent semantic analysis of the online rating study data.
 We used the workflow developed by @peikert2021 to ensure the long-term reproducibility of our analysis pipeline.
@@ -633,13 +629,13 @@ This may be due to a dampening of alpha/beta oscillations which creates favorabl
 
 In contrast to the N400 and event-related power, the N170 was modulated only on those initial trials on which the relevant semantic information was presented directly before the object.
 It therefore constitutes an online marker of semantic insight, that is, of participants suddenly understanding the visual objects in the light of the information provided by the keywords.
-The N170 is associated with the holistic perception of faces [@sagiv2001; @eimer2011] and other stimuli of visual expertise [@tanaka2001; @rossion2002], that is, it is sensitive to factors that go beyond structural encoding and categorical perception [@thierry2007, @thierry2007a; @dering2011].
+The N170 is associated with the holistic perception of faces [@sagiv2001; @eimer2011] and other stimuli of visual expertise [@tanaka2001; @rossion2002], that is, it is sensitive to factors that go beyond structural encoding and categorical perception [@thierry2007; @thierry2007a; @dering2011].
 It being enlarged may reflect that the semantic information made participants experience the configuration of the visual features of the objects in a new and meaningful way.
 This is supported by previous findings of enlarged N170 amplitudes for scrambled face stimuli after participants had been shown the original version of the face [@bentin2002], as well as for line drawings of meaningful objects as compared to non-objects [@beaucousin2011].
 Together, this suggests an online impact of meaningfulness on the higher-level perception of visual objects, integrating across their visual features.
 
 The P1, unlike the N400 and N170, was modulated by semantic information only one trial after this information had been obtained.
-This replicates previous studies showing modulations of the P1 when participants had learned meaningful information about previously unfamiliar objects [@abdelrahman2008; @maier2018, @maier2019; @samaha2018; @weller2019].
+This replicates previous studies showing modulations of the P1 when participants had learned meaningful information about previously unfamiliar objects [@abdelrahman2008; @maier2018; @maier2019; @samaha2018; @weller2019].
 The present study adds that the P1 effect does not take an extensive learning history to develop; instead, it can be observed as soon as one trial after semantic insight has happened.
 Because the P1 is associated with lower-level sensory processing [@johannes1995; @pratt2011; @luck2014], we take its susceptibility to semantic information as an indicator that knowledge about the function of an object can change how we perceive its low-level features [@athanasopoulos2020].
 
